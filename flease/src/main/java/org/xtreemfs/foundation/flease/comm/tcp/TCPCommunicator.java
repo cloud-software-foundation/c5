@@ -43,19 +43,20 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleThread;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
 import org.xtreemfs.foundation.flease.comm.tcp.TCPConnection.SendRequest;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class TCPCommunicator extends LifeCycleThread {
-
+    private static final Logger LOG = LoggerFactory.getLogger(TCPCommunicator.class);
     private final int port;
 
     /**
@@ -120,8 +121,6 @@ public class TCPCommunicator extends LifeCycleThread {
     /**
      * sends a response.
      *
-     * @param request
-     *            the request
      */
     public void write(TCPConnection connection, ReusableBuffer buffer, Object context) {
         assert (buffer != null);
@@ -130,9 +129,7 @@ public class TCPCommunicator extends LifeCycleThread {
                 if (connection.sendQueueIsEmpty()) {
                     try {
                         int bytesWritten = connection.getChannel().write(buffer.getBuffer());
-                        if (Logging.isDebug()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG, this,"directly wrote %d bytes to %s",bytesWritten,connection.getChannel().socket().getRemoteSocketAddress().toString());
-                        }
+                        LOG.debug("directly wrote {} bytes to {}", bytesWritten, connection.getChannel().socket().getRemoteSocketAddress());
                         if (bytesWritten < 0) {
                             if (context != null)
                                 implementation.onWriteFailed(new IOException("remote party closed connection while writing"), context);
@@ -149,8 +146,7 @@ public class TCPCommunicator extends LifeCycleThread {
                             implementation.onWriteFailed(ex, context);
                         abortConnection(connection,ex);
                     } catch (IOException ex) {
-                        if (Logging.isDebug())
-                            Logging.logError(Logging.LEVEL_DEBUG, this,ex);
+                        LOG.debug("Exception in write", ex);
                         if (context != null)
                             implementation.onWriteFailed(ex, context);
                         abortConnection(connection,ex);
@@ -172,18 +168,14 @@ public class TCPCommunicator extends LifeCycleThread {
 
                 sendQueueSize.incrementAndGet();
                 connection.addToSendQueue(new TCPConnection.SendRequest(buffer, context));
-                if (Logging.isDebug()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, this,"enqueued write to %s",connection.getEndpoint());
-                }
+                LOG.debug("enqueued write to {}", connection.getEndpoint());
                 selector.wakeup();
             } else {
                 // ignore and free bufers
                 if (connection.getChannel().isConnectionPending()) {
                     sendQueueSize.incrementAndGet();
                     connection.addToSendQueue(new TCPConnection.SendRequest(buffer, context));
-                    if (Logging.isDebug()) {
-                        Logging.logMessage(Logging.LEVEL_DEBUG, this,"enqueued write to %s",connection.getEndpoint());
-                    }
+                    LOG.debug("enqueued write to {}", connection.getEndpoint());
                 } else {
                     BufferPool.free(buffer);
                     if (context != null)
@@ -196,9 +188,7 @@ public class TCPCommunicator extends LifeCycleThread {
     public void run() {
         notifyStarted();
 
-        if (Logging.isInfo()) {
-            Logging.logMessage(Logging.LEVEL_INFO, Category.net, this, "TCP Server @%d ready", port);
-        }
+        LOG.info("TCP Server @{} ready", port);
 
         try {
             while (!isInterrupted()) {
@@ -226,8 +216,7 @@ public class TCPCommunicator extends LifeCycleThread {
                 } catch (CancelledKeyException ex) {
                     // who cares
                 } catch (IOException ex) {
-                    Logging.logMessage(Logging.LEVEL_WARN, Category.net, this,
-                            "Exception while selecting: %s", ex.toString());
+                    LOG.warn("Exception while selecting: {}", ex);
                     continue;
                 }
 
@@ -275,14 +264,11 @@ public class TCPCommunicator extends LifeCycleThread {
             if (socket != null)
                 socket.close();
 
-            if (Logging.isInfo()) {
-                Logging.logMessage(Logging.LEVEL_INFO, Category.net, this,
-                        "TCP Server @%d shutdown complete", port);
-            }
+            LOG.info("TCP Server @{} shutdown complete", port);
 
             notifyStopped();
         } catch (Throwable thr) {
-            Logging.logMessage(Logging.LEVEL_ERROR, Category.net, this, "TPC Server @%d CRASHED!", port);
+            LOG.error("TCP Server @{} CRASHED!", port);
             notifyCrashed(thr);
         }
     }
@@ -302,16 +288,11 @@ public class TCPCommunicator extends LifeCycleThread {
                     key.interestOps(SelectionKey.OP_READ);
                 }
             }
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "connected from %s to %s", con
-                        .getChannel().socket().getLocalSocketAddress().toString(), channel.socket().getRemoteSocketAddress()
-                        .toString());
-            }
+            LOG.debug("connected from {} to {}", con.getChannel().socket().getLocalSocketAddress(),
+                channel.socket().getRemoteSocketAddress());
             implementation.onConnect(con.getNIOConnection());
         } catch (IOException ex) {
-            if (Logging.isDebug()) {
-                Logging.logError(Logging.LEVEL_DEBUG, this,ex);
-            }
+            LOG.error("connectConnection",ex);
             implementation.onConnectFailed(con.getEndpoint(), ex, con.getNIOConnection().getContext());
             con.close(implementation,ex);
         }
@@ -325,10 +306,7 @@ public class TCPCommunicator extends LifeCycleThread {
 
     private TCPConnection openConnection(InetSocketAddress server, Object context) throws IOException {
 
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "connect to %s", server
-                    .toString());
-        }
+        LOG.debug("connect to {}", server);
         SocketChannel channel = null;
         TCPConnection con = null;
         try {
@@ -341,14 +319,10 @@ public class TCPCommunicator extends LifeCycleThread {
             con.getNIOConnection().setContext(context);
             pendingCons.add(con);
             selector.wakeup();
-            if (Logging.isDebug())
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "connection established");
+            LOG.debug("connection established");
             return con;
         } catch (IOException ex) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "cannot contact server %s",
-                    server);
-            }
+            LOG.debug("cannot contact server {}", server);
             if (con != null)
                 con.close(implementation, ex);
             throw ex;
@@ -384,22 +358,13 @@ public class TCPCommunicator extends LifeCycleThread {
 
             connections.add(connection);
 
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "connect from client at %s",
-                        client.socket().getRemoteSocketAddress().toString());
-            }
+            LOG.debug("connect from client at {}", client.socket().getRemoteSocketAddress());
             implementation.onAccept(connection.getNIOConnection());
 
         } catch (ClosedChannelException ex) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                        "cannot establish connection: %s", ex.toString());
-            }
+                LOG.debug("cannot establish connection:", ex);
         } catch (IOException ex) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                        "cannot establish connection: %s", ex.toString());
-            }
+            LOG.debug("cannot establish connection: %s", ex);
         }
     }
 
@@ -423,11 +388,7 @@ public class TCPCommunicator extends LifeCycleThread {
                 final int numBytesRead = channel.read(readBuf.getBuffer());
                 if (numBytesRead == -1) {
                     // connection closed
-                    if (Logging.isInfo()) {
-                        Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                            "client closed connection (EOF): %s", channel.socket()
-                                    .getRemoteSocketAddress().toString());
-                    }
+                    LOG.debug("client closed connection (EOF): {}", channel.socket().getRemoteSocketAddress());
                     abortConnection(con,new IOException("remote end closed connection while reading data"));
                     return;
                 } else if (numBytesRead == 0) {
@@ -436,17 +397,12 @@ public class TCPCommunicator extends LifeCycleThread {
                 implementation.onRead(con.getNIOConnection(), readBuf);
             }
         } catch (ClosedChannelException ex) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                    "connection to %s closed by remote peer", con.getChannel().socket()
-                            .getRemoteSocketAddress().toString());
-            }
+            LOG.debug("connection to {} closed by remote peer", con.getChannel().socket().getRemoteSocketAddress());
+
             abortConnection(con,ex);
         } catch (IOException ex) {
             // simply close the connection
-            if (Logging.isDebug()) {
-                Logging.logError(Logging.LEVEL_DEBUG, this, ex);
-            }
+            LOG.error("readConnection", ex);
             abortConnection(con,ex);
         }
     }
@@ -478,14 +434,9 @@ public class TCPCommunicator extends LifeCycleThread {
                 }
                 // send data
                 final long numBytesWritten = channel.write(srq.getData().getBuffer());
-                if (Logging.isDebug()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, this,"wrote %d bytes to %s",numBytesWritten,channel.socket().getRemoteSocketAddress().toString());
-                }
+                LOG.debug("wrote %d bytes to {}",numBytesWritten,channel.socket().getRemoteSocketAddress());
                 if (numBytesWritten == -1) {
-                    if (Logging.isInfo()) {
-                        Logging.logMessage(Logging.LEVEL_INFO, Category.net, this,
-                                "client closed connection (EOF): %s", channel.socket().getRemoteSocketAddress().toString());
-                    }
+                    LOG.info("client closed connection (EOF): {}", channel.socket().getRemoteSocketAddress());
                     // connection closed
                     
                     abortConnection(con, new IOException("remote end closed connection while writing data"));
@@ -504,16 +455,11 @@ public class TCPCommunicator extends LifeCycleThread {
                 
             }
         } catch (ClosedChannelException ex) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                        "connection to %s closed by remote peer", con.getChannel().socket().getRemoteSocketAddress().toString());
-            }
+            LOG.debug("connection to {} closed by remote peer", con.getChannel().socket().getRemoteSocketAddress());
             abortConnection(con,ex);
         } catch (IOException ex) {
             // simply close the connection
-            if (Logging.isDebug()) {
-                Logging.logError(Logging.LEVEL_DEBUG, this, ex);
-            }
+            LOG.error("", ex);
             abortConnection(con,ex);
         }
     }
@@ -540,10 +486,7 @@ public class TCPCommunicator extends LifeCycleThread {
         } catch (Exception ex) {
         }
 
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "closing connection to %s", channel
-                    .socket().getRemoteSocketAddress().toString());
-        }
+        LOG.debug("closing connection to {}", channel.socket().getRemoteSocketAddress());
     }
 
     void abortConnection(TCPConnection con, IOException exception) {
@@ -564,10 +507,7 @@ public class TCPCommunicator extends LifeCycleThread {
         } catch (Exception ex) {
         }
 
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this, "closing connection to %s", channel
-                    .socket().getRemoteSocketAddress().toString());
-        }
+        LOG.debug("closing connection to {}", channel.socket().getRemoteSocketAddress());
         implementation.onClose(con.getNIOConnection());
     }
 

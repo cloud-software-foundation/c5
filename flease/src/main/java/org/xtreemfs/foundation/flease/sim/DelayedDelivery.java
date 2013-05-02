@@ -31,15 +31,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleThread;
 import org.xtreemfs.foundation.flease.FleaseStage;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  * Thread to deliver delayed packets and to set availability status of hosts.
  * @author bjko
  */
 public class DelayedDelivery extends LifeCycleThread {
+  private static final Logger LOG = LoggerFactory.getLogger(DelayedDelivery.class);
 
     /**
      * queued packets for delayed delivery
@@ -97,23 +100,17 @@ public class DelayedDelivery extends LifeCycleThread {
     private final static int HOSTWAIT_MULTIPLIER = 10;
 
     /**
-     * if set to true debug output is generated
-     */
-    private boolean debug;
-
-    /**
      * Creates a new instance of UDPDelayedDelivery
      * @param targetQ queue to use for delivering delayed packets
      * @param blockedPorts list of blocked ports (unavail hosts)
      * @param ports list of all hosts
      * @param pHostUnavail probability of unavailable host
      * @param pHostRecovery probability of host recovery
-     * @param debug if set to true debug output is generated
      */
     public DelayedDelivery(LinkedBlockingQueue<Communicator.Packet> targetQ,
             Map<Integer,Integer> blockedPorts,
             Map<Integer,FleaseStage> ports,
-            double pHostUnavail, double pHostRecovery, boolean debug) {
+            double pHostUnavail, double pHostRecovery) {
 
         super("UDP-Delivery");
 
@@ -129,7 +126,6 @@ public class DelayedDelivery extends LifeCycleThread {
         this.ports = ports;
 
         this.quit = false;
-        this.debug = debug;
     }
 
     /**
@@ -183,8 +179,7 @@ public class DelayedDelivery extends LifeCycleThread {
                     if (Math.random() < this.pHostRecovery*round) {
 
                         iter.remove();
-                        if (debug)
-                            Logging.logMessage(Logging.LEVEL_DEBUG,this,"unblocked "+portNo);
+                        LOG.debug("unblocked {}", portNo);
                     } else {
                         blockedPorts.put(portNo,round+1);
                     }
@@ -197,8 +192,7 @@ public class DelayedDelivery extends LifeCycleThread {
                         Integer[] keys = ports.keySet().toArray(new Integer[0]);
                         int rand = (int)(Math.random()*(double)(keys.length));
                         blockedPorts.put(keys[rand],1);
-                        if (debug)
-                            Logging.logMessage(Logging.LEVEL_DEBUG,this,"blocked   "+keys[rand]);
+                        LOG.debug("blocked   {}", keys[rand]);
                     }
                 }
 

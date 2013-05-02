@@ -46,8 +46,6 @@ import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptor;
 import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
 import org.xtreemfs.foundation.flease.comm.FleaseCommunicationInterface;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
@@ -67,7 +65,7 @@ public class FleaseProposerTest extends TestCase {
         super(testName);
 
         result = new AtomicReference();
-        Logging.start(Logging.LEVEL_WARN, Category.all);
+        //Logging.start(Logging.LEVEL_WARN, Category.all);
         TimeSync.initializeLocal(50);
 
         cfg = new FleaseConfig(10000, 500, 500, new InetSocketAddress(12345), "localhost:12345",5);

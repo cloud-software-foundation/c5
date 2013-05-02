@@ -80,7 +80,7 @@ public class FleaseAcceptorCell implements Serializable {
 
     /**
      * Setter for property lastPrep.
-     * @param lastPrep New value of property lastPrep.
+     * @param prepared New value of property lastPrep.
      */
     public void setPrepared(FleaseMessage prepared) {
         this.prepared = prepared;

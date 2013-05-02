@@ -30,15 +30,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.flease.comm.tcp.TCPFleaseCommunicator;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class FleaseStats extends Thread {
+    private static final Logger LOG = LoggerFactory.getLogger(FleaseStats.class);
     
     public static final int INTERVAL_IN_MS = 1000;
 
@@ -55,7 +57,7 @@ public class FleaseStats extends Thread {
         try {
             out = new PrintWriter(logfile);
         } catch (IOException ex) {
-            Logging.logMessage(Logging.LEVEL_ERROR, Category.replication, this,"cannot write to %s, due to %s",logfile,ex.toString());
+            LOG.error("cannot write to {}, due to {}",logfile,ex.toString());
             ex.printStackTrace();
             throw ex;
         }
@@ -68,13 +70,13 @@ public class FleaseStats extends Thread {
 
     public void run() {
         long t = 0;
-        Logging.logMessage(Logging.LEVEL_INFO, Category.replication, this,"collecting statistics");
+        LOG.info("collecting statistics");
         do {
             try {
                 try {
                     sleep(INTERVAL_IN_MS);
                 } catch (InterruptedException ex) {
-                    Logging.logMessage(Logging.LEVEL_INFO, this,"interrupted");
+                    LOG.info("interrupted");
                     break;
                 }
                 t += INTERVAL_IN_MS;
@@ -95,12 +97,12 @@ public class FleaseStats extends Thread {
                 printValues2(tcpIn, tcpOut,t,"x");
                 printValues(inTimers, durTimers,t,"T");
             } catch (Throwable thr) {
-                Logging.logMessage(Logging.LEVEL_ERROR, Category.replication, this,thr.toString());
+                LOG.error("exception in run loop", thr);
             }
 
         } while (!quit);
         out.close();
-        Logging.logMessage(Logging.LEVEL_INFO, Category.replication, this,"done");
+        LOG.info("run loop finished");
     }
 
     void printValues(int numRq, List<Integer> durations, long t, String type) {

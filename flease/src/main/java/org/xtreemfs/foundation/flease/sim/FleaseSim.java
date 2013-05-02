@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleListener;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
@@ -44,14 +47,13 @@ import org.xtreemfs.foundation.flease.FleaseViewChangeListenerInterface;
 import org.xtreemfs.foundation.flease.MasterEpochHandlerInterface;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.proposer.FleaseException;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  * Simulator for testing
  * @author bjko
  */
 public class FleaseSim {
+  private static final Logger LOG = LoggerFactory.getLogger(FleaseSim.class);
 
     //private void
 
@@ -60,9 +62,6 @@ public class FleaseSim {
      */
     public static void main(String[] args) {
         try {
-
-            final boolean DEBUG_COMM_MSGS = false;
-
             final int dmax = 500;
             final int leaseTimeout = 5000;
 
@@ -71,10 +70,9 @@ public class FleaseSim {
 
             final boolean useME = true;
 
-            Logging.start(Logging.LEVEL_DEBUG, Category.all);
             TimeSync.initializeLocal(50);
 
-            final Communicator com = new Communicator(10, 100, 30000, 5, true, 0.2, 0.05, DEBUG_COMM_MSGS);
+            final Communicator com = new Communicator(10, 100, 30000, 5, true, 0.2, 0.05);
             com.start();
 
             List<InetSocketAddress> allPorts = new ArrayList(numHosts);
@@ -115,8 +113,7 @@ public class FleaseSim {
 
                     public void sendMessage(FleaseMessage message, InetSocketAddress recipient) {
                         assert(message != null);
-                        if (DEBUG_COMM_MSGS)
-                            Logging.logMessage(Logging.LEVEL_DEBUG, this,"received message for delivery to port %d: %s",recipient.getPort(),message.toString());
+                        LOG.debug("received message for delivery to port {}: {}",recipient.getPort(),message);
                         message.setSender(new InetSocketAddress("localhost", portNo));
                         com.send(recipient.getPort(), message);
                     }

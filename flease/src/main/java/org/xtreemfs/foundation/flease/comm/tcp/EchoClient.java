@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  *
@@ -46,7 +45,6 @@ public class EchoClient {
     public static void main(String[] args) {
         // TODO code application logic here
 
-        Logging.start(Logging.LEVEL_DEBUG);
         TimeSync ts = TimeSync.initializeLocal(50);
 
         try {

@@ -28,8 +28,8 @@
 
 package org.xtreemfs.foundation;
 
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A base class for threads representing a life cycle. It offers methods for
@@ -40,6 +40,7 @@ import org.xtreemfs.foundation.logging.Logging.Category;
  * 
  */
 public class LifeCycleThread extends Thread {
+    private static final Logger LOG = LoggerFactory.getLogger(LifeCycleThread.class);
     
     private final Object      startLock;
     
@@ -65,9 +66,7 @@ public class LifeCycleThread extends Thread {
      */
     protected void notifyStarted() {
         
-        if (Logging.isInfo())
-            Logging.logMessage(Logging.LEVEL_INFO, Category.lifecycle, this, "Thread %s started", Thread
-                    .currentThread().getName());
+        LOG.info("Thread {} started", Thread.currentThread().getName());
         
         synchronized (startLock) {
             started = true;
@@ -83,9 +82,7 @@ public class LifeCycleThread extends Thread {
      */
     protected void notifyStopped() {
         
-        if (Logging.isInfo())
-            Logging.logMessage(Logging.LEVEL_INFO, Category.lifecycle, this, "Thread %s terminated", Thread
-                    .currentThread().getName());
+        LOG.info("Thread {} terminated", Thread.currentThread().getName());
         
         synchronized (stopLock) {
             stopped = true;
@@ -100,9 +97,8 @@ public class LifeCycleThread extends Thread {
      */
     protected void notifyCrashed(Throwable exc) {
         
-        Logging.logMessage(Logging.LEVEL_CRIT, this, "service ***CRASHED***, shutting down");
-        Logging.logError(Logging.LEVEL_CRIT, this, exc);
-        
+        LOG.error("service ***CRASHED***, shutting down", exc);
+
         synchronized (startLock) {
             this.exc = exc instanceof Exception ? (Exception) exc : new Exception(exc);
             started = true;

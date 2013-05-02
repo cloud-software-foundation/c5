@@ -32,14 +32,15 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author bjko
  */
 public final class ReusableBuffer {
+    private static final Logger LOG = LoggerFactory.getLogger(ReusableBuffer.class);
     
     private static final Charset ENC_UTF8 = Charset.forName("utf-8");
     
@@ -651,24 +652,22 @@ public final class ReusableBuffer {
         
         if (!returned && reusable) {
             
-            Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this,
-                "buffer was finalized but not freed before! buffer = %s, refCount=%d", this.toString(), getRefCount());
+            LOG.warn("buffer was finalized but not freed before! buffer = {}, refCount={}", this, getRefCount());
             
             if (allocStack != null) {
                 
-                Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "stacktrace: %s", allocStack);
+                LOG.warn("stacktrace: %s", allocStack);
                 if (this.viewParent != null)
-                    Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "parent stacktrace: %s",
-                            viewParent.allocStack);
+                    LOG.warn("parent stacktrace: {}", viewParent.allocStack);
             }
             
             if (freeStack != null) {
-                Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "freed at: %s", freeStack);
+                LOG.warn("freed at: {}", freeStack);
             } else if (viewParent != null && viewParent.freeStack != null) {
-                Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "freed at: %s", viewParent.freeStack);
+                LOG.warn("freed at: {}", viewParent.freeStack);
             }
             
-            if (Logging.isDebug()) {
+            if (LOG.isDebugEnabled()) {
                 
                 byte[] data = new byte[(this.capacity() > 128) ? 128 : this.capacity()];
                 this.position(0);
@@ -676,16 +675,13 @@ public final class ReusableBuffer {
                 this.get(data);
                 String content = new String(data);
                 
-                Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "content: %s", content);
+                LOG.warn("content: {}", content);
                 
                 if (this.viewParent != null) {
-                    Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "view parent: %s",
-                        this.viewParent.toString());
-                    Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "ref count: %d",
-                        this.viewParent.refCount.get());
+                    LOG.warn("view parent: {}", this.viewParent);
+                    LOG.warn("ref count: {}", this.viewParent.refCount.get());
                 } else {
-                    Logging.logMessage(Logging.LEVEL_WARN, Category.buffer, this, "ref count: %d",
-                        this.refCount.get());
+                    LOG.warn("ref count: {}", this.refCount.get());
                 }
                 
             }

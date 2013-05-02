@@ -27,6 +27,9 @@
 
 package org.xtreemfs.foundation.flease.comm.tcp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -38,13 +41,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.xtreemfs.foundation.LifeCycleListener;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  *
  * @author bjko
  */
 public class TCPClient {
+    private final static Logger LOG = LoggerFactory.getLogger(TCPClient.class);
 
     private static final long MAX_WAITTIME_MS = 1000 * 60 * 10;
 
@@ -89,7 +92,7 @@ public class TCPClient {
                     if (cc != null)
                         cc.connectSucces();
                     else {
-                        Logging.logMessage(Logging.LEVEL_ERROR, this,"connect for unknown connection: "+connection);
+                        LOG.error("connect for unknown connection: {}", connection);
                         connection.close();
                     }
                 } finally {

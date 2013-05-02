@@ -31,7 +31,6 @@ import java.net.InetSocketAddress;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.logging.Logging;
 
 
 /**
@@ -47,7 +46,6 @@ public class EchoServer implements NIOServer {
         // TODO code application logic here
 
         try {
-            Logging.start(Logging.LEVEL_DEBUG);
             TimeSync.initializeLocal(50);
 
             EchoServer s = new EchoServer();

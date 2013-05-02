@@ -39,8 +39,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class that offers a local time w/ adjustable granularity and a global time
@@ -52,6 +53,7 @@ import org.xtreemfs.foundation.logging.Logging.Category;
  * @author bjko
  */
 public final class TimeSync extends LifeCycleThread {
+    private static final Logger LOG = LoggerFactory.getLogger(TimeSync.class);
 
     public enum ExtSyncSource {
         XTREEMFS_DIR, GPSD, LOCAL_CLOCK
@@ -156,9 +158,8 @@ public final class TimeSync extends LifeCycleThread {
         
         if (this.timeServerClient != null && this.timeSyncInterval != 0 && this.localTimeRenew != 0) {
             this.localTimeRenew = 0;
-            Logging.logMessage(Logging.LEVEL_DEBUG, this,
-                    "Disabled the periodic local time renew (set local_clock_renewal to 0)" +
-                    " and using always the current system time as base since the time will be corrected by synchronizing with the DIR service.");
+            LOG.debug("Disabled the periodic local time renew (set local_clock_renewal to 0)" +
+                " and using always the current system time as base since the time will be corrected by synchronizing with the DIR service.");
         }
 
         if (source == ExtSyncSource.GPSD) {
@@ -171,7 +172,7 @@ public final class TimeSync extends LifeCycleThread {
                 gpsdSocket.setTcpNoDelay(true);
                 gpsdSocket.connect(gpsdAddr,2000);
             } catch (IOException ex) {
-                Logging.logMessage(Logging.LEVEL_ERROR, this,"cannot connect to GPSd: "+ex);
+                LOG.error("cannot connect to GPSd: ", ex);
                 gpsdSocket = null;
             }
         }
@@ -193,7 +194,7 @@ public final class TimeSync extends LifeCycleThread {
         if (this.timeServerClient != null && timeSyncInterval != 0) {
             tsStatus += " and remote sync every " + this.timeSyncInterval + " ms";
         }
-        Logging.logMessage(Logging.LEVEL_INFO, Category.lifecycle, this, "TimeSync is running %s", tsStatus);
+        LOG.info("TimeSync is running {}", tsStatus);
         while (!quit) {
             // Renew cached local time.
             final long previousLocalSysTime = localSysTime;
@@ -201,12 +202,11 @@ public final class TimeSync extends LifeCycleThread {
             if (localTimeRenew > 0 && previousLocalSysTime != 0) {
                 final long timeBetweenUpdates = Math.abs(localSysTime - previousLocalSysTime);
                 if (timeBetweenUpdates > 4 * localTimeRenew) {
-                    Logging.logMessage(Logging.LEVEL_WARN, this,
-                            "The granularity of the renewed local time could not be guaranteed" +
-                            " since it took longer to retrieve the latest local time (%d ms) than configured (local_clock_renewal = %d)." +
-                            " Maybe the system is under high I/O load and therefore scheduling threads takes longer than usual?",
-                            timeBetweenUpdates,
-                            localTimeRenew);
+                    LOG.warn("The granularity of the renewed local time could not be guaranteed" +
+                        " since it took longer to retrieve the latest local time ({} ms) than configured (local_clock_renewal = {})." +
+                        " Maybe the system is under high I/O load and therefore scheduling threads takes longer than usual?",
+                        timeBetweenUpdates,
+                        localTimeRenew);
                 }
             }
             
@@ -248,8 +248,7 @@ public final class TimeSync extends LifeCycleThread {
     public static TimeSync initialize(TimeServerClient dir, int timeSyncInterval, int localTimeRenew) throws Exception {
         
         if (theInstance != null) {
-            Logging.logMessage(Logging.LEVEL_WARN, Category.lifecycle, null, "time sync already running",
-                new Object[0]);
+            LOG.warn("time sync already running");
             return theInstance;
         }
         
@@ -261,8 +260,7 @@ public final class TimeSync extends LifeCycleThread {
     
     public static TimeSync initializeLocal(int localTimeRenew) {
         if (theInstance != null) {
-            Logging.logMessage(Logging.LEVEL_WARN, Category.lifecycle, null, "time sync already running",
-                new Object[0]);
+            LOG.warn("time sync already running");
             return theInstance;
         }
         
@@ -273,8 +271,7 @@ public final class TimeSync extends LifeCycleThread {
 
     public static TimeSync initializeGPSD(InetSocketAddress gpsd, int timeSyncInterval, int localTimeRenew) {
         if (theInstance != null) {
-            Logging.logMessage(Logging.LEVEL_WARN, Category.lifecycle, null, "time sync already running",
-                new Object[0]);
+            LOG.warn("time sync already running");
             return theInstance;
         }
 
@@ -288,7 +285,7 @@ public final class TimeSync extends LifeCycleThread {
         try {
             waitForShutdown();
         } catch (Exception e) {
-            Logging.logError(Logging.LEVEL_ERROR, null, e);
+            LOG.error("in close()", e);
         }
     }
     
@@ -387,9 +384,8 @@ public final class TimeSync extends LifeCycleThread {
                     syncRTT = (int)(tEnd - tStart);
                     
                     if (syncRTT > MAX_RTT) {
-                        Logging.logMessage(Logging.LEVEL_WARN, Category.misc, this,
-                                "Ignored time synchronization message because DIR took too long to respond (%d ms)",
-                                syncRTT);
+                        LOG.warn("Ignored time synchronization message because DIR took too long to respond (%{} ms)",
+                            syncRTT);
                         syncSuccess = false;
                         return;
                     }
@@ -401,8 +397,7 @@ public final class TimeSync extends LifeCycleThread {
                     lastSuccessfulSync = tEnd;
 
                     if (Math.abs(oldDrift - currentDrift) > 5000 && oldDrift != 0) {
-                        Logging.logMessage(Logging.LEVEL_ERROR, Category.misc, this,
-                            "STRANGE DRIFT CHANGE from %d to %d", oldDrift, currentDrift);
+                        LOG.error("STRANGE DRIFT CHANGE from {} to {}", oldDrift, currentDrift);
                     }
 
                 } catch (Exception ex) {
@@ -438,31 +433,29 @@ public final class TimeSync extends LifeCycleThread {
                         c.set(Calendar.SECOND, Integer.parseInt(m.group(6)));
                         //c.set(Calendar.MILLISECOND, Integer.parseInt(m.group(7))*10);
                     } else {
-                        Logging.logMessage(Logging.LEVEL_WARN, this,"cannot parse GPSd response: %s",response);
+                        LOG.warn("cannot parse GPSd response: %s", response);
                         syncSuccess = false;
                         return;
                     }
 
                     long globalTime = c.getTimeInMillis();
                     Date d = new Date(globalTime);
-                    Logging.logMessage(Logging.LEVEL_DEBUG, this,"global GPSd time: %d (%d:%d:%d)",c.getTimeInMillis(),d.getHours(),
-                            d.getMinutes(),d.getSeconds());
+                    LOG.debug("global GPSd time: {} ({}:{}:{})", c.getTimeInMillis(), d.getHours(),
+                        d.getMinutes(), d.getSeconds());
                     
                     // add half a roundtrip to estimate the delay
                     syncRTT = (int)(tEnd - tStart);
-                    Logging.logMessage(Logging.LEVEL_DEBUG, this,"sync RTT: %d ms",syncRTT);
+                    LOG.debug("sync RTT: {} ms", syncRTT);
                     globalTime += syncRTT / 2;
                     syncSuccess = true;
 
                     currentDrift = globalTime - tEnd;
                     lastSuccessfulSync = tEnd;
 
-                    Logging.logMessage(Logging.LEVEL_DEBUG, Category.misc, this,
-                            "resync success, drift: %d ms", Math.abs(oldDrift-currentDrift));
+                    LOG.debug("resync success, drift: {} ms", Math.abs(oldDrift - currentDrift));
 
                     if (Math.abs(oldDrift - currentDrift) > 5000 && oldDrift != 0) {
-                        Logging.logMessage(Logging.LEVEL_ERROR, Category.misc, this,
-                            "STRANGE DRIFT CHANGE from %d to %d", oldDrift, currentDrift);
+                        LOG.error("STRANGE DRIFT CHANGE from {} to {}", oldDrift, currentDrift);
                     }
                 } catch (Exception ex) {
                     syncSuccess = false;

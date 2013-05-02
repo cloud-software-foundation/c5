@@ -30,17 +30,21 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LRUCache;
 import org.xtreemfs.foundation.LifeCycleThread;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  *
  * @author bjko
  */
 public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterEpochHandlerInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleMasterEpochHandler.class);
+
     public static final int MAX_EPOCH_CACHE_SIZE = 10000;
 
 
@@ -79,7 +83,7 @@ public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterE
                                     epoch = 0l;
                                 }
                                 epochs.put(rq.message.getCellId(),epoch);
-                            Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.all, this, "sent %d", epoch);
+                                LOG.debug("sent {}", epoch);
                             }
                             rq.message.setMasterEpochNumber(epoch);
                         } catch (Exception ex) {
@@ -88,7 +92,7 @@ public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterE
                             try {
                                 rq.callback.processingFinished();
                             } catch (Exception ex) {
-                                Logging.logError(Logging.LEVEL_ERROR, this, ex);
+                                LOG.error("exception for SEND, calling rq.callback.processingFinished", ex);
                             }
                         }
                         break;
@@ -100,8 +104,7 @@ public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterE
                             raf.writeLong(rq.message.getMasterEpochNumber());
                             raf.getFD().sync();
                             raf.close();
-                        Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.all, this, "stored %d",
-                                rq.message.getMasterEpochNumber());
+                            LOG.debug("stored {}", rq.message.getMasterEpochNumber());
                             epochs.put(rq.message.getCellId(),rq.message.getMasterEpochNumber());
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -109,7 +112,7 @@ public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterE
                             try {
                                 rq.callback.processingFinished();
                             } catch (Exception ex) {
-                                Logging.logError(Logging.LEVEL_ERROR, this, ex);
+                                LOG.error("exception for STORE, calling rq.callback.processingFinished", ex);
                             }
                         }
                         break;
@@ -154,10 +157,10 @@ public class SimpleMasterEpochHandler extends LifeCycleThread implements MasterE
     private final static class Request {
         FleaseMessage message;
         Continuation callback;
-        String fileName;
+        //String fileName;
         enum RequestType {
-            SEND, STORE;
-        };
+            SEND, STORE
+        }
         RequestType  type;
     }
 

@@ -27,6 +27,8 @@
 
 package org.xtreemfs.foundation.flease.comm.tcp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.flease.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -38,13 +40,13 @@ import org.xtreemfs.foundation.LifeCycleListener;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  *
  * @author bjko
  */
 public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(TCPFleaseCommunicator.class);
     
     private final FleaseStage                     stage;
 
@@ -105,7 +107,7 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
                             c.readingHdr = false;
                             int size = buffer.getInt();
                             if ((size <= 0) || (size > 2048)) {
-                                Logging.logMessage(Logging.LEVEL_ERROR, this,"warining: invalid fragment size: %d",size);
+                                LOG.error("warning: invalid fragment size: {}", size);
                                 connection.close();
                                 return;
                             }
@@ -127,8 +129,8 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
                         }
                     }
                 } catch (Exception ex) {
-                    Logging.logError(Logging.LEVEL_ERROR, this,ex);
-                    Logging.logMessage(Logging.LEVEL_ERROR, this,buffer.toString());
+                    LOG.error("onRead", ex);
+                    LOG.debug("buffer: {}", buffer);
                     connection.close();
                 }
 
@@ -144,11 +146,11 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
             }
 
             public void onWriteFailed(IOException exception, Object context) {
-                Logging.logMessage(Logging.LEVEL_ERROR, this,"write failed: "+context);
+                LOG.error("write failed: {}", context);
             }
 
             public void onConnectFailed(InetSocketAddress endpoint, IOException exception, Object context) {
-                Logging.logMessage(Logging.LEVEL_ERROR, this,"could not connect to: "+endpoint);
+                LOG.error("could not connect to: {}", endpoint);
             }
         });
 

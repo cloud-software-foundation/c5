@@ -29,6 +29,9 @@ package org.xtreemfs.foundation.flease.proposer;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.Flease;
@@ -36,14 +39,13 @@ import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.comm.ProposalNumber;
 import org.xtreemfs.foundation.flease.proposer.CellAction.ActionName;
 import org.xtreemfs.foundation.flease.proposer.CellAction.CellActionList;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class FleaseProposerCell {
+    private static final Logger LOG = LoggerFactory.getLogger(FleaseProposerCell.class);
 
     /**
      * @return the responses
@@ -197,9 +199,7 @@ public class FleaseProposerCell {
         this.prevLease = Flease.EMPTY_LEASE;
         this.markedClose = false;
         this.handoverTo = null;
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.replication, this,"opened new cell id %s with majority = %d ",cellId,majority);
-        }
+        LOG.debug("opened new cell id {} with majority = {}", cellId, majority);
     }
     
     public void addAction(ActionName actionName) {

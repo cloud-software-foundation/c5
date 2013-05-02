@@ -38,18 +38,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleThread;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMessageSenderInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(UDPFleaseCommunicator.class);
     
     private final FleaseStage                     stage;
 
@@ -128,22 +130,18 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
             channel.socket().bind(new InetSocketAddress(port));
             channel.socket().setReceiveBufferSize(1024*1024*1024);
             channel.socket().setSendBufferSize(1024*1024*1024);
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,"sendbuffer size: "+channel.socket().getSendBufferSize());
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,"recv       size: "+channel.socket().getReceiveBufferSize());
+            LOG.debug("sendbuffer size: {}", channel.socket().getSendBufferSize());
+            LOG.debug("recv       size: {}", channel.socket().getReceiveBufferSize());
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);
 
-            if (Logging.isInfo())
-                Logging.logMessage(Logging.LEVEL_INFO, Category.net, this, "UDP socket on port %d ready",
-                    port);
+            LOG.info("UDP socket on port {} ready", port);
 
             stage.start();
             stage.waitForStartup();
 
 
             notifyStarted();
-
-           
 
 
             boolean isRdOnly = true;
@@ -210,9 +208,7 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
                             FleaseMessage r = sendList.remove(sendList.size()-1);
                             if (r == null)
                                 break;
-                            if (Logging.isDebug())
-                                Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                                    "sent packet to %s", r.getSender().toString());
+                            LOG.debug("sent packet to {}", r.getSender());
                             data.clear();
                             r.serialize(data);
                             data.flip();
@@ -234,15 +230,11 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
                             data.clear();
                             sender = (InetSocketAddress) channel.receive(data.getBuffer());
                             if (sender == null) {
-                                if (Logging.isDebug())
-                                    Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                                        "read key for empty read");
+                                LOG.debug("read key for empty read");
                                 break;
                             } else {
                                 numRxInCycle++;
-                                if (Logging.isDebug())
-                                    Logging.logMessage(Logging.LEVEL_DEBUG, Category.net, this,
-                                        "read data from %s", sender.toString());
+                                LOG.debug("read data from {}", sender);
 
                                 try {
                                     //unpack flease message
@@ -252,9 +244,7 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
                                     numRx++;
                                     stage.receiveMessage(m);
                                 } catch (Throwable ex) {
-                                    ex.printStackTrace();
-                                    Logging.logMessage(Logging.LEVEL_WARN, Category.net, this,
-                                    "received invalid UPD message: "+ex);
+                                    LOG.warn("received invalid UDP message: ", ex);
                                 }
                             }
                         } while (sender != null);
@@ -275,15 +265,15 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
         } catch (ClosedByInterruptException ex) {
             // ignore
         } catch (IOException ex) {
-            Logging.logError(Logging.LEVEL_ERROR, this, ex);
+            LOG.error("main loop exception", ex);
         } catch (Throwable th) {
             notifyCrashed(th);
             return;
         }
 
 
-        Logging.logMessage(Logging.LEVEL_ERROR, Category.net, this,"num packets tranferred: %d tx    %d rx",numTx,numRx);
-        Logging.logMessage(Logging.LEVEL_ERROR, Category.net, this,"numRxCycles %d, maxPkgPerCycle %d, avg/Cycle %d",numRxCycles,maxPkgCycle,avgPkgCycle/numRxCycles);
+        LOG.info("num packets tranferred: {} tx    {} rx", numTx, numRx);
+        LOG.info("numRxCycles {}, maxPkgPerCycle {}, avg/Cycle {}", numRxCycles, maxPkgCycle, avgPkgCycle/numRxCycles);
 
         notifyStopped();
     }

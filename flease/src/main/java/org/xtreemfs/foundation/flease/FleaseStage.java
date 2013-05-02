@@ -27,6 +27,9 @@
 package org.xtreemfs.foundation.flease;
 
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.flease.proposer.*;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -47,14 +50,13 @@ import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptorCell;
 import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
 import org.xtreemfs.foundation.flease.comm.FleaseCommunicationInterface;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class FleaseStage extends LifeCycleThread implements LearnEventListener, FleaseLocalQueueInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(FleaseStage.class);
 
     public static final String FLEASE_VERSION = "0.2.4 (trunk)";
 
@@ -295,25 +297,17 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
     }
 
     public void learnedEvent(ASCIIString cellId, ASCIIString leaseHolder, long leaseTimeout_ms, long masterEpochNumber) {
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Category.replication, this,"learned event: "+leaseHolder+"/"+leaseTimeout_ms);
-        }
+        LOG.debug("learned event: {}/{}", leaseHolder, leaseTimeout_ms);
         Flease newFlease = new Flease(cellId, leaseHolder, leaseTimeout_ms, masterEpochNumber);
         Flease oldFlease = proposer.updatePrevLeaseForCell(cellId, newFlease);
         if (oldFlease != null) {
             if (oldFlease.isValid()) {
                 if (!oldFlease.isSameLeaseHolder(newFlease)) {
-                    Logging.logMessage(
-                            Logging.LEVEL_DEBUG,
-                            Category.replication,
-                            this,
-                            "New lease replaced old lease which is still valid according to this OSD's clocks. Make sure all OSD clocks are synchronized. New Lease: %s Old Lease: %s",
-                            newFlease, oldFlease);
+                    LOG.debug("New lease replaced old lease which is still valid according to this OSD's clocks. Make sure all OSD clocks are synchronized. New Lease: {} Old Lease: {}",
+                        newFlease, oldFlease);
                 }
             }
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Category.replication, this,"lease state change: %s %s %d",cellId,leaseHolder,leaseTimeout_ms);
-            }
+            LOG.debug("lease state change: {} {} {}", cellId, leaseHolder, leaseTimeout_ms);
             leaseListener.statusChanged(cellId, newFlease);
             if (ENABLE_TIMEOUT_EVENTS) {
                 leaseTimeouts.remove(oldFlease);
@@ -328,7 +322,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
         if (COLLECT_STATISTICS)
             statThr.start();
 
-        Logging.logMessage(Logging.LEVEL_INFO, Category.replication, this, "Flease (version %s) ready", FLEASE_VERSION);
+        LOG.info("Flease (version {}) ready", FLEASE_VERSION);
 
         notifyStarted();
 
@@ -386,7 +380,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
 
                         if (msg.isInternalEvent()) {
                             //should never happen!
-                            Logging.logMessage(Logging.LEVEL_ERROR, Category.replication, this, "received internal event: %s", msg);
+                            LOG.error("received internal event: {}", msg);
                         } else if (msg.isAcceptorMessage()) {
                             final FleaseMessage response = acceptor.processMessage(msg);
                             if (response != null) {
@@ -402,8 +396,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                                         };
                                         meHandler.sendMasterEpoch(response, cont);
                                     } else {
-                                        Logging.logMessage(Logging.LEVEL_ERROR, this,
-                                                "MASTER EPOCH WAS REQUESTED, BUT NO MASTER EPOCH HANDLER DEFINED!!!");
+                                        LOG.error("MASTER EPOCH WAS REQUESTED, BUT NO MASTER EPOCH HANDLER DEFINED!!!");
                                         sender.sendMessage(response, msg.getSender());
                                     }
                                 } else if (msg.getMasterEpochNumber() != FleaseMessage.IGNORE_MASTER_EPOCH
@@ -440,7 +433,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                                     if (rq.listener != null)
                                         rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
                                 } catch (FleaseException ex) {
-                                    Logging.logError(Logging.LEVEL_DEBUG, this, ex);
+                                    LOG.error("OPEN_CELL_REQUEST", ex);
                                     leaseListener.leaseFailed(rq.cellId, ex);
                                 }
                                 break;
@@ -483,7 +476,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                         }
                         if (COLLECT_STATISTICS) {
                             long rqEnd = System.nanoTime();
-                            durRequests.get().add(Integer.valueOf((int)(rqEnd-rqStart)));
+                            durRequests.get().add((int) (rqEnd - rqStart));
                         }
                     }
                     
@@ -504,13 +497,12 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
 
         acceptor.shutdown();
         notifyStopped();
-        Logging.logMessage(Logging.LEVEL_INFO, Category.replication, this, "Flease stopped", FLEASE_VERSION);
+        LOG.info("Flease stopped {}", FLEASE_VERSION);
     }
 
     public void shutdown() {
         if (COLLECT_STATISTICS)
-            statThr.shutdown();
-        Logging.logMessage(Logging.LEVEL_DEBUG, Category.replication, this, "received shutdown call...");
+            LOG.debug("received shutdown call...");
         quit = true;
         this.interrupt();
     }
@@ -534,14 +526,14 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                     inTimers.incrementAndGet();
                 }
                 if (e.getScheduledTime() < now) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, this, "event sent after deadline: %s", e.message);
+                    LOG.debug("event sent after deadline: {}", e.message);
                 }
                 e.getMessage().setSendTimestamp(TimeSync.getGlobalTime());
                 proposer.processMessage(e.getMessage());
 
                 if (COLLECT_STATISTICS) {
                     long rqEnd = System.nanoTime();
-                    durTimers.get().add(Integer.valueOf((int)(rqEnd-rqStart)));
+                    durTimers.get().add((int) (rqEnd - rqStart));
                 }
 
                 e = timers.peek();
@@ -569,9 +561,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
             do {
                 f = leaseTimeouts.poll();
 
-                if (Logging.isDebug()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, Category.replication, this,"lease state change: %s timed out (old lease: %s)",f.getCellId(),f.toString());
-                }
+                LOG.debug("lease state change: {} timed out (old lease: {})", f.getCellId(), f);
                 proposer.updatePrevLeaseForCell(f.getCellId(), f.EMPTY_LEASE);
                 leaseListener.statusChanged(f.getCellId(), Flease.EMPTY_LEASE);
                 //create restart event

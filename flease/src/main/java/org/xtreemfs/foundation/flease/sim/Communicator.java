@@ -32,16 +32,19 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleThread;
 import org.xtreemfs.foundation.flease.FleaseStage;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-import org.xtreemfs.foundation.logging.Logging;
 
 /**
  * A tool to simulate package loss, temporary host disconnects and message delay.
  * @author bjko
  */
 public class Communicator extends LifeCycleThread {
+    private static final Logger LOG = LoggerFactory.getLogger(Communicator.class);
 
     /**
      * the connected UDPSimSockets
@@ -62,11 +65,6 @@ public class Communicator extends LifeCycleThread {
      * if true the thread will quit operation
      */
     private boolean quit;
-
-    /**
-     * debug output is generated if set to true
-     */
-    private boolean debug;
 
     /**
      * queue with packets to be delivered to sockets
@@ -106,11 +104,9 @@ public class Communicator extends LifeCycleThread {
      * @param pHostUnavail probability (0..1) that a host becomes unavailable
      * @param pHostRecovery probability that a host is recovered. This value is multiplied by the
      * number of rounds that the host is already unavailable.
-     * @param debug if set to true extensive debug output is generated
      */
     public Communicator(int pkgLossPct, int minDelay, int maxDelay, int pctDelay,
-                  boolean halfLink, double pHostUnavail, double pHostRecovery,
-            boolean debug) {
+                  boolean halfLink, double pHostUnavail, double pHostRecovery) {
 
         super("UDP-Sim");
 
@@ -118,11 +114,9 @@ public class Communicator extends LifeCycleThread {
         this.blockedPorts = new ConcurrentHashMap();
         this.pkgLossPct = pkgLossPct;
         this.quit = false;
-        this.debug = debug;
         this.sendQ = new LinkedBlockingQueue();
         this.dd = new DelayedDelivery(sendQ,blockedPorts,ports,
-                                        pHostUnavail,pHostRecovery,
-                                         debug);
+                                        pHostUnavail,pHostRecovery);
         dd.start();
         this.minDelay = minDelay;
         this.maxDelay = maxDelay;
@@ -138,7 +132,6 @@ public class Communicator extends LifeCycleThread {
     /**
      * opens a port and delivers messages into the queue
      * @param port port number to open
-     * @param q the queue to receive messages
      * @return true if the port was opened succesfully, false if the port is already in use
      */
     public boolean openPort(int port, FleaseStage stage) {
@@ -151,7 +144,6 @@ public class Communicator extends LifeCycleThread {
 
     /**
      * Opens a free port
-     * @param q the queue to receive messages
      * @return treu if successful, false if there is no free port available
      */
     public int openPort(FleaseStage stage) {
@@ -178,7 +170,7 @@ public class Communicator extends LifeCycleThread {
     /**
      * sends a datagram packet from
      * @param port sending port number
-     * @param dp packet to send
+     * @param msg packet to send
      */
     public synchronized void send(int port, FleaseMessage msg) {
         Packet p = new Packet(msg,port);
@@ -203,14 +195,12 @@ public class Communicator extends LifeCycleThread {
                         continue;
 
                     if (blockedPorts.containsKey(p.msg.getSender().getPort())) {
-                        if (debug)
-                            Logging.logMessage(Logging.LEVEL_DEBUG,this,"msg dropped, port blocked "+p.msg.getSender().getPort());
+                        LOG.debug("msg dropped, port blocked {}", p.msg.getSender().getPort());
                         continue;
                     }
 
                     if (blockedPorts.containsKey(p.recipientPort)) {
-                        if (debug)
-                            Logging.logMessage(Logging.LEVEL_DEBUG,this,"msg dropped, port blocked "+p.recipientPort);
+                        LOG.debug("msg dropped, port blocked {}", p.recipientPort);
                         continue;
                     }
 
@@ -218,8 +208,7 @@ public class Communicator extends LifeCycleThread {
 
                         int delay = delayPacket();
                         if ((delay > 0) && !p.requeued) {
-                            if (debug)
-                                Logging.logMessage(Logging.LEVEL_DEBUG,this,"msg delayed "+delay+"ms "+p.recipientPort+" -> "+p.msg.getSender().getPort());
+                            LOG.debug("msg delayed {} ms {} -> {}", delay, p.recipientPort, p.msg.getSender().getPort());
                             dd.add(p,delay);
                         } else {
 
@@ -231,19 +220,18 @@ public class Communicator extends LifeCycleThread {
                             }
                         }
                     } else {
-                        if (debug)
-                            Logging.logMessage(Logging.LEVEL_DEBUG,this,"msg lost "+p.recipientPort+" -> "+p.msg.getSender().getPort());
+                        LOG.debug("msg lost {} -> {}", p.recipientPort, p.msg.getSender().getPort());
                     }
 
 
 
                 } catch (InterruptedException ex) {
-                    Logging.logError(Logging.LEVEL_ERROR,this,ex);
+                    LOG.error("run loop", ex);
                 }
             }
 
         } catch (UnknownHostException ex) {
-            Logging.logError(Logging.LEVEL_ERROR,this,ex);
+            LOG.error("unknown host", ex);
         }
 
         notifyStopped();
@@ -281,7 +269,7 @@ public class Communicator extends LifeCycleThread {
             dd.waitForShutdown();
             waitForShutdown();
         } catch (Exception exc) {
-            Logging.logError(Logging.LEVEL_ERROR, this, exc);
+            LOG.error("in shutdown", exc);
         }
     }
 
@@ -318,7 +306,7 @@ public class Communicator extends LifeCycleThread {
         public boolean requeued;
         /**
          * creates a new packet
-         * @param dp datagram packet
+         * @param msg flease message
          * @param port originating port
          */
         public Packet(FleaseMessage msg, int port) {

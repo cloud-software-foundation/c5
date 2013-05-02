@@ -31,6 +31,9 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.Flease;
@@ -47,14 +50,13 @@ import org.xtreemfs.foundation.flease.comm.FleaseMessage.MsgType;
 import org.xtreemfs.foundation.flease.comm.ProposalNumber;
 import org.xtreemfs.foundation.flease.proposer.CellAction.ActionName;
 import org.xtreemfs.foundation.flease.proposer.FleaseProposerCell.State;
-import org.xtreemfs.foundation.logging.Logging;
-import org.xtreemfs.foundation.logging.Logging.Category;
 
 /**
  *
  * @author bjko
  */
 public class FleaseProposer {
+    private static final Logger LOG = LoggerFactory.getLogger(FleaseProposer.class);
 
     final Map<ASCIIString, FleaseProposerCell> cells;
 
@@ -141,13 +143,8 @@ public class FleaseProposer {
             cell.setRequestMasteEpoch(requestMasterEpoch);
             cells.put(cellId, cell);
             cell.addAction(ActionName.PROPOSER_CELL_OPENED);
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_WARN,
-                        Category.replication,
-                        this,
-                        "P created new cellId %s",
-                        cellId);
-            }
+            LOG.warn("P created new cellId {}",
+                cellId);
             acquireLease(cell);
         } else {
             throw new FleaseException("cell already opened");
@@ -168,13 +165,8 @@ public class FleaseProposer {
         FleaseMessage localInfo = localAcceptor.getLocalLeaseInformation(cellId);
         if ((localInfo != null) && (localInfo.hasNotTimedOut(config, TimeSync.getGlobalTime()))) {
             //we can safely return the learned values
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P request served from local state: %s",
-                        cellId);
-            }
+            LOG.debug("P request served from local state: {}",
+                cellId);
             cell.addAction(ActionName.PROPOSER_RETURNED_LOCAL_LEASE);
             evListener.learnedEvent(localInfo.getCellId(),
                     localInfo.getLeaseHolder(),
@@ -190,34 +182,22 @@ public class FleaseProposer {
             startPrepare(cell,config.getIdentity());
         } else {
             cell.addAction(ActionName.PROPOSER_ACQUIRE_LEASE, "not idle");
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_WARN,
-                        Logging.Category.replication,
-                        this,
-                        "P cellId %s is not idle, ignoring acquireLease",
-                        cellId);
-            }
+            LOG.warn("P cellId {} is not idle, ignoring acquireLease",
+                cellId);
         }
     }
 
     public void renewLease(ASCIIString cellId) throws FleaseException {
         FleaseProposerCell cell = cells.get(cellId);
         if (cell == null) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Category.replication,
-                        this,
-                        "P ignore renew for closed/unknown cell %s", cellId);
-            }
+            LOG.debug("P ignore renew for closed/unknown cell {}", cellId);
             return;
         }
         cell.addAction(ActionName.PROPOSER_RENEW_LEASE);
         //fixme
 
         if (cell.isHandoverInProgress()) {
-            Logging.logMessage(Logging.LEVEL_INFO,
-                    this,
-                    "handover in progress for cell %s, renew canceled",
+            LOG.info("handover in progress for cell {}, renew canceled",
                     cell.getCellId());
             return;
         }
@@ -263,13 +243,8 @@ public class FleaseProposer {
         // TODO(bjko): Change to return lease.
         FleaseProposerCell cell = cells.get(cellId);
         if (cell == null) {
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Category.replication,
-                        this,
-                        "P ignore renew for closed/unknown cell %s",
-                        cellId);
-            }
+            LOG.debug("P ignore renew for closed/unknown cell {}",
+                cellId);
             return;
         }
         cell.addAction(ActionName.PROPOSER_HANDOVER_LEASE);
@@ -311,14 +286,9 @@ public class FleaseProposer {
         //get the cell
         FleaseProposerCell cell = cells.get(msg.getCellId());
         if (cell == null) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P drop message for unknown cellId %s from %s",
+            LOG.debug("P drop message for unknown cellId {} from {}",
                         msg.getCellId(),
                         msg.getSender());
-            }
             return;
         }
         
@@ -328,28 +298,17 @@ public class FleaseProposer {
             final int myViewId = cell.getViewId();
             if (myViewId == FleaseMessage.VIEW_ID_INVALIDATED) {
                 //just ignore things
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Category.replication,
-                            this,
-                            "P drop message because of INVALIDATED local view for cell %s",
-                            cell.getCellId());
-                }
+                LOG.debug("P drop message because of INVALIDATED local view for cell {}",
+                    cell.getCellId());
                 return;
             }
     
             if (myViewId > msg.getViewId()) {
                 //drop
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Category.replication,
-                            this,
-                            "P drop message because of outdated remote view for cell %s: "
-                                    + "local view %d, remote %d",
-                            cell.getCellId(),
-                            myViewId,
-                            msg.getViewId());
-                }
+                LOG.debug("P drop message because of outdated remote view for cell {}: local view {}, remote {}",
+                    cell.getCellId(),
+                    myViewId,
+                    msg.getViewId());
                 return;
             }
     
@@ -358,33 +317,19 @@ public class FleaseProposer {
                 case IDLE: {
                     if (msg.getMsgType() == FleaseMessage.MsgType.EVENT_RESTART) {
                         cell.addAction(ActionName.PROPOSER_RESTART_EVENT);
-                        if (Logging.isDebug()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P restart event: %s",
-                                    msg.toString());
-                        }
+                        LOG.debug("P restart event: {}", msg);
                         startPrepare(cell,config.getIdentity());
                     } else if (msg.getMsgType() == FleaseMessage.MsgType.EVENT_RENEW) {
                         cell.addAction(ActionName.PROPOSER_RENEW_EVENT);
-                        if (Logging.isDebug()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P renew event: %s",
-                                    msg.toString());
-                        }
+                        LOG.debug("P renew event: {}", msg);
                         try {
                             renewLease(cell.getCellId());
                         } catch (FleaseException ex) {
                             cell.addAction(ActionName.PROPOSER_INTERNAL_ERROR_CELL_RESET,
                                     ex.toString());
-                            Logging.logMessage(Logging.LEVEL_ERROR,
-                                    this,
-                                    "P renew failed for cell %s: %s",
+                            LOG.error("P renew failed for cell {}: {}",
                                     cell.getCellId(),
-                                    ex.toString());
+                                    ex);
                             // Reset cell.
                             cell.setCellState(State.IDLE);
                             cell.setMessageSent(null);
@@ -394,13 +339,8 @@ public class FleaseProposer {
                             cell.setNumFailures(0);
                             // Schedule restart.
                             final int wait_ms = (int) config.getDMax() + config.getMaxLeaseTimeout();
-                            if (Logging.isDebug()) {
-                                Logging.logMessage(Logging.LEVEL_DEBUG,
-                                        Logging.Category.replication,
-                                        this,
-                                        "P cannot renew cell %s, scheduled restart in %d ms",
-                                        cell.getCellId(), wait_ms);
-                            }
+                            LOG.debug("P cannot renew cell {}, scheduled restart in {} ms",
+                                    cell.getCellId(), wait_ms);
                             cell.addAction(ActionName.PROPOSER_SCHEDULED_RESTART);
                             FleaseMessage timer = new FleaseMessage(MsgType.EVENT_RESTART);
                             timer.setCellId(cell.getCellId());
@@ -409,13 +349,7 @@ public class FleaseProposer {
                         }
                     } else {
                         //ignore everything else
-                        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P droped message in state IDLE: %s",
-                                    msg.toString());
-                        }
+                        LOG.debug("P droped message in state IDLE: {}", msg);
                     }
                     break;
                 }
@@ -429,12 +363,7 @@ public class FleaseProposer {
                 }
             }
         } catch (Throwable throwable) {
-            Logging.logMessage(Logging.LEVEL_ERROR,
-                    Category.replication,
-                    this,
-                    "Exception in proposer: %s, cell %s",
-                    throwable,
-                    cell);
+            LOG.error("Exception in proposer: {}, cell {}", throwable, cell);
             throw new Exception(throwable);
         }
     }
@@ -446,13 +375,8 @@ public class FleaseProposer {
         if (cell.getLastPrepareTimestamp_ms() + config.getMaxLeaseTimeout()
                 < TimeSync.getLocalSystemTime()) {
             //timed out, set new ballot number
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Category.replication,
-                        this,
-                        "P reset cell id %s due to timeout",
+            LOG.debug("P reset cell id {} due to timeout",
                         cell.getCellId());
-            }
             cell.setBallotNo(new ProposalNumber(TimeSync.getGlobalTime(), config.getSenderId()));
             cell.addAction(ActionName.PROPOSER_SET_BALLOT_NO, cell.getBallotNo().toString());
         }
@@ -481,19 +405,12 @@ public class FleaseProposer {
         }
         cell.setMessageSent(msg);
 
-        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.replication, this,
-                    "P start PREPARE: %s",
-                    msg.toString());
-        }
+        LOG.debug("P start PREPARE: {}", msg);
+
 
         for (int i = 0; i < numRemoteAcc; i++) {
             try {
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.replication, this,
-                            "P send prepare to: %s",
-                            cell.getAcceptors().get(i));
-                }
+                LOG.debug("P send prepare to: {}", cell.getAcceptors().get(i));
                 Thread.yield();
                 comm.sendMessage(msg, cell.getAcceptors().get(i));
             } catch (IOException ex) {
@@ -540,26 +457,15 @@ public class FleaseProposer {
                 && msg.getMsgType() != MsgType.MSG_PREPARE_NACK
                 && msg.getMsgType() != MsgType.MSG_WRONG_VIEW
                 && msg.getMsgType() != MsgType.EVENT_TIMEOUT_PREPARE) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (UNEXPECTED MESSAGE TYPE %s): %s",
+            LOG.debug("P ignore message (UNEXPECTED MESSAGE TYPE {}): {}",
                         msg.getMsgType(),
-                        msg.toString());
-            }
+                        msg);
             return;
         }
 
         if (msg.getSendTimestamp() + config.getMessageTimeout() < TimeSync.getGlobalTime()) {
             //drop outdated message
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (too old): %s",
-                        msg.toString());
-            }
+            LOG.debug("P ignore message (too old): {}", msg);
             return;
         }
 
@@ -572,11 +478,8 @@ public class FleaseProposer {
                     + "+"
                     + config.getDMax());
             //drop outdated message
-            Logging.logMessage(Logging.LEVEL_WARN,
-                    Logging.Category.replication,
-                    this,
-                    "RECEIVED MESSAGE WITH TIMESTAMP TOO FAR IN THE FUTURE (likely cause: "
-                            + "clocks aren't in sync). SYSTEM IS NOT IN A SAFE STATE. Msg TS %d > current Time %d + dMax %d. FleaseMessage Details: %s",
+            LOG.warn("RECEIVED MESSAGE WITH TIMESTAMP TOO FAR IN THE FUTURE (likely cause: "
+                            + "clocks aren't in sync). SYSTEM IS NOT IN A SAFE STATE. Msg TS {} > current Time {} + dMax {}. FleaseMessage Details: {}",
                     msg.getSendTimestamp(),
                     currentTime,
                     config.getDMax(),
@@ -588,13 +491,7 @@ public class FleaseProposer {
         }
 
         if (msg.before(cell.getMessageSent())) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (before my request): %s",
-                        msg.toString());
-            }
+            LOG.debug("P ignore message (before my request): {}", msg);
             return;
         }
 
@@ -608,14 +505,9 @@ public class FleaseProposer {
         final List<FleaseMessage> responses = cell.getResponses();
         responses.add(msg);
         if (cell.majorityAvail()) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P majority responded for proposal %s: %d",
+            LOG.debug("P majority responded for proposal {}: {}",
                         cell.getBallotNo(),
                         responses.size());
-            }
             //analyze responses
             ProposalNumber maxBallot = ProposalNumber.EMPTY_PROPOSAL_NUMBER;
             FleaseMessage prevAccepted = new FleaseMessage(MsgType.MSG_ACCEPT);
@@ -655,14 +547,9 @@ public class FleaseProposer {
             if (maxViewId != cell.getViewId()) {
                 cell.addAction(ActionName.PROPOSER_VIEW_OUTDATED,
                         maxViewId + "!=" + cell.getViewId());
-                if (Logging.isDebug()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P prepare failed due to outdated view local=%d max=%",
+                LOG.debug("P prepare failed due to outdated view local={} max={}",
                             cell.getViewId(),
                             maxViewId);
-                }
                 viewListener.viewIdChangeEvent(cell.getCellId(), maxViewId);
                 cell.addAction(ActionName.PROPOSER_PREPARE_FAILED);
                 cancel(cell, new FleaseException("local viewId is outdated"), 0);
@@ -674,14 +561,9 @@ public class FleaseProposer {
                 cell.setBallotNo(new ProposalNumber(
                         maxBallot.getProposalNo() + (int) (Math.random() * 10) + 1,
                         cell.getBallotNo().getSenderId()));
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P prepare OVERRULED by %s, restart with ballot number: %s",
+                LOG.debug("P prepare OVERRULED by {}, restart with ballot number: {}",
                             maxBallot.getProposalNo(),
                             cell.getBallotNo());
-                }
                 //request a timer event for restart
                 cancel(cell,
                         new FleaseException("local proposal was overruled by remote proposal"), 0);
@@ -706,70 +588,42 @@ public class FleaseProposer {
                                     prevAccepted.getLeaseTimeout(),
                                 cell);
                         cell.addAction(ActionName.PROPOSER_PREPARE_IMPLICIT_RENEW);
-                        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P prepare ACK processing with my proposal (renew): "
-                                        + "prev=%s/%d %s",
+                            LOG.debug("P prepare ACK processing with my proposal (renew): "
+                                        + "prev={}/{} {}",
                                     prevAccepted.getLeaseHolder(),
                                     prevAccepted.getLeaseTimeout(),
                                     prevAccepted.getPrevProposalNo());
-                        }
                     } else {
                         //use other value
                         cell.addAction(ActionName.PROPOSER_PREPARE_PRIOR_VALUE);
-                        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P prepare ACK processing with prior proposal (still valid): "
-                                            + "prev=%s/%d %s",
+                        LOG.debug("P prepare ACK processing with prior proposal (still valid): prev={}/{} {}",
                                     prevAccepted.getLeaseHolder(),
                                     prevAccepted.getLeaseTimeout(),
                                     prevAccepted.getPrevProposalNo());
-                        }
                         cell.getMessageSent().setLeaseHolder(prevAccepted.getLeaseHolder());
                         cell.getMessageSent().setLeaseTimeout(prevAccepted.getLeaseTimeout());
                     }
                 } else {
                     if (prevAccepted.hasTimedOut(config, TimeSync.getGlobalTime())) {
                         cell.addAction(ActionName.PROPOSER_PREPARE_LEASE_TO);
-                        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P prepare ACK processing with my proposal "
-                                            + "(old lease has timed out): prev=%s/%d %s",
+                        LOG.debug("P prepare ACK processing with my proposal (old lease has timed out): prev={}/{} {}",
                                     prevAccepted.getLeaseHolder(),
                                     prevAccepted.getLeaseTimeout(),
                                     prevAccepted.getPrevProposalNo());
-                        }
                     } else {
                         //unknown state of the lease, must use prev value
                         cell.addAction(ActionName.PROPOSER_PREPARE_PRIOR_VALUE);
-                        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                            Logging.logMessage(Logging.LEVEL_DEBUG,
-                                    Logging.Category.replication,
-                                    this,
-                                    "P processing with prior proposal (old lease is in GP): "
-                                            + "%s/%d %s",
+                        LOG.debug("P processing with prior proposal (old lease is in GP): {}/{} {}",
                                     prevAccepted.getLeaseHolder(),
                                     prevAccepted.getLeaseTimeout(),
                                     prevAccepted.getPrevProposalNo());
-                        }
                         cell.getMessageSent().setLeaseHolder(prevAccepted.getLeaseHolder());
                         cell.getMessageSent().setLeaseTimeout(prevAccepted.getLeaseTimeout());
                     }
                 }
             } else {
                 cell.addAction(ActionName.PROPOSER_PREPARE_EMPTY);
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P processing with no prior proposal");
-                }
+                LOG.debug("P processing with no prior proposal");
             }
 
             //master epoch
@@ -786,13 +640,7 @@ public class FleaseProposer {
                 cell.setMasterEpochNumber(maxMasterEpoch+1);
                 cell.addAction(ActionName.PROPOSER_PREPARE_MAX_MASTER_EPOCH,
                         Long.toString(maxMasterEpoch));
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P using masterEpoch %s",
-                            maxMasterEpoch+1);
-                }
+                LOG.debug("P using masterEpoch {}", maxMasterEpoch+1);
             }
 
             responses.clear();
@@ -819,19 +667,11 @@ public class FleaseProposer {
             msg.setMasterEpochNumber(cell.getMasterEpochNumber());
         cell.setMessageSent(msg);
 
-        if (Logging.isDebug() && config.isDebugPrintMessages()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.replication, this,
-                    "P start ACCEPT: %s",
-                    msg.toString());
-        }
+        LOG.debug("P start ACCEPT: {}", msg);
 
         for (int i = 0; i < numRemoteAcc; i++) {
             try {
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.replication, this,
-                            "P send accept to: %s",
-                            cell.getAcceptors().get(i));
-                }
+                LOG.debug("P send accept to: {}", cell.getAcceptors().get(i));
                 Thread.yield();
                 comm.sendMessage(msg, cell.getAcceptors().get(i));
             } catch (IOException ex) {
@@ -872,13 +712,7 @@ public class FleaseProposer {
 
         if (msg.getSendTimestamp() + config.getMessageTimeout() < TimeSync.getGlobalTime()) {
             //drop outdated message
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (too old): %s",
-                        msg.toString());
-            }
+            LOG.debug("P ignore message (too old): {}", msg);
             return;
         }
 
@@ -890,13 +724,10 @@ public class FleaseProposer {
                     + TimeSync.getGlobalTime()
                     + "+"
                     + config.getDMax());
-            Logging.logMessage(Logging.LEVEL_WARN,
-                    Logging.Category.replication,
-                    this,
-                    "RECEIVED MESSAGE WITH TIMESTAMP TOO FAR IN THE FUTURE "
+            LOG.warn("RECEIVED MESSAGE WITH TIMESTAMP TOO FAR IN THE FUTURE "
                             + "(likely cause: clocks aren't in sync). "
-                            + "SYSTEM IS NOT IN A SAFE STATE: %s",
-                    msg.toString());
+                            + "SYSTEM IS NOT IN A SAFE STATE: {}",
+                    msg);
             cell.addAction(ActionName.PROPOSER_ACCEPT_FAILED);
             cancel(cell,
                     new FleaseException("System is not in sync (clock sync drift exceeded)!"), 0);
@@ -907,24 +738,12 @@ public class FleaseProposer {
                 && msg.getMsgType() != MsgType.MSG_ACCEPT_NACK
                 && msg.getMsgType() != MsgType.MSG_WRONG_VIEW
                 && msg.getMsgType() != MsgType.EVENT_TIMEOUT_ACCEPT) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (unexpected message type): %s",
-                        msg.toString());
-            }
+            LOG.debug("P ignore message (unexpected message type): {}", msg);
             return;
         }
 
         if (msg.before(cell.getMessageSent())) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P ignore message (before my request): %s",
-                        msg.toString());
-            }
+                LOG.debug("P ignore message (before my request): {}", msg);
             return;
         }
 
@@ -938,13 +757,8 @@ public class FleaseProposer {
         final List<FleaseMessage> responses = cell.getResponses();
         responses.add(msg);
         if (cell.majorityAvail()) {
-            if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P majority responded for proposal %s: %d",
+            LOG.debug("P majority responded for proposal {}: {}",
                         cell.getBallotNo(), responses.size());
-            }
             //analyze responses
             int maxViewId = 0;
             ProposalNumber maxBallot = ProposalNumber.EMPTY_PROPOSAL_NUMBER;
@@ -957,14 +771,10 @@ public class FleaseProposer {
             }
 
             if (maxViewId != cell.getViewId()) {
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P accept failed due to outdated view local=%d max=%",
-                            cell.getViewId(),
-                            maxViewId);
-                }
+                LOG.debug("P accept failed due to outdated view local={} max={}",
+                    cell.getViewId(),
+                    maxViewId);
+
                 viewListener.viewIdChangeEvent(cell.getCellId(), maxViewId);
                 cancel(cell, new FleaseException("local viewId is outdated"), 0);
                 return;
@@ -976,13 +786,8 @@ public class FleaseProposer {
                 cell.setBallotNo(new ProposalNumber(
                         maxBallot.getProposalNo() + (int) (Math.random() * 10) + 1,
                         cell.getBallotNo().getSenderId()));
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P accept  OVERRULED by %s, restart with ballot number: %s",
+                LOG.debug("P accept  OVERRULED by {}, restart with ballot number: {}",
                             maxBallot.getProposalNo(), cell.getBallotNo());
-                }
                 //request a timer event for restart
                 cancel(cell,
                         new FleaseException("proposal was overruled by remote proposal "
@@ -1031,12 +836,9 @@ public class FleaseProposer {
 
             startPrepare(cell,cell.getMessageSent().getLeaseHolder());
 
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG, Logging.Category.replication, this,
-                        "P finished round, lease has timed out, restart prepare: %s",
+            LOG.debug("P finished round, lease has timed out, restart prepare: {}",
                         msg.toString());
-            }
-            
+
         } else if (msg.hasNotTimedOut(config, TimeSync.getGlobalTime())) {
             //lease is valid, do learn step
 
@@ -1044,23 +846,12 @@ public class FleaseProposer {
                     cell.getBallotNo().getProposalNo() + 1,
                     cell.getBallotNo().getSenderId()));
 
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P finished round, lease is valid: %s",
-                        msg.toString());
-            }
+            LOG.debug("P finished round, lease is valid: {}", msg);
+
 
             //only here does a learn make sense
             if (config.isSendLearnMessages()) {
-                if (Logging.isDebug() && config.isDebugPrintMessages()) {
-                    Logging.logMessage(Logging.LEVEL_DEBUG,
-                            Logging.Category.replication,
-                            this,
-                            "P start LEARN: %s",
-                            msg.toString());
-                }
+                LOG.debug("P start LEARN: {}", msg);
 
                 for (int i = 0; i < numRemoteAcc; i++) {
                     try {
@@ -1089,28 +880,16 @@ public class FleaseProposer {
                     timer.setProposalNo(cell.getBallotNo());
 
                     comm.requestTimer(timer, globalToLocalTime(renewTime));
-                    if (Logging.isDebug()) {
-                        Logging.logMessage(Logging.LEVEL_DEBUG,
-                                Logging.Category.replication,
-                                this,
-                                "scheduled renew for %s at %d",
+                    LOG.debug("scheduled renew for {} at {}",
                                 cell.getCellId(),
                                 globalToLocalTime(renewTime));
-                    }
                 } else {
                     cell.addAction(ActionName.PROPOSER_LEARN_TIMED_OUT);
                     cell.addAction(ActionName.PROPOSER_SCHEDULED_RESTART);
                     final int wait_ms = (int)
                             (msg.getLeaseTimeout() - TimeSync.getGlobalTime() + config.getDMax());
-                    Logging.logMessage(Logging.LEVEL_WARN,
-                            Logging.Category.replication,
-                            this,
-                            "too late to schedule renew for cell %s, restart in %d ms "
-                                    + "(now=%d, renew=%d)",
-                            cell.getCellId(),
-                            wait_ms,
-                            TimeSync.getGlobalTime(),
-                            renewTime);
+                    LOG.warn("too late to schedule renew for cell {}, restart in {} ms (now={}, renew={})",
+                            cell.getCellId(), wait_ms, TimeSync.getGlobalTime(), renewTime);
                     //schedule a retry instead
                     cancel(cell,
                             new FleaseException("too late for renew, re-start after lease "
@@ -1127,15 +906,8 @@ public class FleaseProposer {
             cell.addAction(ActionName.PROPOSER_SCHEDULED_RESTART);
             final int wait_ms = (int)
                     (msg.getLeaseTimeout() - TimeSync.getGlobalTime() + config.getDMax());
-            if (Logging.isDebug()) {
-                Logging.logMessage(Logging.LEVEL_DEBUG,
-                        Logging.Category.replication,
-                        this,
-                        "P finished round, lease is in grace period, "
-                                + "scheduled restart in %d ms: %s",
-                        wait_ms,
-                        msg.toString());
-            }
+            LOG.debug("P finished round, lease is in grace period, scheduled restart in {} ms: {}",
+                        wait_ms, msg);
             cancel(cell, new FleaseException("current lease not yet timed out"), wait_ms);
         }
     }
@@ -1148,14 +920,9 @@ public class FleaseProposer {
         cell.addAction(ActionName.PROPOSER_CANCELLED);
         int numFailures = cell.getNumFailures() + 1;
         cell.setNumFailures(numFailures);
-        if (Logging.isDebug()) {
-            Logging.logMessage(Logging.LEVEL_DEBUG,
-                    Category.replication,
-                    this,
-                    "P proposal failed for cell %s: %s",
-                    cell.getCellId(),
-                    reason);
-        }
+        LOG.debug("P proposal failed for cell {}: {}",
+                    cell.getCellId(), reason);
+
         cell.setCellState(State.IDLE);
         cell.setMessageSent(null);
         cell.setBallotNo(new ProposalNumber(
@@ -1198,11 +965,7 @@ public class FleaseProposer {
 
     private void assertState(boolean assertion, FleaseProposerCell cell) {
         if (assertion == false) {
-            Logging.logMessage(Logging.LEVEL_ERROR,
-                    Logging.Category.replication,
-                    this,
-                    "Invalid state detected. State: %s",
-                     cell);
+            LOG.error("Invalid state detected. State: {}", cell);
             throw new AssertionError("Invalid state in cell "
                     + (cell != null ? cell.getCellId() : "NULL"));
         }

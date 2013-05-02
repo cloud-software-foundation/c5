@@ -29,7 +29,6 @@
 package org.xtreemfs.foundation;
 
 import java.net.InetSocketAddress;
-import org.xtreemfs.foundation.pbrpc.client.RPCResponse;
 
 
 /**
@@ -46,7 +45,7 @@ public interface TimeServerClient {
      * Requests the global time at the given server.
      * 
      * @param server - if null, the default will be used.
-     * @return a {@link RPCResponse} future for an UNIX time-stamp.
+     * @return a {@link long} an UNIX time-stamp.
      */
     public long xtreemfs_global_time_get(InetSocketAddress server);
 }
