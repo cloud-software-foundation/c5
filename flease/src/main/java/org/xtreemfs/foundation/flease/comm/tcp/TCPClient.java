@@ -27,8 +27,12 @@
 
 package org.xtreemfs.foundation.flease.comm.tcp;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.TimeSync;
+import org.xtreemfs.foundation.buffer.ReusableBuffer;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -38,9 +42,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.xtreemfs.foundation.LifeCycleListener;
-import org.xtreemfs.foundation.TimeSync;
-import org.xtreemfs.foundation.buffer.ReusableBuffer;
 
 /**
  *
@@ -199,33 +200,29 @@ public class TCPClient {
             assert(client.getConnection() != null);
             client.getConnection().write(data, context);
         }
-        
-       
+
+
     }
 
     public void start() {
         server.start();
     }
 
-    public void waitForStartup() throws Exception {
-        server.waitForStartup();
+    public void startAndWait() {
+        server.startAndWait();
     }
 
-    public void shutdown() {
-        server.shutdown();
+    public void stopAndWait() {
+        server.stopAndWait();
         closeTimer.cancel();
-    }
-
-    public void waitForShutdown() throws Exception {
-        server.waitForShutdown();
-    }
-
-    public void setLifeCycleListener(LifeCycleListener l) {
-        server.setLifeCycleListener(l);
     }
 
     public int getSendQueueSize() {
         return server.getSendQueueSize();
+    }
+
+    public void setLifeCycleListener(Service.Listener l) {
+        server.addListener(l, MoreExecutors.sameThreadExecutor());
     }
 
     private static class ClientConnection {

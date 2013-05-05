@@ -47,7 +47,7 @@ public class FleaseStageTest extends TestCase {
 
     private final FleaseConfig cfg;
 
-    public FleaseStageTest(String testName) {
+    public FleaseStageTest(String testName) throws FleaseException {
         super(testName);
 
         //Logging.start(Logging.LEVEL_WARN, Category.all);
@@ -105,8 +105,7 @@ public class FleaseStageTest extends TestCase {
         FleaseMessage msg = new FleaseMessage(FleaseMessage.MsgType.EVENT_RESTART);
         msg.setCellId(CELL_ID);
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
 
         fs.openCell(CELL_ID, new ArrayList(),false);
 
@@ -137,9 +136,7 @@ public class FleaseStageTest extends TestCase {
 
         assertEquals(result.get().getLeaseHolder(),cfg.getIdentity());
 
-        fs.shutdown();
-        fs.waitForShutdown();
-
+        fs.stopAndWait();
     }
 
 
@@ -173,8 +170,7 @@ public class FleaseStageTest extends TestCase {
         FleaseMessage msg = new FleaseMessage(FleaseMessage.MsgType.EVENT_RESTART);
         msg.setCellId(new ASCIIString("testcell"));
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
 
         FleaseFuture f = fs.openCell(new ASCIIString("testcell"), new ArrayList(), false);
         final AtomicBoolean done = new AtomicBoolean(false);
@@ -189,9 +185,7 @@ public class FleaseStageTest extends TestCase {
         // System.out.println("cell "+cellId+" "+m.get(cellId));
         // }
 
-        fs.shutdown();
-        fs.waitForShutdown();
-
+        fs.stopAndWait();
     }
 
     /**
@@ -225,13 +219,10 @@ public class FleaseStageTest extends TestCase {
         FleaseMessage msg = new FleaseMessage(FleaseMessage.MsgType.EVENT_RESTART);
         msg.setCellId(new ASCIIString("testcell"));
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
         fs.createTimer(msg, TimeSync.getLocalSystemTime()+20);
         Thread.sleep(100);
-        fs.shutdown();
-        fs.waitForShutdown();
-
+        fs.stopAndWait();
     }
 
 }

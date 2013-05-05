@@ -27,21 +27,21 @@
 
 package org.xtreemfs.foundation.flease.sim;
 
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.flease.FleaseStage;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.LifeCycleThread;
-import org.xtreemfs.foundation.flease.FleaseStage;
-
 /**
  * Thread to deliver delayed packets and to set availability status of hosts.
  * @author bjko
  */
-public class DelayedDelivery extends LifeCycleThread {
+public class DelayedDelivery extends AbstractExecutionThreadService {
   private static final Logger LOG = LoggerFactory.getLogger(DelayedDelivery.class);
 
     /**
@@ -63,11 +63,6 @@ public class DelayedDelivery extends LifeCycleThread {
      * maximum delay in ms
      */
     private int maxDelay;
-
-    /**
-     * if set to true the thread shuts down
-     */
-    private boolean quit;
 
     /**
      * time to wait between two invocations in ms
@@ -99,6 +94,11 @@ public class DelayedDelivery extends LifeCycleThread {
      */
     private final static int HOSTWAIT_MULTIPLIER = 10;
 
+    @Override
+    protected String serviceName() {
+        return "DelayedDelivery";
+    }
+
     /**
      * Creates a new instance of UDPDelayedDelivery
      * @param targetQ queue to use for delivering delayed packets
@@ -112,8 +112,6 @@ public class DelayedDelivery extends LifeCycleThread {
             Map<Integer,FleaseStage> ports,
             double pHostUnavail, double pHostRecovery) {
 
-        super("UDP-Delivery");
-
         this.packets = new LinkedList();
         this.targetQ = targetQ;
         /*this.minDelay = minDelay;
@@ -124,8 +122,6 @@ public class DelayedDelivery extends LifeCycleThread {
 
         this.blockedPorts = blockedPorts;
         this.ports = ports;
-
-        this.quit = false;
     }
 
     /**
@@ -143,15 +139,22 @@ public class DelayedDelivery extends LifeCycleThread {
         }
     }
 
+    private Thread theThread;
+
+    @Override
+    protected void triggerShutdown() {
+        theThread.interrupt();
+    }
+
     /**
      * main loop
      */
-    public void run() {
-
-        notifyStarted();
+    @Override
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
 
         int hostwait = 0;
-        while (!quit) {
+        while (isRunning()) {
             synchronized (packets) {
                 Iterator<DelayPacket> iter = packets.iterator();
                 while (iter.hasNext()) {
@@ -203,21 +206,10 @@ public class DelayedDelivery extends LifeCycleThread {
             synchronized (this) {
                 try {
                     this.wait(WAIT_TIME);
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException ignored) {
                 }
             }
-
         }
-
-        notifyStopped();
-    }
-
-    /**
-     * shuts down the thread
-     */
-    public void shutdown() {
-        this.quit = true;
-        this.interrupt();
     }
 
     /**

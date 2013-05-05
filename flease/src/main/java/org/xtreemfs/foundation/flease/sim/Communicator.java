@@ -27,23 +27,22 @@
 
 package org.xtreemfs.foundation.flease.sim;
 
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.flease.FleaseStage;
+import org.xtreemfs.foundation.flease.comm.FleaseMessage;
+
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.LifeCycleThread;
-import org.xtreemfs.foundation.flease.FleaseStage;
-import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 
 /**
  * A tool to simulate package loss, temporary host disconnects and message delay.
  * @author bjko
  */
-public class Communicator extends LifeCycleThread {
+public class Communicator extends AbstractExecutionThreadService {
     private static final Logger LOG = LoggerFactory.getLogger(Communicator.class);
 
     /**
@@ -94,6 +93,11 @@ public class Communicator extends LifeCycleThread {
      */
     private boolean halfLink;
 
+    @Override
+    protected String serviceName() {
+        return "Communicator";
+    }
+
     /**
      * Creates a new instance of UDPSim
      * @param pkgLossPct packet loss in percent
@@ -107,8 +111,6 @@ public class Communicator extends LifeCycleThread {
      */
     public Communicator(int pkgLossPct, int minDelay, int maxDelay, int pctDelay,
                   boolean halfLink, double pHostUnavail, double pHostRecovery) {
-
-        super("UDP-Sim");
 
         this.ports = new ConcurrentHashMap();
         this.blockedPorts = new ConcurrentHashMap();
@@ -126,7 +128,6 @@ public class Communicator extends LifeCycleThread {
 
 
         theInstance = this;
-
     }
 
     /**
@@ -177,64 +178,64 @@ public class Communicator extends LifeCycleThread {
         sendQ.add(p);
     }
 
+    private Thread theThread;
+
+    @Override
+    protected void triggerShutdown() {
+        theThread.interrupt();
+    }
+
     /**
      * main loop
      */
-    public void run() {
-        try {
-            InetAddress ia = InetAddress.getLocalHost();
+    @Override
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
 
-            notifyStarted();
-            while (!quit) {
-                try {
-                    Packet p = sendQ.take();
+        InetAddress ia = InetAddress.getLocalHost();
 
-                    FleaseStage rec = ports.get(p.recipientPort);
+        while (isRunning()) {
+            try {
+                Packet p = sendQ.take();
 
-                    if (rec == null)
-                        continue;
+                FleaseStage rec = ports.get(p.recipientPort);
 
-                    if (blockedPorts.containsKey(p.msg.getSender().getPort())) {
-                        LOG.debug("msg dropped, port blocked {}", p.msg.getSender().getPort());
-                        continue;
-                    }
+                if (rec == null)
+                    continue;
 
-                    if (blockedPorts.containsKey(p.recipientPort)) {
-                        LOG.debug("msg dropped, port blocked {}", p.recipientPort);
-                        continue;
-                    }
-
-                    if (!dropPacket() || p.requeued) {
-
-                        int delay = delayPacket();
-                        if ((delay > 0) && !p.requeued) {
-                            LOG.debug("msg delayed {} ms {} -> {}", delay, p.recipientPort, p.msg.getSender().getPort());
-                            dd.add(p,delay);
-                        } else {
-
-                            //p.msg.setSender(new InetSocketAddress(ia, p.recipientPort));
-                            try {
-                                rec.receiveMessage(p.msg);
-                            } catch (IllegalStateException e) {
-                                //just drop it
-                            }
-                        }
-                    } else {
-                        LOG.debug("msg lost {} -> {}", p.recipientPort, p.msg.getSender().getPort());
-                    }
-
-
-
-                } catch (InterruptedException ex) {
-                    LOG.error("run loop", ex);
+                if (blockedPorts.containsKey(p.msg.getSender().getPort())) {
+                    LOG.debug("msg dropped, port blocked {}", p.msg.getSender().getPort());
+                    continue;
                 }
-            }
 
-        } catch (UnknownHostException ex) {
-            LOG.error("unknown host", ex);
+                if (blockedPorts.containsKey(p.recipientPort)) {
+                    LOG.debug("msg dropped, port blocked {}", p.recipientPort);
+                    continue;
+                }
+
+                if (!dropPacket() || p.requeued) {
+
+                    int delay = delayPacket();
+                    if ((delay > 0) && !p.requeued) {
+                        LOG.debug("msg delayed {} ms {} -> {}", delay, p.recipientPort, p.msg.getSender().getPort());
+                        dd.add(p,delay);
+                    } else {
+
+                        //p.msg.setSender(new InetSocketAddress(ia, p.recipientPort));
+                        try {
+                            rec.receiveMessage(p.msg);
+                        } catch (IllegalStateException e) {
+                            //just drop it
+                        }
+                    }
+                } else {
+                    LOG.debug("msg lost {} -> {}", p.recipientPort, p.msg.getSender().getPort());
+                }
+            } catch (InterruptedException ex) {
+                LOG.error("run loop", ex);
+            }
         }
 
-        notifyStopped();
     }
 
     /**
@@ -254,23 +255,6 @@ public class Communicator extends LifeCycleThread {
      */
     public static Communicator getInstance() {
         return theInstance;
-    }
-
-    /**
-     * kills the thread and the delayed delivery thread
-     */
-    public void shutdown() {
-
-        try {
-            this.quit = true;
-            this.interrupt();
-            dd.shutdown();
-
-            dd.waitForShutdown();
-            waitForShutdown();
-        } catch (Exception exc) {
-            LOG.error("in shutdown", exc);
-        }
     }
 
     /**

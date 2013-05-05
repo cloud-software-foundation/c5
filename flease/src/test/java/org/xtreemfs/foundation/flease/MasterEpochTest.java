@@ -52,7 +52,7 @@ public class MasterEpochTest extends TestCase {
     private final FleaseConfig cfg;
     private final File testDir;
 
-    public MasterEpochTest(String testName) {
+    public MasterEpochTest(String testName) throws FleaseException {
         super(testName);
 
         //Logging.start(Logging.LEVEL_WARN, Category.all);
@@ -130,8 +130,7 @@ public class MasterEpochTest extends TestCase {
         FleaseMessage msg = new FleaseMessage(FleaseMessage.MsgType.EVENT_RESTART);
         msg.setCellId(CELL_ID);
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
 
         fs.openCell(CELL_ID, new ArrayList(),true);
 
@@ -164,9 +163,7 @@ public class MasterEpochTest extends TestCase {
         assertEquals(result.get().getLeaseHolder(),cfg.getIdentity());
         assertEquals(result.get().getMasterEpochNumber(),2);
 
-        fs.shutdown();
-        fs.waitForShutdown();
-
+        fs.stopAndWait();
     }
 
 
@@ -215,8 +212,7 @@ public class MasterEpochTest extends TestCase {
         FleaseMessage msg = new FleaseMessage(FleaseMessage.MsgType.EVENT_RESTART);
         msg.setCellId(CELL_ID);
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
 
         fs.openCell(CELL_ID, new ArrayList(),true);
 
@@ -233,8 +229,7 @@ public class MasterEpochTest extends TestCase {
         FleaseFuture f = fs.closeCell(CELL_ID, false);
         f.get();
 
-        fs.shutdown();
-        fs.waitForShutdown();
+        fs.stopAndWait();
         meHandler.stopAndWait();
 
         Thread.sleep(12000);
@@ -273,8 +268,7 @@ public class MasterEpochTest extends TestCase {
             }
         }, meHandler);
 
-        fs.start();
-        fs.waitForStartup();
+        fs.startAndWait();
 
         result.set(null);
 
@@ -290,8 +284,7 @@ public class MasterEpochTest extends TestCase {
         assertEquals(result.get().getLeaseHolder(),cfg.getIdentity());
         assertEquals(result.get().getMasterEpochNumber(),2);
 
-        fs.shutdown();
-        fs.waitForShutdown();
+        fs.stopAndWait();
 
     }
 

@@ -70,18 +70,14 @@ public class SimpleMasterEpochHandler extends AbstractExecutionThreadService imp
     private Thread executionThread;
 
     @Override
-    protected void startUp() throws Exception {
-        // cache this for triggerShutdown.
-        executionThread = Thread.currentThread();
-    }
-
-    @Override
     protected void triggerShutdown() {
         executionThread.interrupt();
     }
 
     @Override
     public void run() {
+        executionThread = Thread.currentThread();
+
         do {
             Request rq;
 

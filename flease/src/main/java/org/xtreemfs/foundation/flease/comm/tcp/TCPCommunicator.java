@@ -27,6 +27,13 @@
 
 package org.xtreemfs.foundation.flease.comm.tcp;
 
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.buffer.BufferPool;
+import org.xtreemfs.foundation.buffer.ReusableBuffer;
+import org.xtreemfs.foundation.flease.comm.tcp.TCPConnection.SendRequest;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -44,18 +51,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.LifeCycleThread;
-import org.xtreemfs.foundation.buffer.BufferPool;
-import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.flease.comm.tcp.TCPConnection.SendRequest;
-
 /**
  *
  * @author bjko
  */
-public class TCPCommunicator extends LifeCycleThread {
+public class TCPCommunicator extends AbstractExecutionThreadService {
     private static final Logger LOG = LoggerFactory.getLogger(TCPCommunicator.class);
     private final int port;
 
@@ -76,6 +76,12 @@ public class TCPCommunicator extends LifeCycleThread {
     private final Queue<TCPConnection> pendingCons;
 
     private final AtomicInteger        sendQueueSize;
+    private Thread theThread;
+
+    @Override
+    protected String serviceName() {
+        return "TCPcomm@" + port;
+    }
 
     /**
      *
@@ -85,8 +91,6 @@ public class TCPCommunicator extends LifeCycleThread {
      * @throws IOException
      */
     public TCPCommunicator(NIOServer implementation, int port, InetAddress bindAddr) throws IOException {
-        super("TCPcom@" + port);
-
         this.port = port;
         this.implementation = implementation;
         this.connections = new LinkedList();
@@ -109,13 +113,6 @@ public class TCPCommunicator extends LifeCycleThread {
         selector = Selector.open();
         if (socket != null)
             socket.register(selector, SelectionKey.OP_ACCEPT);
-    }
-
-    /**
-     * Stop the server and close all connections.
-     */
-    public void shutdown() {
-        this.interrupt();
     }
 
     /**
@@ -185,92 +182,90 @@ public class TCPCommunicator extends LifeCycleThread {
         }
     }
 
-    public void run() {
-        notifyStarted();
+    @Override
+    protected void triggerShutdown() {
+        theThread.interrupt();
+    }
+
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
 
         LOG.info("TCP Server @{} ready", port);
 
-        try {
-            while (!isInterrupted()) {
-                // try to select events...
-                try {
-                    final int numKeys = selector.select();
-                    if (!pendingCons.isEmpty()) {
-                         while (true) {
-                            TCPConnection con = pendingCons.poll();
-                            if (con == null) {
-                                break;
-                            }
-                            try {
-                                assert(con.getChannel() != null);
-                                con.getChannel().register(selector,
+        while (isRunning()) {
+            // try to select events...
+            try {
+                final int numKeys = selector.select();
+                if (!pendingCons.isEmpty()) {
+                    while (true) {
+                        TCPConnection con = pendingCons.poll();
+                        if (con == null) {
+                            break;
+                        }
+                        try {
+                            assert(con.getChannel() != null);
+                            con.getChannel().register(selector,
                                     SelectionKey.OP_CONNECT | SelectionKey.OP_WRITE | SelectionKey.OP_READ, con);
-                            } catch (ClosedChannelException ex) {
-                                abortConnection(con,ex);
-                            }
+                        } catch (ClosedChannelException ex) {
+                            abortConnection(con,ex);
                         }
                     }
-                    if (numKeys == 0) {
-                        continue;
-                    }
-                } catch (CancelledKeyException ex) {
-                    // who cares
-                } catch (IOException ex) {
-                    LOG.warn("Exception while selecting: {}", ex);
+                }
+                if (numKeys == 0) {
                     continue;
                 }
-
-                // fetch events
-                Set<SelectionKey> keys = selector.selectedKeys();
-                Iterator<SelectionKey> iter = keys.iterator();
-
-                // process all events
-                while (iter.hasNext()) {
-                    SelectionKey key = iter.next();
-
-                    // remove key from the list
-                    iter.remove();
-                    try {
-
-                        if (key.isAcceptable()) {
-                            acceptConnection(key);
-                        }
-                        if (key.isConnectable()) {
-                            connectConnection(key);
-                        }
-                        if (key.isReadable()) {
-                            readConnection(key);
-                        }
-                        if (key.isWritable()) {
-                            writeConnection(key);
-                        }
-                    } catch (CancelledKeyException ex) {
-                        // nobody cares...
-                        continue;
-                    }
-                }
+            } catch (CancelledKeyException ex) {
+                // who cares
+            } catch (IOException ex) {
+                LOG.warn("Exception while selecting: {}", ex);
+                continue;
             }
 
-            for (TCPConnection con : connections) {
+            // fetch events
+            Set<SelectionKey> keys = selector.selectedKeys();
+            Iterator<SelectionKey> iter = keys.iterator();
+
+            // process all events
+            while (iter.hasNext()) {
+                SelectionKey key = iter.next();
+
+                // remove key from the list
+                iter.remove();
                 try {
-                    con.close(implementation,new IOException("server shutdown"));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+
+                    if (key.isAcceptable()) {
+                        acceptConnection(key);
+                    }
+                    if (key.isConnectable()) {
+                        connectConnection(key);
+                    }
+                    if (key.isReadable()) {
+                        readConnection(key);
+                    }
+                    if (key.isWritable()) {
+                        writeConnection(key);
+                    }
+                } catch (CancelledKeyException ex) {
+                    // nobody cares...
+                    continue;
                 }
             }
-
-            // close socket
-            selector.close();
-            if (socket != null)
-                socket.close();
-
-            LOG.info("TCP Server @{} shutdown complete", port);
-
-            notifyStopped();
-        } catch (Throwable thr) {
-            LOG.error("TCP Server @{} CRASHED!", port);
-            notifyCrashed(thr);
         }
+
+        for (TCPConnection con : connections) {
+            try {
+                con.close(implementation,new IOException("server shutdown"));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        // close socket
+        selector.close();
+        if (socket != null)
+            socket.close();
+
+        LOG.info("TCP Server @{} shutdown complete", port);
     }
 
     private void connectConnection(SelectionKey key) {
@@ -438,7 +433,7 @@ public class TCPCommunicator extends LifeCycleThread {
                 if (numBytesWritten == -1) {
                     LOG.info("client closed connection (EOF): {}", channel.socket().getRemoteSocketAddress());
                     // connection closed
-                    
+
                     abortConnection(con, new IOException("remote end closed connection while writing data"));
                     return;
                 }
@@ -452,7 +447,7 @@ public class TCPCommunicator extends LifeCycleThread {
                 BufferPool.free(srq.getData());
                 sendQueueSize.decrementAndGet();
                 con.nextSendBuffer();
-                
+
             }
         } catch (ClosedChannelException ex) {
             LOG.debug("connection to {} closed by remote peer", con.getChannel().socket().getRemoteSocketAddress());

@@ -26,11 +26,22 @@
  */
 package org.xtreemfs.foundation.flease;
 
-import java.io.IOException;
-
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.flease.proposer.*;
+import org.xtreemfs.foundation.TimeSync;
+import org.xtreemfs.foundation.buffer.ASCIIString;
+import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptor;
+import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptorCell;
+import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
+import org.xtreemfs.foundation.flease.comm.FleaseCommunicationInterface;
+import org.xtreemfs.foundation.flease.comm.FleaseMessage;
+import org.xtreemfs.foundation.flease.proposer.FleaseException;
+import org.xtreemfs.foundation.flease.proposer.FleaseListener;
+import org.xtreemfs.foundation.flease.proposer.FleaseLocalQueueInterface;
+import org.xtreemfs.foundation.flease.proposer.FleaseProposer;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,20 +53,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.xtreemfs.foundation.LifeCycleThread;
-import org.xtreemfs.foundation.TimeSync;
-import org.xtreemfs.foundation.buffer.ASCIIString;
-import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptor;
-import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptorCell;
-import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
-import org.xtreemfs.foundation.flease.comm.FleaseCommunicationInterface;
-import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 
 /**
  *
  * @author bjko
  */
-public class FleaseStage extends LifeCycleThread implements LearnEventListener, FleaseLocalQueueInterface {
+public class FleaseStage extends AbstractExecutionThreadService implements LearnEventListener, FleaseLocalQueueInterface {
     private static final Logger LOG = LoggerFactory.getLogger(FleaseStage.class);
 
     public static final String FLEASE_VERSION = "0.2.4 (trunk)";
@@ -78,8 +81,6 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
 
     private final LinkedBlockingQueue messages;
 
-    private volatile boolean quit;
-
     private long lastTimerRun;
 
     private final FleaseConfig config;
@@ -97,6 +98,12 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
     private final FleaseStats                    statThr;
 
     private final MasterEpochHandlerInterface    meHandler;
+    private Thread theThread;
+
+    @Override
+    protected String serviceName() {
+        return "FleaseStage";
+    }
 
     /**
      * Creates a new instance of Flease.
@@ -113,13 +120,11 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
             final FleaseMessageSenderInterface sender, boolean ignoreLockForTesting,
             final FleaseViewChangeListenerInterface viewListener, final FleaseStatusListener leaseListener,
             final MasterEpochHandlerInterface meHandler) throws IOException {
-        super("FleaseSt");
         assert (sender != null);
         assert(leaseListener != null);
 
         timers = new PriorityQueue<TimerEntry>();
         messages = new LinkedBlockingQueue();
-        quit = false;
         this.config = config;
         this.leaseListener = leaseListener;
         this.meHandler = meHandler;
@@ -204,7 +209,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
             rq.requestME = requestMasterEpoch;
             batch.add(rq);
         }
-        
+
         for (int i = 0; i < batch.size(); i += MAX_BATCH_SIZE) {
             int endIndex = i+MAX_BATCH_SIZE;
             if (endIndex > batch.size()-1)
@@ -317,14 +322,18 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
     }
 
     @Override
-    public void run() {
+    protected void triggerShutdown() {
+        theThread.interrupt();
+    }
+
+    @Override
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
 
         if (COLLECT_STATISTICS)
             statThr.start();
 
         LOG.info("Flease (version {}) ready", FLEASE_VERSION);
-
-        notifyStarted();
 
         // interval to check the OFT
 
@@ -333,31 +342,36 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
 
         List<Object> rqList = new ArrayList(1000);
 
-        while (!quit) {
+        while (isRunning()) {
+            final Object tmp;
+
             try {
-                final Object tmp = messages.poll(nextTimerRunInMS, TimeUnit.MILLISECONDS);
+                tmp = messages.poll(nextTimerRunInMS, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ie) {
+                continue;
+            }
 
-                if (quit) {
-                    break;
-                }
+            if (!isRunning()) {
+                break;
+            }
 
-                if ((tmp == null) ||
-                        (TimeSync.getLocalSystemTime() >= lastTimerRun + nextTimerRunInMS)) {
-                    if (ENABLE_TIMEOUT_EVENTS) {
-                        //nextTimerRunInMS =
-                        checkTimers();
-                        checkLeaseTimeouts();
-                    } else {
-                        nextTimerRunInMS = checkTimers();
-                    }
-                    lastTimerRun = TimeSync.getLocalSystemTime();
+            if ((tmp == null) ||
+                    (TimeSync.getLocalSystemTime() >= lastTimerRun + nextTimerRunInMS)) {
+                if (ENABLE_TIMEOUT_EVENTS) {
+                    //nextTimerRunInMS =
+                    checkTimers();
+                    checkLeaseTimeouts();
+                } else {
+                    nextTimerRunInMS = checkTimers();
                 }
-                if (tmp == null) {
-                    continue;
-                }
+                lastTimerRun = TimeSync.getLocalSystemTime();
+            }
+            if (tmp == null) {
+                continue;
+            }
 
-                rqList.add(tmp);
-                messages.drainTo(rqList, 25);
+            rqList.add(tmp);
+            messages.drainTo(rqList, 25);
                 /*final int numItems = messages.poll(rqList, 25, nextTimerRunInMS);
                 if ((numItems == 0) ||
                 (TimeSync.getLocalSystemTime() >= lastTimerRun+nextTimerRunInMS)) {
@@ -367,147 +381,130 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                 if (numItems == 0)
                 continue;*/
 
-                while (!rqList.isEmpty()) {
+            while (!rqList.isEmpty()) {
 
-                    final Object request = rqList.remove(rqList.size() - 1);
+                final Object request = rqList.remove(rqList.size() - 1);
 
-                    long rqStart;
-                    if (COLLECT_STATISTICS) {
-                        rqStart = System.nanoTime();
-                    }
-                    if (request instanceof FleaseMessage) {
-                        final FleaseMessage msg = (FleaseMessage) request;
+                long rqStart;
+                if (COLLECT_STATISTICS) {
+                    rqStart = System.nanoTime();
+                }
+                if (request instanceof FleaseMessage) {
+                    final FleaseMessage msg = (FleaseMessage) request;
 
-                        if (msg.isInternalEvent()) {
-                            //should never happen!
-                            LOG.error("received internal event: {}", msg);
-                        } else if (msg.isAcceptorMessage()) {
-                            final FleaseMessage response = acceptor.processMessage(msg);
-                            if (response != null) {
-                                if (msg.getMasterEpochNumber() == FleaseMessage.REQUEST_MASTER_EPOCH
-                                        && response.getMsgType() == FleaseMessage.MsgType.MSG_PREPARE_ACK) {
-                                    // Respond with the current master epoch.
-                                    if (meHandler != null) {
-                                        MasterEpochHandlerInterface.Continuation cont = new MasterEpochHandlerInterface.Continuation() {
-                                            @Override
-                                            public void processingFinished() {
-                                                sender.sendMessage(response, msg.getSender());
-                                            }
-                                        };
-                                        meHandler.sendMasterEpoch(response, cont);
-                                    } else {
-                                        LOG.error("MASTER EPOCH WAS REQUESTED, BUT NO MASTER EPOCH HANDLER DEFINED!!!");
-                                        sender.sendMessage(response, msg.getSender());
-                                    }
-                                } else if (msg.getMasterEpochNumber() != FleaseMessage.IGNORE_MASTER_EPOCH
-                                        && response.getMsgType() == FleaseMessage.MsgType.MSG_ACCEPT_ACK) {
-                                    // Write the current master epoch to disk.
-                                    if (meHandler != null) {
-                                        MasterEpochHandlerInterface.Continuation cont = new MasterEpochHandlerInterface.Continuation() {
-                                            @Override
-                                            public void processingFinished() {
-                                                sender.sendMessage(response, msg.getSender());
-                                            }
-                                        };
-                                        meHandler.storeMasterEpoch(response, cont);
-                                    }
+                    if (msg.isInternalEvent()) {
+                        //should never happen!
+                        LOG.error("received internal event: {}", msg);
+                    } else if (msg.isAcceptorMessage()) {
+                        final FleaseMessage response = acceptor.processMessage(msg);
+                        if (response != null) {
+                            if (msg.getMasterEpochNumber() == FleaseMessage.REQUEST_MASTER_EPOCH
+                                    && response.getMsgType() == FleaseMessage.MsgType.MSG_PREPARE_ACK) {
+                                // Respond with the current master epoch.
+                                if (meHandler != null) {
+                                    MasterEpochHandlerInterface.Continuation cont = new MasterEpochHandlerInterface.Continuation() {
+                                        @Override
+                                        public void processingFinished() {
+                                            sender.sendMessage(response, msg.getSender());
+                                        }
+                                    };
+                                    meHandler.sendMasterEpoch(response, cont);
                                 } else {
+                                    LOG.error("MASTER EPOCH WAS REQUESTED, BUT NO MASTER EPOCH HANDLER DEFINED!!!");
                                     sender.sendMessage(response, msg.getSender());
                                 }
+                            } else if (msg.getMasterEpochNumber() != FleaseMessage.IGNORE_MASTER_EPOCH
+                                    && response.getMsgType() == FleaseMessage.MsgType.MSG_ACCEPT_ACK) {
+                                // Write the current master epoch to disk.
+                                if (meHandler != null) {
+                                    MasterEpochHandlerInterface.Continuation cont = new MasterEpochHandlerInterface.Continuation() {
+                                        @Override
+                                        public void processingFinished() {
+                                            sender.sendMessage(response, msg.getSender());
+                                        }
+                                    };
+                                    meHandler.storeMasterEpoch(response, cont);
+                                }
+                            } else {
+                                sender.sendMessage(response, msg.getSender());
                             }
-                        } else {
-                            proposer.processMessage(msg);
-                        }
-                        if (COLLECT_STATISTICS) {
-                            long rqEnd = System.nanoTime();
-                            durMsgs.get().add(Integer.valueOf((int)(rqEnd-rqStart)));
-                            outMsgs.incrementAndGet();
                         }
                     } else {
-                        Request rq = (Request) request;
-                        switch (rq.type) {
-                            case OPEN_CELL_REQUEST: {
-                                assert (rq.acceptors != null);
-                                try {
-                                    proposer.openCell(rq.cellId, rq.acceptors, rq.requestME);
-                                    if (rq.listener != null)
-                                        rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
-                                } catch (FleaseException ex) {
-                                    LOG.error("OPEN_CELL_REQUEST", ex);
-                                    leaseListener.leaseFailed(rq.cellId, ex);
-                                }
-                                break;
+                        proposer.processMessage(msg);
+                    }
+                    if (COLLECT_STATISTICS) {
+                        long rqEnd = System.nanoTime();
+                        durMsgs.get().add(Integer.valueOf((int)(rqEnd-rqStart)));
+                        outMsgs.incrementAndGet();
+                    }
+                } else {
+                    Request rq = (Request) request;
+                    switch (rq.type) {
+                        case OPEN_CELL_REQUEST: {
+                            assert (rq.acceptors != null);
+                            try {
+                                proposer.openCell(rq.cellId, rq.acceptors, rq.requestME);
+                                if (rq.listener != null)
+                                    rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
+                            } catch (FleaseException ex) {
+                                LOG.error("OPEN_CELL_REQUEST", ex);
+                                leaseListener.leaseFailed(rq.cellId, ex);
                             }
-                            case CLOSE_CELL_REQUEST: {
-                                proposer.closeCell(rq.cellId);
-                                rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
-                                break;
-                            }
-                            case HANDOVER_LEASE: {
-                                try {
-                                    Flease prevLease = proposer.updatePrevLeaseForCell(rq.cellId, Flease.EMPTY_LEASE);
-                                    if (prevLease != null) {
-                                        //cancel the lease
-                                        leaseTimeouts.remove(prevLease);
-                                    }
-                                    proposer.handoverLease(rq.cellId, rq.newLeaseOwner);
-                                } catch (FleaseException ex) {
-                                    rq.listener.proposalFailed(rq.cellId, ex);
-                                }
-                                break;
-                            }
-                            case SET_VIEW: {
-                                try {
-                                    proposer.setViewId(rq.cellId, rq.viewId);
-                                    acceptor.setViewId(rq.cellId, rq.viewId);
-                                } catch (FleaseException ex) {
-                                    rq.listener.proposalFailed(rq.cellId, ex);
-                                }
-                                rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
-                                break;
-                            }
-                            case GET_STATE: {
-                                try {
-                                    rq.cback.localStateResult(acceptor.localState());
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
+                            break;
                         }
-                        if (COLLECT_STATISTICS) {
-                            long rqEnd = System.nanoTime();
-                            durRequests.get().add((int) (rqEnd - rqStart));
+                        case CLOSE_CELL_REQUEST: {
+                            proposer.closeCell(rq.cellId);
+                            rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
+                            break;
+                        }
+                        case HANDOVER_LEASE: {
+                            try {
+                                Flease prevLease = proposer.updatePrevLeaseForCell(rq.cellId, Flease.EMPTY_LEASE);
+                                if (prevLease != null) {
+                                    //cancel the lease
+                                    leaseTimeouts.remove(prevLease);
+                                }
+                                proposer.handoverLease(rq.cellId, rq.newLeaseOwner);
+                            } catch (FleaseException ex) {
+                                rq.listener.proposalFailed(rq.cellId, ex);
+                            }
+                            break;
+                        }
+                        case SET_VIEW: {
+                            try {
+                                proposer.setViewId(rq.cellId, rq.viewId);
+                                acceptor.setViewId(rq.cellId, rq.viewId);
+                            } catch (FleaseException ex) {
+                                rq.listener.proposalFailed(rq.cellId, ex);
+                            }
+                            rq.listener.proposalResult(rq.cellId, null, 0, FleaseMessage.IGNORE_MASTER_EPOCH);
+                            break;
+                        }
+                        case GET_STATE: {
+                            try {
+                                rq.cback.localStateResult(acceptor.localState());
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
                         }
                     }
-                    
-                }
-                if (DISABLE_RENEW_FOR_TESTING) {
-                    Thread.sleep(0, 2);
+                    if (COLLECT_STATISTICS) {
+                        long rqEnd = System.nanoTime();
+                        durRequests.get().add((int) (rqEnd - rqStart));
+                    }
                 }
 
-            } catch (InterruptedException ex) {
-                if (quit) {
-                    break;
-                }
-            } catch (Throwable ex) {
-                notifyCrashed(ex);
-                break;
+            }
+            if (DISABLE_RENEW_FOR_TESTING) {
+                Thread.sleep(0, 2);
             }
         }
 
         acceptor.shutdown();
-        notifyStopped();
         LOG.info("Flease stopped {}", FLEASE_VERSION);
     }
 
-    public void shutdown() {
-        if (COLLECT_STATISTICS)
-            LOG.debug("received shutdown call...");
-        quit = true;
-        this.interrupt();
-    }
-
-    private int checkTimers() throws Throwable {
+    private int checkTimers() throws Exception {
         final long now = TimeSync.getLocalSystemTime();
 
         TimerEntry e = timers.peek();
@@ -516,7 +513,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
         }
         if (e.getScheduledTime() <= now + TIMER_INTERVAL_IN_MS) {
             //execute timer
-            
+
             do {
                 e = timers.poll();
 
@@ -541,7 +538,7 @@ public class FleaseStage extends LifeCycleThread implements LearnEventListener, 
                     return TIMER_INTERVAL_IN_MS;
                 }
             } while (e.getScheduledTime() <= now + TIMER_INTERVAL_IN_MS);
-            
+
             return (int) (e.getScheduledTime() - now);
         } else {
             //tell how long we have to wait

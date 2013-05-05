@@ -59,7 +59,7 @@ public class FleaseProposerTest extends TestCase {
 
     private final AtomicReference<Flease> result;
 
-    public FleaseProposerTest(String testName) {
+    public FleaseProposerTest(String testName) throws FleaseException {
         super(testName);
 
         result = new AtomicReference();

@@ -27,9 +27,10 @@
 
 package org.xtreemfs.foundation.flease.sim;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.LifeCycleListener;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.Flease;
@@ -73,7 +74,10 @@ public class FleaseSim {
             TimeSync.initializeLocal(50);
 
             final Communicator com = new Communicator(10, 100, 30000, 5, true, 0.2, 0.05);
-            com.start();
+            if (com.startAndWait() != Service.State.RUNNING) {
+                LOG.error("Unable to start communicator", com.failureCause());
+                System.exit(2);
+            }
 
             List<InetSocketAddress> allPorts = new ArrayList(numHosts);
             List<InetSocketAddress>[] acceptors = new List[numHosts];
@@ -139,19 +143,29 @@ public class FleaseSim {
                         //restart my cell
                     }
                 },meHandlers[i]);
-                stages[i].setLifeCycleListener(new LifeCycleListener() {
-
-                    public void startupPerformed() {
+                stages[i].addListener(new Service.Listener() {
+                    @Override
+                    public void starting() {
                     }
 
-                    public void shutdownPerformed() {
+                    @Override
+                    public void running() {
                     }
 
-                    public void crashPerformed(Throwable cause) {
-                        cause.printStackTrace();
+                    @Override
+                    public void stopping(Service.State from) {
+                    }
+
+                    @Override
+                    public void terminated(Service.State from) {
+                    }
+
+                    @Override
+                    public void failed(Service.State from, Throwable failure) {
+                        LOG.error("Failed service, from state: {} with exception {}", from, failure);
                         System.exit(100);
                     }
-                });
+                }, MoreExecutors.sameThreadExecutor());
                 stages[i].start();
                 allPorts.add(new InetSocketAddress("localhost", 1024+i));
                 com.openPort(1024+i, stages[i]);
@@ -187,7 +201,7 @@ public class FleaseSim {
                                 leaseHolder = leaseStates[i].get().getLeaseHolder();
                             } else {
                                 if (!leaseHolder.equals(leaseStates[i].get().getLeaseHolder())) {
-                                    com.shutdown();
+                                    com.stop();
                                     System.out.println("INVARIANT VIOLATED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                                     System.out.println("\n\n");
                                     System.out.println("got lease for: "+leaseHolder);

@@ -26,11 +26,12 @@
  */
 package org.xtreemfs.foundation.flease.comm.tcp;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 
 /**
@@ -50,8 +51,7 @@ public class EchoServer implements NIOServer {
 
             EchoServer s = new EchoServer();
             TCPCommunicator srv = new TCPCommunicator(s, 3333, null);
-            srv.start();
-            srv.waitForStartup();
+            srv.startAndWait();
         } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(1);
@@ -96,7 +96,7 @@ public class EchoServer implements NIOServer {
                 //we have a full line
                 System.out.println("new buffer: "+connection);
                 buffer.clear();
-                
+
                 if (contents.startsWith("stats")) {
                     contents = BufferPool.getStatus();
                 } else {

@@ -27,19 +27,26 @@
 
 package org.xtreemfs.foundation.flease.comm.tcp;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.flease.*;
+import org.xtreemfs.foundation.buffer.BufferPool;
+import org.xtreemfs.foundation.buffer.ReusableBuffer;
+import org.xtreemfs.foundation.flease.FleaseConfig;
+import org.xtreemfs.foundation.flease.FleaseMessageSenderInterface;
+import org.xtreemfs.foundation.flease.FleaseStage;
+import org.xtreemfs.foundation.flease.FleaseStatusListener;
+import org.xtreemfs.foundation.flease.FleaseViewChangeListenerInterface;
+import org.xtreemfs.foundation.flease.MasterEpochHandlerInterface;
+import org.xtreemfs.foundation.flease.comm.FleaseMessage;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.xtreemfs.foundation.LifeCycleListener;
-import org.xtreemfs.foundation.buffer.BufferPool;
-import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 
 /**
  *
@@ -47,7 +54,7 @@ import org.xtreemfs.foundation.flease.comm.FleaseMessage;
  */
 public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
     private static final Logger LOG = LoggerFactory.getLogger(TCPFleaseCommunicator.class);
-    
+
     private final FleaseStage                     stage;
 
     private final int                             port;
@@ -142,7 +149,7 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
                     BufferPool.free(c.data);
                 else
                     BufferPool.free(c.header);
-               
+
             }
 
             public void onWriteFailed(IOException exception, Object context) {
@@ -187,7 +194,7 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
         FleaseMessage m = message.clone();
         m.setSender(recipient);
         send(m);
-        
+
         if (FleaseStage.COLLECT_STATISTICS)
             numOut.incrementAndGet();
     }
@@ -214,22 +221,18 @@ public class TCPFleaseCommunicator implements FleaseMessageSenderInterface {
     }
 
     public void start() throws Exception {
-        comm.start();
-        comm.waitForStartup();
-        stage.start();
-        stage.waitForStartup();
+        comm.startAndWait();
+        stage.startAndWait();
     }
 
     public void shutdown() throws Exception {
-        stage.shutdown();
-        stage.waitForShutdown();
-        comm.shutdown();
-        comm.waitForShutdown();
+        stage.stopAndWait();
+        comm.stopAndWait();
     }
 
-    public void setLifeCycleListener(LifeCycleListener l) {
+    public void setLifeCycleListener(Service.Listener l) {
         comm.setLifeCycleListener(l);
-        stage.setLifeCycleListener(l);
+        stage.addListener(l, MoreExecutors.sameThreadExecutor());
     }
 
     public int getNumIn() {

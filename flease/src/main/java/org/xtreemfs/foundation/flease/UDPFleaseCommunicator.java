@@ -26,6 +26,13 @@
  */
 package org.xtreemfs.foundation.flease;
 
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.buffer.BufferPool;
+import org.xtreemfs.foundation.buffer.ReusableBuffer;
+import org.xtreemfs.foundation.flease.comm.FleaseMessage;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedByInterruptException;
@@ -39,20 +46,13 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xtreemfs.foundation.LifeCycleThread;
-import org.xtreemfs.foundation.buffer.BufferPool;
-import org.xtreemfs.foundation.buffer.ReusableBuffer;
-import org.xtreemfs.foundation.flease.comm.FleaseMessage;
-
 /**
  *
  * @author bjko
  */
-public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMessageSenderInterface {
+public class UDPFleaseCommunicator extends AbstractExecutionThreadService implements FleaseMessageSenderInterface {
     private static final Logger LOG = LoggerFactory.getLogger(UDPFleaseCommunicator.class);
-    
+
     private final FleaseStage                     stage;
 
     private final int                             port;
@@ -70,11 +70,16 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
     private static final int                      MAX_UDP_SIZE  = 16*1024;
 
     private long numTx,numRx;
+    private Thread theThread;
+
+    @Override
+    protected String serviceName() {
+        return "FlUDPCom";
+    }
 
     public UDPFleaseCommunicator(FleaseConfig config, String lockfileDir,
             boolean ignoreLockForTesting,
             final FleaseViewChangeListenerInterface viewListener) throws Exception {
-        super("FlUDPCom");
         stage = new FleaseStage(config, lockfileDir, this, ignoreLockForTesting, viewListener, null, null);
         port = config.getEndpoint().getPort();
         q = new LinkedBlockingQueue<FleaseMessage>();
@@ -108,13 +113,14 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
         }
     }
 
-    public void shutdown() {
-        quit = true;
-        interrupt();
+    @Override
+    protected void triggerShutdown() {
+        theThread.interrupt();
     }
 
     @Override
-    public void run() {
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
 
         long numRxCycles = 0;
         long durAllRx = 0;
@@ -137,19 +143,14 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
 
             LOG.info("UDP socket on port {} ready", port);
 
-            stage.start();
-            stage.waitForStartup();
-
-
-            notifyStarted();
-
+            stage.startAndWait();
 
             boolean isRdOnly = true;
 
             List<FleaseMessage> sendList = new ArrayList(5000);
             ReusableBuffer data = BufferPool.allocate(MAX_UDP_SIZE);
 
-            while (!quit) {
+            while (isRunning()) {
 
                 if (q.size() == 0) {
                     if (!isRdOnly) {
@@ -257,7 +258,7 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
 
             }
 
-            stage.shutdown();
+            stage.stopAndWait();
 
             selector.close();
             channel.close();
@@ -266,15 +267,10 @@ public class UDPFleaseCommunicator extends LifeCycleThread implements FleaseMess
             // ignore
         } catch (IOException ex) {
             LOG.error("main loop exception", ex);
-        } catch (Throwable th) {
-            notifyCrashed(th);
-            return;
-        }
-
+        } finally {
 
         LOG.info("num packets tranferred: {} tx    {} rx", numTx, numRx);
         LOG.info("numRxCycles {}, maxPkgPerCycle {}, avg/Cycle {}", numRxCycles, maxPkgCycle, avgPkgCycle/numRxCycles);
-
-        notifyStopped();
+        }
     }
 }

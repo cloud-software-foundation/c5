@@ -26,12 +26,14 @@
  */
 package org.xtreemfs.foundation.flease.comm.tcp;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.BufferPool;
 import org.xtreemfs.foundation.buffer.ReusableBuffer;
+import org.xtreemfs.foundation.flease.proposer.FleaseException;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -42,13 +44,13 @@ public class EchoClient {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FleaseException {
         // TODO code application logic here
 
         TimeSync ts = TimeSync.initializeLocal(50);
 
         try {
-            ts.waitForStartup();
+            ts.startAndWait();
 
             TCPClient com = new TCPClient(3334,null, new NIOServer() {
 
@@ -85,8 +87,7 @@ public class EchoClient {
                     System.out.println("could not connect to: "+endpoint+", context: "+context);
                 }
             });
-            com.start();
-            com.waitForStartup();
+            com.startAndWait();
 
             ReusableBuffer data = ReusableBuffer.wrap("Hello world!\n".getBytes());
             com.write(new InetSocketAddress("localhost", 3333), data, "Yagg");
@@ -102,9 +103,9 @@ public class EchoClient {
             com.write(new InetSocketAddress("localhost", 3333), data, null);
 
             Thread.sleep(2000);
-            com.shutdown();
+            com.stopAndWait();
             ts.close();
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(1);

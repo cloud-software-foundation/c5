@@ -40,8 +40,10 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xtreemfs.foundation.flease.proposer.FleaseException;
 
 /**
  * A class that offers a local time w/ adjustable granularity and a global time
@@ -49,11 +51,12 @@ import org.slf4j.LoggerFactory;
  * This class should be used to minimize the number of calls to
  * System.currentTimeMillis which is a costly system call on Linux. Moreover it
  * offers a system-global time.
- * 
+ *
  * @author bjko
  */
-public final class TimeSync extends LifeCycleThread {
+public final class TimeSync extends AbstractExecutionThreadService {
     private static final Logger LOG = LoggerFactory.getLogger(TimeSync.class);
+    private Thread theThread;
 
     public enum ExtSyncSource {
         XTREEMFS_DIR, GPSD, LOCAL_CLOCK
@@ -65,7 +68,7 @@ public final class TimeSync extends LifeCycleThread {
      * synchronization message exceeds this value, the message will be ignored.
      */
     private static final int MAX_RTT = 1000;
-    
+
     /**
      * A client used to synchronize clocks
      */
@@ -78,9 +81,9 @@ public final class TimeSync extends LifeCycleThread {
 
     /**
      * interval between updates of the local system clock.
-     * 
+     *
      * If it's set to 0, the local renew by the thread is disabled and the time
-     * is read from the system on demand. 
+     * is read from the system on demand.
      */
     private volatile int           localTimeRenew;
 
@@ -99,18 +102,13 @@ public final class TimeSync extends LifeCycleThread {
     private volatile long          currentDrift;
 
     /**
-     * set to true to stop thread
-     */
-    private volatile boolean       quit;
-
-    /**
      * timestamp of last resync operation
      */
     private volatile long          lastSuccessfulSync;
-    
+
     /**
      * Timestamp of the last resync attempt.
-     * 
+     *
      * @note No need to specify it as volatile since it's only used by run().
      */
     private long                   lastSyncAttempt;
@@ -124,25 +122,28 @@ public final class TimeSync extends LifeCycleThread {
     private final Pattern          gpsdDatePattern;
 
     private Socket                 gpsdSocket;
-    
+
     /**
      * Creates a new instance of TimeSync
-     * 
+     *
      * @dir a directory server to use for synchronizing clocks, can be null for
      *      test setups only
      */
     private TimeSync(ExtSyncSource source, TimeServerClient dir, InetSocketAddress gpsd, int timeSyncInterval, int localTimeRenew) {
-        super("TSync Thr");
-        setDaemon(true);
         this.syncSuccess = false;
         this.gpsdDatePattern = Pattern.compile("GPSD,D=(....)-(..)-(..)T(..):(..):(..)\\.(.+)Z");
-        
+
         init(source, dir, gpsd, timeSyncInterval, localTimeRenew);
+    }
+
+    @Override
+    protected String serviceName() {
+        return "TSync Thr";
     }
 
     /**
      * Initializes the TimeSync with new parameters.
-     * 
+     *
      * @param source
      * @param dir
      * @param gpsd
@@ -155,7 +156,7 @@ public final class TimeSync extends LifeCycleThread {
         this.timeServerClient = dir;
         this.syncSource = source;
         this.gpsdAddr = gpsd;
-        
+
         if (this.timeServerClient != null && this.timeSyncInterval != 0 && this.localTimeRenew != 0) {
             this.localTimeRenew = 0;
             LOG.debug("Disabled the periodic local time renew (set local_clock_renewal to 0)" +
@@ -166,7 +167,7 @@ public final class TimeSync extends LifeCycleThread {
             try {
                 if (gpsdSocket != null)
                     gpsdSocket.close();
-                
+
                 gpsdSocket = new Socket();
                 gpsdSocket.setSoTimeout(2000);
                 gpsdSocket.setTcpNoDelay(true);
@@ -177,14 +178,26 @@ public final class TimeSync extends LifeCycleThread {
             }
         }
     }
-    
+
+    @Override
+    protected void triggerShutdown() {
+        theThread.interrupt();
+        if (gpsdSocket != null) {
+            try {
+                gpsdSocket.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
     /**
      * main loop
      */
     @Override
-    public void run() {
+    public void run() throws Exception {
+        theThread = Thread.currentThread();
+
         TimeSync.theInstance = this;
-        notifyStarted();
         String tsStatus;
         if (localTimeRenew == 0) {
             tsStatus = "using the local clock";
@@ -195,7 +208,7 @@ public final class TimeSync extends LifeCycleThread {
             tsStatus += " and remote sync every " + this.timeSyncInterval + " ms";
         }
         LOG.info("TimeSync is running {}", tsStatus);
-        while (!quit) {
+        while (isRunning()) {
             // Renew cached local time.
             final long previousLocalSysTime = localSysTime;
             localSysTime = System.currentTimeMillis();
@@ -209,13 +222,13 @@ public final class TimeSync extends LifeCycleThread {
                         localTimeRenew);
                 }
             }
-            
+
             // Remote sync time.
             if (timeSyncInterval != 0 && localSysTime - lastSyncAttempt > timeSyncInterval) {
                 resync();
             }
-            if (!quit) {
-                // 
+            if (isRunning()) {
+                //
                 try {
                     // If local refresh was disabled, use timeSyncInterval as sleep time.
                     long sleepTimeMs = localTimeRenew != 0 ? localTimeRenew : timeSyncInterval;
@@ -223,86 +236,74 @@ public final class TimeSync extends LifeCycleThread {
                         // If there is no need to run this thread at all, let it sleep for 10 minutes.
                         sleepTimeMs = 600000;
                     }
-                    TimeSync.sleep(sleepTimeMs);
+                    Thread.sleep(sleepTimeMs);
                 } catch (InterruptedException ex) {
                     break;
                 }
             }
-            
+
         }
-        
-        notifyStopped();
+
         syncSuccess = false;
         theInstance = null;
     }
-    
+
     /**
      * Initializes the time synchronizer. Note that only the first invocation of
      * this method has an effect, any further invocations will be ignored.
-     * 
+     *
      * @param dir
      * @param timeSyncInterval
      * @param localTimeRenew
      * @param dirAuthStr
      */
     public static TimeSync initialize(TimeServerClient dir, int timeSyncInterval, int localTimeRenew) throws Exception {
-        
+
         if (theInstance != null) {
             LOG.warn("time sync already running");
             return theInstance;
         }
-        
+
         TimeSync s = new TimeSync(ExtSyncSource.XTREEMFS_DIR, dir, null, timeSyncInterval, localTimeRenew);
-        s.start();
-        s.waitForStartup();
-        return s;
-    }
-    
-    public static TimeSync initializeLocal(int localTimeRenew) {
-        if (theInstance != null) {
-            LOG.warn("time sync already running");
-            return theInstance;
+        if (s.startAndWait() != State.RUNNING) {
+            LOG.error("Unable to start timesync server", s.failureCause());
+            throw new FleaseException("Unable to start timesync server", s.failureCause());
         }
-        
-        TimeSync s = new TimeSync(ExtSyncSource.LOCAL_CLOCK, null, null, 0, localTimeRenew);
-        s.start();
         return s;
     }
 
-    public static TimeSync initializeGPSD(InetSocketAddress gpsd, int timeSyncInterval, int localTimeRenew) {
+    public static TimeSync initializeLocal(int localTimeRenew) throws FleaseException {
+        if (theInstance != null) {
+            LOG.warn("time sync already running");
+            return theInstance;
+        }
+
+        TimeSync s = new TimeSync(ExtSyncSource.LOCAL_CLOCK, null, null, 0, localTimeRenew);
+        if (s.startAndWait() != State.RUNNING) {
+            LOG.error("Unable to start timesync server", s.failureCause());
+            throw new FleaseException("Unable to start timesync server", s.failureCause());
+        }
+        return s;
+    }
+
+    public static TimeSync initializeGPSD(InetSocketAddress gpsd, int timeSyncInterval, int localTimeRenew) throws FleaseException {
         if (theInstance != null) {
             LOG.warn("time sync already running");
             return theInstance;
         }
 
         TimeSync s = new TimeSync(ExtSyncSource.GPSD, null, gpsd, timeSyncInterval, localTimeRenew);
-        s.start();
+        if (s.startAndWait() != State.RUNNING) {
+            LOG.error("Unable to start timesync server", s.failureCause());
+            throw new FleaseException("Unable to start timesync server", s.failureCause());
+        }
         return s;
     }
-    
+
     public void close() {
-        shutdown();
-        try {
-            waitForShutdown();
-        } catch (Exception e) {
-            LOG.error("in close()", e);
-        }
+        stopAndWait();
     }
-    
-    /**
-     * stop the thread
-     */
-    public void shutdown() {
-        quit = true;
-        this.interrupt();
-        if (gpsdSocket != null) {
-            try {
-                gpsdSocket.close();
-            } catch (IOException ex) {
-            }
-        }
-    }
-    
+
     /**
      * returns the current value of the local system time variable. Has a
      * resolution of localTimeRenew ms.
@@ -315,7 +316,7 @@ public final class TimeSync extends LifeCycleThread {
             return ts.localSysTime;
         }
     }
-    
+
     /**
      * returns the current value of the local system time adjusted to global
      * time. Has a resolution of localTimeRenew ms.
@@ -328,11 +329,11 @@ public final class TimeSync extends LifeCycleThread {
             return ts.localSysTime + ts.currentDrift;
         }
     }
-    
+
     public static long getLocalRenewInterval() {
         return getInstance().localTimeRenew;
     }
-    
+
     public static int getTimeSyncInterval() {
         return getInstance().timeSyncInterval;
     }
@@ -345,7 +346,7 @@ public final class TimeSync extends LifeCycleThread {
         return getInstance().syncSuccess;
     }
 
-    
+
     /**
      *
      * @return the timestamp (local time) when the drift
@@ -360,7 +361,7 @@ public final class TimeSync extends LifeCycleThread {
     public long getDrift() {
         return this.currentDrift;
     }
-    
+
     /**
      * resynchronizes with the global time obtained from the DIR
      */
@@ -382,14 +383,14 @@ public final class TimeSync extends LifeCycleThread {
                     long tEnd = System.currentTimeMillis();
                     // add half a roundtrip to estimate the delay
                     syncRTT = (int)(tEnd - tStart);
-                    
+
                     if (syncRTT > MAX_RTT) {
                         LOG.warn("Ignored time synchronization message because DIR took too long to respond (%{} ms)",
                             syncRTT);
                         syncSuccess = false;
                         return;
                     }
-                    
+
                     globalTime += syncRTT / 2;
                     syncSuccess = true;
 
@@ -408,12 +409,12 @@ public final class TimeSync extends LifeCycleThread {
             }
             case GPSD : {
                 try {
-                    
+
                     BufferedReader br = new BufferedReader(new InputStreamReader(gpsdSocket.getInputStream()));
                     OutputStream os = gpsdSocket.getOutputStream();
                     long tStart = System.currentTimeMillis();
                     lastSyncAttempt = tStart;
-                    
+
                     os.write(new byte[]{'d','\n'});
                     os.flush();
 
@@ -442,7 +443,7 @@ public final class TimeSync extends LifeCycleThread {
                     Date d = new Date(globalTime);
                     LOG.debug("global GPSd time: {} ({}:{}:{})", c.getTimeInMillis(), d.getHours(),
                         d.getMinutes(), d.getSeconds());
-                    
+
                     // add half a roundtrip to estimate the delay
                     syncRTT = (int)(tEnd - tStart);
                     LOG.debug("sync RTT: {} ms", syncRTT);
@@ -464,13 +465,13 @@ public final class TimeSync extends LifeCycleThread {
              }
         }
     }
-    
+
     public static TimeSync getInstance() {
         if (theInstance == null)
             throw new RuntimeException("TimeSync not initialized!");
         return theInstance;
     }
-    
+
     public static boolean isInitialized() {
         return theInstance != null;
     }
