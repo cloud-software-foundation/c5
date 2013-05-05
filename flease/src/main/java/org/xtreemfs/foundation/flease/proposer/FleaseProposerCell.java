@@ -26,10 +26,6 @@
  */
 package org.xtreemfs.foundation.flease.proposer;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.TimeSync;
@@ -39,6 +35,10 @@ import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.comm.ProposalNumber;
 import org.xtreemfs.foundation.flease.proposer.CellAction.ActionName;
 import org.xtreemfs.foundation.flease.proposer.CellAction.CellActionList;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -116,17 +116,17 @@ public class FleaseProposerCell {
     }
 
     /**
-     * @return the requestMasteEpoch
+     * @return the requestMasterEpoch
      */
-    public boolean isRequestMasteEpoch() {
-        return requestMasteEpoch;
+    public boolean isRequestMasterEpoch() {
+        return requestMasterEpoch;
     }
 
     /**
-     * @param requestMasteEpoch the requestMasteEpoch to set
+     * @param requestMasterEpoch the requestMasterEpoch to set
      */
-    public void setRequestMasteEpoch(boolean requestMasteEpoch) {
-        this.requestMasteEpoch = requestMasteEpoch;
+    public void setRequestMasterEpoch(boolean requestMasterEpoch) {
+        this.requestMasterEpoch = requestMasterEpoch;
     }
 
     /**
@@ -175,10 +175,10 @@ public class FleaseProposerCell {
 
     private ASCIIString handoverTo;
 
-    private boolean requestMasteEpoch;
+    private boolean requestMasterEpoch;
 
     private long masterEpochNumber;
-    
+
     private final CellActionList actions;
 
     /**
@@ -201,11 +201,11 @@ public class FleaseProposerCell {
         this.handoverTo = null;
         LOG.debug("opened new cell id {} with majority = {}", cellId, majority);
     }
-    
+
     public void addAction(ActionName actionName) {
         actions.addAction(actionName);
     }
-    
+
     public void addAction(ActionName actionName, String message) {
         actions.addAction(actionName, message);
     }
@@ -334,7 +334,7 @@ public class FleaseProposerCell {
         text.append(" markedClose:");
         text.append(markedClose);
         text.append(" rqME:");
-        text.append(requestMasteEpoch);
+        text.append(requestMasterEpoch);
         text.append(" msgSent:");
         text.append(messageSent);
         text.append(" responses:");

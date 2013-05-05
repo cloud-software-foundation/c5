@@ -26,12 +26,6 @@
  */
 package org.xtreemfs.foundation.flease.proposer;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.TimeSync;
@@ -39,8 +33,8 @@ import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.Flease;
 import org.xtreemfs.foundation.flease.FleaseConfig;
 import org.xtreemfs.foundation.flease.FleaseStage;
-import org.xtreemfs.foundation.flease.FleaseViewChangeListenerInterface;
 import org.xtreemfs.foundation.flease.FleaseStatusListener;
+import org.xtreemfs.foundation.flease.FleaseViewChangeListenerInterface;
 import org.xtreemfs.foundation.flease.MasterEpochHandlerInterface;
 import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptor;
 import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
@@ -50,6 +44,12 @@ import org.xtreemfs.foundation.flease.comm.FleaseMessage.MsgType;
 import org.xtreemfs.foundation.flease.comm.ProposalNumber;
 import org.xtreemfs.foundation.flease.proposer.CellAction.ActionName;
 import org.xtreemfs.foundation.flease.proposer.FleaseProposerCell.State;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -140,7 +140,7 @@ public class FleaseProposer {
         if (cell == null) {
             cell = new FleaseProposerCell(cellId, acceptors, config.getSenderId());
             cell.setCellState(State.IDLE);
-            cell.setRequestMasteEpoch(requestMasterEpoch);
+            cell.setRequestMasterEpoch(requestMasterEpoch);
             cells.put(cellId, cell);
             cell.addAction(ActionName.PROPOSER_CELL_OPENED);
             LOG.warn("P created new cellId {}",
@@ -231,7 +231,7 @@ public class FleaseProposer {
         }
 
         //no need for a new master epoch upon renew!
-        cell.setRequestMasteEpoch(false);
+        cell.setRequestMasterEpoch(false);
 
         //we can safely set the instance no +1
         //ONLY ALLOWED DURING RENEW!
@@ -291,7 +291,7 @@ public class FleaseProposer {
                         msg.getSender());
             return;
         }
-        
+
         try {
             //reject anything if viewID < own viewID or if own viewId is -1
             //ignore if viewId > own viewID but notify listener
@@ -302,7 +302,7 @@ public class FleaseProposer {
                     cell.getCellId());
                 return;
             }
-    
+
             if (myViewId > msg.getViewId()) {
                 //drop
                 LOG.debug("P drop message because of outdated remote view for cell {}: local view {}, remote {}",
@@ -311,7 +311,7 @@ public class FleaseProposer {
                     msg.getViewId());
                 return;
             }
-    
+
             //events
             switch (cell.getCellState()) {
                 case IDLE: {
@@ -399,7 +399,7 @@ public class FleaseProposer {
         msg.setLeaseTimeout(TimeSync.getGlobalTime() + config.getMaxLeaseTimeout());
         msg.setSendTimestamp(TimeSync.getGlobalTime());
         msg.setSender(null);
-        if (cell.isRequestMasteEpoch()) {
+        if (cell.isRequestMasterEpoch()) {
             msg.setMasterEpochNumber(FleaseMessage.REQUEST_MASTER_EPOCH);
             cell.addAction(ActionName.PROPOSER_REQUEST_MASTER_EPOCH);
         }
@@ -417,14 +417,14 @@ public class FleaseProposer {
                 //cancel(cell, ex, 0);
             }
         }
-        
+
         FleaseMessage timer = new FleaseMessage(MsgType.EVENT_TIMEOUT_PREPARE);
         timer.setCellId(cell.getCellId());
         timer.setProposalNo(cell.getBallotNo());
         timer.validateMessage();
         comm.requestTimer(timer, TimeSync.getLocalSystemTime() + config.getRoundTimeout());
         cell.addAction(ActionName.PROPOSER_SCHEDULED_TIMEOUT);
-        
+
         assertState(cell.getMessageSent() != null, cell);
         assertState(cell.getMessageSent().getProposalNo() != null, cell);
         cell.setCellState(State.WAIT_FOR_PREP_ACK);
@@ -432,7 +432,7 @@ public class FleaseProposer {
         final FleaseMessage localResponse = localAcceptor.handlePREPARE(msg);
         if (localResponse != null) {
             if (meHandler != null
-                && cell.isRequestMasteEpoch()
+                && cell.isRequestMasterEpoch()
                 && localResponse.getMsgType() == FleaseMessage.MsgType.MSG_PREPARE_ACK) {
                 meHandler.sendMasterEpoch(localResponse,
                         new MasterEpochHandlerInterface.Continuation() {
@@ -452,7 +452,7 @@ public class FleaseProposer {
         cell.addAction(ActionName.PROPOSER_PREPARE_PROCESS_RESPONSE);
         assertState(cell.getCellState() == State.WAIT_FOR_PREP_ACK, cell);
         assertState(cell.getMessageSent() != null, cell);
-        
+
         if (msg.getMsgType() != MsgType.MSG_PREPARE_ACK
                 && msg.getMsgType() != MsgType.MSG_PREPARE_NACK
                 && msg.getMsgType() != MsgType.MSG_WRONG_VIEW
@@ -627,7 +627,7 @@ public class FleaseProposer {
             }
 
             //master epoch
-            if (cell.isRequestMasteEpoch()) {
+            if (cell.isRequestMasterEpoch()) {
                 long maxMasterEpoch = -1;
                 for (FleaseMessage resp : responses) {
                     if (resp.getMsgType() == FleaseMessage.MsgType.MSG_PREPARE_ACK) {
@@ -663,7 +663,7 @@ public class FleaseProposer {
         msg.setLeaseTimeout(cell.getMessageSent().getLeaseTimeout());
         msg.setSendTimestamp(TimeSync.getGlobalTime());
         msg.setSender(null);
-        if (cell.isRequestMasteEpoch())
+        if (cell.isRequestMasterEpoch())
             msg.setMasterEpochNumber(cell.getMasterEpochNumber());
         cell.setMessageSent(msg);
 
@@ -689,7 +689,7 @@ public class FleaseProposer {
         final FleaseMessage localResponse = localAcceptor.handleACCEPT(msg);
         if (localResponse != null) {
             if (meHandler != null
-                && cell.isRequestMasteEpoch()
+                && cell.isRequestMasterEpoch()
                 && localResponse.getMsgType() == FleaseMessage.MsgType.MSG_ACCEPT_ACK) {
                 meHandler.storeMasterEpoch(localResponse,
                         new MasterEpochHandlerInterface.Continuation() {
@@ -733,7 +733,7 @@ public class FleaseProposer {
                     new FleaseException("System is not in sync (clock sync drift exceeded)!"), 0);
             return;
         }
-        
+
         if (msg.getMsgType() != MsgType.MSG_ACCEPT_ACK
                 && msg.getMsgType() != MsgType.MSG_ACCEPT_NACK
                 && msg.getMsgType() != MsgType.MSG_WRONG_VIEW
@@ -815,7 +815,7 @@ public class FleaseProposer {
         msg.setLeaseTimeout(cell.getMessageSent().getLeaseTimeout());
         msg.setSendTimestamp(TimeSync.getGlobalTime());
         msg.setSender(null);
-        if (cell.isRequestMasteEpoch()) {
+        if (cell.isRequestMasterEpoch()) {
             assertState(cell.getMasterEpochNumber() > -1, cell);
             msg.setMasterEpochNumber(cell.getMasterEpochNumber());
         }

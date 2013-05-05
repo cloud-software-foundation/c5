@@ -27,7 +27,10 @@
 
 package org.xtreemfs.foundation.flease;
 
+import com.google.common.util.concurrent.Service;
 import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
@@ -44,6 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author bjko
  */
 public class MasterEpochTest extends TestCase {
+    private static final Logger LOG = LoggerFactory.getLogger(MasterEpochTest.class);
 
     private final FleaseConfig cfg;
     private final File testDir;
@@ -175,8 +179,10 @@ public class MasterEpochTest extends TestCase {
         final AtomicReference<Flease> result = new AtomicReference();
 
         SimpleMasterEpochHandler meHandler = new SimpleMasterEpochHandler("/tmp/xtreemfs-test/");
-        meHandler.start();
-        meHandler.waitForStartup();
+        Service.State svcState = meHandler.startAndWait();
+        if (svcState != Service.State.RUNNING) {
+            LOG.error("Unable to start Master Epoch Handler", meHandler.failureCause());
+        }
 
         FleaseStage fs = new FleaseStage(cfg, "/tmp/xtreemfs-test/", new FleaseMessageSenderInterface() {
 
@@ -229,15 +235,15 @@ public class MasterEpochTest extends TestCase {
 
         fs.shutdown();
         fs.waitForShutdown();
-        meHandler.shutdown();
-        meHandler.waitForShutdown();
+        meHandler.stopAndWait();
 
         Thread.sleep(12000);
 
         //restart
         meHandler = new SimpleMasterEpochHandler("/tmp/xtreemfs-test/");
-        meHandler.start();
-        meHandler.waitForStartup();
+        if (meHandler.startAndWait() != Service.State.RUNNING) {
+            LOG.error("Couldnt start meHandler", meHandler.failureCause());
+        }
 
         fs = new FleaseStage(cfg, "/tmp/xtreemfs-test/", new FleaseMessageSenderInterface() {
 
