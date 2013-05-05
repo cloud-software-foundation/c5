@@ -27,7 +27,6 @@
 
 package org.xtreemfs.foundation.flease.acceptor;
 
-import java.net.InetSocketAddress;
 import junit.framework.TestCase;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
@@ -35,6 +34,8 @@ import org.xtreemfs.foundation.flease.FleaseConfig;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage.MsgType;
 import org.xtreemfs.foundation.flease.comm.ProposalNumber;
+
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -46,7 +47,7 @@ public class FleaseAcceptorTest extends TestCase {
     private final static ASCIIString TESTCELL = new ASCIIString("testcell");
 
     private final FleaseConfig cfg;
-    
+
     public FleaseAcceptorTest(String testName) {
         super(testName);
         //Logging.start(Logging.LEVEL_WARN, Category.all);
@@ -163,6 +164,6 @@ public class FleaseAcceptorTest extends TestCase {
 
     }
 
-    
+
 
 }

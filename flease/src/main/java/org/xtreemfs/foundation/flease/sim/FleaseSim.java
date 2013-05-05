@@ -27,12 +27,6 @@
 
 package org.xtreemfs.foundation.flease.sim;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xtreemfs.foundation.LifeCycleListener;
@@ -47,6 +41,12 @@ import org.xtreemfs.foundation.flease.FleaseViewChangeListenerInterface;
 import org.xtreemfs.foundation.flease.MasterEpochHandlerInterface;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.proposer.FleaseException;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Simulator for testing
@@ -83,7 +83,7 @@ public class FleaseSim {
             for (int i = 0; i < numHosts; i++) {
                 final int portNo = 1024+i;
                 final int myI = i;
-                FleaseConfig cfg = new FleaseConfig(leaseTimeout, dmax, 500, new InetSocketAddress(portNo), "localhost:"+(1024+i),5, true, 0, true);
+                FleaseConfig cfg = new FleaseConfig(leaseTimeout, dmax, 500, new InetSocketAddress(portNo), "localhost:"+(1024+i),5, true, 0);
                 leaseStates[i] = new AtomicReference<Flease>(Flease.EMPTY_LEASE);
 
                 if (useME) {
@@ -124,7 +124,7 @@ public class FleaseSim {
                 },new FleaseStatusListener() {
 
                     public void statusChanged(ASCIIString cellId, Flease lease) {
-                        
+
                         synchronized (leaseStates) {
                             leaseStates[myI].set(lease);
                         }
@@ -210,10 +210,10 @@ public class FleaseSim {
                 }
 
                 System.out.println("");
-                
+
                 final int host = (int)(Math.random()*numHosts);
                 stages[host].closeCell(new ASCIIString("testcell"), false);
-                
+
 
                 //make sure that cells also time out some times (requires a wait > 2*lease_timeout)
                 final int waitTime = (int)(Math.random()*(leaseTimeout*2+1000));
@@ -228,7 +228,7 @@ public class FleaseSim {
             }
             com.shutdown();
              */
-            
+
 
         } catch (Exception ex) {
             ex.printStackTrace();

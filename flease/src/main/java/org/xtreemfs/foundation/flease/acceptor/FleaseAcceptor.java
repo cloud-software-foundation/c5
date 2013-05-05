@@ -49,12 +49,12 @@ import org.xtreemfs.foundation.flease.comm.ProposalNumber;
  */
 public class FleaseAcceptor {
     private static final Logger LOG = LoggerFactory.getLogger(FleaseAcceptor.class);
-    
+
     /**
      * Instances of the Multipaxos
      */
     public final Map<ASCIIString, FleaseAcceptorCell> cells;
-  
+
     /**
      * filename to use for storing state permanantly
      */
@@ -66,7 +66,7 @@ public class FleaseAcceptor {
     private final String lockfile;
 
     private final long   waitUntilTimestamp_ms;
-    
+
     /**
      * set to true to quit
      */
@@ -78,8 +78,8 @@ public class FleaseAcceptor {
 
     private final LearnEventListener evtListener;
 
-    
-    
+
+
     /**
      * Creates a new instance of PxAcceptor
      *
@@ -90,11 +90,11 @@ public class FleaseAcceptor {
     public FleaseAcceptor(LearnEventListener evtListener, FleaseConfig localConfig, String lockfileDir, boolean ignoreLockFileForTesting)
     throws IOException {
         this.config = localConfig;
-        
+
         cells = new HashMap<ASCIIString, FleaseAcceptorCell>();
 
         quit = false;
-        
+
         lockfile = lockfileDir+"/"+LOCKFILE_NAME+config.getIdentity().hashCode();
 
         this.evtListener = evtListener;
@@ -114,9 +114,9 @@ public class FleaseAcceptor {
             if (!lock.createNewFile())
                 throw new IOException("Lock file exists!");
         }
-        
+
     }
-    
+
     public void setViewChangeListener(FleaseViewChangeListenerInterface listener) {
         viewListener = listener;
     }
@@ -125,12 +125,12 @@ public class FleaseAcceptor {
         FleaseAcceptorCell cell = getCell(cellId);
         cell.setViewId(viewId);
     }
-    
+
     private FleaseAcceptorCell getCell(FleaseMessage msg) {
         assert (msg != null);
         return getCell(msg.getCellId());
     }
-    
+
     private FleaseAcceptorCell getCell(ASCIIString cellId) {
         FleaseAcceptorCell cc = cells.get(cellId);
         if (cc == null) {
@@ -149,7 +149,7 @@ public class FleaseAcceptor {
         cc.touch();
         return cc;
     }
-    
+
     /**
      * Handles paxos prepare messages
      *
@@ -158,12 +158,12 @@ public class FleaseAcceptor {
      * @return a response message
      */
     public FleaseMessage handlePREPARE(FleaseMessage msg) {
-            
+
         final FleaseAcceptorCell cc = getCell(msg);
         cc.touch();
 
         if ((cc.getPrepared() != null) && (cc.getPrepared().after(msg))) {
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages()) {
+            if (LOG.isDebugEnabled()) {
                 final String preped = (cc.getPrepared() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getPrepared().getProposalNo().toString();
                 LOG.debug("A prepare NACK p: {} is after {}", preped, msg.getProposalNo());
             }
@@ -175,7 +175,7 @@ public class FleaseAcceptor {
             reject.setSendTimestamp(TimeSync.getGlobalTime());
             return reject;
         } else {
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages()) {
+            if (LOG.isDebugEnabled()) {
                 final String preped = (cc.getPrepared() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getPrepared().getProposalNo().toString();
                 final String acced = (cc.getAccepted() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getAccepted().getProposalNo()+"="+cc.getAccepted().getLeaseHolder()+"/"+cc.getAccepted().getLeaseTimeout();
                 LOG.debug("A prepare ACK  p:{} -> {} a:{}", preped, msg.getProposalNo(), acced);
@@ -200,7 +200,7 @@ public class FleaseAcceptor {
 
         }
     }
-    
+
     /**
      * Handles paxos accept (vote) messages.
      *
@@ -215,7 +215,7 @@ public class FleaseAcceptor {
         cc.touch();
         if ((cc.getPrepared() != null) && (cc.getPrepared().after(msg))) {
             // reject the request
-           if (LOG.isDebugEnabled() && config.isDebugPrintMessages()) {
+           if (LOG.isDebugEnabled()) {
                 final String preped = (cc.getPrepared() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getPrepared().getProposalNo().toString();
                 LOG.debug("An accept  NACK p:{} is after {}", preped, msg.getProposalNo());
             }
@@ -228,7 +228,7 @@ public class FleaseAcceptor {
             return tmp;
         } else {
             // okay accept it
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages()) {
+            if (LOG.isDebugEnabled()) {
                 final String preped = (cc.getPrepared() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getPrepared().getProposalNo().toString();
                 final String acced = (cc.getAccepted() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getAccepted().getProposalNo()+"="+cc.getAccepted().getLeaseHolder()+"/"+cc.getAccepted().getLeaseTimeout();
                 LOG.debug("An accept  ACK  p:{} a: {} -> {}={}/{}", preped, acced, msg.getProposalNo(), msg.getLeaseHolder(), msg.getLeaseTimeout());
@@ -245,7 +245,7 @@ public class FleaseAcceptor {
 
         }
     }
-    
+
     /**
      * Handles paxos learn messages. Removes oudated instances and updates
      * maxLearnedInstId accordingly
@@ -259,10 +259,10 @@ public class FleaseAcceptor {
         cc.touch();
         if ((cc.getPrepared() != null) && (cc.getPrepared().after(msg))
             || (cc.getAccepted() != null) && (cc.getAccepted().after(msg))) {
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages())
+            if (LOG.isDebugEnabled())
                 LOG.debug("A ignore outdated LEARN message {}", msg.getProposalNo());
         } else {
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages()) {
+            if (LOG.isDebugEnabled()) {
                 final String preped = (cc.getPrepared() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getPrepared().getProposalNo().toString();
                 final String acced = (cc.getAccepted() == null) ? ProposalNumber.EMPTY_PROPOSAL_NUMBER.toString() : cc.getAccepted().getProposalNo()+"="+cc.getAccepted().getLeaseHolder()+"/"+cc.getAccepted().getLeaseTimeout();
                 LOG.debug("A learn        p:{} a: {} -> {}={}/{}",preped, acced, msg.getProposalNo(), msg.getLeaseHolder(), msg.getLeaseTimeout());
@@ -273,9 +273,9 @@ public class FleaseAcceptor {
             cc.setLatestLearn(msg);
             evtListener.learnedEvent(msg.getCellId(), msg.getLeaseHolder(), msg.getLeaseTimeout(), msg.getMasterEpochNumber());
         }
-            
+
     }
-    
+
     /**
      * Handles requests for lease information. Returns current lease
      * holder+timeout or the current instance id.
@@ -302,8 +302,8 @@ public class FleaseAcceptor {
 
         return state;
     }
-    
-    
+
+
     /**
      * main loop
      */
@@ -317,12 +317,12 @@ public class FleaseAcceptor {
         final long now = TimeSync.getLocalSystemTime();
         if (msg.getSendTimestamp()+config.getMessageTimeout() < TimeSync.getGlobalTime()) {
             //old message, ignore
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages())
+            if (LOG.isDebugEnabled())
                 LOG.debug("A outdated message discarded: {}", msg.toString());
             return null;
         }
         if (this.waitUntilTimestamp_ms >= now) {
-            if (LOG.isDebugEnabled() && config.isDebugPrintMessages())
+            if (LOG.isDebugEnabled())
                 LOG.debug("A message discarded, acceptor is still in recovery period");
             return null;
         }
@@ -363,9 +363,9 @@ public class FleaseAcceptor {
             Logging.logMessage(Logging.LEVEL_DEBUG,this,"response %s",(response != null) ? response.toString() : "<empty>");*/
 
         return response;
-                    
-                    
-        
+
+
+
     }
 
     /*private void notifyLeaseListener(FleaseAcceptorCell cell, ASCIIString leaseHolder, long leaseTimeout) {
@@ -379,7 +379,7 @@ public class FleaseAcceptor {
             }
         }
     }*/
-    
+
     /**
      * string representation
      *
@@ -388,10 +388,10 @@ public class FleaseAcceptor {
     public String toString() {
         return "Acceptor @ " + config.getIdentity();
     }
-    
+
     // only for testing!
     /*public String getLocalLeaseInfo(String cellId) {
-        
+
         synchronized (cells) {
             FleaseAcceptorCell cc = getCell(cellId);
             FleaseInstance currentL = cc.getInstances().get(cc.getMaxLearnedInstanceId());
@@ -407,9 +407,9 @@ public class FleaseAcceptor {
             }
             return null;
         }
-        
+
     }*/
-    
+
     public void shutdown() {
         this.quit = true;
         File f = new File(lockfile);

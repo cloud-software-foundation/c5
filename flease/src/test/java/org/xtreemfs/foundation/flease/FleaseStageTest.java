@@ -27,16 +27,17 @@
 
 package org.xtreemfs.foundation.flease;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.proposer.FleaseException;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -45,7 +46,7 @@ import org.xtreemfs.foundation.flease.proposer.FleaseException;
 public class FleaseStageTest extends TestCase {
 
     private final FleaseConfig cfg;
-    
+
     public FleaseStageTest(String testName) {
         super(testName);
 
@@ -108,7 +109,7 @@ public class FleaseStageTest extends TestCase {
         fs.waitForStartup();
 
         fs.openCell(CELL_ID, new ArrayList(),false);
-       
+
         synchronized(result) {
             if (result.get() == null)
                 result.wait(1000);
@@ -178,7 +179,7 @@ public class FleaseStageTest extends TestCase {
         FleaseFuture f = fs.openCell(new ASCIIString("testcell"), new ArrayList(), false);
         final AtomicBoolean done = new AtomicBoolean(false);
         f.get();
-        
+
         Thread.sleep(100);
 
 

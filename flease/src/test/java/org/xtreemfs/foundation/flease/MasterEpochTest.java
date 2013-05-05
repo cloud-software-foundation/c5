@@ -27,18 +27,17 @@
 
 package org.xtreemfs.foundation.flease;
 
-import java.io.File;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
 import org.xtreemfs.foundation.flease.proposer.FleaseException;
 import org.xtreemfs.foundation.util.FSUtils;
+
+import java.io.File;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -48,14 +47,14 @@ public class MasterEpochTest extends TestCase {
 
     private final FleaseConfig cfg;
     private final File testDir;
-    
+
     public MasterEpochTest(String testName) {
         super(testName);
 
         //Logging.start(Logging.LEVEL_WARN, Category.all);
         TimeSync.initializeLocal(50);
 
-        cfg = new FleaseConfig(10000, 500, 500, new InetSocketAddress(12345), "localhost:12345",5, true, 0, true);
+        cfg = new FleaseConfig(10000, 500, 500, new InetSocketAddress(12345), "localhost:12345",5, true, 0);
         testDir = new File("/tmp/xtreemfs-test/");
     }
 
@@ -131,7 +130,7 @@ public class MasterEpochTest extends TestCase {
         fs.waitForStartup();
 
         fs.openCell(CELL_ID, new ArrayList(),true);
-       
+
         synchronized(result) {
             if (result.get() == null)
                 result.wait(1000);

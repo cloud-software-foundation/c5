@@ -27,15 +27,6 @@
 
 package org.xtreemfs.foundation.flease.proposer;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.security.auth.login.FailedLoginException;
-
 import junit.framework.TestCase;
 import org.xtreemfs.foundation.TimeSync;
 import org.xtreemfs.foundation.buffer.ASCIIString;
@@ -46,6 +37,13 @@ import org.xtreemfs.foundation.flease.acceptor.FleaseAcceptor;
 import org.xtreemfs.foundation.flease.acceptor.LearnEventListener;
 import org.xtreemfs.foundation.flease.comm.FleaseCommunicationInterface;
 import org.xtreemfs.foundation.flease.comm.FleaseMessage;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -60,7 +58,7 @@ public class FleaseProposerTest extends TestCase {
     private final FleaseConfig cfg;
 
     private final AtomicReference<Flease> result;
-    
+
     public FleaseProposerTest(String testName) {
         super(testName);
 
@@ -329,8 +327,8 @@ public class FleaseProposerTest extends TestCase {
 //
 //    }
 
-    
 
-    
+
+
 
 }
