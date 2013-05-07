@@ -13,8 +13,7 @@
   </parent>
 
   <artifactId>flease</artifactId>
-
-
+  <version>1</version>
 
   <build>
     <plugins>
