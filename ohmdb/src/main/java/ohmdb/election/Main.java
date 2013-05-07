@@ -22,19 +22,14 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Enumeration;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, SocketException {
+    public static void main(String[] args) throws InterruptedException, SocketException, ExecutionException {
         HashedWheelTimer wheelTimer = new HashedWheelTimer(1, TimeUnit.SECONDS);
 
         if (args.length < 1) {
@@ -48,31 +43,17 @@ public class Main {
         System.out.println("Cluster port = " + port);
 
         int ourMasterPort = port + (int)(Math.random() * 5000);
-        // Our message:
 
         Gossip.Availability.Builder builder = Gossip.Availability.newBuilder();
         builder.setNetworkPort(ourMasterPort);
         builder.setNodeId(UUID.randomUUID().toString());
 
-        // Enumeration is hell on earth.
-        for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements(); ) {
-            NetworkInterface iface = interfaces.nextElement();
-            for (Enumeration<InetAddress> addrs = iface.getInetAddresses(); addrs.hasMoreElements(); ) {
-                InetAddress addr = addrs.nextElement();
-                if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isAnyLocalAddress()) {
-                    continue;
-                }
-                builder.addAddresses(addr.getHostAddress());
-            }
-        }
-        final Gossip.Availability msg = builder.build();
-        System.out.println("Beacon message is: " + msg);
-
 
         Bootstrap b = new Bootstrap();
+        BeaconService beaconService = null;
 
         try {
-            b.group(new NioEventLoopGroup())
+            b.group(new NioEventLoopGroup(1))
                     .channel(NioDatagramChannel.class)
                     .option(ChannelOption.SO_BROADCAST, true)
                     .option(ChannelOption.SO_REUSEADDR, true)
@@ -80,22 +61,16 @@ public class Main {
             // get the udp channel:
             final ChannelFuture udpChannelFuture = b.bind(port);
             udpChannelFuture.sync();
-            // binded:
-            wheelTimer.newTimeout(new TimerTask() {
-                @Override
-                public void run(Timeout timeout) throws Exception {
-                    InetSocketAddress outAddr1 = new InetSocketAddress("255.255.255.255", port);
-                    System.out.println("Sending beacon message to " + outAddr1);
-                    //InetAddress outAddr = InetAddress.getByName("255.255.255.255");
-                    udpChannelFuture.channel().write(new UdpProtobufEncoder.UdpProtobufMessage(outAddr1, msg));
-                    //udpChannelFuture.channel().flush().sync();
 
-                }
-            }, 10, TimeUnit.SECONDS);
-
+            // Start the beacon service:
+            beaconService = new BeaconService(udpChannelFuture.channel(), builder.buildPartial());
+            beaconService.start().get();
 
             udpChannelFuture.channel().closeFuture().sync();
         } finally {
+            if (beaconService != null) {
+                beaconService.stopAndWait();
+            }
             wheelTimer.stop();
             b.shutdown();
         }
