@@ -14,24 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ohmdb.election;
+package ohmdb.discovery;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.HashedWheelTimer;
+import com.google.common.collect.ImmutableMap;
+import org.jetlang.channels.AsyncRequest;
+import org.jetlang.core.Callback;
+import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.ThreadFiber;
 
 import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+
+import static ohmdb.discovery.Beacon.Availability;
+
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, SocketException, ExecutionException {
-        HashedWheelTimer wheelTimer = new HashedWheelTimer(1, TimeUnit.SECONDS);
-
         if (args.length < 1) {
             System.out.println("Specify cluster name as arg1 pls");
             System.exit(1);
@@ -44,35 +43,35 @@ public class Main {
 
         int ourMasterPort = port + (int)(Math.random() * 5000);
 
-        Gossip.Availability.Builder builder = Gossip.Availability.newBuilder();
+        Availability.Builder builder = Availability.newBuilder();
         builder.setNetworkPort(ourMasterPort);
         builder.setNodeId(UUID.randomUUID().toString());
 
 
-        Bootstrap b = new Bootstrap();
         BeaconService beaconService = null;
+        // Start the beacon service:
+        beaconService = new BeaconService(port, builder.buildPartial());
+        beaconService.startAndWait();
 
-        try {
-            b.group(new NioEventLoopGroup(1))
-                    .channel(NioDatagramChannel.class)
-                    .option(ChannelOption.SO_BROADCAST, true)
-                    .option(ChannelOption.SO_REUSEADDR, true)
-                    .handler(new ElectionInit());
-            // get the udp channel:
-            final ChannelFuture udpChannelFuture = b.bind(port);
-            udpChannelFuture.sync();
+        System.out.println("Started");
 
-            // Start the beacon service:
-            beaconService = new BeaconService(udpChannelFuture.channel(), builder.buildPartial());
-            beaconService.start().get();
+        Thread.sleep(10000);
 
-            udpChannelFuture.channel().closeFuture().sync();
-        } finally {
-            if (beaconService != null) {
-                beaconService.stopAndWait();
+        System.out.println("making state request to beacon service");
+        // now try to RPC myself a tad:
+        final Fiber fiber = new ThreadFiber();
+        fiber.start();
+
+        AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, BeaconService.NodeInfo>>() {
+            @Override
+            public void onMessage(ImmutableMap<String, BeaconService.NodeInfo> message) {
+                System.out.println("State info:");
+                for(BeaconService.NodeInfo info : message.values()) {
+                    System.out.println(info);
+                }
+
+                fiber.dispose();
             }
-            wheelTimer.stop();
-            b.shutdown();
-        }
+        });
     }
 }
