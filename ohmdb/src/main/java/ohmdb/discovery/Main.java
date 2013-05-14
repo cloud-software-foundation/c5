@@ -25,6 +25,7 @@ import org.jetlang.fibers.ThreadFiber;
 import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static ohmdb.discovery.Beacon.Availability;
 
@@ -48,30 +49,32 @@ public class Main {
         builder.setNodeId(UUID.randomUUID().toString());
 
 
-        BeaconService beaconService = null;
-        // Start the beacon service:
-        beaconService = new BeaconService(port, builder.buildPartial());
+        final BeaconService beaconService = new BeaconService(port, builder.buildPartial());
         beaconService.startAndWait();
 
         System.out.println("Started");
 
-        Thread.sleep(10000);
+//        Thread.sleep(10000);
 
-        System.out.println("making state request to beacon service");
+//        System.out.println("making state request to beacon service");
         // now try to RPC myself a tad:
         final Fiber fiber = new ThreadFiber();
         fiber.start();
 
-        AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, BeaconService.NodeInfo>>() {
+        fiber.scheduleAtFixedRate(new Runnable() {
             @Override
-            public void onMessage(ImmutableMap<String, BeaconService.NodeInfo> message) {
-                System.out.println("State info:");
-                for(BeaconService.NodeInfo info : message.values()) {
-                    System.out.println(info);
-                }
+            public void run() {
+                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, BeaconService.NodeInfo>>() {
+                    @Override
+                    public void onMessage(ImmutableMap<String, BeaconService.NodeInfo> message) {
+                        System.out.println("State info:");
+                        for(BeaconService.NodeInfo info : message.values()) {
+                            System.out.println(info);
+                        }
+                    }
+                });
 
-                fiber.dispose();
             }
-        });
+        }, 10, 10, TimeUnit.SECONDS);
     }
 }
