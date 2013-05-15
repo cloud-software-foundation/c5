@@ -42,9 +42,8 @@ public class FleaseAcceptorCell implements Serializable {
 
     FleaseMessage accepted;
 
-    AtomicReference<FleaseMessage> latestLearn;
+    volatile FleaseMessage latestLearn = null;
 
-    
     /** timestamp for last access
      */
     public long lastAccess;
@@ -58,16 +57,15 @@ public class FleaseAcceptorCell implements Serializable {
         prepared = null;
         accepted = null;
         lastAccess = TimeSync.getLocalSystemTime();
-        latestLearn = new AtomicReference<FleaseMessage>();
     }
 
     public FleaseMessage getLatestLearn() {
-        return latestLearn.get();
+        return latestLearn;
     }
 
     public void setLatestLearn(FleaseMessage msg) {
         assert(msg.getMsgType() == FleaseMessage.MsgType.MSG_LEARN);
-        latestLearn.set(msg);
+        latestLearn = msg;
     }
 
     /**
@@ -105,7 +103,7 @@ public class FleaseAcceptorCell implements Serializable {
     }
 
     public boolean isLearned() {
-        return latestLearn.get() != null;
+        return latestLearn != null;
     }
 
     public void touch() {
@@ -129,7 +127,6 @@ public class FleaseAcceptorCell implements Serializable {
         sb.append("\n");
         
         return sb.toString();
-
     }
 
     /**

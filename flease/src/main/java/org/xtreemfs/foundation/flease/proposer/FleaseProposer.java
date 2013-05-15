@@ -335,7 +335,7 @@ public class FleaseProposer {
                             cell.setMessageSent(null);
                             cell.setBallotNo(new ProposalNumber(cell.getBallotNo().getProposalNo() + 1,
                                     cell.getBallotNo().getSenderId()));
-                            cell.getResponses().clear();
+                            cell.clearResponses();
                             cell.setNumFailures(0);
                             // Schedule restart.
                             final int wait_ms = (int) config.getDMax() + config.getMaxLeaseTimeout();
@@ -382,7 +382,7 @@ public class FleaseProposer {
         }
 
         //propose myself
-        cell.getResponses().clear();
+        cell.clearResponses();
         cell.touch();
 
         //assert (lastBallotNo < cell.getBallotNo().getProposalNo()) : ("lastBallotNo="+lastBallotNo+", cell="+cell.getBallotNo().getProposalNo());
@@ -502,8 +502,8 @@ public class FleaseProposer {
             return;
         }
 
+        cell.addResponse(msg);
         final List<FleaseMessage> responses = cell.getResponses();
-        responses.add(msg);
         if (cell.majorityAvail()) {
             LOG.debug("P majority responded for proposal {}: {}",
                         cell.getBallotNo(),
@@ -643,7 +643,7 @@ public class FleaseProposer {
                 LOG.debug("P using masterEpoch {}", maxMasterEpoch+1);
             }
 
-            responses.clear();
+            cell.clearResponses();
 
             cell.addAction(ActionName.PROPOSER_PREPARE_SUCCESS);
             startAccept(cell);
@@ -754,8 +754,8 @@ public class FleaseProposer {
             return;
         }
 
+        cell.addResponse(msg);
         final List<FleaseMessage> responses = cell.getResponses();
-        responses.add(msg);
         if (cell.majorityAvail()) {
             LOG.debug("P majority responded for proposal {}: {}",
                         cell.getBallotNo(), responses.size());
@@ -796,7 +796,7 @@ public class FleaseProposer {
                 return;
             }
 
-            responses.clear();
+            cell.clearResponses();
 
             cell.addAction(ActionName.PROPOSER_ACCEPT_SUCCESS);
             learn(cell);
@@ -928,7 +928,8 @@ public class FleaseProposer {
         cell.setBallotNo(new ProposalNumber(
                 cell.getBallotNo().getProposalNo() + 1,
                 cell.getBallotNo().getSenderId()));
-        cell.getResponses().clear();
+        cell.clearResponses();
+        //cell.getResponses().clear();
 
         if (numFailures > config.getMaxRetries()) {
             cell.addAction(ActionName.PROPOSER_CANCEL_LEASE_FAILED);

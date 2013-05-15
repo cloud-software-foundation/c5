@@ -429,7 +429,7 @@ public class TCPCommunicator extends AbstractExecutionThreadService {
                 }
                 // send data
                 final long numBytesWritten = channel.write(srq.getData().getBuffer());
-                LOG.debug("wrote %d bytes to {}",numBytesWritten,channel.socket().getRemoteSocketAddress());
+                LOG.debug("wrote {} bytes to {}",numBytesWritten,channel.socket().getRemoteSocketAddress());
                 if (numBytesWritten == -1) {
                     LOG.info("client closed connection (EOF): {}", channel.socket().getRemoteSocketAddress());
                     // connection closed

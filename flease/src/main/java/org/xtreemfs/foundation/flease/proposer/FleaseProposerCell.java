@@ -143,6 +143,15 @@ public class FleaseProposerCell {
         this.masterEpochNumber = masterEpochNumber;
     }
 
+    public void clearResponses() {
+        responses.clear();
+    }
+
+    public void addResponse(FleaseMessage msg) {
+        // TODO check to see if this response is in the accepter list.
+        responses.add(msg);
+    }
+
     public static enum State {
         IDLE,
         WAIT_FOR_PREP_ACK,
@@ -192,9 +201,9 @@ public class FleaseProposerCell {
         this.actions = new CellActionList();
         this.cellId = cellId;
         this.acceptors = acceptors;
-        this.responses = new ArrayList(acceptors.size()+1);
-        this.listeners = new ArrayList(5);
-        this.ballotNo = new ProposalNumber(TimeSync.getGlobalTime(),senderId);
+        this.responses = new ArrayList<>(acceptors.size()+1);
+        this.listeners = new ArrayList<>(5);
+        this.ballotNo = new ProposalNumber(TimeSync.getGlobalTime(), senderId);
         this.majority = (int) Math.floor((acceptors.size()+1.0)/ 2.0) + 1;
         this.prevLease = Flease.EMPTY_LEASE;
         this.markedClose = false;
