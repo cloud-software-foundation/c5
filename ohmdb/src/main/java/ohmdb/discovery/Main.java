@@ -17,6 +17,7 @@
 package ohmdb.discovery;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.jetlang.channels.AsyncRequest;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
@@ -28,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.discovery.Beacon.Availability;
+import static ohmdb.discovery.BeaconService.NodeInfo;
 
 
 public class Main {
@@ -64,16 +66,20 @@ public class Main {
         fiber.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, BeaconService.NodeInfo>>() {
-                    @Override
-                    public void onMessage(ImmutableMap<String, BeaconService.NodeInfo> message) {
-                        System.out.println("State info:");
-                        for(BeaconService.NodeInfo info : message.values()) {
-                            System.out.println(info);
-                        }
-                    }
-                });
+                ListenableFuture<ImmutableMap<String,NodeInfo>> fut = beaconService.getState();
+                try {
+                    ImmutableMap<String,NodeInfo> state = fut.get();
 
+                    System.out.println("State info:");
+                    for(BeaconService.NodeInfo info : state.values()) {
+                        System.out.println(info);
+                    }
+
+                } catch (InterruptedException e) {
+                    // ignore
+                } catch (ExecutionException e) {
+                    // ignore
+                }
             }
         }, 10, 10, TimeUnit.SECONDS);
     }
