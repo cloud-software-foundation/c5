@@ -59,6 +59,18 @@
       <version>14.0.1</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jetlang</groupId>
+      <artifactId>jetlang</artifactId>
+      <version>0.2.10</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
+    </dependency>
+
   </dependencies>
 
 </project>

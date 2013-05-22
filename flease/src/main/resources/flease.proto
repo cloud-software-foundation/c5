@@ -1,0 +1,61 @@
+package ohmdb.flease;
+
+option java_package = "ohmdb.flease";
+option optimize_for = SPEED;
+
+// Reference flease_paper_ipdps.
+message FleaseRequestMessage {
+    enum MessageType {
+        READ = 0;
+        WRITE = 1;
+    }
+    // Message and lease identification for the RPC system
+    optional string        lease_id = 1;
+    //optional int64         message_id = 2;
+    optional MessageType   message_type = 3;
+
+    // Ballot number, aka 'k' in Algorithm 1.  Used by READ and WRITE messages
+    optional BallotNumber  k = 4;
+    // Lease data. Called 'v(i)' in Algorithm 1.
+    // Used by WRITE message type only.
+    optional Lease         lease = 5;
+}
+
+message FleaseReplyMessage {
+    enum MessageType {
+        ackREAD = 1;
+        nackREAD = 2;
+        ackWRITE = 3;
+        nackWRITE = 4;
+    }
+
+    optional string      lease_id = 1;
+    //optional int64       message_id = 2;
+    optional MessageType message_type = 3;
+
+    // Used by ackREAD message only.
+    optional Lease          lease = 4;
+    // Used by all message types
+    optional BallotNumber   k = 5;
+    // Used by ackREAD message type only!
+    optional BallotNumber   kprime = 6;
+}
+
+message Lease {
+    // The millis time which this lease expires at.
+    optional int64  lease_expiry = 1;
+    // who the lease is for... we can augment the data structure here.
+    optional string datum = 2;
+}
+
+// As per page 5
+message BallotNumber {
+    // We use the current time as the ballot number (pg 5).
+    // Aka k.t from page 5
+    optional int64 ballot_number = 1;
+
+    // message number r that is used to distinguish the messages sent by a process within the same interval.
+    optional int64 message_number = 2;
+    // aka k.id from page 5.
+    optional int64 id = 3;
+}
