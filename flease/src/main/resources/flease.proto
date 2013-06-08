@@ -29,9 +29,9 @@ message FleaseReplyMessage {
         nackWRITE = 4;
     }
 
-    optional string      lease_id = 1;
-    //optional int64       message_id = 2;
-    optional MessageType message_type = 3;
+    optional string         lease_id = 1;
+    //optional int64          message_in_reply_to = 2;
+    optional MessageType    message_type = 3;
 
     // Used by ackREAD message only.
     optional Lease          lease = 4;

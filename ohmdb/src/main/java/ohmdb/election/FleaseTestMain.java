@@ -135,7 +135,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
                 AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, NodeInfo>>() {
                     @Override
                     public void onMessage(ImmutableMap<String, NodeInfo> message) {
-                        if (message.size() >= 3) {
+                        if (message.size() >= 2) {
                             // yay...
                             LOG.info("Got more than 3 peers, continuing");
                             future.set(message);

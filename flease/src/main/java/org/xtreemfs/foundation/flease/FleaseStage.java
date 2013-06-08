@@ -200,7 +200,7 @@ public class FleaseStage extends AbstractExecutionThreadService implements Learn
 
     public void batchOpenCells(ASCIIString[] cellIds, List<InetSocketAddress>[] acceptors, boolean requestMasterEpoch) {
 
-        List<Request> batch = new ArrayList(cellIds.length);
+        List<Request> batch = new ArrayList<>(cellIds.length);
         for (int i =0; i < cellIds.length; i++) {
             Request rq = new Request(Request.RequestType.OPEN_CELL_REQUEST);
             rq.cellId = cellIds[i];

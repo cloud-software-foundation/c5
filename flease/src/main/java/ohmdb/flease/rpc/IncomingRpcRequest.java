@@ -14,39 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ohmdb.flease;
+package ohmdb.flease.rpc;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
+import ohmdb.flease.BallotNumber;
+import ohmdb.flease.Flease;
+
+import java.util.UUID;
 
 import static ohmdb.flease.Flease.FleaseRequestMessage;
 
 /**
- * Used to send RPC requests from the lease fiber.
+ * An incoming request from a peer.
  */
-public class FleaseRpcRequest extends RetriedMessage {
-
+public class IncomingRpcRequest {
+    public final long   messageId;
+    public final UUID from;
     public final FleaseRequestMessage message;
-    public final InetSocketAddress remoteAddress;
 
     /**
-     * Default constructor.  Set retries to '10', retry spacing to '2', timeUnit = SECONDS.
-     * @param message
-     * @param remoteAddress
+     * Constructor used by RPC subsystem.
+     * @param messageId the request message id.
+     * @param from      the other peer we are talking to.
+     * @param message   the actual message contents.
      */
-    public FleaseRpcRequest(FleaseRequestMessage message, InetSocketAddress remoteAddress) {
-        this(message, remoteAddress,
-                10,
-                2,
-                TimeUnit.SECONDS);
-    }
-
-    public FleaseRpcRequest(FleaseRequestMessage message, InetSocketAddress remoteAddress,
-                            int retries, int retrySpacing, TimeUnit timeUnit) {
-        super(retries, retrySpacing, timeUnit);
-
+    IncomingRpcRequest(long messageId, UUID from, FleaseRequestMessage message) {
+        this.messageId = messageId;
+        this.from = from;
         this.message = message;
-        this.remoteAddress = remoteAddress;
     }
 
     public BallotNumber getBallotNumber() {

@@ -1,0 +1,18 @@
+package ohmdb.flease;
+
+import "flease.proto";
+
+option java_package = "ohmdb.flease";
+option optimize_for = SPEED;
+
+message FleaseWireMessage {
+    // Envelope
+    optional int64                 message_id = 1;
+    optional string                sender_id = 2;
+    // The destination is implied by who received the message.
+    optional string                destination_id = 3;
+
+    // Payload/content
+    optional FleaseRequestMessage  request_message = 4;
+    optional FleaseReplyMessage    reply_message = 5;
+}

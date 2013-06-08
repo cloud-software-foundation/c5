@@ -16,16 +16,20 @@
  */
 package ohmdb.flease;
 
+import com.google.common.collect.ImmutableList;
+import ohmdb.flease.rpc.IncomingRpcReply;
+
 import java.util.List;
 
 /**
  * Timed out waiting for enough ackREAD.
  */
 public class FleaseReadTimeoutException extends Throwable {
-    final List<FleaseRpcReply> replies;
+    final List<IncomingRpcReply> replies;
     final int majority;
-    public FleaseReadTimeoutException(List<FleaseRpcReply> replies, int majority) {
-        this.replies = replies;
+
+    public FleaseReadTimeoutException(List<IncomingRpcReply> replies, int majority) {
+        this.replies = ImmutableList.copyOf(replies);
         this.majority = majority;
     }
 
@@ -33,9 +37,9 @@ public class FleaseReadTimeoutException extends Throwable {
     public String toString() {
         StringBuilder sb =  new StringBuilder();
         sb.append("Lease acquire timed out, we got replies from ").append(replies.size()).append(" peers, majority needed: ").append(majority);
-        sb.append(", hosts we got replies from were: \n ");
-        for( FleaseRpcReply reply : replies) {
-            sb.append(reply.remoteAddress);
+        sb.append(", peers we got replies from were: \n ");
+        for( IncomingRpcReply reply : replies) {
+            sb.append(reply.from);
             sb.append(" ");
         }
 

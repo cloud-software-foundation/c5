@@ -14,27 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ohmdb.flease;
+package ohmdb.flease.rpc;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
+import ohmdb.flease.BallotNumber;
+import ohmdb.flease.Flease;
+
+import java.util.UUID;
 
 import static ohmdb.flease.Flease.FleaseReplyMessage;
 
 /**
- * jetlang wrapper message
+ * A reply to an IncomingRpcRequest.
  */
-public class FleaseRpcReply extends RetriedMessage {
+public class OutgoingRpcReply {
 
+    public final long messageIdInReplyTo;
     public final FleaseReplyMessage message;
-    public final InetSocketAddress remoteAddress;
+    public final UUID to;
 
-    public FleaseRpcReply(FleaseReplyMessage message, InetSocketAddress remoteAddress) {
-        // TODO change this default
-        super(10, 2, TimeUnit.SECONDS);
-        // include information about the sender?
+    public OutgoingRpcReply(IncomingRpcRequest requestInReplyTo, FleaseReplyMessage message) {
+        this.messageIdInReplyTo = requestInReplyTo.messageId;
         this.message = message;
-        this.remoteAddress = remoteAddress;
+        this.to = requestInReplyTo.from;
     }
 
     public boolean isNackRead() {
@@ -58,47 +59,40 @@ public class FleaseRpcReply extends RetriedMessage {
     }
 
     // Static constructors for convenience.
-    public static FleaseRpcReply getNackReadMessage(FleaseRpcRequest inReplyTo, BallotNumber k) {
-        // Copy the message id, lease id from the request.
+    public static OutgoingRpcReply getNackReadMessage(IncomingRpcRequest inReplyTo, BallotNumber k) {
         FleaseReplyMessage.Builder builder = FleaseReplyMessage.newBuilder();
         builder.setMessageType(FleaseReplyMessage.MessageType.nackREAD)
-                .setMessageId(inReplyTo.message.getMessageId())
                 .setLeaseId(inReplyTo.message.getLeaseId())
                 .setK(k.getMessage());
-        return new FleaseRpcReply(builder.build(), inReplyTo.remoteAddress);
+        return new OutgoingRpcReply(inReplyTo, builder.build());
     }
 
-    public static FleaseRpcReply getAckReadMessage(FleaseRpcRequest inReplyTo,
+    public static OutgoingRpcReply getAckReadMessage(IncomingRpcRequest inReplyTo,
                                                    BallotNumber k,
                                                    BallotNumber write,
                                                    Flease.Lease value) {
         FleaseReplyMessage.Builder builder = FleaseReplyMessage.newBuilder();
         builder.setMessageType(FleaseReplyMessage.MessageType.ackREAD)
-                .setMessageId(inReplyTo.message.getMessageId())
                 .setLeaseId(inReplyTo.message.getLeaseId())
                 .setK(k.getMessage())
                 .setKprime(write.getMessage())
                 .setLease(value);
-        return new FleaseRpcReply(builder.build(), inReplyTo.remoteAddress);
+        return new OutgoingRpcReply(inReplyTo,  builder.build());
     }
 
-    public static FleaseRpcReply getNackWriteMessage(FleaseRpcRequest inReplyTo, BallotNumber k) {
-        // Copy the message id, lease id from the request.
+    public static OutgoingRpcReply getNackWriteMessage(IncomingRpcRequest inReplyTo, BallotNumber k) {
         FleaseReplyMessage.Builder builder = FleaseReplyMessage.newBuilder();
         builder.setMessageType(FleaseReplyMessage.MessageType.nackWRITE)
-                .setMessageId(inReplyTo.message.getMessageId())
                 .setLeaseId(inReplyTo.message.getLeaseId())
                 .setK(k.getMessage());
-        return new FleaseRpcReply(builder.build(), inReplyTo.remoteAddress);
+        return new OutgoingRpcReply(inReplyTo, builder.build());
     }
 
-    public static FleaseRpcReply getAckWriteMessage(FleaseRpcRequest inReplyTo, BallotNumber k) {
-        // Copy the message id, lease id from the request.
+    public static OutgoingRpcReply getAckWriteMessage(IncomingRpcRequest inReplyTo, BallotNumber k) {
         FleaseReplyMessage.Builder builder = FleaseReplyMessage.newBuilder();
         builder.setMessageType(FleaseReplyMessage.MessageType.ackWRITE)
-                .setMessageId(inReplyTo.message.getMessageId())
                 .setLeaseId(inReplyTo.message.getLeaseId())
                 .setK(k.getMessage());
-        return new FleaseRpcReply(builder.build(), inReplyTo.remoteAddress);
+        return new OutgoingRpcReply(inReplyTo, builder.build());
     }
 }

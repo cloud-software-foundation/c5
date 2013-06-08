@@ -38,23 +38,21 @@ public final class Flease {
     com.google.protobuf.ByteString
         getLeaseIdBytes();
 
-    // optional int64 message_id = 2;
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    boolean hasMessageId();
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    long getMessageId();
-
     // optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;
     /**
      * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64         message_id = 2;
+     * </pre>
      */
     boolean hasMessageType();
     /**
      * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64         message_id = 2;
+     * </pre>
      */
     ohmdb.flease.Flease.FleaseRequestMessage.MessageType getMessageType();
 
@@ -173,25 +171,20 @@ public final class Flease {
               leaseId_ = input.readBytes();
               break;
             }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              messageId_ = input.readInt64();
-              break;
-            }
             case 24: {
               int rawValue = input.readEnum();
               ohmdb.flease.Flease.FleaseRequestMessage.MessageType value = ohmdb.flease.Flease.FleaseRequestMessage.MessageType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(3, rawValue);
               } else {
-                bitField0_ |= 0x00000004;
+                bitField0_ |= 0x00000002;
                 messageType_ = value;
               }
               break;
             }
             case 34: {
               ohmdb.flease.Flease.BallotNumber.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
                 subBuilder = k_.toBuilder();
               }
               k_ = input.readMessage(ohmdb.flease.Flease.BallotNumber.PARSER, extensionRegistry);
@@ -199,12 +192,12 @@ public final class Flease {
                 subBuilder.mergeFrom(k_);
                 k_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000004;
               break;
             }
             case 42: {
               ohmdb.flease.Flease.Lease.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) == 0x00000010)) {
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
                 subBuilder = lease_.toBuilder();
               }
               lease_ = input.readMessage(ohmdb.flease.Flease.Lease.PARSER, extensionRegistry);
@@ -212,7 +205,7 @@ public final class Flease {
                 subBuilder.mergeFrom(lease_);
                 lease_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000008;
               break;
             }
           }
@@ -392,33 +385,25 @@ public final class Flease {
       }
     }
 
-    // optional int64 message_id = 2;
-    public static final int MESSAGE_ID_FIELD_NUMBER = 2;
-    private long messageId_;
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    public boolean hasMessageId() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    public long getMessageId() {
-      return messageId_;
-    }
-
     // optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;
     public static final int MESSAGE_TYPE_FIELD_NUMBER = 3;
     private ohmdb.flease.Flease.FleaseRequestMessage.MessageType messageType_;
     /**
      * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64         message_id = 2;
+     * </pre>
      */
     public boolean hasMessageType() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64         message_id = 2;
+     * </pre>
      */
     public ohmdb.flease.Flease.FleaseRequestMessage.MessageType getMessageType() {
       return messageType_;
@@ -435,7 +420,7 @@ public final class Flease {
      * </pre>
      */
     public boolean hasK() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional .ohmdb.flease.BallotNumber k = 4;</code>
@@ -470,7 +455,7 @@ public final class Flease {
      * </pre>
      */
     public boolean hasLease() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional .ohmdb.flease.Lease lease = 5;</code>
@@ -497,7 +482,6 @@ public final class Flease {
 
     private void initFields() {
       leaseId_ = "";
-      messageId_ = 0L;
       messageType_ = ohmdb.flease.Flease.FleaseRequestMessage.MessageType.READ;
       k_ = ohmdb.flease.Flease.BallotNumber.getDefaultInstance();
       lease_ = ohmdb.flease.Flease.Lease.getDefaultInstance();
@@ -518,15 +502,12 @@ public final class Flease {
         output.writeBytes(1, getLeaseIdBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(2, messageId_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeEnum(3, messageType_.getNumber());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(4, k_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(5, lease_);
       }
       getUnknownFields().writeTo(output);
@@ -544,17 +525,13 @@ public final class Flease {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, messageId_);
+          .computeEnumSize(3, messageType_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(3, messageType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, k_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, lease_);
       }
@@ -682,22 +659,20 @@ public final class Flease {
         super.clear();
         leaseId_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        messageId_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
         messageType_ = ohmdb.flease.Flease.FleaseRequestMessage.MessageType.READ;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (kBuilder_ == null) {
           k_ = ohmdb.flease.Flease.BallotNumber.getDefaultInstance();
         } else {
           kBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         if (leaseBuilder_ == null) {
           lease_ = ohmdb.flease.Flease.Lease.getDefaultInstance();
         } else {
           leaseBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -733,21 +708,17 @@ public final class Flease {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.messageId_ = messageId_;
+        result.messageType_ = messageType_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
-        }
-        result.messageType_ = messageType_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
         }
         if (kBuilder_ == null) {
           result.k_ = k_;
         } else {
           result.k_ = kBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         if (leaseBuilder_ == null) {
           result.lease_ = lease_;
@@ -774,9 +745,6 @@ public final class Flease {
           bitField0_ |= 0x00000001;
           leaseId_ = other.leaseId_;
           onChanged();
-        }
-        if (other.hasMessageId()) {
-          setMessageId(other.getMessageId());
         }
         if (other.hasMessageType()) {
           setMessageType(other.getMessageType());
@@ -912,70 +880,53 @@ public final class Flease {
         return this;
       }
 
-      // optional int64 message_id = 2;
-      private long messageId_ ;
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public boolean hasMessageId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public long getMessageId() {
-        return messageId_;
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public Builder setMessageId(long value) {
-        bitField0_ |= 0x00000002;
-        messageId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public Builder clearMessageId() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        messageId_ = 0L;
-        onChanged();
-        return this;
-      }
-
       // optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;
       private ohmdb.flease.Flease.FleaseRequestMessage.MessageType messageType_ = ohmdb.flease.Flease.FleaseRequestMessage.MessageType.READ;
       /**
        * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64         message_id = 2;
+       * </pre>
        */
       public boolean hasMessageType() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64         message_id = 2;
+       * </pre>
        */
       public ohmdb.flease.Flease.FleaseRequestMessage.MessageType getMessageType() {
         return messageType_;
       }
       /**
        * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64         message_id = 2;
+       * </pre>
        */
       public Builder setMessageType(ohmdb.flease.Flease.FleaseRequestMessage.MessageType value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000002;
         messageType_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>optional .ohmdb.flease.FleaseRequestMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64         message_id = 2;
+       * </pre>
        */
       public Builder clearMessageType() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         messageType_ = ohmdb.flease.Flease.FleaseRequestMessage.MessageType.READ;
         onChanged();
         return this;
@@ -993,7 +944,7 @@ public final class Flease {
        * </pre>
        */
       public boolean hasK() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional .ohmdb.flease.BallotNumber k = 4;</code>
@@ -1026,7 +977,7 @@ public final class Flease {
         } else {
           kBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -1044,7 +995,7 @@ public final class Flease {
         } else {
           kBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -1056,7 +1007,7 @@ public final class Flease {
        */
       public Builder mergeK(ohmdb.flease.Flease.BallotNumber value) {
         if (kBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
               k_ != ohmdb.flease.Flease.BallotNumber.getDefaultInstance()) {
             k_ =
               ohmdb.flease.Flease.BallotNumber.newBuilder(k_).mergeFrom(value).buildPartial();
@@ -1067,7 +1018,7 @@ public final class Flease {
         } else {
           kBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -1084,7 +1035,7 @@ public final class Flease {
         } else {
           kBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
       /**
@@ -1095,7 +1046,7 @@ public final class Flease {
        * </pre>
        */
       public ohmdb.flease.Flease.BallotNumber.Builder getKBuilder() {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         onChanged();
         return getKFieldBuilder().getBuilder();
       }
@@ -1147,7 +1098,7 @@ public final class Flease {
        * </pre>
        */
       public boolean hasLease() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional .ohmdb.flease.Lease lease = 5;</code>
@@ -1182,7 +1133,7 @@ public final class Flease {
         } else {
           leaseBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -1201,7 +1152,7 @@ public final class Flease {
         } else {
           leaseBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -1214,7 +1165,7 @@ public final class Flease {
        */
       public Builder mergeLease(ohmdb.flease.Flease.Lease value) {
         if (leaseBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010) &&
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
               lease_ != ohmdb.flease.Flease.Lease.getDefaultInstance()) {
             lease_ =
               ohmdb.flease.Flease.Lease.newBuilder(lease_).mergeFrom(value).buildPartial();
@@ -1225,7 +1176,7 @@ public final class Flease {
         } else {
           leaseBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -1243,7 +1194,7 @@ public final class Flease {
         } else {
           leaseBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
       /**
@@ -1255,7 +1206,7 @@ public final class Flease {
        * </pre>
        */
       public ohmdb.flease.Flease.Lease.Builder getLeaseBuilder() {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         onChanged();
         return getLeaseFieldBuilder().getBuilder();
       }
@@ -1325,23 +1276,21 @@ public final class Flease {
     com.google.protobuf.ByteString
         getLeaseIdBytes();
 
-    // optional int64 message_id = 2;
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    boolean hasMessageId();
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    long getMessageId();
-
     // optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;
     /**
      * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64          message_in_reply_to = 2;
+     * </pre>
      */
     boolean hasMessageType();
     /**
      * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64          message_in_reply_to = 2;
+     * </pre>
      */
     ohmdb.flease.Flease.FleaseReplyMessage.MessageType getMessageType();
 
@@ -1479,25 +1428,20 @@ public final class Flease {
               leaseId_ = input.readBytes();
               break;
             }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              messageId_ = input.readInt64();
-              break;
-            }
             case 24: {
               int rawValue = input.readEnum();
               ohmdb.flease.Flease.FleaseReplyMessage.MessageType value = ohmdb.flease.Flease.FleaseReplyMessage.MessageType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(3, rawValue);
               } else {
-                bitField0_ |= 0x00000004;
+                bitField0_ |= 0x00000002;
                 messageType_ = value;
               }
               break;
             }
             case 34: {
               ohmdb.flease.Flease.Lease.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
                 subBuilder = lease_.toBuilder();
               }
               lease_ = input.readMessage(ohmdb.flease.Flease.Lease.PARSER, extensionRegistry);
@@ -1505,12 +1449,12 @@ public final class Flease {
                 subBuilder.mergeFrom(lease_);
                 lease_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000004;
               break;
             }
             case 42: {
               ohmdb.flease.Flease.BallotNumber.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000010) == 0x00000010)) {
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
                 subBuilder = k_.toBuilder();
               }
               k_ = input.readMessage(ohmdb.flease.Flease.BallotNumber.PARSER, extensionRegistry);
@@ -1518,12 +1462,12 @@ public final class Flease {
                 subBuilder.mergeFrom(k_);
                 k_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000008;
               break;
             }
             case 50: {
               ohmdb.flease.Flease.BallotNumber.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) == 0x00000020)) {
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
                 subBuilder = kprime_.toBuilder();
               }
               kprime_ = input.readMessage(ohmdb.flease.Flease.BallotNumber.PARSER, extensionRegistry);
@@ -1531,7 +1475,7 @@ public final class Flease {
                 subBuilder.mergeFrom(kprime_);
                 kprime_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000020;
+              bitField0_ |= 0x00000010;
               break;
             }
           }
@@ -1717,33 +1661,25 @@ public final class Flease {
       }
     }
 
-    // optional int64 message_id = 2;
-    public static final int MESSAGE_ID_FIELD_NUMBER = 2;
-    private long messageId_;
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    public boolean hasMessageId() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional int64 message_id = 2;</code>
-     */
-    public long getMessageId() {
-      return messageId_;
-    }
-
     // optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;
     public static final int MESSAGE_TYPE_FIELD_NUMBER = 3;
     private ohmdb.flease.Flease.FleaseReplyMessage.MessageType messageType_;
     /**
      * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64          message_in_reply_to = 2;
+     * </pre>
      */
     public boolean hasMessageType() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+     *
+     * <pre>
+     *optional int64          message_in_reply_to = 2;
+     * </pre>
      */
     public ohmdb.flease.Flease.FleaseReplyMessage.MessageType getMessageType() {
       return messageType_;
@@ -1760,7 +1696,7 @@ public final class Flease {
      * </pre>
      */
     public boolean hasLease() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional .ohmdb.flease.Lease lease = 4;</code>
@@ -1794,7 +1730,7 @@ public final class Flease {
      * </pre>
      */
     public boolean hasK() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional .ohmdb.flease.BallotNumber k = 5;</code>
@@ -1828,7 +1764,7 @@ public final class Flease {
      * </pre>
      */
     public boolean hasKprime() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional .ohmdb.flease.BallotNumber kprime = 6;</code>
@@ -1853,7 +1789,6 @@ public final class Flease {
 
     private void initFields() {
       leaseId_ = "";
-      messageId_ = 0L;
       messageType_ = ohmdb.flease.Flease.FleaseReplyMessage.MessageType.ackREAD;
       lease_ = ohmdb.flease.Flease.Lease.getDefaultInstance();
       k_ = ohmdb.flease.Flease.BallotNumber.getDefaultInstance();
@@ -1875,18 +1810,15 @@ public final class Flease {
         output.writeBytes(1, getLeaseIdBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(2, messageId_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeEnum(3, messageType_.getNumber());
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeMessage(4, lease_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(5, k_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeMessage(6, kprime_);
       }
       getUnknownFields().writeTo(output);
@@ -1904,21 +1836,17 @@ public final class Flease {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, messageId_);
+          .computeEnumSize(3, messageType_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(3, messageType_.getNumber());
+          .computeMessageSize(4, lease_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, lease_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, k_);
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, kprime_);
       }
@@ -2043,28 +1971,26 @@ public final class Flease {
         super.clear();
         leaseId_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
-        messageId_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
         messageType_ = ohmdb.flease.Flease.FleaseReplyMessage.MessageType.ackREAD;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (leaseBuilder_ == null) {
           lease_ = ohmdb.flease.Flease.Lease.getDefaultInstance();
         } else {
           leaseBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         if (kBuilder_ == null) {
           k_ = ohmdb.flease.Flease.BallotNumber.getDefaultInstance();
         } else {
           kBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (kprimeBuilder_ == null) {
           kprime_ = ohmdb.flease.Flease.BallotNumber.getDefaultInstance();
         } else {
           kprimeBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -2100,29 +2026,25 @@ public final class Flease {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.messageId_ = messageId_;
+        result.messageType_ = messageType_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
-        }
-        result.messageType_ = messageType_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
         }
         if (leaseBuilder_ == null) {
           result.lease_ = lease_;
         } else {
           result.lease_ = leaseBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         if (kBuilder_ == null) {
           result.k_ = k_;
         } else {
           result.k_ = kBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
         }
         if (kprimeBuilder_ == null) {
           result.kprime_ = kprime_;
@@ -2149,9 +2071,6 @@ public final class Flease {
           bitField0_ |= 0x00000001;
           leaseId_ = other.leaseId_;
           onChanged();
-        }
-        if (other.hasMessageId()) {
-          setMessageId(other.getMessageId());
         }
         if (other.hasMessageType()) {
           setMessageType(other.getMessageType());
@@ -2266,70 +2185,53 @@ public final class Flease {
         return this;
       }
 
-      // optional int64 message_id = 2;
-      private long messageId_ ;
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public boolean hasMessageId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public long getMessageId() {
-        return messageId_;
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public Builder setMessageId(long value) {
-        bitField0_ |= 0x00000002;
-        messageId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int64 message_id = 2;</code>
-       */
-      public Builder clearMessageId() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        messageId_ = 0L;
-        onChanged();
-        return this;
-      }
-
       // optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;
       private ohmdb.flease.Flease.FleaseReplyMessage.MessageType messageType_ = ohmdb.flease.Flease.FleaseReplyMessage.MessageType.ackREAD;
       /**
        * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64          message_in_reply_to = 2;
+       * </pre>
        */
       public boolean hasMessageType() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64          message_in_reply_to = 2;
+       * </pre>
        */
       public ohmdb.flease.Flease.FleaseReplyMessage.MessageType getMessageType() {
         return messageType_;
       }
       /**
        * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64          message_in_reply_to = 2;
+       * </pre>
        */
       public Builder setMessageType(ohmdb.flease.Flease.FleaseReplyMessage.MessageType value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000002;
         messageType_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>optional .ohmdb.flease.FleaseReplyMessage.MessageType message_type = 3;</code>
+       *
+       * <pre>
+       *optional int64          message_in_reply_to = 2;
+       * </pre>
        */
       public Builder clearMessageType() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         messageType_ = ohmdb.flease.Flease.FleaseReplyMessage.MessageType.ackREAD;
         onChanged();
         return this;
@@ -2347,7 +2249,7 @@ public final class Flease {
        * </pre>
        */
       public boolean hasLease() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional .ohmdb.flease.Lease lease = 4;</code>
@@ -2380,7 +2282,7 @@ public final class Flease {
         } else {
           leaseBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -2398,7 +2300,7 @@ public final class Flease {
         } else {
           leaseBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -2410,7 +2312,7 @@ public final class Flease {
        */
       public Builder mergeLease(ohmdb.flease.Flease.Lease value) {
         if (leaseBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
               lease_ != ohmdb.flease.Flease.Lease.getDefaultInstance()) {
             lease_ =
               ohmdb.flease.Flease.Lease.newBuilder(lease_).mergeFrom(value).buildPartial();
@@ -2421,7 +2323,7 @@ public final class Flease {
         } else {
           leaseBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
@@ -2438,7 +2340,7 @@ public final class Flease {
         } else {
           leaseBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
       /**
@@ -2449,7 +2351,7 @@ public final class Flease {
        * </pre>
        */
       public ohmdb.flease.Flease.Lease.Builder getLeaseBuilder() {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000004;
         onChanged();
         return getLeaseFieldBuilder().getBuilder();
       }
@@ -2500,7 +2402,7 @@ public final class Flease {
        * </pre>
        */
       public boolean hasK() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional .ohmdb.flease.BallotNumber k = 5;</code>
@@ -2533,7 +2435,7 @@ public final class Flease {
         } else {
           kBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -2551,7 +2453,7 @@ public final class Flease {
         } else {
           kBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -2563,7 +2465,7 @@ public final class Flease {
        */
       public Builder mergeK(ohmdb.flease.Flease.BallotNumber value) {
         if (kBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010) &&
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
               k_ != ohmdb.flease.Flease.BallotNumber.getDefaultInstance()) {
             k_ =
               ohmdb.flease.Flease.BallotNumber.newBuilder(k_).mergeFrom(value).buildPartial();
@@ -2574,7 +2476,7 @@ public final class Flease {
         } else {
           kBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
@@ -2591,7 +2493,7 @@ public final class Flease {
         } else {
           kBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
       /**
@@ -2602,7 +2504,7 @@ public final class Flease {
        * </pre>
        */
       public ohmdb.flease.Flease.BallotNumber.Builder getKBuilder() {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         onChanged();
         return getKFieldBuilder().getBuilder();
       }
@@ -2653,7 +2555,7 @@ public final class Flease {
        * </pre>
        */
       public boolean hasKprime() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional .ohmdb.flease.BallotNumber kprime = 6;</code>
@@ -2686,7 +2588,7 @@ public final class Flease {
         } else {
           kprimeBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -2704,7 +2606,7 @@ public final class Flease {
         } else {
           kprimeBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -2716,7 +2618,7 @@ public final class Flease {
        */
       public Builder mergeKprime(ohmdb.flease.Flease.BallotNumber value) {
         if (kprimeBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) == 0x00000020) &&
+          if (((bitField0_ & 0x00000010) == 0x00000010) &&
               kprime_ != ohmdb.flease.Flease.BallotNumber.getDefaultInstance()) {
             kprime_ =
               ohmdb.flease.Flease.BallotNumber.newBuilder(kprime_).mergeFrom(value).buildPartial();
@@ -2727,7 +2629,7 @@ public final class Flease {
         } else {
           kprimeBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -2744,7 +2646,7 @@ public final class Flease {
         } else {
           kprimeBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
       /**
@@ -2755,7 +2657,7 @@ public final class Flease {
        * </pre>
        */
       public ohmdb.flease.Flease.BallotNumber.Builder getKprimeBuilder() {
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         onChanged();
         return getKprimeFieldBuilder().getBuilder();
       }
@@ -4136,17 +4038,16 @@ public final class Flease {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014flease.proto\022\014ohmdb.flease\"\361\001\n\024FleaseR" +
-      "equestMessage\022\020\n\010lease_id\030\001 \001(\t\022\022\n\nmessa" +
-      "ge_id\030\002 \001(\003\022D\n\014message_type\030\003 \001(\0162..ohmd" +
-      "b.flease.FleaseRequestMessage.MessageTyp" +
-      "e\022%\n\001k\030\004 \001(\0132\032.ohmdb.flease.BallotNumber" +
-      "\022\"\n\005lease\030\005 \001(\0132\023.ohmdb.flease.Lease\"\"\n\013" +
-      "MessageType\022\010\n\004READ\020\000\022\t\n\005WRITE\020\001\"\274\002\n\022Fle" +
-      "aseReplyMessage\022\020\n\010lease_id\030\001 \001(\t\022\022\n\nmes" +
-      "sage_id\030\002 \001(\003\022B\n\014message_type\030\003 \001(\0162,.oh" +
-      "mdb.flease.FleaseReplyMessage.MessageTyp",
-      "e\022\"\n\005lease\030\004 \001(\0132\023.ohmdb.flease.Lease\022%\n" +
+      "\n\014flease.proto\022\014ohmdb.flease\"\335\001\n\024FleaseR" +
+      "equestMessage\022\020\n\010lease_id\030\001 \001(\t\022D\n\014messa" +
+      "ge_type\030\003 \001(\0162..ohmdb.flease.FleaseReque" +
+      "stMessage.MessageType\022%\n\001k\030\004 \001(\0132\032.ohmdb" +
+      ".flease.BallotNumber\022\"\n\005lease\030\005 \001(\0132\023.oh" +
+      "mdb.flease.Lease\"\"\n\013MessageType\022\010\n\004READ\020" +
+      "\000\022\t\n\005WRITE\020\001\"\250\002\n\022FleaseReplyMessage\022\020\n\010l" +
+      "ease_id\030\001 \001(\t\022B\n\014message_type\030\003 \001(\0162,.oh" +
+      "mdb.flease.FleaseReplyMessage.MessageTyp" +
+      "e\022\"\n\005lease\030\004 \001(\0132\023.ohmdb.flease.Lease\022%\n",
       "\001k\030\005 \001(\0132\032.ohmdb.flease.BallotNumber\022*\n\006" +
       "kprime\030\006 \001(\0132\032.ohmdb.flease.BallotNumber" +
       "\"E\n\013MessageType\022\013\n\007ackREAD\020\001\022\014\n\010nackREAD" +
@@ -4166,13 +4067,13 @@ public final class Flease {
           internal_static_ohmdb_flease_FleaseRequestMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ohmdb_flease_FleaseRequestMessage_descriptor,
-              new java.lang.String[] { "LeaseId", "MessageId", "MessageType", "K", "Lease", });
+              new java.lang.String[] { "LeaseId", "MessageType", "K", "Lease", });
           internal_static_ohmdb_flease_FleaseReplyMessage_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_ohmdb_flease_FleaseReplyMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ohmdb_flease_FleaseReplyMessage_descriptor,
-              new java.lang.String[] { "LeaseId", "MessageId", "MessageType", "Lease", "K", "Kprime", });
+              new java.lang.String[] { "LeaseId", "MessageType", "Lease", "K", "Kprime", });
           internal_static_ohmdb_flease_Lease_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_ohmdb_flease_Lease_fieldAccessorTable = new

@@ -23,13 +23,4 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class RetriedMessage {
 
-    public final int retries;
-    public final int retrySpacing;
-    public final TimeUnit timeUnit;
-
-    public RetriedMessage(int retries, int retrySpacing, TimeUnit timeUnit) {
-        this.retries = retries;
-        this.retrySpacing = retrySpacing;
-        this.timeUnit = timeUnit;
-    }
 }

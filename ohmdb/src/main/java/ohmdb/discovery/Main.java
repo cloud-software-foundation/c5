@@ -18,11 +18,27 @@ package ohmdb.discovery;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 import org.jetlang.channels.AsyncRequest;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -33,26 +49,45 @@ import static ohmdb.discovery.BeaconService.NodeInfo;
 
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, SocketException, ExecutionException {
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    final BeaconService beaconService;
+    private final String clusterName;
+    private final int discoveryPort;
+    private final int servicePort;
+    private final String nodeId;
+
+    Main(String clusterName) throws SocketException, InterruptedException {
+        this.clusterName = clusterName;
+
+        // a non-privileged port between 1024 -> ....
+        this.discoveryPort = (Math.abs(clusterName.hashCode()) % 16384) + 1024;
+        System.out.println("Cluster port = " + discoveryPort);
+
+        this.servicePort = discoveryPort + (int)(Math.random() * 5000);
+
+        Availability.Builder builder = Availability.newBuilder();
+        builder.setNetworkPort(servicePort);
+        nodeId = UUID.randomUUID().toString();
+        builder.setNodeId(nodeId);
+
+
+        beaconService = new BeaconService(discoveryPort, builder.buildPartial());
+    }
+
+    public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             System.out.println("Specify cluster name as arg1 pls");
             System.exit(1);
         }
         String clusterName = args[0];
 
-        // a non-privileged port between 1024 -> ....
-        final int port = (Math.abs(clusterName.hashCode()) % 16384) + 1024;
-        System.out.println("Cluster port = " + port);
 
-        int ourMasterPort = port + (int)(Math.random() * 5000);
+        new Main(clusterName).run();
+    }
 
-        Availability.Builder builder = Availability.newBuilder();
-        builder.setNetworkPort(ourMasterPort);
-        builder.setNodeId(UUID.randomUUID().toString());
-
-
-        final BeaconService beaconService = new BeaconService(port, builder.buildPartial());
+    public void run() throws Exception {
         beaconService.startAndWait();
+
 
         System.out.println("Started");
 
@@ -75,12 +110,88 @@ public class Main {
                         System.out.println(info);
                     }
 
-                } catch (InterruptedException e) {
-                    // ignore
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     // ignore
                 }
             }
         }, 10, 10, TimeUnit.SECONDS);
+
+
+        ServerBootstrap b = new ServerBootstrap();
+        NioEventLoopGroup parentGroup = new NioEventLoopGroup(1);
+        NioEventLoopGroup childGroup = new NioEventLoopGroup();
+        b.group(parentGroup, childGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 100)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new InboundHandler());
+                    }
+                });
+        Channel serverChannel = b.bind(servicePort).sync().channel();
+
+        ImmutableMap<String,NodeInfo> peers = waitForAPeerOrMore();
+
+        // make a new bootstrap, it's just so silly:
+        Bootstrap b2 = new Bootstrap();
+        b2.group(childGroup)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast("stringEncoder", new StringEncoder(CharsetUtil.UTF_8));
+                    }
+                });
+        // we dont even need to do anything else!
+
+
+        System.out.println("Listening on service port: " + servicePort);
+        // now send messages to all my peers except myself of course, duh.
+        for ( NodeInfo peer: peers.values()) {
+            if (peer.availability.getNodeId().equals(nodeId)) {
+                // yes this is me, and continue
+                continue;
+            }
+            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddresses(0), peer.availability.getNetworkPort());
+            // uh ok lets connect and make hash:
+
+            SocketAddress localAddr = serverChannel.localAddress();
+            System.out.println("Writing some junk to: " + remotePeerAddr + " from: " + localAddr);
+            Channel peerChannel = b2.connect(remotePeerAddr, localAddr).channel();
+            System.out.println("Channel RemoteAddr: " + peerChannel.remoteAddress() + " localaddr: " + peerChannel.localAddress());
+            // now write a little bit:
+            peerChannel.write("42");
+        }
     }
+
+    private ImmutableMap<String,NodeInfo> waitForAPeerOrMore() throws ExecutionException, InterruptedException {
+        final Fiber fiber = new ThreadFiber();
+        fiber.start();
+        final SettableFuture<ImmutableMap<String,NodeInfo>> future = SettableFuture.create();
+
+        fiber.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, NodeInfo>>() {
+                    @Override
+                    public void onMessage(ImmutableMap<String, NodeInfo> message) {
+                        if (message.size() >= 2) {
+                            // yay...
+                            LOG.info("Got more than 2 peers, continuing");
+                            future.set(message);
+                            fiber.dispose(); // end this mess.
+                        }
+                    }
+                });
+            }
+        }, 2, 2, TimeUnit.SECONDS);
+
+        LOG.info("Waiting for peers...");
+        return future.get();
+    }
+
 }

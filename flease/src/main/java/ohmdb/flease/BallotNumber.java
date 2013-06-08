@@ -28,8 +28,15 @@ public class BallotNumber implements Comparable<BallotNumber> {
     private final long ballotNumber;
     private final long messageNumber;
     private final long processId;
-    // maybe stashed
+    // maybe stashed from constructor.
     private final Flease.BallotNumber protobuf;
+
+    /**
+     * The "zero" constructor, that has every field set to 0.
+     */
+    public BallotNumber() {
+        this(0, 0, 0);
+    }
 
     public BallotNumber(long ballotNumber, long messageNumber, long processId) {
         this.ballotNumber = ballotNumber;
@@ -45,10 +52,24 @@ public class BallotNumber implements Comparable<BallotNumber> {
         this.protobuf = fromMessage;
     }
 
+    /**
+     * Builds the protobuf message for this object.  Nominally this creates a new
+     * protobuf message every call, so don't go too crazy.
+     *
+     * As an implementation detail, this might return a previously constructed protobuf message,
+     * for example if this object was created from a protobuf message, but that's a minor perf detail
+     * that one should not rely on.
+     *
+     * @return protobuf message for this object.
+     */
     public Flease.BallotNumber getMessage() {
         // Thanks to immutable objects, lets do this.
         if (protobuf != null) return protobuf;
 
+        // YES, in theory we could update protobuf but it would be problematic for a few reasons:
+        // * synchronization becomes an issue
+        // * we'd have to get rid of that final, which I like the way it is.
+        // So yeah, just dont call getMessage() too much.
         Flease.BallotNumber.Builder builder = Flease.BallotNumber.newBuilder();
         builder.setBallotNumber(ballotNumber)
                 .setMessageNumber(messageNumber)

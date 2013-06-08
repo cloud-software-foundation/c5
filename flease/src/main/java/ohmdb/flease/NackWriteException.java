@@ -19,16 +19,18 @@ package ohmdb.flease;
 import ohmdb.flease.rpc.IncomingRpcReply;
 
 /**
- * Got a nackREAD during read()
+ * A nack write message was recieved during WRITE processing.
  */
-public class NackReadException extends Exception {
+public class NackWriteException extends Throwable {
     final IncomingRpcReply onMsg;
-    public NackReadException(IncomingRpcReply onMsg) {
+
+    public NackWriteException(IncomingRpcReply onMsg) {
         this.onMsg = onMsg;
     }
 
     @Override
     public String toString() {
-        return "got nackREAD from: " + onMsg.from + " with ballot number: " + onMsg.getK();
+        return "got nackWRITE from: " + onMsg.from + " with ballot number: " + onMsg.getK();
     }
+
 }
