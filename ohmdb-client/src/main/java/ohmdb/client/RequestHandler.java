@@ -26,10 +26,9 @@ import io.netty.channel.ChannelInboundMessageHandlerAdapter;
 import ohmdb.client.generated.ClientProtos;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +38,7 @@ public class RequestHandler
 
   private static final Logger logger = Logger.getLogger(
       RequestHandler.class.getName());
-  private final ConcurrentHashMap<Long, BlockingQueue<ClientProtos.Result>>
+  private final ConcurrentHashMap<Long, ArrayBlockingQueue<ClientProtos.Result>>
       scanResults = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Long, Boolean> scansIsClosed
       = new ConcurrentHashMap<>();
@@ -49,33 +48,36 @@ public class RequestHandler
 
   @Override
   public void messageReceived(final ChannelHandlerContext ctx,
-                              final ClientProtos.Response msg) throws Exception {
+                              final ClientProtos.Response msg)
+      throws Exception {
+    SettableFuture f = futures.get(msg.getCommandId());
+
     switch (msg.getCommand()) {
       case MUTATE:
         if (!msg.getMutate().getProcessed()) {
           IOException exception = new IOException("Not Processed");
-          futures.get(msg.getCommandId()).setException(exception);
+          f.setException(exception);
         }
-        futures.get(msg.getCommandId()).set(null);
+        f.set(null);
         break;
       case SCAN:
-        List<ClientProtos.Result> getResultsList
-            = msg.getScan().getResultList();
-
-        if (!scanResults.containsKey(msg.getScan().getScannerId()))  {
-          scanResults.put(msg.getScan().getScannerId(),
-                          new LinkedBlockingQueue<ClientProtos.Result>());
-          futures.get(msg.getCommandId()).set(msg.getScan().getScannerId());
-        }
-
-        scanResults.get(msg.getScan().getScannerId()).addAll(getResultsList);
         if (!msg.getScan().getMoreResults()) {
           scansIsClosed.put(msg.getScan().getScannerId(), true);
+        }
+
+        if (!scanResults.containsKey(msg.getScan().getScannerId())) {
+          scanResults.put(msg.getScan().getScannerId(),
+              new ArrayBlockingQueue<ClientProtos.Result>(1000000));
+          f.set(msg.getScan().getScannerId());
+        }
+
+        for (ClientProtos.Result result : msg.getScan().getResultList()) {
+          scanResults.get(msg.getScan().getScannerId()).put(result);
         }
         break;
 
       default:
-        futures.get(msg.getCommandId()).set(msg);
+        f.set(msg);
         break;
     }
   }
@@ -85,6 +87,7 @@ public class RequestHandler
       throws InterruptedException, IOException {
     futures.put(request.getCommandId(), future);
     channel.write(request);
+    channel.flush();
   }
 
 
@@ -94,7 +97,8 @@ public class RequestHandler
   }
 
   @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+      throws Exception {
     logger.log(
         Level.WARNING,
         "Unexpected exception from downstream.", cause);
@@ -104,11 +108,12 @@ public class RequestHandler
 
   public ClientProtos.Result next(final long scannerId) throws IOException {
     ClientProtos.Result result;
+    BlockingQueue<ClientProtos.Result> queue = scanResults.get(scannerId);
     do {
-    if (isClosed(scannerId)) {
-      return null;
-    }
-      result = scanResults.get(scannerId).poll();
+      if (isClosed(scannerId)) {
+        return null;
+      }
+      result = queue.poll();
     } while (result == null);
     return result;
   }

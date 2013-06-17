@@ -1677,7 +1677,7 @@ public class HRegion implements HeapSize { // , Writable{
    return getScanner(scan, null);
   }
 
-  void prepareScanner(Scan scan) throws IOException {
+  public void prepareScanner(Scan scan) throws IOException {
     if(!scan.hasFamilies()) {
       // Adding all families to scanner
       for(byte[] family: this.htableDescriptor.getFamiliesKeys()){
