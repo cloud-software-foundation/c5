@@ -32,7 +32,7 @@ public class Populator {
                                        final byte[] value) throws IOException, InterruptedException {
     try {
       ArrayList<Put> puts = new ArrayList<>();
-      for (int j = 1; j != 10; j++) {
+      for (int j = 1; j != 30; j++) {
         puts.clear();
         for (int i = 1; i != 1024 * 81; i++) {
           puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, value));
