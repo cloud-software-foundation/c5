@@ -72,7 +72,7 @@ public class FleaseLease {
 
     /**
      * A single instance of a flease lease.
-     * @param fiber the fiber to run this lease on
+     * @param fiber the fiber to run this lease on, not started
      * @param leaseId the leaseId that uniquely identifies this lease. This could be a virtual resource name.
      * @param myId the UUID of this node.
      * @param peers the UUIDs of my peers, it should contain myId as well (I'm my own peer)
@@ -99,6 +99,8 @@ public class FleaseLease {
         });
         // set the 'lease' to the default/empty, which will serve as 'null' for now:
         lease = Lease.getDefaultInstance();
+
+        fiber.start();
     }
 
 
@@ -331,4 +333,7 @@ public class FleaseLease {
         }
     }
 
+    public void dispose() {
+        fiber.dispose();
+    }
 }
