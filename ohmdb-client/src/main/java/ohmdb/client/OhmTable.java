@@ -21,12 +21,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class OhmTable extends OhmShim {
   private RequestHandler handler;
   private OhmConnectionManager ohmConnectionManager;
-  private long commandId = 0;
+  private AtomicLong commandId = new AtomicLong(0);
 
   /**
    * OhmTable is the main entry points for clients of OhmDB
@@ -56,7 +57,7 @@ public class OhmTable extends OhmShim {
             false);
     call.setGet(getRequest);
     call.setCommand(ClientProtos.Call.Command.GET);
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
 
     try {
       handler.call(call.build(), resultFuture);
@@ -76,7 +77,7 @@ public class OhmTable extends OhmShim {
     call.setMultiGet(multiGet);
     final SettableFuture<ClientProtos.Response> resultFuture
         = SettableFuture.create();
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
 
     try {
       handler.call(call.build(), resultFuture);
@@ -103,7 +104,7 @@ public class OhmTable extends OhmShim {
     call.setCommand(ClientProtos.Call.Command.GET);
     final SettableFuture<ClientProtos.Response> resultFuture
         = SettableFuture.create();
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
 
     try {
       handler.call(call.build(), resultFuture);
@@ -133,7 +134,7 @@ public class OhmTable extends OhmShim {
         .setRegion(regionSpecifier).build();
     ClientProtos.Call call = ClientProtos.Call.newBuilder()
         .setCommand(ClientProtos.Call.Command.SCAN)
-        .setCommandId(++commandId)
+        .setCommandId(commandId.incrementAndGet())
         .setScan(scanRequest)
         .build();
 
@@ -171,7 +172,7 @@ public class OhmTable extends OhmShim {
         RequestConverter.buildMultiGetRequest(getRegionName(), gets, true);
     call.setCommand(ClientProtos.Call.Command.MULTI_GET);
     call.setMultiGet(multiGet);
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
     try {
       handler.call(call.build(), resultFuture);
       ClientProtos.MultiGetResponse response = resultFuture.get().getMultiGet();
@@ -193,7 +194,7 @@ public class OhmTable extends OhmShim {
         RequestConverter.buildMutateRequest(getRegionName(), put);
     call.setMutate(mutateRequest);
     call.setCommand(ClientProtos.Call.Command.MUTATE);
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
     final SettableFuture<ClientProtos.Response> resultFuture
         = SettableFuture.create();
 
@@ -220,7 +221,7 @@ public class OhmTable extends OhmShim {
         RequestConverter.buildMutateRequest(getRegionName(), delete);
     call.setMutate(mutateRequest);
     call.setCommand(ClientProtos.Call.Command.MUTATE);
-    call.setCommandId(++commandId);
+    call.setCommandId(commandId.incrementAndGet());
     final SettableFuture<ClientProtos.Response> resultFuture
         = SettableFuture.create();
 
@@ -247,7 +248,7 @@ public class OhmTable extends OhmShim {
           RequestConverter.buildMultiRequest(getRegionName(), rm);
       call.setMulti(multiRequest);
       call.setCommand(ClientProtos.Call.Command.MULTI);
-      call.setCommandId(++commandId);
+      call.setCommandId(commandId.incrementAndGet());
       final SettableFuture<ClientProtos.Response> resultFuture
           = SettableFuture.create();
 
