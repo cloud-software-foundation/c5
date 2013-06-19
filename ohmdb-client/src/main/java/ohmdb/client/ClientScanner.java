@@ -70,7 +70,8 @@ public class ClientScanner extends AbstractClientScanner {
 
     OhmConnectionManager ohmConnectionManager = OhmConnectionManager.INSTANCE;
     try {
-      ch = ohmConnectionManager.getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
+      ch = ohmConnectionManager.getOrCreateChannel("localhost",
+          OhmConstants.TEST_PORT);
     } catch (InterruptedException e) {
       throw new IOException(e);
     }
