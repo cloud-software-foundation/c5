@@ -24,10 +24,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundMessageHandlerAdapter;
 import ohmdb.client.generated.ClientProtos;
+import ohmdb.client.queue.WickedQueue;
 
 import java.io.IOException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +37,7 @@ public class RequestHandler
 
   private static final Logger logger = Logger.getLogger(
       RequestHandler.class.getName());
-  private final ConcurrentHashMap<Long, ArrayBlockingQueue<ClientProtos.Result>>
+  private final ConcurrentHashMap<Long, WickedQueue<ClientProtos.Result>>
       scanResults = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Long, Boolean> scansIsClosed
       = new ConcurrentHashMap<>();
@@ -67,12 +66,12 @@ public class RequestHandler
 
         if (!scanResults.containsKey(msg.getScan().getScannerId())) {
           scanResults.put(msg.getScan().getScannerId(),
-              new ArrayBlockingQueue<ClientProtos.Result>(1000000));
+              new WickedQueue<ClientProtos.Result>(1000000));
           f.set(msg.getScan().getScannerId());
         }
 
         for (ClientProtos.Result result : msg.getScan().getResultList()) {
-          scanResults.get(msg.getScan().getScannerId()).put(result);
+          scanResults.get(msg.getScan().getScannerId()).add(result);
         }
         break;
 
@@ -108,7 +107,7 @@ public class RequestHandler
 
   public ClientProtos.Result next(final long scannerId) throws IOException {
     ClientProtos.Result result;
-    BlockingQueue<ClientProtos.Result> queue = scanResults.get(scannerId);
+    WickedQueue<ClientProtos.Result> queue = scanResults.get(scannerId);
     do {
       if (isClosed(scannerId)) {
         return null;
