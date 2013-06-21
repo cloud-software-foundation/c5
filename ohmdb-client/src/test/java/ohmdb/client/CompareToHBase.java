@@ -37,23 +37,6 @@ public class CompareToHBase {
     Result result;
     ResultScanner scanner;
 
-    int j = 0;
-    Bs = System.currentTimeMillis();
-     scanner = hTable.getScanner(cf);
-    do {
-      j++;
-      if (j % 1024 == 0) {
-        System.out.print("!");
-        System.out.flush();
-      }
-      if (j % (1024 * 80) == 0) {
-        System.out.println("");
-      }
-      result = scanner.next();
-    } while (result != null);
-    Be = System.currentTimeMillis();
-
-    scanner.close();
 
     scanner = table.getScanner(cf);
     As = System.currentTimeMillis();
@@ -71,6 +54,23 @@ public class CompareToHBase {
     scanner.close();
     Ae = System.currentTimeMillis();
 
+    int j = 0;
+    Bs = System.currentTimeMillis();
+     scanner = hTable.getScanner(cf);
+    do {
+      j++;
+      if (j % 1024 == 0) {
+        System.out.print("!");
+        System.out.flush();
+      }
+      if (j % (1024 * 80) == 0) {
+        System.out.println("");
+      }
+      result = scanner.next();
+    } while (result != null);
+    Be = System.currentTimeMillis();
+
+    scanner.close();
 
     System.out.println("A:" + String.valueOf(Ae - As) + "i:" + i);
     System.out.println("B:" + String.valueOf(Be - Bs) + "j:" + j);
