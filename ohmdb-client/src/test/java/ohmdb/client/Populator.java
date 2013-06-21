@@ -15,7 +15,6 @@ public class Populator {
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    Populator testingUtil = new Populator();
     OhmTable table = new OhmTable(tableName);
     long start = System.currentTimeMillis();
     compareToHBasePut(table,
