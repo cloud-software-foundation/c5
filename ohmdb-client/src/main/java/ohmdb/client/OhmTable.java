@@ -26,7 +26,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class OhmTable extends OhmShim {
   private RequestHandler handler;
-  private OhmConnectionManager ohmConnectionManager;
+  private  final OhmConnectionManager ohmConnectionManager
+      = OhmConnectionManager.INSTANCE;
+  private final ClientScannerManager clientScannerManager
+      = ClientScannerManager.INSTANCE;
   private AtomicLong commandId = new AtomicLong(0);
 
   /**
@@ -37,7 +40,6 @@ public class OhmTable extends OhmShim {
   public OhmTable(ByteString tableName) throws IOException, InterruptedException {
     super(tableName);
 
-    ohmConnectionManager = OhmConnectionManager.INSTANCE;
     Channel channel =
         ohmConnectionManager
             .getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
@@ -131,18 +133,21 @@ public class OhmTable extends OhmShim {
             .setValue(ByteString.copyFromUtf8("value")).build();
     ClientProtos.ScanRequest scanRequest = ClientProtos.ScanRequest.newBuilder()
         .setScan(ProtobufUtil.toScan(scan))
-        .setRegion(regionSpecifier).build();
+        .setRegion(regionSpecifier)
+        .setNumberOfRows(OhmConstants.DEFAULT_INIT_SCAN)
+        .build();
+
     ClientProtos.Call call = ClientProtos.Call.newBuilder()
         .setCommand(ClientProtos.Call.Command.SCAN)
         .setCommandId(commandId.incrementAndGet())
         .setScan(scanRequest)
+
         .build();
 
     try {
       handler.call(call, future);
       Long scannerId = future.get();
-      return new ClientScanner(scan, getTableName(), scannerId);
-
+      return clientScannerManager.getOrCreate(scannerId);
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
