@@ -37,13 +37,16 @@
  */
 
 
-package ohmdb.client;
+package ohmdb.client.scanner;
 
 import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import ohmdb.ProtobufUtil;
+import ohmdb.client.OhmConnectionManager;
+import ohmdb.client.OhmConstants;
+import ohmdb.client.RequestHandler;
 import ohmdb.client.generated.ClientProtos;
 import ohmdb.client.generated.HBaseProtos;
 import ohmdb.client.queue.WickedQueue;

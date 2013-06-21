@@ -7,6 +7,7 @@ import ohmdb.ProtobufUtil;
 import ohmdb.RequestConverter;
 import ohmdb.client.generated.ClientProtos;
 import ohmdb.client.generated.HBaseProtos;
+import ohmdb.client.scanner.ClientScannerManager;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;

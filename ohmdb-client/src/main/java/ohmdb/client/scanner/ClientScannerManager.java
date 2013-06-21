@@ -14,11 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ohmdb.client;
-
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.regionserver.HRegion;
-import org.apache.hadoop.hbase.regionserver.RegionScanner;
+package ohmdb.client.scanner;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +25,7 @@ public enum ClientScannerManager {
   private final ConcurrentHashMap<Long, ClientScanner> scannerMap =
       new ConcurrentHashMap<>();
 
-  ClientScanner getOrCreate(long scannerId)
+  public ClientScanner getOrCreate(long scannerId)
       throws IOException {
     if (!scannerMap.containsKey(scannerId)){
       scannerMap.put(scannerId, new ClientScanner(scannerId));
@@ -37,7 +33,7 @@ public enum ClientScannerManager {
     return scannerMap.get(scannerId);
   }
 
-  boolean hasScanner(long scannerId)  {
+  public boolean hasScanner(long scannerId)  {
     return scannerMap.containsKey(scannerId);
   }
 }
