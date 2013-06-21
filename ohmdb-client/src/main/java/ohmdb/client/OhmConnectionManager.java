@@ -45,7 +45,7 @@ public enum OhmConnectionManager {
   }
 
   //TODO thread safe?
-  Channel getOrCreateChannel(String host, int port)
+  public Channel getOrCreateChannel(String host, int port)
       throws IOException, InterruptedException {
     String hash = getHostPortHash(host, port);
     if (!regionChannelMap.containsKey(hash)) {

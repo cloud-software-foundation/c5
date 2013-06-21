@@ -20,13 +20,12 @@
 package ohmdb.client;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundMessageHandlerAdapter;
 import ohmdb.client.generated.ClientProtos;
-import ohmdb.client.generated.HBaseProtos;
-import ohmdb.client.queue.WickedQueue;
+import ohmdb.client.scanner.ClientScanner;
+import ohmdb.client.scanner.ClientScannerManager;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
