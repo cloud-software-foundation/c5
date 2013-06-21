@@ -18,7 +18,7 @@ public class Populator {
     Populator testingUtil = new Populator();
     OhmTable table = new OhmTable(tableName);
     long start = System.currentTimeMillis();
-    testingUtil.compareToHBasePut(table,
+    compareToHBasePut(table,
         Bytes.toBytes("cf"),
         Bytes.toBytes("cq"),
         Bytes.toBytes("value"));
