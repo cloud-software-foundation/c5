@@ -90,8 +90,8 @@ public class RequestConverter {
   /**
    * Create a protocol buffer MutateRequest for a put
    *
-   * @param regionName
-   * @param put
+   * @param regionName The region name to request from
+   * @param delete The delete to process
    * @return a mutate request
    * @throws IOException
    */

@@ -39,10 +39,14 @@
 
 package ohmdb.client;
 
+import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import ohmdb.ProtobufUtil;
+import ohmdb.client.generated.ClientProtos;
+import ohmdb.client.generated.HBaseProtos;
+import ohmdb.client.queue.WickedQueue;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -54,20 +58,21 @@ public class ClientScanner extends AbstractClientScanner {
   final RequestHandler handler;
   private final Channel ch;
   private final long scannerId;
+  private final WickedQueue<ClientProtos.Result>
+      scanResults = new WickedQueue<>(OhmConstants.MAX_CACHE_SZ);
+  private boolean isClosed = true;
+  private final OhmConnectionManager ohmConnectionManager
+      = OhmConnectionManager.INSTANCE;
+  private int outStandingRequests = OhmConstants.DEFAULT_INIT_SCAN;
+  private int requestSize = OhmConstants.DEFAULT_INIT_SCAN;
 
   /**
    * Create a new ClientScanner for the specified table
    * Note that the passed {@link Scan}'s start row maybe changed changed.
    *
-   *
-   * @param scan      {@link org.apache.hadoop.hbase.client.Scan} to use in this scanner
-   * @param tableName The table that we wish to scan
    * @throws IOException
    */
-  public ClientScanner(final Scan scan,
-                       final byte[] tableName,
-                       final long scannerId) throws IOException {
-
+  public ClientScanner(final long scannerId) throws IOException {
     OhmConnectionManager ohmConnectionManager = OhmConnectionManager.INSTANCE;
     try {
       ch = ohmConnectionManager.getOrCreateChannel("localhost",
@@ -79,14 +84,72 @@ public class ClientScanner extends AbstractClientScanner {
     final ChannelPipeline pipeline = ch.pipeline();
     handler = pipeline.get(RequestHandler.class);
     this.scannerId = scannerId;
+    this.isClosed = false;
   }
 
   @Override
   public Result next() throws IOException {
-    if (handler.isClosed(scannerId)) {
+    if (this.isClosed && this.scanResults.isEmpty()) {
       return null;
     }
-    return ProtobufUtil.toResult(handler.next(scannerId));
+
+    ClientProtos.Result result;
+    do {
+      result = scanResults.poll();
+
+      if (!this.isClosed) {
+        // If we don't have enough pending outstanding increase our rate
+        if (this.outStandingRequests < .5 * requestSize ) {
+          if (requestSize < OhmConstants.MAX_REQUEST_SIZE) {
+            requestSize = requestSize * 2;
+            System.out.println("increasing requestSize:" + requestSize);
+            System.out.flush();
+          }
+        }
+        int queueSpace = OhmConstants.MAX_CACHE_SZ - this.scanResults.size();
+
+        // If we have plenty of room for another request
+        if (queueSpace * 1.5  >  (requestSize + this.outStandingRequests)
+          // And we have less than two requests worth in the queue
+           &&  2 * this.outStandingRequests < requestSize) {
+          getMoreRows();
+        }
+      }
+    } while (result == null && !this.isClosed);
+
+    if (result == null){
+      return null;
+    }
+
+    return ProtobufUtil.toResult(result);
+  }
+
+  private void getMoreRows() throws IOException {
+    HBaseProtos.RegionSpecifier regionSpecifier =
+        HBaseProtos.RegionSpecifier.newBuilder()
+            .setType(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME)
+            .setValue(ByteString.copyFromUtf8("value")).build();
+
+    ClientProtos.ScanRequest.Builder scanRequest = ClientProtos.ScanRequest.newBuilder()
+        .setScannerId(scannerId)
+        .setRegion(regionSpecifier);
+        scanRequest.setNumberOfRows(requestSize);
+
+    ClientProtos.Call call = ClientProtos.Call.newBuilder()
+        .setCommand(ClientProtos.Call.Command.SCAN)
+        .setCommandId(0)
+        .setScan(scanRequest)
+        .build();
+
+    try {
+      Channel channel = ohmConnectionManager
+          .getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
+      this.outStandingRequests += requestSize;
+      channel.write(call);
+
+    } catch (InterruptedException e) {
+      throw new IOException(e);
+    }
   }
 
   @Override
@@ -110,6 +173,14 @@ public class ClientScanner extends AbstractClientScanner {
       f.sync();
     } catch (InterruptedException e) {
       e.printStackTrace();
+    }
+    this.isClosed = true;
+  }
+
+  public void add(ClientProtos.ScanResponse response) {
+    for (ClientProtos.Result result : response.getResultList()) {
+      scanResults.add(result);
+      this.outStandingRequests--;
     }
   }
 }

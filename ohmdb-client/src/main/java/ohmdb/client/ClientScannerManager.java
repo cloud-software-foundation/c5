@@ -13,20 +13,31 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
-
 package ohmdb.client;
 
-public class OhmConstants {
-  public static final int DEFAULT_INIT_SCAN = 100;
-  public static final int MAX_REQUEST_SIZE = 1000000;
-  public static final long FLUSH_PERIOD = 30000;
-  public static final int AMOUNT_OF_FLUSH_PER_COMPACT = 10;
-  public static final long SCANNER_TIMEOUT_MS = 3000;
-  public static final int MSG_SIZE = 100;
-  public static int TEST_PORT = 8080;
-  public static int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
+public enum ClientScannerManager {
+  INSTANCE;
+
+  private final ConcurrentHashMap<Long, ClientScanner> scannerMap =
+      new ConcurrentHashMap<>();
+
+  ClientScanner getOrCreate(long scannerId)
+      throws IOException {
+    if (!scannerMap.containsKey(scannerId)){
+      scannerMap.put(scannerId, new ClientScanner(scannerId));
+    }
+    return scannerMap.get(scannerId);
+  }
+
+  boolean hasScanner(long scannerId)  {
+    return scannerMap.containsKey(scannerId);
+  }
 }

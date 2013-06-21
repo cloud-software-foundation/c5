@@ -20,10 +20,12 @@
 package ohmdb.client;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundMessageHandlerAdapter;
 import ohmdb.client.generated.ClientProtos;
+import ohmdb.client.generated.HBaseProtos;
 import ohmdb.client.queue.WickedQueue;
 
 import java.io.IOException;
@@ -37,13 +39,11 @@ public class RequestHandler
 
   private static final Logger logger = Logger.getLogger(
       RequestHandler.class.getName());
-  private final ConcurrentHashMap<Long, WickedQueue<ClientProtos.Result>>
-      scanResults = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<Long, Boolean> scansIsClosed
-      = new ConcurrentHashMap<>();
 
   private final ConcurrentHashMap<Long, SettableFuture>
       futures = new ConcurrentHashMap<>();
+
+  ClientScannerManager manager = ClientScannerManager.INSTANCE;
 
   @Override
   public void messageReceived(final ChannelHandlerContext ctx,
@@ -60,18 +60,18 @@ public class RequestHandler
         f.set(null);
         break;
       case SCAN:
+        long scannerId = msg.getScan().getScannerId();
+
+        ClientScanner clientScanner;
+        if (!manager.hasScanner(scannerId)){
+          clientScanner =  manager.getOrCreate(scannerId);
+          f.set(scannerId);
+        } else {
+          clientScanner = manager.getOrCreate(scannerId);
+        }
+        clientScanner.add(msg.getScan());
         if (!msg.getScan().getMoreResults()) {
-          scansIsClosed.put(msg.getScan().getScannerId(), true);
-        }
-
-        if (!scanResults.containsKey(msg.getScan().getScannerId())) {
-          scanResults.put(msg.getScan().getScannerId(),
-              new WickedQueue<ClientProtos.Result>(1000000));
-          f.set(msg.getScan().getScannerId());
-        }
-
-        for (ClientProtos.Result result : msg.getScan().getResultList()) {
-          scanResults.get(msg.getScan().getScannerId()).add(result);
+          clientScanner.close();
         }
         break;
 
@@ -89,7 +89,6 @@ public class RequestHandler
     channel.flush();
   }
 
-
   @Override
   public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
     channel = ctx.channel();
@@ -102,24 +101,5 @@ public class RequestHandler
         Level.WARNING,
         "Unexpected exception from downstream.", cause);
     ctx.close();
-  }
-
-
-  public ClientProtos.Result next(final long scannerId) throws IOException {
-    ClientProtos.Result result;
-    WickedQueue<ClientProtos.Result> queue = scanResults.get(scannerId);
-    do {
-      if (isClosed(scannerId)) {
-        return null;
-      }
-      result = queue.poll();
-    } while (result == null);
-    return result;
-  }
-
-  public boolean isClosed(final long scannerId) {
-    return scansIsClosed.containsKey(scannerId)
-        && scansIsClosed.get(scannerId)
-        && scanResults.get(scannerId).isEmpty();
   }
 }

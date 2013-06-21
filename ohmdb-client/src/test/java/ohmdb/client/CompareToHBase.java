@@ -11,7 +11,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 
 public class CompareToHBase {
-  private static OhmTable table;
   private static HTable hTable;
   private static ByteString tableName =
       ByteString.copyFrom(Bytes.toBytes("tableName"));
@@ -31,16 +30,16 @@ public class CompareToHBase {
   }
 
   public void compareToHBaseScan() throws IOException, InterruptedException {
-    table = new OhmTable(tableName);
+    OhmTable table = new OhmTable(tableName);
 
     long As, Ae, Bs, Be;
     int i = 0;
     Result result;
-
+    ResultScanner scanner;
 
     int j = 0;
     Bs = System.currentTimeMillis();
-    ResultScanner scanner = hTable.getScanner(cf);
+     scanner = hTable.getScanner(cf);
     do {
       j++;
       if (j % 1024 == 0) {
