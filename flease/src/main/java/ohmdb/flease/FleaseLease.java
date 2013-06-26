@@ -142,7 +142,7 @@ public class FleaseLease {
             }, 20, TimeUnit.SECONDS);
 
             for (UUID peer : peers) {
-                OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(outMsg, peer);
+                OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(myId, outMsg, peer);
 
                 AsyncRequest.withOneReply(fiber, sendRpcChannel, rpcRequest, new Callback<IncomingRpcReply>() {
                     @Override
@@ -208,7 +208,7 @@ public class FleaseLease {
 
             // Send to all processes:
             for (UUID peer : peers) {
-                OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(outMsg, peer);
+                OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(myId, outMsg, peer);
 
                 AsyncRequest.withOneReply(fiber, sendRpcChannel, rpcRequest, new Callback<IncomingRpcReply>() {
                     @Override

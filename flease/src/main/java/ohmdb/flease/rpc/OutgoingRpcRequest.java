@@ -33,18 +33,20 @@ public class OutgoingRpcRequest {
 
     public final FleaseRequestMessage message;
     public final UUID to;
+    public final UUID from;
 
     // The RPC system may support retries, if so it will do according to these params.
     public final int retries;
     public final int retrySpacing;
     public final TimeUnit timeUnit;
 
-    public OutgoingRpcRequest(FleaseRequestMessage message, UUID to,
+    public OutgoingRpcRequest(UUID from, FleaseRequestMessage message, UUID to,
                               int retries, int retrySpacing, TimeUnit timeUnit) {
         this.retries = retries;
         this.retrySpacing = retrySpacing;
         this.timeUnit = timeUnit;
 
+        this.from = from;
         this.message = message;
         this.to = to;
     }
@@ -54,8 +56,8 @@ public class OutgoingRpcRequest {
      * @param message
      * @param to
      */
-    public OutgoingRpcRequest(FleaseRequestMessage message, UUID to) {
-        this(message, to,
+    public OutgoingRpcRequest(UUID from, FleaseRequestMessage message, UUID to) {
+        this(from, message, to,
                 10,
                 2,
                 TimeUnit.SECONDS);

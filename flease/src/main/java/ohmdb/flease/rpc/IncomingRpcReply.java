@@ -28,7 +28,7 @@ public class IncomingRpcReply {
     public final Flease.FleaseReplyMessage message;
     public final UUID from;
 
-    IncomingRpcReply(Flease.FleaseReplyMessage message, UUID from) {
+    public IncomingRpcReply(Flease.FleaseReplyMessage message, UUID from) {
         this.message = message;
         this.from = from;
     }

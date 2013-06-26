@@ -1,7 +1,11 @@
 package ohmdb.flease;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import ohmdb.flease.rpc.IncomingRpcReply;
+import ohmdb.flease.rpc.IncomingRpcRequest;
+import ohmdb.flease.rpc.OutgoingRpcReply;
 import ohmdb.flease.rpc.OutgoingRpcRequest;
+import org.jetlang.channels.AsyncRequest;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
@@ -16,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class InRamSim {
@@ -49,14 +54,47 @@ public class InRamSim {
         rpcChannel.subscribe(rpcFiber, new Callback<Request<OutgoingRpcRequest, IncomingRpcReply>>() {
             @Override
             public void onMessage(Request<OutgoingRpcRequest, IncomingRpcReply> message) {
-                LOG.debug("Got a message!");
 
-                // TODO implement me!
-
+                doThing(message);
             }
         });
 
         rpcFiber.start();
+    }
+
+    private void doThing(final Request<OutgoingRpcRequest, IncomingRpcReply> origMsg) {
+
+        // ok, who sent this?!!!!!
+        final OutgoingRpcRequest request = origMsg.getRequest();
+        final UUID dest = request.to;
+        // find it:
+        final FleaseLease fl = fleaseRunners.get(dest);
+        if (fl == null) {
+            // boo
+            LOG.error("Request to non exist: " + dest);
+            origMsg.reply(null);
+            return;
+        }
+
+        LOG.debug("Forwarding message from {} to {}, contents: {}", request.from, request.to, request.message);
+        // Construct and send a IncomingRpcRequest from the OutgoingRpcRequest.
+        // There is absolutely no way to know who this is from at this point from the infrastructure.
+        final IncomingRpcRequest newRequest = new IncomingRpcRequest(1, request.from, request.message);
+        AsyncRequest.withOneReply(rpcFiber, fl.getIncomingChannel(), newRequest, new Callback<OutgoingRpcReply>() {
+            @Override
+            public void onMessage(OutgoingRpcReply msg) {
+                // Translate the OutgoingRpcReply -> IncomingRpcReply.
+                LOG.debug("Forwarding reply message from {} back to {}, contents: {}", dest, request.to, msg.message);
+                IncomingRpcReply newReply = new IncomingRpcReply(msg.message, dest);
+                origMsg.reply(newReply);
+            }
+        });
+    }
+
+    public void run() throws ExecutionException, InterruptedException {
+        FleaseLease fl = fleaseRunners.values().iterator().next();
+        ListenableFuture future = fl.read();
+        LOG.info("read result: {}", future.get());
     }
 
     public void dispose() {
@@ -65,5 +103,11 @@ public class InRamSim {
             fl.dispose();
         }
         fiberPool.dispose();
+    }
+
+    public static void main(String []args) throws ExecutionException, InterruptedException {
+        InRamSim sim = new InRamSim(3);
+        sim.run();
+        sim.dispose();
     }
 }

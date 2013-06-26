@@ -37,7 +37,7 @@ public class IncomingRpcRequest {
      * @param from      the other peer we are talking to.
      * @param message   the actual message contents.
      */
-    IncomingRpcRequest(long messageId, UUID from, FleaseRequestMessage message) {
+    public IncomingRpcRequest(long messageId, UUID from, FleaseRequestMessage message) {
         this.messageId = messageId;
         this.from = from;
         this.message = message;
