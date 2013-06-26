@@ -64,8 +64,8 @@ public class FleaseLease {
     private long messageNumber = 0; // also named "r" in the algorithm.
     private int majority;
     // As per algorithm 1.
-    private BallotNumber read = null;
-    private BallotNumber write = null;
+    private BallotNumber read = new BallotNumber();
+    private BallotNumber write = new BallotNumber();
     // The actual lease data, aka "v" in Algorithm 1.
     private Lease lease = null;
 
