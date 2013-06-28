@@ -93,8 +93,14 @@ public class InRamSim {
 
     public void run() throws ExecutionException, InterruptedException {
         FleaseLease fl = fleaseRunners.values().iterator().next();
-        ListenableFuture future = fl.read();
-        LOG.info("read result: {}", future.get());
+        ListenableFuture<LeaseValue> future = fl.read();
+        //LOG.info("read result: {}", future.get());
+        LeaseValue result = future.get();
+        System.out.println("read result: " + result);
+
+        if (result.isBefore(System.currentTimeMillis())) {
+            // new lease!
+        }
     }
 
     public void dispose() {

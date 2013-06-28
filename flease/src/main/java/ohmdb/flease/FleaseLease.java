@@ -39,7 +39,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.flease.Flease.FleaseRequestMessage;
-import static ohmdb.flease.Flease.Lease;
 
 /**
  * A single lease object. Runs on a jetlang Fiber, and sends and responds to RPC requests.
@@ -67,7 +66,7 @@ public class FleaseLease {
     private BallotNumber read = new BallotNumber();
     private BallotNumber write = new BallotNumber();
     // The actual lease data, aka "v" in Algorithm 1.
-    private Lease lease = null;
+    private LeaseValue lease = new LeaseValue();
 
 
     /**
@@ -97,15 +96,13 @@ public class FleaseLease {
                  onIncomingMessage(message);
             }
         });
-        // set the 'lease' to the default/empty, which will serve as 'null' for now:
-        lease = Lease.getDefaultInstance();
 
         fiber.start();
     }
 
 
-    public ListenableFuture<Lease> write(final String datum) {
-        final SettableFuture<Lease> future = SettableFuture.create();
+    public ListenableFuture<LeaseValue> write(final String datum) {
+        final SettableFuture<LeaseValue> future = SettableFuture.create();
 
         fiber.execute(new Runnable() {
             @Override
@@ -117,12 +114,11 @@ public class FleaseLease {
         return future;
     }
 
-    private void writeInternal(final SettableFuture<Lease> future, String datum) {
+    private void writeInternal(final SettableFuture<LeaseValue> future, String datum) {
         try {
             // Choose a lease expiry:
             long exp = System.currentTimeMillis() + 10; // TODO param this 10 seconds
-            final Flease.Lease newLease = Flease.Lease.newBuilder().setDatum(datum)
-                    .setLeaseExpiry(exp).build();
+            final LeaseValue newLease = new LeaseValue(datum, exp);
 
             BallotNumber k = getNextBallotNumber();
 
@@ -130,7 +126,7 @@ public class FleaseLease {
                     .setMessageType(FleaseRequestMessage.MessageType.WRITE)
                     .setLeaseId(leaseId)
                     .setK(k.getMessage())
-                    .setLease(newLease).build();
+                    .setLease(newLease.getMessage()).build();
 
             final List<IncomingRpcReply> replies = new ArrayList<>(peers.size());
 
@@ -172,8 +168,8 @@ public class FleaseLease {
      * Procedure READ(k) from Algorithm 1.
      * @return
      */
-    public ListenableFuture<Lease> read() {
-        final SettableFuture<Lease> future = SettableFuture.create();
+    public ListenableFuture<LeaseValue> read() {
+        final SettableFuture<LeaseValue> future = SettableFuture.create();
 
         fiber.execute(new Runnable() {
             @Override
@@ -186,9 +182,9 @@ public class FleaseLease {
     }
 
 
-    private void readInternal(final SettableFuture<Lease> future) {
+    private void readInternal(final SettableFuture<LeaseValue> future) {
         try {
-            // choose a new ballot number:
+            // TODO choose a new ballot number:
             // TODO use a "real" process id, not just 0.
             BallotNumber k = getNextBallotNumber();
             // outgoing message:
@@ -246,11 +242,11 @@ public class FleaseLease {
         return new BallotNumber(System.currentTimeMillis(), messageNumber++, 0);
     }
 
-    private void checkReadReplies(List<IncomingRpcReply> replies, SettableFuture<Lease> future) {
+    private void checkReadReplies(List<IncomingRpcReply> replies, SettableFuture<LeaseValue> future) {
         try {
             // every reply should be a ackREAD.
             BallotNumber largest = null;
-            Lease v = null;
+            LeaseValue v = null;
             for(IncomingRpcReply reply : replies) {
                 // if kPrime > largest
                 BallotNumber kPrime = reply.getKPrime();
@@ -312,7 +308,7 @@ public class FleaseLease {
             message.reply(OutgoingRpcReply.getNackWriteMessage(message.getRequest(), k));
         } else {
             write = k;
-            lease = message.getRequest().getLeaseData();
+            lease = message.getRequest().getLease();
             // send ackWRITE, k
             message.reply(OutgoingRpcReply.getAckWriteMessage(message.getRequest(), k));
         }
@@ -324,8 +320,10 @@ public class FleaseLease {
         if (k.compareTo(write) < 0
                 || k.compareTo(read) < 0) {
             // send (nackREAD, k) to p(j)
+            LOG.debug("Sending nackREAD, {}", k);
             message.reply(OutgoingRpcReply.getNackReadMessage(message.getRequest(), k));
         } else {
+            LOG.debug("onRead, setting 'read' to : {} (was: {})", k, read);
             read = k;
             // send (ackREAD,k,write(i),v(i)) to p(j)
             message.reply(OutgoingRpcReply.getAckReadMessage(message.getRequest(),

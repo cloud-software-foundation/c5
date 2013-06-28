@@ -18,6 +18,7 @@ package ohmdb.flease.rpc;
 
 import ohmdb.flease.BallotNumber;
 import ohmdb.flease.Flease;
+import ohmdb.flease.LeaseValue;
 
 import java.util.UUID;
 
@@ -45,8 +46,8 @@ public class IncomingRpcReply {
         return new BallotNumber(message.getKprime());
     }
 
-    public Flease.Lease getLease() {
-        return message.getLease();
+    public LeaseValue getLease() {
+        return new LeaseValue(message.getLease());
     }
 
     public boolean isNackWrite() {

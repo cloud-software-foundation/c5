@@ -17,7 +17,7 @@
 package ohmdb.flease.rpc;
 
 import ohmdb.flease.BallotNumber;
-import ohmdb.flease.Flease;
+import ohmdb.flease.LeaseValue;
 
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public class IncomingRpcRequest {
         return new BallotNumber(message.getK());
     }
 
-    public Flease.Lease getLeaseData() {
-        return message.getLease();
+    public LeaseValue getLease() {
+        return new LeaseValue(message.getLease());
     }
 }

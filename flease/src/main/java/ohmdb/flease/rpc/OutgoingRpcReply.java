@@ -18,6 +18,7 @@ package ohmdb.flease.rpc;
 
 import ohmdb.flease.BallotNumber;
 import ohmdb.flease.Flease;
+import ohmdb.flease.LeaseValue;
 
 import java.util.UUID;
 
@@ -70,13 +71,13 @@ public class OutgoingRpcReply {
     public static OutgoingRpcReply getAckReadMessage(IncomingRpcRequest inReplyTo,
                                                    BallotNumber k,
                                                    BallotNumber write,
-                                                   Flease.Lease value) {
+                                                   LeaseValue value) {
         FleaseReplyMessage.Builder builder = FleaseReplyMessage.newBuilder();
         builder.setMessageType(FleaseReplyMessage.MessageType.ackREAD)
                 .setLeaseId(inReplyTo.message.getLeaseId())
                 .setK(k.getMessage())
                 .setKprime(write.getMessage())
-                .setLease(value);
+                .setLease(value.getMessage());
         return new OutgoingRpcReply(inReplyTo,  builder.build());
     }
 
