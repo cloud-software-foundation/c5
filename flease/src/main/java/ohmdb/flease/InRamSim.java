@@ -98,9 +98,15 @@ public class InRamSim {
         LeaseValue result = future.get();
         System.out.println("read result: " + result);
 
+        String datum = "";
         if (result.isBefore(System.currentTimeMillis())) {
             // new lease!
+            datum = "new lease";
+        } else {
+            datum = result.datum;
         }
+        ListenableFuture<LeaseValue> writeFuture = fl.write(datum);
+        System.out.println("write value: " + writeFuture.get());
     }
 
     public void dispose() {

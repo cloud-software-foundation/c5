@@ -309,6 +309,8 @@ public class FleaseLease {
         } else {
             write = k;
             lease = message.getRequest().getLease();
+            LOG.info("{} new lease value written [{}] with k {}", myId, lease, write);
+
             // send ackWRITE, k
             message.reply(OutgoingRpcReply.getAckWriteMessage(message.getRequest(), k));
         }
