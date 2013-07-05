@@ -17,6 +17,8 @@
 package ohmdb.flease;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import ohmdb.flease.rpc.IncomingRpcReply;
@@ -59,6 +61,7 @@ public class FleaseLease {
 
     private final UUID myId;
     private final ImmutableList<UUID> peers;
+    private final String leaseValue;
 
     private long messageNumber = 0; // also named "r" in the algorithm.
     private int majority;
@@ -67,23 +70,31 @@ public class FleaseLease {
     private BallotNumber write = new BallotNumber();
     // The actual lease data, aka "v" in Algorithm 1.
     private LeaseValue lease = new LeaseValue();
+    private final InformationInterface info;
 
 
     /**
      * A single instance of a flease lease.
      * @param fiber the fiber to run this lease on, not started
+     * @param leaseValue The value string to use when creating leases.  This should be the IP/port/hostname
+     *                   for the lease.
      * @param leaseId the leaseId that uniquely identifies this lease. This could be a virtual resource name.
      * @param myId the UUID of this node.
      * @param peers the UUIDs of my peers, it should contain myId as well (I'm my own peer)
      * @param sendRpcChannel the rpc channel I'll use to send requests on
      */
-    public FleaseLease(Fiber fiber, String leaseId, UUID myId,
+    public FleaseLease(Fiber fiber, InformationInterface info,
+                       String leaseValue,
+                       String leaseId, UUID myId,
+
                        List<UUID> peers,
                        RequestChannel<OutgoingRpcRequest,IncomingRpcReply> sendRpcChannel) {
         this.fiber = fiber;
         this.leaseId = leaseId;
+        this.leaseValue = leaseValue;
         this.myId = myId;
         this.peers = ImmutableList.copyOf(peers);
+        this.info = info;
 
         assert this.peers.contains(this.myId);
 
@@ -100,28 +111,80 @@ public class FleaseLease {
         fiber.start();
     }
 
+    // return the configured lease value
+    public String getLeaseValue() {
+        return leaseValue;
+    }
+    public UUID getId() {
+        return myId;
+    }
 
-    public ListenableFuture<LeaseValue> write(final String datum) {
+    public ListenableFuture<LeaseValue> getLease() {
+        final SettableFuture<LeaseValue> future = SettableFuture.create();
+        final BallotNumber k = getNextBallotNumber();
+
+        // We are NOT on the fiber at this point, so call the non-fiber version.
+        ListenableFuture<LeaseValue> read = read(k);
+        // The future becomes a way to chain one activity on the fiber to the next:
+        Futures.addCallback(read, new FutureCallback<LeaseValue>() {
+            @Override
+            public void onSuccess(LeaseValue readValue) {
+                LeaseValue lease = null;
+
+                // TODO implement the full Flease algorithm including waiting.
+                if (readValue.isBefore(info.currentTimeMillis())) {
+                    lease = new LeaseValue(leaseValue, info.currentTimeMillis() + info.getLeaseLength());
+                } else {
+                    lease = readValue;
+                }
+
+                // running on the fiber. can directly call internalWrite()
+                writeInternal(future, k, lease);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                future.setException(t);
+            }
+        }, fiber);
+
+
+        return future;
+    }
+
+    public void write(final LeaseValue newLease, final SettableFuture<LeaseValue> future) {
+        fiber.execute(new Runnable() {
+            @Override
+            public void run() {
+                writeInternal(future, getNextBallotNumber(), newLease);
+            }
+        });
+    }
+
+    public ListenableFuture<LeaseValue> write(final LeaseValue newLease) {
         final SettableFuture<LeaseValue> future = SettableFuture.create();
 
         fiber.execute(new Runnable() {
             @Override
             public void run() {
-                writeInternal(future, datum);
+                writeInternal(future, getNextBallotNumber(), newLease);
             }
             });
 
         return future;
     }
 
-    private void writeInternal(final SettableFuture<LeaseValue> future, String datum) {
+    /**
+     * Only call when executed ON the fiber runnable.  If you are already on the fiber runnable, you may
+     * call this, otherwise consider using write().
+     * @param future callback ftw
+     * @param k the "k"/ballot number value.
+     * @param newLease the lease object
+     */
+    private void writeInternal(final SettableFuture<LeaseValue> future,
+                               final BallotNumber k,
+                               final LeaseValue newLease) {
         try {
-            // Choose a lease expiry:
-            long exp = System.currentTimeMillis() + 10; // TODO param this 10 seconds
-            final LeaseValue newLease = new LeaseValue(datum, exp);
-
-            BallotNumber k = getNextBallotNumber();
-
             FleaseRequestMessage outMsg = FleaseRequestMessage.newBuilder()
                     .setMessageType(FleaseRequestMessage.MessageType.WRITE)
                     .setLeaseId(leaseId)
@@ -168,13 +231,13 @@ public class FleaseLease {
      * Procedure READ(k) from Algorithm 1.
      * @return
      */
-    public ListenableFuture<LeaseValue> read() {
+    public ListenableFuture<LeaseValue> read(final BallotNumber k) {
         final SettableFuture<LeaseValue> future = SettableFuture.create();
 
         fiber.execute(new Runnable() {
             @Override
             public void run() {
-                readInternal(future);
+                readInternal(future, k);
             }
         });
 
@@ -182,11 +245,8 @@ public class FleaseLease {
     }
 
 
-    private void readInternal(final SettableFuture<LeaseValue> future) {
+    private void readInternal(final SettableFuture<LeaseValue> future, final BallotNumber k) {
         try {
-            // TODO choose a new ballot number:
-            // TODO use a "real" process id, not just 0.
-            BallotNumber k = getNextBallotNumber();
             // outgoing message:
             FleaseRequestMessage outMsg = FleaseRequestMessage.newBuilder()
                     .setMessageType(FleaseRequestMessage.MessageType.READ)
@@ -239,7 +299,7 @@ public class FleaseLease {
     }
 
     private BallotNumber getNextBallotNumber() {
-        return new BallotNumber(System.currentTimeMillis(), messageNumber++, 0);
+        return new BallotNumber(info.currentTimeMillis(), messageNumber++, 0);
     }
 
     private void checkReadReplies(List<IncomingRpcReply> replies, SettableFuture<LeaseValue> future) {
@@ -302,8 +362,8 @@ public class FleaseLease {
     private void receiveWrite(Request<IncomingRpcRequest, OutgoingRpcReply> message) {
         BallotNumber k = message.getRequest().getBallotNumber();
         // If write > k or read > k THEN
-        if (k.compareTo(write) <= 0
-                || k.compareTo(read) <= 0) {
+        if (k.compareTo(write) < 0
+                || k.compareTo(read) < 0) {
             // send nackWRITE, k
             message.reply(OutgoingRpcReply.getNackWriteMessage(message.getRequest(), k));
         } else {
@@ -319,8 +379,8 @@ public class FleaseLease {
     private void receiveRead(Request<IncomingRpcRequest, OutgoingRpcReply> message) {
         BallotNumber k = message.getRequest().getBallotNumber();
         // If write >= k or read >= k
-        if (k.compareTo(write) < 0
-                || k.compareTo(read) < 0) {
+        if (k.compareTo(write) <= 0
+                || k.compareTo(read) <= 0) {
             // send (nackREAD, k) to p(j)
             LOG.debug("Sending nackREAD, {}", k);
             message.reply(OutgoingRpcReply.getNackReadMessage(message.getRequest(), k));

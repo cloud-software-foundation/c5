@@ -24,6 +24,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class InRamSim {
+    public static class Info implements InformationInterface {
+
+        @Override
+        public long currentTimeMillis() {
+            return System.currentTimeMillis();
+        }
+
+        @Override
+        public long getLeaseLength() {
+            return 10 * 1000;
+        }
+    }
     private static final Logger LOG = LoggerFactory.getLogger(InRamSim.class);
 
     final int peerSize;
@@ -43,7 +55,7 @@ public class InRamSim {
 
         for( UUID peerId : peerUUIDs) {
             // make me a ....
-            FleaseLease fl = new FleaseLease(fiberPool.create(), "lease", peerId, peerUUIDs, rpcChannel);
+            FleaseLease fl = new FleaseLease(fiberPool.create(), new Info(), peerId.toString(), "lease", peerId, peerUUIDs, rpcChannel);
             fleaseRunners.put(peerId, fl);
         }
 
@@ -54,15 +66,14 @@ public class InRamSim {
         rpcChannel.subscribe(rpcFiber, new Callback<Request<OutgoingRpcRequest, IncomingRpcReply>>() {
             @Override
             public void onMessage(Request<OutgoingRpcRequest, IncomingRpcReply> message) {
-
-                doThing(message);
+                messageForwarder(message);
             }
         });
 
         rpcFiber.start();
     }
 
-    private void doThing(final Request<OutgoingRpcRequest, IncomingRpcReply> origMsg) {
+    private void messageForwarder(final Request<OutgoingRpcRequest, IncomingRpcReply> origMsg) {
 
         // ok, who sent this?!!!!!
         final OutgoingRpcRequest request = origMsg.getRequest();
@@ -92,21 +103,26 @@ public class InRamSim {
     }
 
     public void run() throws ExecutionException, InterruptedException {
-        FleaseLease fl = fleaseRunners.values().iterator().next();
-        ListenableFuture<LeaseValue> future = fl.read();
-        //LOG.info("read result: {}", future.get());
-        LeaseValue result = future.get();
-        System.out.println("read result: " + result);
-
-        String datum = "";
-        if (result.isBefore(System.currentTimeMillis())) {
-            // new lease!
-            datum = "new lease";
-        } else {
-            datum = result.datum;
+        List<ListenableFuture<LeaseValue>> futures = new ArrayList<>();
+        for (FleaseLease fl : fleaseRunners.values()) {
+            futures.add(fl.getLease());
+            Thread.sleep(100);
         }
-        ListenableFuture<LeaseValue> writeFuture = fl.write(datum);
-        System.out.println("write value: " + writeFuture.get());
+
+        // now print them out in order:
+        System.out.println("Get lease results in order:");
+        for (FleaseLease fl : fleaseRunners.values()) {
+            ListenableFuture<LeaseValue> lv = futures.get(0);
+            futures.remove(0);
+            System.out.print(fl.getId());
+            System.out.print(" : ");
+            try {
+                System.out.println(lv.get());
+            } catch (Throwable t) {
+                System.out.println("ex: " + t);
+            }
+        }
+
     }
 
     public void dispose() {
