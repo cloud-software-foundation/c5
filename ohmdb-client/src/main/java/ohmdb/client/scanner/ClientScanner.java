@@ -102,7 +102,7 @@ public class ClientScanner extends AbstractClientScanner {
 
       if (!this.isClosed) {
         // If we don't have enough pending outstanding increase our rate
-        if (this.outStandingRequests < .5 * requestSize ) {
+        if (this.outStandingRequests < .5 * requestSize) {
           if (requestSize < OhmConstants.MAX_REQUEST_SIZE) {
             requestSize = requestSize * 2;
             System.out.println("increasing requestSize:" + requestSize);
@@ -112,15 +112,15 @@ public class ClientScanner extends AbstractClientScanner {
         int queueSpace = OhmConstants.MAX_CACHE_SZ - this.scanResults.size();
 
         // If we have plenty of room for another request
-        if (queueSpace * 1.5  >  (requestSize + this.outStandingRequests)
-          // And we have less than two requests worth in the queue
-           &&  2 * this.outStandingRequests < requestSize) {
+        if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
+            // And we have less than two requests worth in the queue
+            && 2 * this.outStandingRequests < requestSize) {
           getMoreRows();
         }
       }
     } while (result == null && !this.isClosed);
 
-    if (result == null){
+    if (result == null) {
       return null;
     }
 
@@ -136,7 +136,7 @@ public class ClientScanner extends AbstractClientScanner {
     ClientProtos.ScanRequest.Builder scanRequest = ClientProtos.ScanRequest.newBuilder()
         .setScannerId(scannerId)
         .setRegion(regionSpecifier);
-        scanRequest.setNumberOfRows(requestSize);
+    scanRequest.setNumberOfRows(requestSize);
 
     ClientProtos.Call call = ClientProtos.Call.newBuilder()
         .setCommand(ClientProtos.Call.Command.SCAN)

@@ -20,13 +20,11 @@
 package ohmdb.client;
 
 import com.google.protobuf.ByteString;
-
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class TestInOrderScan {
   private static ByteString tableName =
@@ -49,18 +47,18 @@ public class TestInOrderScan {
     ResultScanner scanner;
 
     scanner = table.getScanner(cf);
-    byte [] previousRow = {};
+    byte[] previousRow = {};
     int counter = 0;
     do {
-      if (result != null){
+      if (result != null) {
         previousRow = result.getRow();
       }
       result = scanner.next();
 
-      if (Bytes.compareTo(result.getRow(), previousRow) < 1){
-          System.out.println(counter);
-          System.exit(1);
-        }
+      if (Bytes.compareTo(result.getRow(), previousRow) < 1) {
+        System.out.println(counter);
+        System.exit(1);
+      }
 
     } while (result != null);
     table.close();

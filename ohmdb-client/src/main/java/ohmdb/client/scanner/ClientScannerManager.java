@@ -27,13 +27,13 @@ public enum ClientScannerManager {
 
   public ClientScanner getOrCreate(long scannerId)
       throws IOException {
-    if (!scannerMap.containsKey(scannerId)){
+    if (!scannerMap.containsKey(scannerId)) {
       scannerMap.put(scannerId, new ClientScanner(scannerId));
     }
     return scannerMap.get(scannerId);
   }
 
-  public boolean hasScanner(long scannerId)  {
+  public boolean hasScanner(long scannerId) {
     return scannerMap.containsKey(scannerId);
   }
 }

@@ -29,17 +29,27 @@ import java.util.ArrayList;
 public class Populator {
   static ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
 
-
   public Populator() throws IOException, InterruptedException {
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException {
     OhmTable table = new OhmTable(tableName);
     long start = System.currentTimeMillis();
+
+    int numberOfBatches = 30;
+    int batchSize = 1024 * 81;
+    if (args.length == 2) {
+      numberOfBatches = Integer.parseInt(args[0]);
+      batchSize = Integer.parseInt(args[1]);
+
+    }
     compareToHBasePut(table,
         Bytes.toBytes("cf"),
         Bytes.toBytes("cq"),
-        Bytes.toBytes("value"));
+        Bytes.toBytes("value"),
+        numberOfBatches,
+        batchSize);
     long end = System.currentTimeMillis();
     System.out.println("time:" + (end - start));
   }
@@ -47,34 +57,32 @@ public class Populator {
   public static void compareToHBasePut(final TableInterface table,
                                        final byte[] cf,
                                        final byte[] cq,
-                                       final byte[] value) throws IOException, InterruptedException {
-    try {
-      ArrayList<Put> puts = new ArrayList<>();
-      for (int j = 1; j != 30; j++) {
-        puts.clear();
-        for (int i = 1; i != 1024 * 81; i++) {
-          puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, value));
+                                       final byte[] value,
+                                       final int numberOfBatches,
+                                       final int batchSize)
+      throws IOException {
+    ArrayList<Put> puts = new ArrayList<>();
 
-        }
-        int i = 0;
-        for (Put put : puts) {
-          i++;
-          if (i % 1024 == 0) {
-            System.out.print("#");
-            System.out.flush();
-          }
-          if (i % (1024 * 80) == 0) {
-            System.out.println("");
-          }
-          table.put(put);
-        }
-        puts.clear();
+    for (int j = 1; j != numberOfBatches + 1; j++) {
+      puts.clear();
+      for (int i = 1; i != batchSize + 1; i++) {
+        puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, value));
       }
-    } finally {
-      if (table != null) {
-        table.close();
+
+      int i = 0;
+      for (Put put : puts) {
+        i++;
+        if (i % 1024 == 0) {
+          System.out.print("#");
+          System.out.flush();
+        }
+        if (i % (1024 * 80) == 0) {
+          System.out.println("");
+        }
+        table.put(put);
       }
+
+      puts.clear();
     }
   }
-
 }

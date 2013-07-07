@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class OhmTable extends OhmShim {
   private RequestHandler handler;
-  private  final OhmConnectionManager ohmConnectionManager
+  private final OhmConnectionManager ohmConnectionManager
       = OhmConnectionManager.INSTANCE;
   private final ClientScannerManager clientScannerManager
       = ClientScannerManager.INSTANCE;

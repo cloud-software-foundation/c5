@@ -34,8 +34,6 @@
  */
 package ohmdb.client.queue;
 
-import ohmdb.client.queue.PaddedAtomicLong;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

@@ -38,7 +38,6 @@ public class HBasePop {
   static byte[] cf = Bytes.toBytes("cf");
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    HBasePop testingUtil = new HBasePop();
     HBaseAdmin admin = new HBaseAdmin(conf);
     HTableDescriptor hTableDescriptor = new HTableDescriptor(tableName.toByteArray());
     hTableDescriptor.addFamily(new HColumnDescriptor(cf));
@@ -50,20 +49,18 @@ public class HBasePop {
     System.out.println("time:" + (end - start));
   }
 
-  public static void compareToHBasePut() throws IOException, InterruptedException {
+  public static void compareToHBasePut() throws IOException {
     byte[] cq = Bytes.toBytes("cq");
     byte[] value = Bytes.toBytes("value");
-    HTable table = new HTable(conf, tableName.toByteArray());
 
-    try {
+    try (HTable table = new HTable(conf, tableName.toByteArray())) {
       ArrayList<Put> puts = new ArrayList<>();
-      for (int j = 1; j != 30; j++) {
-        for (int i = 1; i != 1024 * 81; i++) {
+      for (int j = 1; j != 30 + 1; j++) {
+        for (int i = 1; i != (1024 * 81) + 1; i++) {
           puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, value));
         }
 
         int i = 0;
-
         for (Put put : puts) {
           i++;
           if (i % 1024 == 0) {
@@ -77,11 +74,6 @@ public class HBasePop {
         }
         puts.clear();
       }
-    } finally {
-      if (table != null) {
-        table.close();
-      }
     }
   }
-
 }
