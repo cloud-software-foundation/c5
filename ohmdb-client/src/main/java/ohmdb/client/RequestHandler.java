@@ -62,8 +62,8 @@ public class RequestHandler
         long scannerId = msg.getScan().getScannerId();
 
         ClientScanner clientScanner;
-        if (!manager.hasScanner(scannerId)){
-          clientScanner =  manager.getOrCreate(scannerId);
+        if (!manager.hasScanner(scannerId)) {
+          clientScanner = manager.getOrCreate(scannerId);
           f.set(scannerId);
         } else {
           clientScanner = manager.getOrCreate(scannerId);

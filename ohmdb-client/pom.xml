@@ -14,7 +14,6 @@
   <version>1.0-SNAPSHOT</version>
   <properties>
     <log4j.version>1.2.16</log4j.version>
-    <junit.version>4.8.1</junit.version>
     <surefire.version>2.12</surefire.version>
   </properties>
 

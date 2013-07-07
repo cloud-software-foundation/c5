@@ -75,7 +75,7 @@ public class CompareToHBase {
 
     int j = 0;
     Bs = System.currentTimeMillis();
-     scanner = hTable.getScanner(cf);
+    scanner = hTable.getScanner(cf);
     do {
       j++;
       if (j % 1024 == 0) {
