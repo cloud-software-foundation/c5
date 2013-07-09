@@ -1,5 +1,9 @@
 package ohmdb.flease;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.ListenableFuture;
 import ohmdb.flease.rpc.IncomingRpcReply;
 import ohmdb.flease.rpc.IncomingRpcRequest;
@@ -22,6 +26,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 public class InRamSim {
     public static class Info implements InformationInterface {
@@ -43,6 +50,7 @@ public class InRamSim {
     final RequestChannel<OutgoingRpcRequest,IncomingRpcReply> rpcChannel = new MemoryRequestChannel<>();
     final Fiber rpcFiber;
     private final PoolFiberFactory fiberPool;
+    private final MetricRegistry metrics = new MetricRegistry();
 
     public InRamSim(final int peerSize) {
         this.peerSize = peerSize;
@@ -73,6 +81,10 @@ public class InRamSim {
         rpcFiber.start();
     }
 
+
+    private final Meter messages = metrics.meter(name(InRamSim.class, "messageRate"));
+    private final Counter messageCnt = metrics.counter(name(InRamSim.class, "messageCnt"));
+
     private void messageForwarder(final Request<OutgoingRpcRequest, IncomingRpcReply> origMsg) {
 
         // ok, who sent this?!!!!!
@@ -87,7 +99,10 @@ public class InRamSim {
             return;
         }
 
-        LOG.debug("Forwarding message from {} to {}, contents: {}", request.from, request.to, request.message);
+        messages.mark();
+        messageCnt.inc();
+
+        //LOG.debug("Forwarding message from {} to {}, contents: {}", request.from, request.to, request.message);
         // Construct and send a IncomingRpcRequest from the OutgoingRpcRequest.
         // There is absolutely no way to know who this is from at this point from the infrastructure.
         final IncomingRpcRequest newRequest = new IncomingRpcRequest(1, request.from, request.message);
@@ -95,7 +110,9 @@ public class InRamSim {
             @Override
             public void onMessage(OutgoingRpcReply msg) {
                 // Translate the OutgoingRpcReply -> IncomingRpcReply.
-                LOG.debug("Forwarding reply message from {} back to {}, contents: {}", dest, request.to, msg.message);
+                //LOG.debug("Forwarding reply message from {} back to {}, contents: {}", dest, request.to, msg.message);
+                messages.mark();
+                messageCnt.inc();
                 IncomingRpcReply newReply = new IncomingRpcReply(msg.message, dest);
                 origMsg.reply(newReply);
             }
@@ -122,7 +139,6 @@ public class InRamSim {
                 System.out.println("ex: " + t);
             }
         }
-
     }
 
     public void dispose() {
@@ -135,7 +151,15 @@ public class InRamSim {
 
     public static void main(String []args) throws ExecutionException, InterruptedException {
         InRamSim sim = new InRamSim(3);
+        ConsoleReporter reporter = ConsoleReporter.forRegistry(sim.metrics)
+                .convertDurationsTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .build();
+
+        reporter.start(1, TimeUnit.SECONDS);
         sim.run();
         sim.dispose();
+        reporter.report();
+        reporter.stop();
     }
 }

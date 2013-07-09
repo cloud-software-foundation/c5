@@ -108,12 +108,35 @@ public class FleaseLease {
             }
         });
 
+//        fiber.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//                  maintainLease();
+//            }
+//        }, 1, 1, TimeUnit.SECONDS);
+
         fiber.start();
+
     }
 
-    // return the configured lease value
-    public String getLeaseValue() {
-        return leaseValue;
+    /**
+     * Maintain the lease for the system.
+     * Things we may do:
+     * * Renew the lease if we own it
+     * * Renew the lease even if we dont own it
+     * * Other stuff
+     */
+    private void maintainLease() {
+
+
+    }
+
+    /**
+     * Returns the current lease - may be null!
+     * @return the lease value or null if no lease is set.
+     */
+    public LeaseValue getLeaseValue() {
+        return lease;
     }
     public UUID getId() {
         return myId;
@@ -133,7 +156,7 @@ public class FleaseLease {
 
                 // TODO implement the full Flease algorithm including waiting.
                 if (readValue.isBefore(info.currentTimeMillis())) {
-                    lease = new LeaseValue(leaseValue, info.currentTimeMillis() + info.getLeaseLength());
+                    lease = new LeaseValue(leaseValue, info.currentTimeMillis() + info.getLeaseLength(), myId);
                 } else {
                     lease = readValue;
                 }

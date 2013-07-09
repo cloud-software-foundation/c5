@@ -1,5 +1,7 @@
 package ohmdb.flease;
 
+import java.util.UUID;
+
 /**
  * A value holder class for leases. Serializes to Flease.Lease protobuf.
  *
@@ -9,24 +11,38 @@ package ohmdb.flease;
 public class LeaseValue implements Comparable<LeaseValue> {
 
     public final String datum;
+    // If leaseExpiry = 0, then this is the "null" lease
     public final long leaseExpiry;
+    // Will be null if there is no lease (ie: leaseExpiry = 0)
+    public final UUID leaseOwner;
 
     private final Flease.Lease protobuf;
 
-    public LeaseValue(final String datum, final long leaseExpiry) {
+    public LeaseValue(final String datum, final long leaseExpiry, final UUID leaseOwner) {
         this.datum = datum;
         this.leaseExpiry = leaseExpiry;
+        this.leaseOwner = leaseOwner;
+
+        assert (leaseExpiry > 0 && leaseOwner != null) ||
+                (leaseExpiry == 0 && leaseOwner == null);
 
         this.protobuf = null;
     }
 
     public LeaseValue() {
-        this("", 0);
+        this("", 0, null);
     }
 
     public LeaseValue(Flease.Lease fromMessage) {
         this.datum = fromMessage.getDatum();
         this.leaseExpiry = fromMessage.getLeaseExpiry();
+        if (fromMessage.hasLeaseOwner())
+            this.leaseOwner = UUID.fromString(fromMessage.getLeaseOwner());
+        else
+            this.leaseOwner = null;
+
+        assert (leaseExpiry > 0 && leaseOwner != null) ||
+                (leaseExpiry == 0 && leaseOwner == null);
 
         this.protobuf = fromMessage;
     }
@@ -46,8 +62,14 @@ public class LeaseValue implements Comparable<LeaseValue> {
         if (protobuf != null) return protobuf;
 
         Flease.Lease.Builder builder = Flease.Lease.newBuilder();
+
         builder.setDatum(datum)
                 .setLeaseExpiry(leaseExpiry);
+
+        if (leaseOwner != null) {
+            builder.setLeaseOwner(leaseOwner.toString());
+        }
+
         return builder.build();
     }
 
@@ -55,7 +77,7 @@ public class LeaseValue implements Comparable<LeaseValue> {
     public String toString() {
         if (leaseExpiry == 0) return "<empty lease>";
 
-        return datum + " (exp: " + leaseExpiry + ")";
+        return datum + " (exp: " + leaseExpiry + ") owned by: " + leaseOwner;
     }
 
     @Override
@@ -67,7 +89,8 @@ public class LeaseValue implements Comparable<LeaseValue> {
             LeaseValue vOther = (LeaseValue)other;
 
             if (datum.equals(vOther.datum) &&
-                    leaseExpiry == vOther.leaseExpiry)
+                    leaseExpiry == vOther.leaseExpiry &&
+                    leaseOwner == vOther.leaseOwner)
                 return true;
         }
         return false;
