@@ -21,14 +21,15 @@
 package ohmdb.client;
 
 public class OhmConstants {
+  public static final long FLUSH_PERIOD = 30000;
+
   public static final int DEFAULT_INIT_SCAN = 100;
   public static final int MAX_REQUEST_SIZE = 1000000;
-  public static final long FLUSH_PERIOD = 30000;
   public static final int AMOUNT_OF_FLUSH_PER_COMPACT = 10;
   public static final int MSG_SIZE = 100;
   public static final int DEFAULT_PORT = 8080;
-  public static int TEST_PORT = 8080;
-  public static int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
+  public static final int TEST_PORT = 8080;
+  public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
   public static final String LOG_NAME = "log";
   public static final String WAL_DIR = "wal";
   public static final String ARCHIVE_DIR = "old_wal";
