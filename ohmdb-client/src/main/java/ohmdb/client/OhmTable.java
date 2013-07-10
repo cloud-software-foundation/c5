@@ -45,7 +45,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class OhmTable extends OhmShim {
+public class OhmTable extends OhmShim implements AutoCloseable {
   private RequestHandler handler;
   private final OhmConnectionManager ohmConnectionManager
       = OhmConnectionManager.INSTANCE;
