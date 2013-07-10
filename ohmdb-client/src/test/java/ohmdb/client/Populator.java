@@ -34,24 +34,26 @@ public class Populator {
 
   public static void main(String[] args)
       throws IOException, InterruptedException {
-    OhmTable table = new OhmTable(tableName);
-    long start = System.currentTimeMillis();
+    try (OhmTable table = new OhmTable(tableName)) {
 
-    int numberOfBatches = 30;
-    int batchSize = 1024 * 81;
-    if (args.length == 2) {
-      numberOfBatches = Integer.parseInt(args[0]);
-      batchSize = Integer.parseInt(args[1]);
+      long start = System.currentTimeMillis();
 
+      int numberOfBatches = 30;
+      int batchSize = 1024 * 81;
+      if (args.length == 2) {
+        numberOfBatches = Integer.parseInt(args[0]);
+        batchSize = Integer.parseInt(args[1]);
+
+      }
+      compareToHBasePut(table,
+          Bytes.toBytes("cf"),
+          Bytes.toBytes("cq"),
+          Bytes.toBytes("value"),
+          numberOfBatches,
+          batchSize);
+      long end = System.currentTimeMillis();
+      System.out.println("time:" + (end - start));
     }
-    compareToHBasePut(table,
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("cq"),
-        Bytes.toBytes("value"),
-        numberOfBatches,
-        batchSize);
-    long end = System.currentTimeMillis();
-    System.out.println("time:" + (end - start));
   }
 
   public static void compareToHBasePut(final TableInterface table,
