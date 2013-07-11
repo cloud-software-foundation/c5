@@ -1,7 +1,5 @@
 package ohmdb.flease;
 
-import java.util.UUID;
-
 /**
  * A value holder class for leases. Serializes to Flease.Lease protobuf.
  *
@@ -14,35 +12,32 @@ public class LeaseValue implements Comparable<LeaseValue> {
     // If leaseExpiry = 0, then this is the "null" lease
     public final long leaseExpiry;
     // Will be null if there is no lease (ie: leaseExpiry = 0)
-    public final UUID leaseOwner;
+    public final long leaseOwner;
 
     private final Flease.Lease protobuf;
 
-    public LeaseValue(final String datum, final long leaseExpiry, final UUID leaseOwner) {
+    public LeaseValue(final String datum, final long leaseExpiry, final long leaseOwner) {
         this.datum = datum;
         this.leaseExpiry = leaseExpiry;
         this.leaseOwner = leaseOwner;
 
-        assert (leaseExpiry > 0 && leaseOwner != null) ||
-                (leaseExpiry == 0 && leaseOwner == null);
+        assert (leaseExpiry > 0 && leaseOwner != 0) ||
+                (leaseExpiry == 0 && leaseOwner == 0);
 
         this.protobuf = null;
     }
 
     public LeaseValue() {
-        this("", 0, null);
+        this("", 0, 0);
     }
 
     public LeaseValue(Flease.Lease fromMessage) {
         this.datum = fromMessage.getDatum();
         this.leaseExpiry = fromMessage.getLeaseExpiry();
-        if (fromMessage.hasLeaseOwner())
-            this.leaseOwner = UUID.fromString(fromMessage.getLeaseOwner());
-        else
-            this.leaseOwner = null;
+        this.leaseOwner = fromMessage.getLeaseOwner();
 
-        assert (leaseExpiry > 0 && leaseOwner != null) ||
-                (leaseExpiry == 0 && leaseOwner == null);
+        assert (leaseExpiry > 0 && leaseOwner != 0) ||
+                (leaseExpiry == 0 && leaseOwner == 0);
 
         this.protobuf = fromMessage;
     }
@@ -58,6 +53,13 @@ public class LeaseValue implements Comparable<LeaseValue> {
         return false;
     }
 
+    public boolean isAfter(long aTime, InformationInterface info) {
+        if ((leaseExpiry + info.getEpsilon()) > aTime) {
+            return true;
+        }
+        return false;
+    }
+
     public Flease.Lease getMessage() {
         if (protobuf != null) return protobuf;
 
@@ -66,9 +68,9 @@ public class LeaseValue implements Comparable<LeaseValue> {
         builder.setDatum(datum)
                 .setLeaseExpiry(leaseExpiry);
 
-        if (leaseOwner != null) {
-            builder.setLeaseOwner(leaseOwner.toString());
-        }
+        // small boring optimization of bytes on the wire.
+        if (leaseOwner != 0)
+            builder.setLeaseOwner(leaseOwner);
 
         return builder.build();
     }

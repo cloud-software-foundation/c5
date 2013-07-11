@@ -77,15 +77,6 @@ public class BallotNumber implements Comparable<BallotNumber> {
         return builder.build();
     }
 
-    /**
-     * Create a new BallotNumber but with an updated message number.
-     * @param newMessageNumber new object.
-     * @return
-     */
-    public BallotNumber updateNumber(long newMessageNumber) {
-        return new BallotNumber(ballotNumber, newMessageNumber, processId);
-    }
-
     @Override
     public String toString() {
         return ballotNumber + "/" + messageNumber + "@" + processId;
@@ -99,13 +90,33 @@ public class BallotNumber implements Comparable<BallotNumber> {
         }
 
         // TODO compare using interval, message number and processId.
-        if (ballotNumber == o.ballotNumber)
-            return 0;
-        else if (ballotNumber > o.ballotNumber)
+        if (ballotNumber == o.ballotNumber) {
+            return (int)(messageNumber - o.messageNumber);
+        } else if (ballotNumber > o.ballotNumber)
             return 1;
         else
             return -1;
     }
+
+    public long compareTo(BallotNumber o, InformationInterface info) {
+        if (o == null) {
+            return 1;
+        }
+
+        if (interval(info) == o.interval(info)) {
+            if (messageNumber == o.messageNumber) {
+                return processId - o.processId;
+            }
+            return messageNumber - o.messageNumber;
+        } else {
+            return interval(info) - o.interval(info);
+        }
+    }
+
+    public long interval(InformationInterface info) {
+        return ballotNumber / (info.getLeaseLength() - info.getEpsilon());
+    }
+
 
     @Override
     public int hashCode() {

@@ -19,8 +19,6 @@ package ohmdb.flease.rpc;
 import ohmdb.flease.BallotNumber;
 import ohmdb.flease.LeaseValue;
 
-import java.util.UUID;
-
 import static ohmdb.flease.Flease.FleaseRequestMessage;
 
 /**
@@ -28,7 +26,7 @@ import static ohmdb.flease.Flease.FleaseRequestMessage;
  */
 public class IncomingRpcRequest {
     public final long   messageId;
-    public final UUID from;
+    public final long from;
     public final FleaseRequestMessage message;
 
     /**
@@ -37,7 +35,7 @@ public class IncomingRpcRequest {
      * @param from      the other peer we are talking to.
      * @param message   the actual message contents.
      */
-    public IncomingRpcRequest(long messageId, UUID from, FleaseRequestMessage message) {
+    public IncomingRpcRequest(long messageId, long from, FleaseRequestMessage message) {
         this.messageId = messageId;
         this.from = from;
         this.message = message;

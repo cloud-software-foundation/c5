@@ -20,8 +20,6 @@ import ohmdb.flease.BallotNumber;
 import ohmdb.flease.Flease;
 import ohmdb.flease.LeaseValue;
 
-import java.util.UUID;
-
 import static ohmdb.flease.Flease.FleaseReplyMessage;
 
 /**
@@ -31,7 +29,7 @@ public class OutgoingRpcReply {
 
     public final long messageIdInReplyTo;
     public final FleaseReplyMessage message;
-    public final UUID to;
+    public final long to;
 
     public OutgoingRpcReply(IncomingRpcRequest requestInReplyTo, FleaseReplyMessage message) {
         this.messageIdInReplyTo = requestInReplyTo.messageId;

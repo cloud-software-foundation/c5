@@ -4,7 +4,6 @@ import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.util.concurrent.ListenableFuture;
 import ohmdb.flease.rpc.IncomingRpcReply;
 import ohmdb.flease.rpc.IncomingRpcRequest;
 import ohmdb.flease.rpc.OutgoingRpcReply;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,40 +30,55 @@ import java.util.concurrent.TimeUnit;
 import static com.codahale.metrics.MetricRegistry.name;
 
 public class InRamSim {
+
+
     public static class Info implements InformationInterface {
+        private final long plusMillis;
+
+        public Info(long plusMillis) {
+            this.plusMillis = plusMillis;
+        }
 
         @Override
         public long currentTimeMillis() {
-            return System.currentTimeMillis();
+            return System.currentTimeMillis() + plusMillis;
         }
 
         @Override
         public long getLeaseLength() {
             return 10 * 1000;
         }
+
+        @Override
+        public long getEpsilon() {
+            return 2 * 1000;
+        }
     }
     private static final Logger LOG = LoggerFactory.getLogger(InRamSim.class);
 
     final int peerSize;
-    final Map<UUID, FleaseLease> fleaseRunners = new HashMap<>();
+    final Map<Long, FleaseLease> fleaseRunners = new HashMap<>();
     final RequestChannel<OutgoingRpcRequest,IncomingRpcReply> rpcChannel = new MemoryRequestChannel<>();
     final Fiber rpcFiber;
+    final List<Long> peerUUIDs = new ArrayList<>();
     private final PoolFiberFactory fiberPool;
     private final MetricRegistry metrics = new MetricRegistry();
 
     public InRamSim(final int peerSize) {
         this.peerSize = peerSize;
         this.fiberPool = new PoolFiberFactory(Executors.newCachedThreadPool());
+        Random r = new Random();
 
-        List<UUID> peerUUIDs = new ArrayList<>();
         for (int i = 0; i < peerSize; i++) {
-            peerUUIDs.add(UUID.randomUUID());
+            peerUUIDs.add((long)r.nextInt());
         }
 
-        for( UUID peerId : peerUUIDs) {
+        long plusMillis = 0;
+        for( long peerId : peerUUIDs) {
             // make me a ....
-            FleaseLease fl = new FleaseLease(fiberPool.create(), new Info(), peerId.toString(), "lease", peerId, peerUUIDs, rpcChannel);
+            FleaseLease fl = new FleaseLease(fiberPool.create(), new Info(plusMillis), ""+peerId, "lease", peerId, peerUUIDs, rpcChannel);
             fleaseRunners.put(peerId, fl);
+            plusMillis += 500;
         }
 
         rpcFiber = fiberPool.create();
@@ -83,13 +97,15 @@ public class InRamSim {
 
 
     private final Meter messages = metrics.meter(name(InRamSim.class, "messageRate"));
-    private final Counter messageCnt = metrics.counter(name(InRamSim.class, "messageCnt"));
+    private final Counter messageTxn = metrics.counter(name(InRamSim.class, "messageTxn"));
+//    private final Histogram msgSize = metrics.histogram(name(InRamSim.class, "messageBytes"));
 
     private void messageForwarder(final Request<OutgoingRpcRequest, IncomingRpcReply> origMsg) {
 
         // ok, who sent this?!!!!!
         final OutgoingRpcRequest request = origMsg.getRequest();
-        final UUID dest = request.to;
+//        msgSize.update(request.message.getSerializedSize());
+        final long dest = request.to;
         // find it:
         final FleaseLease fl = fleaseRunners.get(dest);
         if (fl == null) {
@@ -100,7 +116,7 @@ public class InRamSim {
         }
 
         messages.mark();
-        messageCnt.inc();
+        messageTxn.inc();
 
         //LOG.debug("Forwarding message from {} to {}, contents: {}", request.from, request.to, request.message);
         // Construct and send a IncomingRpcRequest from the OutgoingRpcRequest.
@@ -112,7 +128,8 @@ public class InRamSim {
                 // Translate the OutgoingRpcReply -> IncomingRpcReply.
                 //LOG.debug("Forwarding reply message from {} back to {}, contents: {}", dest, request.to, msg.message);
                 messages.mark();
-                messageCnt.inc();
+                messageTxn.dec();
+//                msgSize.update(msg.message.getSerializedSize());
                 IncomingRpcReply newReply = new IncomingRpcReply(msg.message, dest);
                 origMsg.reply(newReply);
             }
@@ -120,23 +137,37 @@ public class InRamSim {
     }
 
     public void run() throws ExecutionException, InterruptedException {
-        List<ListenableFuture<LeaseValue>> futures = new ArrayList<>();
-        for (FleaseLease fl : fleaseRunners.values()) {
-            futures.add(fl.getLease());
-            Thread.sleep(100);
-        }
+        FleaseLease theOneIKilled = null;
 
-        // now print them out in order:
-        System.out.println("Get lease results in order:");
-        for (FleaseLease fl : fleaseRunners.values()) {
-            ListenableFuture<LeaseValue> lv = futures.get(0);
-            futures.remove(0);
-            System.out.print(fl.getId());
-            System.out.print(" : ");
-            try {
-                System.out.println(lv.get());
-            } catch (Throwable t) {
-                System.out.println("ex: " + t);
+        for(int i = 0 ; i < 15 ; i++) {
+            Thread.sleep(3 * 1000);
+
+            for (FleaseLease fl : fleaseRunners.values()) {
+                if (theOneIKilled != null && theOneIKilled.getId() == fl.getId()) {
+                    if (i > 10)
+                        System.out.print("BACK_TO_LIFE: ");
+                    else if (i > 5)
+                        System.out.print("DEAD: ");
+                }
+                if (fl.isLeaseOwner()) System.out.print("OWNER: ");
+                System.out.print("Lease for " + fl.getId() + " is: " + fl.getLeaseValue());
+                System.out.println(" k: " + fl.getWriteBallot());
+            }
+
+            if (i == 5) {
+                for (FleaseLease fl : fleaseRunners.values()) {
+                    if (fl.isLeaseOwner()) {
+                        fl.dispose();
+                        theOneIKilled = fl;
+                    }
+
+                }
+            }
+            if (i == 10) {
+                // crash recovery with same UUID:
+                FleaseLease newLease = new FleaseLease(fiberPool.create(), theOneIKilled.info,
+                        ""+ theOneIKilled.getId(), "lease", theOneIKilled.myId, peerUUIDs, rpcChannel);
+                fleaseRunners.put(theOneIKilled.myId, newLease);
             }
         }
     }
@@ -156,8 +187,9 @@ public class InRamSim {
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();
 
-        reporter.start(1, TimeUnit.SECONDS);
+        reporter.start(5, TimeUnit.SECONDS);
         sim.run();
+        System.out.println("All done baby");
         sim.dispose();
         reporter.report();
         reporter.stop();

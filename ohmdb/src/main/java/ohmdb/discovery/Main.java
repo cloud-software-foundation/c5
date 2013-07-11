@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +54,7 @@ public class Main {
     private final String clusterName;
     private final int discoveryPort;
     private final int servicePort;
-    private final String nodeId;
+    private final long nodeId;
 
     Main(String clusterName) throws SocketException, InterruptedException {
         this.clusterName = clusterName;
@@ -67,7 +67,7 @@ public class Main {
 
         Availability.Builder builder = Availability.newBuilder();
         builder.setNetworkPort(servicePort);
-        nodeId = UUID.randomUUID().toString();
+        nodeId = new Random().nextLong();
         builder.setNodeId(nodeId);
 
 
@@ -101,9 +101,9 @@ public class Main {
         fiber.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                ListenableFuture<ImmutableMap<String,NodeInfo>> fut = beaconService.getState();
+                ListenableFuture<ImmutableMap<Long,NodeInfo>> fut = beaconService.getState();
                 try {
-                    ImmutableMap<String,NodeInfo> state = fut.get();
+                    ImmutableMap<Long,NodeInfo> state = fut.get();
 
                     System.out.println("State info:");
                     for(BeaconService.NodeInfo info : state.values()) {
@@ -133,7 +133,7 @@ public class Main {
                 });
         Channel serverChannel = b.bind(servicePort).sync().channel();
 
-        ImmutableMap<String,NodeInfo> peers = waitForAPeerOrMore();
+        ImmutableMap<Long,NodeInfo> peers = waitForAPeerOrMore();
 
         // make a new bootstrap, it's just so silly:
         Bootstrap b2 = new Bootstrap();
@@ -152,7 +152,7 @@ public class Main {
         System.out.println("Listening on service port: " + servicePort);
         // now send messages to all my peers except myself of course, duh.
         for ( NodeInfo peer: peers.values()) {
-            if (peer.availability.getNodeId().equals(nodeId)) {
+            if (peer.availability.getNodeId() == nodeId) {
                 // yes this is me, and continue
                 continue;
             }
@@ -168,17 +168,17 @@ public class Main {
         }
     }
 
-    private ImmutableMap<String,NodeInfo> waitForAPeerOrMore() throws ExecutionException, InterruptedException {
+    private ImmutableMap<Long,NodeInfo> waitForAPeerOrMore() throws ExecutionException, InterruptedException {
         final Fiber fiber = new ThreadFiber();
         fiber.start();
-        final SettableFuture<ImmutableMap<String,NodeInfo>> future = SettableFuture.create();
+        final SettableFuture<ImmutableMap<Long,NodeInfo>> future = SettableFuture.create();
 
         fiber.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, NodeInfo>>() {
+                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<Long, NodeInfo>>() {
                     @Override
-                    public void onMessage(ImmutableMap<String, NodeInfo> message) {
+                    public void onMessage(ImmutableMap<Long, NodeInfo> message) {
                         if (message.size() >= 2) {
                             // yay...
                             LOG.info("Got more than 2 peers, continuing");

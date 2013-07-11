@@ -20,16 +20,14 @@ import ohmdb.flease.BallotNumber;
 import ohmdb.flease.Flease;
 import ohmdb.flease.LeaseValue;
 
-import java.util.UUID;
-
 /**
  * A reply message in response to a previously sent request message.  Constructed by RPC layer.
  */
 public class IncomingRpcReply {
     public final Flease.FleaseReplyMessage message;
-    public final UUID from;
+    public final long from;
 
-    public IncomingRpcReply(Flease.FleaseReplyMessage message, UUID from) {
+    public IncomingRpcReply(final Flease.FleaseReplyMessage message, final long from) {
         this.message = message;
         this.from = from;
     }

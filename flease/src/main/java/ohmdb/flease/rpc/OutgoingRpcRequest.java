@@ -19,7 +19,6 @@ package ohmdb.flease.rpc;
 import ohmdb.flease.BallotNumber;
 import ohmdb.flease.Flease;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.flease.Flease.FleaseRequestMessage;
@@ -32,16 +31,16 @@ import static ohmdb.flease.Flease.FleaseRequestMessage;
 public class OutgoingRpcRequest {
 
     public final FleaseRequestMessage message;
-    public final UUID to;
-    public final UUID from;
+    public final long to;
+    public final long from;
 
     // The RPC system may support retries, if so it will do according to these params.
     public final int retries;
     public final int retrySpacing;
     public final TimeUnit timeUnit;
 
-    public OutgoingRpcRequest(UUID from, FleaseRequestMessage message, UUID to,
-                              int retries, int retrySpacing, TimeUnit timeUnit) {
+    public OutgoingRpcRequest(final long from, final FleaseRequestMessage message, final long to,
+                              final int retries, final int retrySpacing, final TimeUnit timeUnit) {
         this.retries = retries;
         this.retrySpacing = retrySpacing;
         this.timeUnit = timeUnit;
@@ -56,7 +55,7 @@ public class OutgoingRpcRequest {
      * @param message
      * @param to
      */
-    public OutgoingRpcRequest(UUID from, FleaseRequestMessage message, UUID to) {
+    public OutgoingRpcRequest(final long from, final FleaseRequestMessage message, long to) {
         this(from, message, to,
                 10,
                 2,

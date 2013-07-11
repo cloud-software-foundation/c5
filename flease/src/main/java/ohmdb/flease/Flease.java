@@ -2755,32 +2755,23 @@ public final class Flease {
     com.google.protobuf.ByteString
         getDatumBytes();
 
-    // optional string lease_owner = 3;
+    // optional int64 lease_owner = 3;
     /**
-     * <code>optional string lease_owner = 3;</code>
+     * <code>optional int64 lease_owner = 3;</code>
      *
      * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
+     * Who owns the lease? This would be the id of the owner.
      * </pre>
      */
     boolean hasLeaseOwner();
     /**
-     * <code>optional string lease_owner = 3;</code>
+     * <code>optional int64 lease_owner = 3;</code>
      *
      * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
+     * Who owns the lease? This would be the id of the owner.
      * </pre>
      */
-    java.lang.String getLeaseOwner();
-    /**
-     * <code>optional string lease_owner = 3;</code>
-     *
-     * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
-     * </pre>
-     */
-    com.google.protobuf.ByteString
-        getLeaseOwnerBytes();
+    long getLeaseOwner();
   }
   /**
    * Protobuf type {@code ohmdb.flease.Lease}
@@ -2843,9 +2834,9 @@ public final class Flease {
               datum_ = input.readBytes();
               break;
             }
-            case 26: {
+            case 24: {
               bitField0_ |= 0x00000004;
-              leaseOwner_ = input.readBytes();
+              leaseOwner_ = input.readInt64();
               break;
             }
           }
@@ -2967,65 +2958,34 @@ public final class Flease {
       }
     }
 
-    // optional string lease_owner = 3;
+    // optional int64 lease_owner = 3;
     public static final int LEASE_OWNER_FIELD_NUMBER = 3;
-    private java.lang.Object leaseOwner_;
+    private long leaseOwner_;
     /**
-     * <code>optional string lease_owner = 3;</code>
+     * <code>optional int64 lease_owner = 3;</code>
      *
      * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
+     * Who owns the lease? This would be the id of the owner.
      * </pre>
      */
     public boolean hasLeaseOwner() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string lease_owner = 3;</code>
+     * <code>optional int64 lease_owner = 3;</code>
      *
      * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
+     * Who owns the lease? This would be the id of the owner.
      * </pre>
      */
-    public java.lang.String getLeaseOwner() {
-      java.lang.Object ref = leaseOwner_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          leaseOwner_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string lease_owner = 3;</code>
-     *
-     * <pre>
-     * Who owns the lease? This would be the uuid of the owner.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString
-        getLeaseOwnerBytes() {
-      java.lang.Object ref = leaseOwner_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        leaseOwner_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getLeaseOwner() {
+      return leaseOwner_;
     }
 
     private void initFields() {
       leaseExpiry_ = 0L;
       datum_ = "";
-      leaseOwner_ = "";
+      leaseOwner_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -3046,7 +3006,7 @@ public final class Flease {
         output.writeBytes(2, getDatumBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getLeaseOwnerBytes());
+        output.writeInt64(3, leaseOwner_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -3067,7 +3027,7 @@ public final class Flease {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getLeaseOwnerBytes());
+          .computeInt64Size(3, leaseOwner_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3189,7 +3149,7 @@ public final class Flease {
         bitField0_ = (bitField0_ & ~0x00000001);
         datum_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        leaseOwner_ = "";
+        leaseOwner_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
@@ -3256,9 +3216,7 @@ public final class Flease {
           onChanged();
         }
         if (other.hasLeaseOwner()) {
-          bitField0_ |= 0x00000004;
-          leaseOwner_ = other.leaseOwner_;
-          onChanged();
+          setLeaseOwner(other.getLeaseOwner());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -3434,100 +3392,51 @@ public final class Flease {
         return this;
       }
 
-      // optional string lease_owner = 3;
-      private java.lang.Object leaseOwner_ = "";
+      // optional int64 lease_owner = 3;
+      private long leaseOwner_ ;
       /**
-       * <code>optional string lease_owner = 3;</code>
+       * <code>optional int64 lease_owner = 3;</code>
        *
        * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
+       * Who owns the lease? This would be the id of the owner.
        * </pre>
        */
       public boolean hasLeaseOwner() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string lease_owner = 3;</code>
+       * <code>optional int64 lease_owner = 3;</code>
        *
        * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
+       * Who owns the lease? This would be the id of the owner.
        * </pre>
        */
-      public java.lang.String getLeaseOwner() {
-        java.lang.Object ref = leaseOwner_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          leaseOwner_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public long getLeaseOwner() {
+        return leaseOwner_;
       }
       /**
-       * <code>optional string lease_owner = 3;</code>
+       * <code>optional int64 lease_owner = 3;</code>
        *
        * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
+       * Who owns the lease? This would be the id of the owner.
        * </pre>
        */
-      public com.google.protobuf.ByteString
-          getLeaseOwnerBytes() {
-        java.lang.Object ref = leaseOwner_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          leaseOwner_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string lease_owner = 3;</code>
-       *
-       * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
-       * </pre>
-       */
-      public Builder setLeaseOwner(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+      public Builder setLeaseOwner(long value) {
+        bitField0_ |= 0x00000004;
         leaseOwner_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string lease_owner = 3;</code>
+       * <code>optional int64 lease_owner = 3;</code>
        *
        * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
+       * Who owns the lease? This would be the id of the owner.
        * </pre>
        */
       public Builder clearLeaseOwner() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        leaseOwner_ = getDefaultInstance().getLeaseOwner();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string lease_owner = 3;</code>
-       *
-       * <pre>
-       * Who owns the lease? This would be the uuid of the owner.
-       * </pre>
-       */
-      public Builder setLeaseOwnerBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        leaseOwner_ = value;
+        leaseOwner_ = 0L;
         onChanged();
         return this;
       }
@@ -3589,7 +3498,7 @@ public final class Flease {
      * <code>optional int64 id = 3;</code>
      *
      * <pre>
-     * aka k.id from page 5.
+     * aka k.id from page 5.  From the id system anyways.
      * </pre>
      */
     boolean hasId();
@@ -3597,7 +3506,7 @@ public final class Flease {
      * <code>optional int64 id = 3;</code>
      *
      * <pre>
-     * aka k.id from page 5.
+     * aka k.id from page 5.  From the id system anyways.
      * </pre>
      */
     long getId();
@@ -3769,7 +3678,7 @@ public final class Flease {
      * <code>optional int64 id = 3;</code>
      *
      * <pre>
-     * aka k.id from page 5.
+     * aka k.id from page 5.  From the id system anyways.
      * </pre>
      */
     public boolean hasId() {
@@ -3779,7 +3688,7 @@ public final class Flease {
      * <code>optional int64 id = 3;</code>
      *
      * <pre>
-     * aka k.id from page 5.
+     * aka k.id from page 5.  From the id system anyways.
      * </pre>
      */
     public long getId() {
@@ -4159,7 +4068,7 @@ public final class Flease {
        * <code>optional int64 id = 3;</code>
        *
        * <pre>
-       * aka k.id from page 5.
+       * aka k.id from page 5.  From the id system anyways.
        * </pre>
        */
       public boolean hasId() {
@@ -4169,7 +4078,7 @@ public final class Flease {
        * <code>optional int64 id = 3;</code>
        *
        * <pre>
-       * aka k.id from page 5.
+       * aka k.id from page 5.  From the id system anyways.
        * </pre>
        */
       public long getId() {
@@ -4179,7 +4088,7 @@ public final class Flease {
        * <code>optional int64 id = 3;</code>
        *
        * <pre>
-       * aka k.id from page 5.
+       * aka k.id from page 5.  From the id system anyways.
        * </pre>
        */
       public Builder setId(long value) {
@@ -4192,7 +4101,7 @@ public final class Flease {
        * <code>optional int64 id = 3;</code>
        *
        * <pre>
-       * aka k.id from page 5.
+       * aka k.id from page 5.  From the id system anyways.
        * </pre>
        */
       public Builder clearId() {
@@ -4257,7 +4166,7 @@ public final class Flease {
       "\"E\n\013MessageType\022\013\n\007ackREAD\020\001\022\014\n\010nackREAD" +
       "\020\002\022\014\n\010ackWRITE\020\003\022\r\n\tnackWRITE\020\004\"A\n\005Lease" +
       "\022\024\n\014lease_expiry\030\001 \001(\003\022\r\n\005datum\030\002 \001(\t\022\023\n" +
-      "\013lease_owner\030\003 \001(\t\"I\n\014BallotNumber\022\025\n\rba" +
+      "\013lease_owner\030\003 \001(\003\"I\n\014BallotNumber\022\025\n\rba" +
       "llot_number\030\001 \001(\003\022\026\n\016message_number\030\002 \001(" +
       "\003\022\n\n\002id\030\003 \001(\003B\020\n\014ohmdb.fleaseH\001"
     };

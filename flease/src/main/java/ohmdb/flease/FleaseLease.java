@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.flease.Flease.FleaseRequestMessage;
@@ -59,8 +58,8 @@ public class FleaseLease {
     private final String leaseId;
     private final Fiber fiber;
 
-    private final UUID myId;
-    private final ImmutableList<UUID> peers;
+    final long myId;
+    private final ImmutableList<Long> peers;
     private final String leaseValue;
 
     private long messageNumber = 0; // also named "r" in the algorithm.
@@ -70,7 +69,9 @@ public class FleaseLease {
     private BallotNumber write = new BallotNumber();
     // The actual lease data, aka "v" in Algorithm 1.
     private LeaseValue lease = new LeaseValue();
-    private final InformationInterface info;
+
+    // package local for testing
+    final InformationInterface info;
 
 
     /**
@@ -85,9 +86,10 @@ public class FleaseLease {
      */
     public FleaseLease(Fiber fiber, InformationInterface info,
                        String leaseValue,
-                       String leaseId, UUID myId,
+                       String leaseId,
+                       long myId,
 
-                       List<UUID> peers,
+                       List<Long> peers,
                        RequestChannel<OutgoingRpcRequest,IncomingRpcReply> sendRpcChannel) {
         this.fiber = fiber;
         this.leaseId = leaseId;
@@ -108,15 +110,14 @@ public class FleaseLease {
             }
         });
 
-//        fiber.scheduleAtFixedRate(new Runnable() {
-//            @Override
-//            public void run() {
-//                  maintainLease();
-//            }
-//        }, 1, 1, TimeUnit.SECONDS);
+        fiber.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                  maintainLease();
+            }
+        }, 1, 1, TimeUnit.SECONDS);
 
-        fiber.start();
-
+        this.fiber.start();
     }
 
     /**
@@ -127,8 +128,20 @@ public class FleaseLease {
      * * Other stuff
      */
     private void maintainLease() {
+        // always call getLease.  If we arent the lease owner, we'll propagate it, otherwise we'll be attempting
+        // to renew and maintain our own lease.
+        ListenableFuture<LeaseValue> future = getLease();
+        Futures.addCallback(future, new FutureCallback<LeaseValue>() {
+            @Override
+            public void onSuccess(LeaseValue result) {
+                LOG.debug("{} maintainLease successful getLease: {}", getId(), result);
+            }
 
-
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.debug("{} maintainLease exception {}", getId(), t.toString());
+            }
+        }, fiber);
     }
 
     /**
@@ -138,26 +151,70 @@ public class FleaseLease {
     public LeaseValue getLeaseValue() {
         return lease;
     }
-    public UUID getId() {
+
+    /**
+     * Returns the ballot number associated with the lease.
+     * @return ballot number, or the "0" ballot number if no lease.
+     */
+    public BallotNumber getWriteBallot() {
+        return write;
+    }
+
+    /**
+     * Get the string that identifies this process (uuid + hashCode for ballots)
+     * @return descriptive string for debugging
+     */
+    public long getId() {
         return myId;
     }
 
+    public boolean isLeaseOwner() {
+        if (lease == null) return false;
+        return myId == lease.leaseOwner;
+    }
+
     public ListenableFuture<LeaseValue> getLease() {
-        final SettableFuture<LeaseValue> future = SettableFuture.create();
+        SettableFuture<LeaseValue> future = SettableFuture.create();
+        getLease(future);
+        return future;
+    }
+
+    protected void getLease(final SettableFuture<LeaseValue> future) {
         final BallotNumber k = getNextBallotNumber();
 
-        // We are NOT on the fiber at this point, so call the non-fiber version.
+        // We are NOT (or may not be) on the fiber at this point, so call the non-fiber version.
         ListenableFuture<LeaseValue> read = read(k);
         // The future becomes a way to chain one activity on the fiber to the next:
         Futures.addCallback(read, new FutureCallback<LeaseValue>() {
             @Override
             public void onSuccess(LeaseValue readValue) {
+
+                if (readValue.isBefore(info.currentTimeMillis()) && readValue.isAfter(info.currentTimeMillis(), info)) {
+                    // wait for an amount of time then retry getLease:
+
+                    long delay = (readValue.leaseExpiry + info.getEpsilon()) - info.currentTimeMillis();
+                    LOG.debug("{} I think the lease is invalid: {}, but I need to delay: {}", getId(), readValue, delay);
+                    fiber.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            getLease(future);
+                        }
+                    }, delay, TimeUnit.MILLISECONDS);
+                    // no more processing at this time.
+                    return;
+                }
+
+                // Lease renewal.
                 LeaseValue lease = null;
 
-                // TODO implement the full Flease algorithm including waiting.
                 if (readValue.isBefore(info.currentTimeMillis())) {
+                    LOG.info("{} I think this lease is invalid: {} based on time: {}", getId(), readValue, info.currentTimeMillis());
+                    lease = new LeaseValue(leaseValue, info.currentTimeMillis() + info.getLeaseLength(), myId);
+                } else if (myId == readValue.leaseOwner) {
+                    LOG.info("{} This is my lease, i will renew it into the future!", getId());
                     lease = new LeaseValue(leaseValue, info.currentTimeMillis() + info.getLeaseLength(), myId);
                 } else {
+                    LOG.debug("{} pushing existing lease out to the group {}", getId(), readValue);
                     lease = readValue;
                 }
 
@@ -170,9 +227,6 @@ public class FleaseLease {
                 future.setException(t);
             }
         }, fiber);
-
-
-        return future;
     }
 
     public void write(final LeaseValue newLease, final SettableFuture<LeaseValue> future) {
@@ -219,30 +273,39 @@ public class FleaseLease {
             final Disposable timeout = fiber.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    future.setException(new FleaseReadTimeoutException(replies, majority));
+                    future.setException(new FleaseWriteTimeoutException(replies, majority));
                 }
             }, 20, TimeUnit.SECONDS);
 
-            for (UUID peer : peers) {
+            for (Long peer : peers) {
                 OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(myId, outMsg, peer);
 
                 AsyncRequest.withOneReply(fiber, sendRpcChannel, rpcRequest, new Callback<IncomingRpcReply>() {
                     @Override
                     public void onMessage(IncomingRpcReply message) {
-                        if (message.isNackWrite())
-                            future.setException(new NackWriteException(message));
+                        // in theory it's possible for this exception call to fail.
+                        if (message.isNackWrite()) {
+                            if (!future.setException(new NackWriteException(message))) {
+                                LOG.warn("{} write unable to set future exception nackWRITE {}", getId(), message);
+                            }
+                            // kill the timeout, let's GTFO
+                            timeout.dispose();
+                            return; // well not much to do anymore.
+                        }
 
                         replies.add(message);
 
+                        // TODO add delay processing so we confirm AFTER we have given all processes a chance to report in
                         if (replies.size() >= majority) {
                             timeout.dispose();
 
                             // not having received any nackWRITE, we can declare success:
-                            future.set(newLease);
+                            if (!future.set(newLease)) {
+                                LOG.warn("{} write unable to set future for new lease {}",
+                                        getId(), newLease);
+                            }
                         }
                     }
-
-
                 });
             }
         } catch (Throwable t) {
@@ -286,7 +349,7 @@ public class FleaseLease {
             }, 20, TimeUnit.SECONDS);
 
             // Send to all processes:
-            for (UUID peer : peers) {
+            for (long peer : peers) {
                 OutgoingRpcRequest rpcRequest = new OutgoingRpcRequest(myId, outMsg, peer);
 
                 AsyncRequest.withOneReply(fiber, sendRpcChannel, rpcRequest, new Callback<IncomingRpcReply>() {
@@ -294,7 +357,11 @@ public class FleaseLease {
                     public void onMessage(IncomingRpcReply message) {
                         if (message.isNackRead()) {
                             // even a single is a failure.
-                            future.setException(new NackReadException(message));
+                            if (!future.setException(new NackReadException(message))) {
+                                LOG.warn("{} read reply processing, got NackREAD but unable to set failure {}",
+                                        getId(), message);
+                            }
+                            timeout.dispose(); // ditch the timeout.
                             return;
                         }
 
@@ -322,7 +389,7 @@ public class FleaseLease {
     }
 
     private BallotNumber getNextBallotNumber() {
-        return new BallotNumber(info.currentTimeMillis(), messageNumber++, 0);
+        return new BallotNumber(info.currentTimeMillis(), messageNumber++, myId);
     }
 
     private void checkReadReplies(List<IncomingRpcReply> replies, SettableFuture<LeaseValue> future) {
@@ -338,9 +405,13 @@ public class FleaseLease {
                     v = reply.getLease();
                 }
             }
-            future.set(v);
+            if (!future.set(v)) {
+                LOG.warn("{} checkReadReplies, unable to set future for {}", getId(), v);
+            }
         } catch (Throwable e) {
-            future.setException(e);
+            if (!future.setException(e)) {
+                LOG.warn("{} checkReadReplies, unable to set exception future, {}", (Object)e);
+            }
         }
     }
 
@@ -385,14 +456,15 @@ public class FleaseLease {
     private void receiveWrite(Request<IncomingRpcRequest, OutgoingRpcReply> message) {
         BallotNumber k = message.getRequest().getBallotNumber();
         // If write > k or read > k THEN
-        if (k.compareTo(write) < 0
-                || k.compareTo(read) < 0) {
+        if (write.compareTo(k, info) > 0
+                || read.compareTo(k, info) > 0) {
             // send nackWRITE, k
+            LOG.debug("{} sending nackWRITE, rejected ballot {} because I already have (r;w) {} ; {}", getId(), k, read, write);
             message.reply(OutgoingRpcReply.getNackWriteMessage(message.getRequest(), k));
         } else {
             write = k;
             lease = message.getRequest().getLease();
-            LOG.info("{} new lease value written [{}] with k {}", myId, lease, write);
+            LOG.info("{} new lease value written [{}] with k {}", getId(), lease, write);
 
             // send ackWRITE, k
             message.reply(OutgoingRpcReply.getAckWriteMessage(message.getRequest(), k));
@@ -402,13 +474,13 @@ public class FleaseLease {
     private void receiveRead(Request<IncomingRpcRequest, OutgoingRpcReply> message) {
         BallotNumber k = message.getRequest().getBallotNumber();
         // If write >= k or read >= k
-        if (k.compareTo(write) <= 0
-                || k.compareTo(read) <= 0) {
+        if (write.compareTo(k, info) >= 0
+                || read.compareTo(k, info) >= 0) {
             // send (nackREAD, k) to p(j)
-            LOG.debug("Sending nackREAD, {}", k);
+            LOG.debug("{} Sending nackREAD, rejecting ballot {} because I already have (r;w) {} ; {}", getId(), k, read, write);
             message.reply(OutgoingRpcReply.getNackReadMessage(message.getRequest(), k));
         } else {
-            LOG.debug("onRead, setting 'read' to : {} (was: {})", k, read);
+            LOG.debug("{} onRead, setting 'read' to : {} (was: {})", getId(), k, read);
             read = k;
             // send (ackREAD,k,write(i),v(i)) to p(j)
             message.reply(OutgoingRpcReply.getAckReadMessage(message.getRequest(),

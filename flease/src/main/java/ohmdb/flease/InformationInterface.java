@@ -35,4 +35,12 @@ public interface InformationInterface {
      * @return
      */
     public long getLeaseLength();
+
+    /**
+     * The fudge factor when comparing leases.  Ballot numbers with timestamps within this
+     * will be considered "equivalient" and secondary data will be used.  It also means
+     * that this is the "fudge factor" for when leases might not be valid.
+     * @return
+     */
+    public long getEpsilon();
 }

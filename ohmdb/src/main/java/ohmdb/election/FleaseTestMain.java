@@ -38,7 +38,7 @@ import org.xtreemfs.foundation.flease.proposer.FleaseException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -95,7 +95,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
 
         Beacon.Availability.Builder builder = Beacon.Availability.newBuilder();
         builder.setNetworkPort(ourMasterPort);
-        builder.setNodeId(UUID.randomUUID().toString());
+        builder.setNodeId(new Random().nextLong());
 
         TimeSync.initializeLocal(50);
 
@@ -111,10 +111,10 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         this.beaconService.start();
 
         // we need some peers to peer with.
-        ImmutableMap <String,NodeInfo> peers = waitForAPeerOrMore();
+        ImmutableMap <Long,NodeInfo> peers = waitForAPeerOrMore();
         List<InetSocketAddress> peerAddrs = new ArrayList<>(peers.size());
         for (NodeInfo nodeInfo : peers.values()) {
-            if (!nodeInfo.availability.getNodeId().equals(nodeInfoTemplate.getNodeId())) {
+            if (!(nodeInfo.availability.getNodeId() == nodeInfoTemplate.getNodeId())) {
                 // just use first IP:
                 peerAddrs.add(new InetSocketAddress(nodeInfo.availability.getAddresses(0), nodeInfo.availability.getNetworkPort()));
             }
@@ -124,17 +124,17 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         tcpFlease.getStage().openCell(new ASCIIString(this.clusterName), peerAddrs, false);
     }
 
-    private ImmutableMap<String,NodeInfo> waitForAPeerOrMore() throws ExecutionException, InterruptedException {
+    private ImmutableMap<Long,NodeInfo> waitForAPeerOrMore() throws ExecutionException, InterruptedException {
         final Fiber fiber = new ThreadFiber();
         fiber.start();
-        final SettableFuture<ImmutableMap<String,NodeInfo>> future = SettableFuture.create();
+        final SettableFuture<ImmutableMap<Long,NodeInfo>> future = SettableFuture.create();
 
         fiber.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<String, NodeInfo>>() {
+                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<Long, NodeInfo>>() {
                     @Override
-                    public void onMessage(ImmutableMap<String, NodeInfo> message) {
+                    public void onMessage(ImmutableMap<Long, NodeInfo> message) {
                         if (message.size() >= 2) {
                             // yay...
                             LOG.info("Got more than 3 peers, continuing");

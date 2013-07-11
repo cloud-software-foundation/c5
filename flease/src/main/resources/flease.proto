@@ -46,8 +46,8 @@ message Lease {
     optional int64  lease_expiry = 1;
     // who the lease is for... we can augment the data structure here.
     optional string datum = 2;
-    // Who owns the lease? This would be the uuid of the owner.
-    optional string lease_owner = 3;
+    // Who owns the lease? This would be the id of the owner.
+    optional int64 lease_owner = 3;
 }
 
 // As per page 5
@@ -58,6 +58,6 @@ message BallotNumber {
 
     // message number r that is used to distinguish the messages sent by a process within the same interval.
     optional int64 message_number = 2;
-    // aka k.id from page 5.
+    // aka k.id from page 5.  From the id system anyways.
     optional int64 id = 3;
 }

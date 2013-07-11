@@ -22,13 +22,13 @@ import ohmdb.flease.rpc.IncomingRpcReply;
 import java.util.List;
 
 /**
- * Timed out waiting for enough ackREAD.
+ * Timed out waiting for enough ackWRITE
  */
-public class FleaseReadTimeoutException extends Throwable {
+public class FleaseWriteTimeoutException extends Throwable {
     final List<IncomingRpcReply> replies;
     final int majority;
 
-    public FleaseReadTimeoutException(List<IncomingRpcReply> replies, int majority) {
+    public FleaseWriteTimeoutException(List<IncomingRpcReply> replies, int majority) {
         this.replies = ImmutableList.copyOf(replies);
         this.majority = majority;
     }
@@ -36,7 +36,7 @@ public class FleaseReadTimeoutException extends Throwable {
     @Override
     public String toString() {
         StringBuilder sb =  new StringBuilder();
-        sb.append("Lease read timed out, we got replies from ").append(replies.size()).append(" peers, majority needed: ").append(majority);
+        sb.append("Lease write timed out, we got replies from ").append(replies.size()).append(" peers, majority needed: ").append(majority);
         sb.append(", peers we got replies from were: \n ");
         for( IncomingRpcReply reply : replies) {
             sb.append(reply.from);
@@ -45,4 +45,5 @@ public class FleaseReadTimeoutException extends Throwable {
 
         return sb.toString();
     }
+
 }

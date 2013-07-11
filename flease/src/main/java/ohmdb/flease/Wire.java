@@ -29,24 +29,19 @@ public final class Wire {
      */
     long getMessageId();
 
-    // optional string sender_id = 2;
+    // optional int64 sender_id = 2;
     /**
-     * <code>optional string sender_id = 2;</code>
+     * <code>optional int64 sender_id = 2;</code>
      */
     boolean hasSenderId();
     /**
-     * <code>optional string sender_id = 2;</code>
+     * <code>optional int64 sender_id = 2;</code>
      */
-    java.lang.String getSenderId();
-    /**
-     * <code>optional string sender_id = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getSenderIdBytes();
+    long getSenderId();
 
-    // optional string destination_id = 3;
+    // optional int64 destination_id = 3;
     /**
-     * <code>optional string destination_id = 3;</code>
+     * <code>optional int64 destination_id = 3;</code>
      *
      * <pre>
      * The destination is implied by who received the message.
@@ -54,22 +49,13 @@ public final class Wire {
      */
     boolean hasDestinationId();
     /**
-     * <code>optional string destination_id = 3;</code>
+     * <code>optional int64 destination_id = 3;</code>
      *
      * <pre>
      * The destination is implied by who received the message.
      * </pre>
      */
-    java.lang.String getDestinationId();
-    /**
-     * <code>optional string destination_id = 3;</code>
-     *
-     * <pre>
-     * The destination is implied by who received the message.
-     * </pre>
-     */
-    com.google.protobuf.ByteString
-        getDestinationIdBytes();
+    long getDestinationId();
 
     // optional .ohmdb.flease.FleaseRequestMessage request_message = 4;
     /**
@@ -167,14 +153,14 @@ public final class Wire {
               messageId_ = input.readInt64();
               break;
             }
-            case 18: {
+            case 16: {
               bitField0_ |= 0x00000002;
-              senderId_ = input.readBytes();
+              senderId_ = input.readInt64();
               break;
             }
-            case 26: {
+            case 24: {
               bitField0_ |= 0x00000004;
-              destinationId_ = input.readBytes();
+              destinationId_ = input.readInt64();
               break;
             }
             case 34: {
@@ -267,54 +253,27 @@ public final class Wire {
       return messageId_;
     }
 
-    // optional string sender_id = 2;
+    // optional int64 sender_id = 2;
     public static final int SENDER_ID_FIELD_NUMBER = 2;
-    private java.lang.Object senderId_;
+    private long senderId_;
     /**
-     * <code>optional string sender_id = 2;</code>
+     * <code>optional int64 sender_id = 2;</code>
      */
     public boolean hasSenderId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional string sender_id = 2;</code>
+     * <code>optional int64 sender_id = 2;</code>
      */
-    public java.lang.String getSenderId() {
-      java.lang.Object ref = senderId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          senderId_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string sender_id = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSenderIdBytes() {
-      java.lang.Object ref = senderId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        senderId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getSenderId() {
+      return senderId_;
     }
 
-    // optional string destination_id = 3;
+    // optional int64 destination_id = 3;
     public static final int DESTINATION_ID_FIELD_NUMBER = 3;
-    private java.lang.Object destinationId_;
+    private long destinationId_;
     /**
-     * <code>optional string destination_id = 3;</code>
+     * <code>optional int64 destination_id = 3;</code>
      *
      * <pre>
      * The destination is implied by who received the message.
@@ -324,45 +283,14 @@ public final class Wire {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string destination_id = 3;</code>
+     * <code>optional int64 destination_id = 3;</code>
      *
      * <pre>
      * The destination is implied by who received the message.
      * </pre>
      */
-    public java.lang.String getDestinationId() {
-      java.lang.Object ref = destinationId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          destinationId_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string destination_id = 3;</code>
-     *
-     * <pre>
-     * The destination is implied by who received the message.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString
-        getDestinationIdBytes() {
-      java.lang.Object ref = destinationId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        destinationId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getDestinationId() {
+      return destinationId_;
     }
 
     // optional .ohmdb.flease.FleaseRequestMessage request_message = 4;
@@ -423,8 +351,8 @@ public final class Wire {
 
     private void initFields() {
       messageId_ = 0L;
-      senderId_ = "";
-      destinationId_ = "";
+      senderId_ = 0L;
+      destinationId_ = 0L;
       requestMessage_ = ohmdb.flease.Flease.FleaseRequestMessage.getDefaultInstance();
       replyMessage_ = ohmdb.flease.Flease.FleaseReplyMessage.getDefaultInstance();
     }
@@ -444,10 +372,10 @@ public final class Wire {
         output.writeInt64(1, messageId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getSenderIdBytes());
+        output.writeInt64(2, senderId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getDestinationIdBytes());
+        output.writeInt64(3, destinationId_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(4, requestMessage_);
@@ -470,11 +398,11 @@ public final class Wire {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getSenderIdBytes());
+          .computeInt64Size(2, senderId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getDestinationIdBytes());
+          .computeInt64Size(3, destinationId_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
@@ -604,9 +532,9 @@ public final class Wire {
         super.clear();
         messageId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        senderId_ = "";
+        senderId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
-        destinationId_ = "";
+        destinationId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
         if (requestMessageBuilder_ == null) {
           requestMessage_ = ohmdb.flease.Flease.FleaseRequestMessage.getDefaultInstance();
@@ -696,14 +624,10 @@ public final class Wire {
           setMessageId(other.getMessageId());
         }
         if (other.hasSenderId()) {
-          bitField0_ |= 0x00000002;
-          senderId_ = other.senderId_;
-          onChanged();
+          setSenderId(other.getSenderId());
         }
         if (other.hasDestinationId()) {
-          bitField0_ |= 0x00000004;
-          destinationId_ = other.destinationId_;
-          onChanged();
+          setDestinationId(other.getDestinationId());
         }
         if (other.hasRequestMessage()) {
           mergeRequestMessage(other.getRequestMessage());
@@ -787,84 +711,43 @@ public final class Wire {
         return this;
       }
 
-      // optional string sender_id = 2;
-      private java.lang.Object senderId_ = "";
+      // optional int64 sender_id = 2;
+      private long senderId_ ;
       /**
-       * <code>optional string sender_id = 2;</code>
+       * <code>optional int64 sender_id = 2;</code>
        */
       public boolean hasSenderId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional string sender_id = 2;</code>
+       * <code>optional int64 sender_id = 2;</code>
        */
-      public java.lang.String getSenderId() {
-        java.lang.Object ref = senderId_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          senderId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public long getSenderId() {
+        return senderId_;
       }
       /**
-       * <code>optional string sender_id = 2;</code>
+       * <code>optional int64 sender_id = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getSenderIdBytes() {
-        java.lang.Object ref = senderId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          senderId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string sender_id = 2;</code>
-       */
-      public Builder setSenderId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+      public Builder setSenderId(long value) {
+        bitField0_ |= 0x00000002;
         senderId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string sender_id = 2;</code>
+       * <code>optional int64 sender_id = 2;</code>
        */
       public Builder clearSenderId() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        senderId_ = getDefaultInstance().getSenderId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string sender_id = 2;</code>
-       */
-      public Builder setSenderIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        senderId_ = value;
+        senderId_ = 0L;
         onChanged();
         return this;
       }
 
-      // optional string destination_id = 3;
-      private java.lang.Object destinationId_ = "";
+      // optional int64 destination_id = 3;
+      private long destinationId_ ;
       /**
-       * <code>optional string destination_id = 3;</code>
+       * <code>optional int64 destination_id = 3;</code>
        *
        * <pre>
        * The destination is implied by who received the message.
@@ -874,62 +757,30 @@ public final class Wire {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string destination_id = 3;</code>
+       * <code>optional int64 destination_id = 3;</code>
        *
        * <pre>
        * The destination is implied by who received the message.
        * </pre>
        */
-      public java.lang.String getDestinationId() {
-        java.lang.Object ref = destinationId_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          destinationId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public long getDestinationId() {
+        return destinationId_;
       }
       /**
-       * <code>optional string destination_id = 3;</code>
+       * <code>optional int64 destination_id = 3;</code>
        *
        * <pre>
        * The destination is implied by who received the message.
        * </pre>
        */
-      public com.google.protobuf.ByteString
-          getDestinationIdBytes() {
-        java.lang.Object ref = destinationId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          destinationId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string destination_id = 3;</code>
-       *
-       * <pre>
-       * The destination is implied by who received the message.
-       * </pre>
-       */
-      public Builder setDestinationId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+      public Builder setDestinationId(long value) {
+        bitField0_ |= 0x00000004;
         destinationId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string destination_id = 3;</code>
+       * <code>optional int64 destination_id = 3;</code>
        *
        * <pre>
        * The destination is implied by who received the message.
@@ -937,24 +788,7 @@ public final class Wire {
        */
       public Builder clearDestinationId() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        destinationId_ = getDefaultInstance().getDestinationId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string destination_id = 3;</code>
-       *
-       * <pre>
-       * The destination is implied by who received the message.
-       * </pre>
-       */
-      public Builder setDestinationIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        destinationId_ = value;
+        destinationId_ = 0L;
         onChanged();
         return this;
       }
@@ -1256,8 +1090,8 @@ public final class Wire {
     java.lang.String[] descriptorData = {
       "\n\nwire.proto\022\014ohmdb.flease\032\014flease.proto" +
       "\"\310\001\n\021FleaseWireMessage\022\022\n\nmessage_id\030\001 \001" +
-      "(\003\022\021\n\tsender_id\030\002 \001(\t\022\026\n\016destination_id\030" +
-      "\003 \001(\t\022;\n\017request_message\030\004 \001(\0132\".ohmdb.f" +
+      "(\003\022\021\n\tsender_id\030\002 \001(\003\022\026\n\016destination_id\030" +
+      "\003 \001(\003\022;\n\017request_message\030\004 \001(\0132\".ohmdb.f" +
       "lease.FleaseRequestMessage\0227\n\rreply_mess" +
       "age\030\005 \001(\0132 .ohmdb.flease.FleaseReplyMess" +
       "ageB\020\n\014ohmdb.fleaseH\001"
