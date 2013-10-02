@@ -94,7 +94,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         int ourMasterPort = port + (int)(Math.random() * 5000);
 
         Beacon.Availability.Builder builder = Beacon.Availability.newBuilder();
-        builder.setNetworkPort(ourMasterPort);
+        builder.setBaseNetworkPort(ourMasterPort);
         builder.setNodeId(new Random().nextLong());
 
         TimeSync.initializeLocal(50);
@@ -116,7 +116,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         for (NodeInfo nodeInfo : peers.values()) {
             if (!(nodeInfo.availability.getNodeId() == nodeInfoTemplate.getNodeId())) {
                 // just use first IP:
-                peerAddrs.add(new InetSocketAddress(nodeInfo.availability.getAddresses(0), nodeInfo.availability.getNetworkPort()));
+                peerAddrs.add(new InetSocketAddress(nodeInfo.availability.getAddresses(0), nodeInfo.availability.getBaseNetworkPort()));
             }
         }
 

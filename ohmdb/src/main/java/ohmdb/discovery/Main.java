@@ -66,10 +66,13 @@ public class Main {
         this.servicePort = discoveryPort + (int)(Math.random() * 5000);
 
         Availability.Builder builder = Availability.newBuilder();
-        builder.setNetworkPort(servicePort);
+        builder.setBaseNetworkPort(servicePort);
         nodeId = new Random().nextLong();
         builder.setNodeId(nodeId);
 
+        // nodeId
+        // servicePort
+        // discoveryPort
 
         beaconService = new BeaconService(discoveryPort, builder.buildPartial());
     }
@@ -156,7 +159,7 @@ public class Main {
                 // yes this is me, and continue
                 continue;
             }
-            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddresses(0), peer.availability.getNetworkPort());
+            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddresses(0), peer.availability.getBaseNetworkPort());
             // uh ok lets connect and make hash:
 
             SocketAddress localAddr = serverChannel.localAddress();

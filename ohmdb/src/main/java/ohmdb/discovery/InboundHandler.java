@@ -18,24 +18,18 @@ package ohmdb.discovery;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundByteHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.net.SocketAddress;
 
-public class InboundHandler extends ChannelInboundByteHandlerAdapter {
+public class InboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
-    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelRegistered(ctx);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
-    protected void inboundBufferUpdated(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         SocketAddress remoteAddress = ctx.channel().remoteAddress();
         SocketAddress localAddress = ctx.channel().localAddress();
 
         System.out.println("Got message from " + remoteAddress + " to me at: " + localAddress);
-        System.out.println("  It was SOOO big: " + in.readableBytes());
+        System.out.println("  It was SOOO big: " + msg.readableBytes());
 
-        // yeah just fucking drop that shit on the ground.
     }
 }
