@@ -7,7 +7,7 @@ option optimize_for = SPEED;
 
 message FleaseWireMessage {
     // Envelope
-    optional int64                 message_id = 1;
+    optional int64                message_id = 1;
     optional int64                sender_id = 2;
     // The destination is implied by who received the message.
     optional int64                destination_id = 3;

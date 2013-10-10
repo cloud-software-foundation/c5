@@ -115,7 +115,7 @@ public class FleaseLease {
             public void run() {
                   maintainLease();
             }
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 200, 200, TimeUnit.MILLISECONDS);
 
         this.fiber.start();
     }

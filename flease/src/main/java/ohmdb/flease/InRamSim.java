@@ -46,12 +46,12 @@ public class InRamSim {
 
         @Override
         public long getLeaseLength() {
-            return 10 * 1000;
+            return 2 * 1000;
         }
 
         @Override
         public long getEpsilon() {
-            return 2 * 1000;
+            return 400;
         }
     }
     private static final Logger LOG = LoggerFactory.getLogger(InRamSim.class);
