@@ -20,8 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.SettableFuture;
 import ohmdb.discovery.Beacon;
 import ohmdb.discovery.BeaconService;
-import org.jetlang.channels.AsyncRequest;
-import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -40,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static ohmdb.discovery.BeaconService.NodeInfo;
 
@@ -53,7 +50,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
     private final String clusterName;
     private final int fleasePort;
     private final Beacon.Availability nodeInfoTemplate;
-    private final BeaconService beaconService;
+    private final BeaconService beaconService = null;
     private final int discoveryPort;
     private final String identity;
 
@@ -74,7 +71,7 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         this.tcpFlease = new TCPFleaseCommunicator(fleaseConfig, "/tmp/ryan/", true,
                 this, this, ramMasterEpochHandler);
 
-        this.beaconService = new BeaconService(discoveryPort, nodeInfoTemplate);
+        //this.beaconService = new BeaconService(discoveryPort, nodeInfoTemplate);
 
     }
 
@@ -128,23 +125,6 @@ public class FleaseTestMain implements FleaseStatusListener, FleaseViewChangeLis
         final Fiber fiber = new ThreadFiber();
         fiber.start();
         final SettableFuture<ImmutableMap<Long,NodeInfo>> future = SettableFuture.create();
-
-        fiber.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<Long, NodeInfo>>() {
-                    @Override
-                    public void onMessage(ImmutableMap<Long, NodeInfo> message) {
-                        if (message.size() >= 2) {
-                            // yay...
-                            LOG.info("Got more than 3 peers, continuing");
-                            future.set(message);
-                            fiber.dispose(); // end this mess.
-                        }
-                    }
-                });
-            }
-        }, 2, 2, TimeUnit.SECONDS);
 
         LOG.info("Waiting for peers...");
         return future.get();

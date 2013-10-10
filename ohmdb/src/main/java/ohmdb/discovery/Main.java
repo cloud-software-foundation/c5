@@ -30,8 +30,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import org.jetlang.channels.AsyncRequest;
-import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -50,7 +48,7 @@ import static ohmdb.discovery.BeaconService.NodeInfo;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    final BeaconService beaconService;
+    final BeaconService beaconService = null;
     private final String clusterName;
     private final int discoveryPort;
     private final int servicePort;
@@ -74,7 +72,7 @@ public class Main {
         // servicePort
         // discoveryPort
 
-        beaconService = new BeaconService(discoveryPort, builder.buildPartial());
+        //beaconService = new BeaconService(discoveryPort, builder.buildPartial());
     }
 
     public static void main(String[] args) throws Exception {
@@ -176,22 +174,6 @@ public class Main {
         fiber.start();
         final SettableFuture<ImmutableMap<Long,NodeInfo>> future = SettableFuture.create();
 
-        fiber.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                AsyncRequest.withOneReply(fiber, beaconService.stateRequests, 1, new Callback<ImmutableMap<Long, NodeInfo>>() {
-                    @Override
-                    public void onMessage(ImmutableMap<Long, NodeInfo> message) {
-                        if (message.size() >= 2) {
-                            // yay...
-                            LOG.info("Got more than 2 peers, continuing");
-                            future.set(message);
-                            fiber.dispose(); // end this mess.
-                        }
-                    }
-                });
-            }
-        }, 2, 2, TimeUnit.SECONDS);
 
         LOG.info("Waiting for peers...");
         return future.get();
