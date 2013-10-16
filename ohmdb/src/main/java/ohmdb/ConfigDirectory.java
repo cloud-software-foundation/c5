@@ -34,6 +34,7 @@ public class ConfigDirectory {
 
     public final static String nodeIdFile = "nodeId";
     public final static String clusterNameFile = "clusterName";
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     public final Path baseConfigPath;
     public final Path nodeIdPath;
@@ -66,6 +67,10 @@ public class ConfigDirectory {
         if (Files.exists(clusterNamePath) && !Files.isRegularFile(clusterNamePath)) {
             throw new Exception("Cluster name is not a regular directory!");
         }
+
+        if (!Files.isWritable(baseConfigPath)) {
+            throw new Exception("Can't write to the base configuration path!");
+        }
     }
 
     /** Get the contents of the node id config file */
@@ -77,9 +82,31 @@ public class ConfigDirectory {
         return getFirstLineOfFile(clusterNamePath);
     }
 
+    public void createSubDir(String subDir) throws Exception {
+        Path dirPath = baseConfigPath.resolve(subDir);
+        if (Files.isRegularFile(dirPath) || !Files.isWritable(dirPath)) {
+            throw new Exception("subdir isnt a dir or isnt writable!");
+        }
+
+        if (Files.isDirectory(dirPath)) {
+            return;
+        }
+        Files.createDirectory(dirPath);
+    }
+
+    public void writeFile(String subDir, String fileName, List<String> data) throws IOException {
+        Path filePath = baseConfigPath.resolve(subDir).resolve(fileName);
+        Files.write(filePath, data, UTF_8);
+    }
+
+    public List<String> readFile(String subDir, String fileName) throws IOException {
+        Path filePath = baseConfigPath.resolve(subDir).resolve(fileName);
+        return Files.readAllLines(filePath, UTF_8);
+    }
+
     private String getFirstLineOfFile(Path path) throws IOException {
         if (Files.isRegularFile(path)) {
-            List<String> allLines = Files.readAllLines(path, Charset.forName("UTF-8"));
+            List<String> allLines = Files.readAllLines(path, UTF_8);
             if (allLines.isEmpty())
                 return null;
             return allLines.get(0);
@@ -97,6 +124,6 @@ public class ConfigDirectory {
     private void setFile(String data, Path path) throws IOException {
         List<String> lines = new ArrayList<>(1);
         lines.add(data);
-        Files.write(path, lines, Charset.forName("UTF-8"));
+        Files.write(path, lines, UTF_8);
     }
 }
