@@ -59,9 +59,10 @@ public class TestingUtil {
       testingUtil.testPut();
       testingUtil.testExist();
       testingUtil.testGet();
-      testingUtil.testScan();
       testingUtil.testMultiGet();
       testingUtil.testExists();
+
+      testingUtil.testScan();
       testingUtil.close();
     } catch (IOException e) {
       e.printStackTrace();

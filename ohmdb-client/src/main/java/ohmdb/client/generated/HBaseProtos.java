@@ -8,78 +8,26 @@ public final class HBaseProtos {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  /**
-   * Protobuf enum {@code CellType}
-   *
-   * <pre>
-   **
-   * The type of the key in a Cell
-   * </pre>
-   */
   public enum CellType
       implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <code>MINIMUM = 0;</code>
-     */
     MINIMUM(0, 0),
-    /**
-     * <code>PUT = 4;</code>
-     */
     PUT(1, 4),
-    /**
-     * <code>DELETE = 8;</code>
-     */
     DELETE(2, 8),
-    /**
-     * <code>DELETE_COLUMN = 12;</code>
-     */
     DELETE_COLUMN(3, 12),
-    /**
-     * <code>DELETE_FAMILY = 14;</code>
-     */
     DELETE_FAMILY(4, 14),
-    /**
-     * <code>MAXIMUM = 255;</code>
-     *
-     * <pre>
-     * MAXIMUM is used when searching; you look from maximum on down.
-     * </pre>
-     */
     MAXIMUM(5, 255),
     ;
-
-    /**
-     * <code>MINIMUM = 0;</code>
-     */
+    
     public static final int MINIMUM_VALUE = 0;
-    /**
-     * <code>PUT = 4;</code>
-     */
     public static final int PUT_VALUE = 4;
-    /**
-     * <code>DELETE = 8;</code>
-     */
     public static final int DELETE_VALUE = 8;
-    /**
-     * <code>DELETE_COLUMN = 12;</code>
-     */
     public static final int DELETE_COLUMN_VALUE = 12;
-    /**
-     * <code>DELETE_FAMILY = 14;</code>
-     */
     public static final int DELETE_FAMILY_VALUE = 14;
-    /**
-     * <code>MAXIMUM = 255;</code>
-     *
-     * <pre>
-     * MAXIMUM is used when searching; you look from maximum on down.
-     * </pre>
-     */
     public static final int MAXIMUM_VALUE = 255;
-
-
+    
+    
     public final int getNumber() { return value; }
-
+    
     public static CellType valueOf(int value) {
       switch (value) {
         case 0: return MINIMUM;
@@ -91,7 +39,7 @@ public final class HBaseProtos {
         default: return null;
       }
     }
-
+    
     public static com.google.protobuf.Internal.EnumLiteMap<CellType>
         internalGetValueMap() {
       return internalValueMap;
@@ -103,7 +51,7 @@ public final class HBaseProtos {
               return CellType.valueOf(number);
             }
           };
-
+    
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(index);
@@ -116,9 +64,11 @@ public final class HBaseProtos {
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.getDescriptor().getEnumTypes().get(0);
     }
-
-    private static final CellType[] VALUES = values();
-
+    
+    private static final CellType[] VALUES = {
+      MINIMUM, PUT, DELETE, DELETE_COLUMN, DELETE_FAMILY, MAXIMUM, 
+    };
+    
     public static CellType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
@@ -127,89 +77,40 @@ public final class HBaseProtos {
       }
       return VALUES[desc.getIndex()];
     }
-
+    
     private final int index;
     private final int value;
-
+    
     private CellType(int index, int value) {
       this.index = index;
       this.value = value;
     }
-
+    
     // @@protoc_insertion_point(enum_scope:CellType)
   }
-
-  /**
-   * Protobuf enum {@code CompareType}
-   *
-   * <pre>
-   * Comparison operators 
-   * </pre>
-   */
+  
   public enum CompareType
       implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <code>LESS = 0;</code>
-     */
     LESS(0, 0),
-    /**
-     * <code>LESS_OR_EQUAL = 1;</code>
-     */
     LESS_OR_EQUAL(1, 1),
-    /**
-     * <code>EQUAL = 2;</code>
-     */
     EQUAL(2, 2),
-    /**
-     * <code>NOT_EQUAL = 3;</code>
-     */
     NOT_EQUAL(3, 3),
-    /**
-     * <code>GREATER_OR_EQUAL = 4;</code>
-     */
     GREATER_OR_EQUAL(4, 4),
-    /**
-     * <code>GREATER = 5;</code>
-     */
     GREATER(5, 5),
-    /**
-     * <code>NO_OP = 6;</code>
-     */
     NO_OP(6, 6),
     ;
-
-    /**
-     * <code>LESS = 0;</code>
-     */
+    
     public static final int LESS_VALUE = 0;
-    /**
-     * <code>LESS_OR_EQUAL = 1;</code>
-     */
     public static final int LESS_OR_EQUAL_VALUE = 1;
-    /**
-     * <code>EQUAL = 2;</code>
-     */
     public static final int EQUAL_VALUE = 2;
-    /**
-     * <code>NOT_EQUAL = 3;</code>
-     */
     public static final int NOT_EQUAL_VALUE = 3;
-    /**
-     * <code>GREATER_OR_EQUAL = 4;</code>
-     */
     public static final int GREATER_OR_EQUAL_VALUE = 4;
-    /**
-     * <code>GREATER = 5;</code>
-     */
     public static final int GREATER_VALUE = 5;
-    /**
-     * <code>NO_OP = 6;</code>
-     */
     public static final int NO_OP_VALUE = 6;
-
-
+    
+    
     public final int getNumber() { return value; }
-
+    
     public static CompareType valueOf(int value) {
       switch (value) {
         case 0: return LESS;
@@ -222,7 +123,7 @@ public final class HBaseProtos {
         default: return null;
       }
     }
-
+    
     public static com.google.protobuf.Internal.EnumLiteMap<CompareType>
         internalGetValueMap() {
       return internalValueMap;
@@ -234,7 +135,7 @@ public final class HBaseProtos {
               return CompareType.valueOf(number);
             }
           };
-
+    
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(index);
@@ -247,9 +148,11 @@ public final class HBaseProtos {
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.getDescriptor().getEnumTypes().get(1);
     }
-
-    private static final CompareType[] VALUES = values();
-
+    
+    private static final CompareType[] VALUES = {
+      LESS, LESS_OR_EQUAL, EQUAL, NOT_EQUAL, GREATER_OR_EQUAL, GREATER, NO_OP, 
+    };
+    
     public static CompareType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
@@ -258,134 +161,543 @@ public final class HBaseProtos {
       }
       return VALUES[desc.getIndex()];
     }
-
+    
     private final int index;
     private final int value;
-
+    
     private CompareType(int index, int value) {
       this.index = index;
       this.value = value;
     }
-
+    
     // @@protoc_insertion_point(enum_scope:CompareType)
   }
-
+  
   public interface CellOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // optional bytes row = 1;
-    /**
-     * <code>optional bytes row = 1;</code>
-     */
     boolean hasRow();
-    /**
-     * <code>optional bytes row = 1;</code>
-     */
     com.google.protobuf.ByteString getRow();
-
+    
     // optional bytes family = 2;
-    /**
-     * <code>optional bytes family = 2;</code>
-     */
     boolean hasFamily();
-    /**
-     * <code>optional bytes family = 2;</code>
-     */
     com.google.protobuf.ByteString getFamily();
-
+    
     // optional bytes qualifier = 3;
-    /**
-     * <code>optional bytes qualifier = 3;</code>
-     */
     boolean hasQualifier();
-    /**
-     * <code>optional bytes qualifier = 3;</code>
-     */
     com.google.protobuf.ByteString getQualifier();
-
+    
     // optional uint64 timestamp = 4;
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
     boolean hasTimestamp();
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
     long getTimestamp();
-
+    
     // optional .CellType cellType = 5;
-    /**
-     * <code>optional .CellType cellType = 5;</code>
-     */
     boolean hasCellType();
-    /**
-     * <code>optional .CellType cellType = 5;</code>
-     */
     ohmdb.client.generated.HBaseProtos.CellType getCellType();
-
+    
     // optional bytes value = 6;
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
     boolean hasValue();
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
     com.google.protobuf.ByteString getValue();
   }
-  /**
-   * Protobuf type {@code Cell}
-   *
-   * <pre>
-   **
-   * Protocol buffer version of Cell.
-   * </pre>
-   */
   public static final class Cell extends
       com.google.protobuf.GeneratedMessage
       implements CellOrBuilder {
     // Use Cell.newBuilder() to construct.
-    private Cell(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Cell(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private Cell(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private Cell(boolean noInit) {}
+    
     private static final Cell defaultInstance;
     public static Cell getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public Cell getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_Cell_descriptor;
     }
-    private Cell(
-        com.google.protobuf.CodedInputStream input,
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_Cell_fieldAccessorTable;
+    }
+    
+    private int bitField0_;
+    // optional bytes row = 1;
+    public static final int ROW_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString row_;
+    public boolean hasRow() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    public com.google.protobuf.ByteString getRow() {
+      return row_;
+    }
+    
+    // optional bytes family = 2;
+    public static final int FAMILY_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString family_;
+    public boolean hasFamily() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    public com.google.protobuf.ByteString getFamily() {
+      return family_;
+    }
+    
+    // optional bytes qualifier = 3;
+    public static final int QUALIFIER_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString qualifier_;
+    public boolean hasQualifier() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    public com.google.protobuf.ByteString getQualifier() {
+      return qualifier_;
+    }
+    
+    // optional uint64 timestamp = 4;
+    public static final int TIMESTAMP_FIELD_NUMBER = 4;
+    private long timestamp_;
+    public boolean hasTimestamp() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    public long getTimestamp() {
+      return timestamp_;
+    }
+    
+    // optional .CellType cellType = 5;
+    public static final int CELLTYPE_FIELD_NUMBER = 5;
+    private ohmdb.client.generated.HBaseProtos.CellType cellType_;
+    public boolean hasCellType() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    public ohmdb.client.generated.HBaseProtos.CellType getCellType() {
+      return cellType_;
+    }
+    
+    // optional bytes value = 6;
+    public static final int VALUE_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString value_;
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    public com.google.protobuf.ByteString getValue() {
+      return value_;
+    }
+    
+    private void initFields() {
+      row_ = com.google.protobuf.ByteString.EMPTY;
+      family_ = com.google.protobuf.ByteString.EMPTY;
+      qualifier_ = com.google.protobuf.ByteString.EMPTY;
+      timestamp_ = 0L;
+      cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
+      value_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, row_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, family_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, qualifier_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeUInt64(4, timestamp_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeEnum(5, cellType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(6, value_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, row_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, family_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, qualifier_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(4, timestamp_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, cellType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, value_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.Cell)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.HBaseProtos.Cell other = (ohmdb.client.generated.HBaseProtos.Cell) obj;
+      
+      boolean result = true;
+      result = result && (hasRow() == other.hasRow());
+      if (hasRow()) {
+        result = result && getRow()
+            .equals(other.getRow());
+      }
+      result = result && (hasFamily() == other.hasFamily());
+      if (hasFamily()) {
+        result = result && getFamily()
+            .equals(other.getFamily());
+      }
+      result = result && (hasQualifier() == other.hasQualifier());
+      if (hasQualifier()) {
+        result = result && getQualifier()
+            .equals(other.getQualifier());
+      }
+      result = result && (hasTimestamp() == other.hasTimestamp());
+      if (hasTimestamp()) {
+        result = result && (getTimestamp()
+            == other.getTimestamp());
+      }
+      result = result && (hasCellType() == other.hasCellType());
+      if (hasCellType()) {
+        result = result &&
+            (getCellType() == other.getCellType());
+      }
+      result = result && (hasValue() == other.hasValue());
+      if (hasValue()) {
+        result = result && getValue()
+            .equals(other.getValue());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+    
+    @java.lang.Override
+    public int hashCode() {
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasRow()) {
+        hash = (37 * hash) + ROW_FIELD_NUMBER;
+        hash = (53 * hash) + getRow().hashCode();
+      }
+      if (hasFamily()) {
+        hash = (37 * hash) + FAMILY_FIELD_NUMBER;
+        hash = (53 * hash) + getFamily().hashCode();
+      }
+      if (hasQualifier()) {
+        hash = (37 * hash) + QUALIFIER_FIELD_NUMBER;
+        hash = (53 * hash) + getQualifier().hashCode();
+      }
+      if (hasTimestamp()) {
+        hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+        hash = (53 * hash) + hashLong(getTimestamp());
+      }
+      if (hasCellType()) {
+        hash = (37 * hash) + CELLTYPE_FIELD_NUMBER;
+        hash = (53 * hash) + hashEnum(getCellType());
+      }
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      return hash;
+    }
+    
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.Cell prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.HBaseProtos.CellOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_Cell_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_Cell_fieldAccessorTable;
+      }
+      
+      // Construct using ohmdb.client.generated.HBaseProtos.Cell.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        row_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        family_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        qualifier_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        timestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.HBaseProtos.Cell.getDescriptor();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.Cell getDefaultInstanceForType() {
+        return ohmdb.client.generated.HBaseProtos.Cell.getDefaultInstance();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.Cell build() {
+        ohmdb.client.generated.HBaseProtos.Cell result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private ohmdb.client.generated.HBaseProtos.Cell buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.Cell result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.Cell buildPartial() {
+        ohmdb.client.generated.HBaseProtos.Cell result = new ohmdb.client.generated.HBaseProtos.Cell(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.row_ = row_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.family_ = family_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.qualifier_ = qualifier_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.timestamp_ = timestamp_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.cellType_ = cellType_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.value_ = value_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.HBaseProtos.Cell) {
+          return mergeFrom((ohmdb.client.generated.HBaseProtos.Cell)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.Cell other) {
+        if (other == ohmdb.client.generated.HBaseProtos.Cell.getDefaultInstance()) return this;
+        if (other.hasRow()) {
+          setRow(other.getRow());
+        }
+        if (other.hasFamily()) {
+          setFamily(other.getFamily());
+        }
+        if (other.hasQualifier()) {
+          setQualifier(other.getQualifier());
+        }
+        if (other.hasTimestamp()) {
+          setTimestamp(other.getTimestamp());
+        }
+        if (other.hasCellType()) {
+          setCellType(other.getCellType());
+        }
+        if (other.hasValue()) {
+          setValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -427,557 +739,18 @@ public final class HBaseProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_Cell_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_Cell_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.Cell.class, ohmdb.client.generated.HBaseProtos.Cell.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<Cell> PARSER =
-        new com.google.protobuf.AbstractParser<Cell>() {
-      public Cell parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Cell(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Cell> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // optional bytes row = 1;
-    public static final int ROW_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString row_;
-    /**
-     * <code>optional bytes row = 1;</code>
-     */
-    public boolean hasRow() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional bytes row = 1;</code>
-     */
-    public com.google.protobuf.ByteString getRow() {
-      return row_;
-    }
-
-    // optional bytes family = 2;
-    public static final int FAMILY_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString family_;
-    /**
-     * <code>optional bytes family = 2;</code>
-     */
-    public boolean hasFamily() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional bytes family = 2;</code>
-     */
-    public com.google.protobuf.ByteString getFamily() {
-      return family_;
-    }
-
-    // optional bytes qualifier = 3;
-    public static final int QUALIFIER_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString qualifier_;
-    /**
-     * <code>optional bytes qualifier = 3;</code>
-     */
-    public boolean hasQualifier() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional bytes qualifier = 3;</code>
-     */
-    public com.google.protobuf.ByteString getQualifier() {
-      return qualifier_;
-    }
-
-    // optional uint64 timestamp = 4;
-    public static final int TIMESTAMP_FIELD_NUMBER = 4;
-    private long timestamp_;
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
-    public boolean hasTimestamp() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
-    public long getTimestamp() {
-      return timestamp_;
-    }
-
-    // optional .CellType cellType = 5;
-    public static final int CELLTYPE_FIELD_NUMBER = 5;
-    private ohmdb.client.generated.HBaseProtos.CellType cellType_;
-    /**
-     * <code>optional .CellType cellType = 5;</code>
-     */
-    public boolean hasCellType() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional .CellType cellType = 5;</code>
-     */
-    public ohmdb.client.generated.HBaseProtos.CellType getCellType() {
-      return cellType_;
-    }
-
-    // optional bytes value = 6;
-    public static final int VALUE_FIELD_NUMBER = 6;
-    private com.google.protobuf.ByteString value_;
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
-    public boolean hasValue() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
-    public com.google.protobuf.ByteString getValue() {
-      return value_;
-    }
-
-    private void initFields() {
-      row_ = com.google.protobuf.ByteString.EMPTY;
-      family_ = com.google.protobuf.ByteString.EMPTY;
-      qualifier_ = com.google.protobuf.ByteString.EMPTY;
-      timestamp_ = 0L;
-      cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-      value_ = com.google.protobuf.ByteString.EMPTY;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, row_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, family_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, qualifier_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeUInt64(4, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeEnum(5, cellType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(6, value_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, row_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, family_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, qualifier_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(4, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(5, cellType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(6, value_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.Cell)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.HBaseProtos.Cell other = (ohmdb.client.generated.HBaseProtos.Cell) obj;
-
-      boolean result = true;
-      result = result && (hasRow() == other.hasRow());
-      if (hasRow()) {
-        result = result && getRow()
-            .equals(other.getRow());
-      }
-      result = result && (hasFamily() == other.hasFamily());
-      if (hasFamily()) {
-        result = result && getFamily()
-            .equals(other.getFamily());
-      }
-      result = result && (hasQualifier() == other.hasQualifier());
-      if (hasQualifier()) {
-        result = result && getQualifier()
-            .equals(other.getQualifier());
-      }
-      result = result && (hasTimestamp() == other.hasTimestamp());
-      if (hasTimestamp()) {
-        result = result && (getTimestamp()
-            == other.getTimestamp());
-      }
-      result = result && (hasCellType() == other.hasCellType());
-      if (hasCellType()) {
-        result = result &&
-            (getCellType() == other.getCellType());
-      }
-      result = result && (hasValue() == other.hasValue());
-      if (hasValue()) {
-        result = result && getValue()
-            .equals(other.getValue());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-
-    private int memoizedHashCode = 0;
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasRow()) {
-        hash = (37 * hash) + ROW_FIELD_NUMBER;
-        hash = (53 * hash) + getRow().hashCode();
-      }
-      if (hasFamily()) {
-        hash = (37 * hash) + FAMILY_FIELD_NUMBER;
-        hash = (53 * hash) + getFamily().hashCode();
-      }
-      if (hasQualifier()) {
-        hash = (37 * hash) + QUALIFIER_FIELD_NUMBER;
-        hash = (53 * hash) + getQualifier().hashCode();
-      }
-      if (hasTimestamp()) {
-        hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + hashLong(getTimestamp());
-      }
-      if (hasCellType()) {
-        hash = (37 * hash) + CELLTYPE_FIELD_NUMBER;
-        hash = (53 * hash) + hashEnum(getCellType());
-      }
-      if (hasValue()) {
-        hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + getValue().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.Cell parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.Cell prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code Cell}
-     *
-     * <pre>
-     **
-     * Protocol buffer version of Cell.
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.HBaseProtos.CellOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Cell_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Cell_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.Cell.class, ohmdb.client.generated.HBaseProtos.Cell.Builder.class);
-      }
-
-      // Construct using ohmdb.client.generated.HBaseProtos.Cell.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        row_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        family_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        qualifier_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        timestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        value_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Cell_descriptor;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.Cell getDefaultInstanceForType() {
-        return ohmdb.client.generated.HBaseProtos.Cell.getDefaultInstance();
-      }
-
-      public ohmdb.client.generated.HBaseProtos.Cell build() {
-        ohmdb.client.generated.HBaseProtos.Cell result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.Cell buildPartial() {
-        ohmdb.client.generated.HBaseProtos.Cell result = new ohmdb.client.generated.HBaseProtos.Cell(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.row_ = row_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.family_ = family_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.qualifier_ = qualifier_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.timestamp_ = timestamp_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.cellType_ = cellType_;
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.value_ = value_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.HBaseProtos.Cell) {
-          return mergeFrom((ohmdb.client.generated.HBaseProtos.Cell)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.Cell other) {
-        if (other == ohmdb.client.generated.HBaseProtos.Cell.getDefaultInstance()) return this;
-        if (other.hasRow()) {
-          setRow(other.getRow());
-        }
-        if (other.hasFamily()) {
-          setFamily(other.getFamily());
-        }
-        if (other.hasQualifier()) {
-          setQualifier(other.getQualifier());
-        }
-        if (other.hasTimestamp()) {
-          setTimestamp(other.getTimestamp());
-        }
-        if (other.hasCellType()) {
-          setCellType(other.getCellType());
-        }
-        if (other.hasValue()) {
-          setValue(other.getValue());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.Cell parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.Cell) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
+      
       private int bitField0_;
-
+      
       // optional bytes row = 1;
       private com.google.protobuf.ByteString row_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes row = 1;</code>
-       */
       public boolean hasRow() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional bytes row = 1;</code>
-       */
       public com.google.protobuf.ByteString getRow() {
         return row_;
       }
-      /**
-       * <code>optional bytes row = 1;</code>
-       */
       public Builder setRow(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -987,33 +760,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes row = 1;</code>
-       */
       public Builder clearRow() {
         bitField0_ = (bitField0_ & ~0x00000001);
         row_ = getDefaultInstance().getRow();
         onChanged();
         return this;
       }
-
+      
       // optional bytes family = 2;
       private com.google.protobuf.ByteString family_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes family = 2;</code>
-       */
       public boolean hasFamily() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional bytes family = 2;</code>
-       */
       public com.google.protobuf.ByteString getFamily() {
         return family_;
       }
-      /**
-       * <code>optional bytes family = 2;</code>
-       */
       public Builder setFamily(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1023,33 +784,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes family = 2;</code>
-       */
       public Builder clearFamily() {
         bitField0_ = (bitField0_ & ~0x00000002);
         family_ = getDefaultInstance().getFamily();
         onChanged();
         return this;
       }
-
+      
       // optional bytes qualifier = 3;
       private com.google.protobuf.ByteString qualifier_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes qualifier = 3;</code>
-       */
       public boolean hasQualifier() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional bytes qualifier = 3;</code>
-       */
       public com.google.protobuf.ByteString getQualifier() {
         return qualifier_;
       }
-      /**
-       * <code>optional bytes qualifier = 3;</code>
-       */
       public Builder setQualifier(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1059,66 +808,42 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes qualifier = 3;</code>
-       */
       public Builder clearQualifier() {
         bitField0_ = (bitField0_ & ~0x00000004);
         qualifier_ = getDefaultInstance().getQualifier();
         onChanged();
         return this;
       }
-
+      
       // optional uint64 timestamp = 4;
       private long timestamp_ ;
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public boolean hasTimestamp() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public long getTimestamp() {
         return timestamp_;
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public Builder setTimestamp(long value) {
         bitField0_ |= 0x00000008;
         timestamp_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public Builder clearTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000008);
         timestamp_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional .CellType cellType = 5;
       private ohmdb.client.generated.HBaseProtos.CellType cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-      /**
-       * <code>optional .CellType cellType = 5;</code>
-       */
       public boolean hasCellType() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      /**
-       * <code>optional .CellType cellType = 5;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.CellType getCellType() {
         return cellType_;
       }
-      /**
-       * <code>optional .CellType cellType = 5;</code>
-       */
       public Builder setCellType(ohmdb.client.generated.HBaseProtos.CellType value) {
         if (value == null) {
           throw new NullPointerException();
@@ -1128,33 +853,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional .CellType cellType = 5;</code>
-       */
       public Builder clearCellType() {
         bitField0_ = (bitField0_ & ~0x00000010);
         cellType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
         onChanged();
         return this;
       }
-
+      
       // optional bytes value = 6;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1164,374 +877,163 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000020);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:Cell)
     }
-
+    
     static {
       defaultInstance = new Cell(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:Cell)
   }
-
+  
   public interface TableSchemaOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // optional bytes name = 1;
-    /**
-     * <code>optional bytes name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>optional bytes name = 1;</code>
-     */
     com.google.protobuf.ByteString getName();
-
+    
     // repeated .BytesBytesPair attributes = 2;
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> 
         getAttributesList();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index);
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     int getAttributesCount();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getAttributesOrBuilderList();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
         int index);
-
+    
     // repeated .ColumnFamilySchema columnFamilies = 3;
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> 
         getColumnFamiliesList();
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     ohmdb.client.generated.HBaseProtos.ColumnFamilySchema getColumnFamilies(int index);
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     int getColumnFamiliesCount();
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder> 
         getColumnFamiliesOrBuilderList();
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder getColumnFamiliesOrBuilder(
         int index);
-
+    
     // repeated .NameStringPair configuration = 4;
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> 
         getConfigurationList();
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index);
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     int getConfigurationCount();
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
         getConfigurationOrBuilderList();
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
         int index);
   }
-  /**
-   * Protobuf type {@code TableSchema}
-   *
-   * <pre>
-   **
-   * Table Schema
-   * Inspired by the rest TableSchema
-   * </pre>
-   */
   public static final class TableSchema extends
       com.google.protobuf.GeneratedMessage
       implements TableSchemaOrBuilder {
     // Use TableSchema.newBuilder() to construct.
-    private TableSchema(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private TableSchema(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private TableSchema(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private TableSchema(boolean noInit) {}
+    
     private static final TableSchema defaultInstance;
     public static TableSchema getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public TableSchema getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private TableSchema(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                attributes_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.BytesBytesPair>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              attributes_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.BytesBytesPair.PARSER, extensionRegistry));
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                columnFamilies_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              columnFamilies_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.PARSER, extensionRegistry));
-              break;
-            }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                configuration_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.NameStringPair>();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              configuration_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.NameStringPair.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          attributes_ = java.util.Collections.unmodifiableList(attributes_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-          columnFamilies_ = java.util.Collections.unmodifiableList(columnFamilies_);
-        }
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-          configuration_ = java.util.Collections.unmodifiableList(configuration_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.TableSchema.class, ohmdb.client.generated.HBaseProtos.TableSchema.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<TableSchema> PARSER =
-        new com.google.protobuf.AbstractParser<TableSchema>() {
-      public TableSchema parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TableSchema(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<TableSchema> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // optional bytes name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString name_;
-    /**
-     * <code>optional bytes name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional bytes name = 1;</code>
-     */
     public com.google.protobuf.ByteString getName() {
       return name_;
     }
-
+    
     // repeated .BytesBytesPair attributes = 2;
     public static final int ATTRIBUTES_FIELD_NUMBER = 2;
     private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> attributes_;
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getAttributesList() {
       return attributes_;
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getAttributesOrBuilderList() {
       return attributes_;
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public int getAttributesCount() {
       return attributes_.size();
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index) {
       return attributes_.get(index);
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
         int index) {
       return attributes_.get(index);
     }
-
+    
     // repeated .ColumnFamilySchema columnFamilies = 3;
     public static final int COLUMNFAMILIES_FIELD_NUMBER = 3;
     private java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> columnFamilies_;
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> getColumnFamiliesList() {
       return columnFamilies_;
     }
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder> 
         getColumnFamiliesOrBuilderList() {
       return columnFamilies_;
     }
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     public int getColumnFamiliesCount() {
       return columnFamilies_.size();
     }
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema getColumnFamilies(int index) {
       return columnFamilies_.get(index);
     }
-    /**
-     * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder getColumnFamiliesOrBuilder(
         int index) {
       return columnFamilies_.get(index);
     }
-
+    
     // repeated .NameStringPair configuration = 4;
     public static final int CONFIGURATION_FIELD_NUMBER = 4;
     private java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> configuration_;
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> getConfigurationList() {
       return configuration_;
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
         getConfigurationOrBuilderList() {
       return configuration_;
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     public int getConfigurationCount() {
       return configuration_.size();
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index) {
       return configuration_.get(index);
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 4;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
         int index) {
       return configuration_.get(index);
     }
-
+    
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
       attributes_ = java.util.Collections.emptyList();
@@ -1542,7 +1044,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       for (int i = 0; i < getAttributesCount(); i++) {
         if (!getAttributes(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -1564,7 +1066,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -1582,12 +1084,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1609,14 +1111,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -1626,7 +1128,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.TableSchema other = (ohmdb.client.generated.HBaseProtos.TableSchema) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -1643,13 +1145,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -1669,85 +1167,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getConfigurationList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TableSchema parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.TableSchema prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TableSchema}
-     *
-     * <pre>
-     **
-     * Table Schema
-     * Inspired by the rest TableSchema
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.TableSchemaOrBuilder {
@@ -1755,21 +1257,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.TableSchema.class, ohmdb.client.generated.HBaseProtos.TableSchema.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.TableSchema.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1783,7 +1282,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = com.google.protobuf.ByteString.EMPTY;
@@ -1808,20 +1307,20 @@ public final class HBaseProtos {
         }
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_TableSchema_descriptor;
+        return ohmdb.client.generated.HBaseProtos.TableSchema.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.TableSchema getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.TableSchema.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.TableSchema build() {
         ohmdb.client.generated.HBaseProtos.TableSchema result = buildPartial();
         if (!result.isInitialized()) {
@@ -1829,7 +1328,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.TableSchema buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.TableSchema result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.TableSchema buildPartial() {
         ohmdb.client.generated.HBaseProtos.TableSchema result = new ohmdb.client.generated.HBaseProtos.TableSchema(this);
         int from_bitField0_ = bitField0_;
@@ -1869,7 +1378,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.TableSchema) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.TableSchema)other);
@@ -1878,7 +1387,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.TableSchema other) {
         if (other == ohmdb.client.generated.HBaseProtos.TableSchema.getDefaultInstance()) return this;
         if (other.hasName()) {
@@ -1965,7 +1474,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         for (int i = 0; i < getAttributesCount(); i++) {
           if (!getAttributes(i).isInitialized()) {
@@ -1987,43 +1496,67 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.TableSchema parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.TableSchema) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder subBuilder = ohmdb.client.generated.HBaseProtos.BytesBytesPair.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addAttributes(subBuilder.buildPartial());
+              break;
+            }
+            case 26: {
+              ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder subBuilder = ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addColumnFamilies(subBuilder.buildPartial());
+              break;
+            }
+            case 34: {
+              ohmdb.client.generated.HBaseProtos.NameStringPair.Builder subBuilder = ohmdb.client.generated.HBaseProtos.NameStringPair.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addConfiguration(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // optional bytes name = 1;
       private com.google.protobuf.ByteString name_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional bytes name = 1;</code>
-       */
       public com.google.protobuf.ByteString getName() {
         return name_;
       }
-      /**
-       * <code>optional bytes name = 1;</code>
-       */
       public Builder setName(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -2033,16 +1566,13 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-
+      
       // repeated .BytesBytesPair attributes = 2;
       private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> attributes_ =
         java.util.Collections.emptyList();
@@ -2052,13 +1582,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000002;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.BytesBytesPair, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder, ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> attributesBuilder_;
-
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getAttributesList() {
         if (attributesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(attributes_);
@@ -2066,9 +1593,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public int getAttributesCount() {
         if (attributesBuilder_ == null) {
           return attributes_.size();
@@ -2076,9 +1600,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index) {
         if (attributesBuilder_ == null) {
           return attributes_.get(index);
@@ -2086,9 +1607,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder setAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
@@ -2103,9 +1621,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder setAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -2117,9 +1632,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
           if (value == null) {
@@ -2133,9 +1645,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
@@ -2150,9 +1659,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -2164,9 +1670,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -2178,9 +1681,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAllAttributes(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPair> values) {
         if (attributesBuilder_ == null) {
@@ -2192,9 +1692,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder clearAttributes() {
         if (attributesBuilder_ == null) {
           attributes_ = java.util.Collections.emptyList();
@@ -2205,9 +1702,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder removeAttributes(int index) {
         if (attributesBuilder_ == null) {
           ensureAttributesIsMutable();
@@ -2218,16 +1712,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder getAttributesBuilder(
           int index) {
         return getAttributesFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
           int index) {
         if (attributesBuilder_ == null) {
@@ -2235,9 +1723,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
            getAttributesOrBuilderList() {
         if (attributesBuilder_ != null) {
@@ -2246,24 +1731,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(attributes_);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addAttributesBuilder() {
         return getAttributesFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addAttributesBuilder(
           int index) {
         return getAttributesFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder> 
            getAttributesBuilderList() {
         return getAttributesFieldBuilder().getBuilderList();
@@ -2282,7 +1758,7 @@ public final class HBaseProtos {
         }
         return attributesBuilder_;
       }
-
+      
       // repeated .ColumnFamilySchema columnFamilies = 3;
       private java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> columnFamilies_ =
         java.util.Collections.emptyList();
@@ -2292,13 +1768,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000004;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.ColumnFamilySchema, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder, ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder> columnFamiliesBuilder_;
-
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> getColumnFamiliesList() {
         if (columnFamiliesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(columnFamilies_);
@@ -2306,9 +1779,6 @@ public final class HBaseProtos {
           return columnFamiliesBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public int getColumnFamiliesCount() {
         if (columnFamiliesBuilder_ == null) {
           return columnFamilies_.size();
@@ -2316,9 +1786,6 @@ public final class HBaseProtos {
           return columnFamiliesBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema getColumnFamilies(int index) {
         if (columnFamiliesBuilder_ == null) {
           return columnFamilies_.get(index);
@@ -2326,9 +1793,6 @@ public final class HBaseProtos {
           return columnFamiliesBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder setColumnFamilies(
           int index, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema value) {
         if (columnFamiliesBuilder_ == null) {
@@ -2343,9 +1807,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder setColumnFamilies(
           int index, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder builderForValue) {
         if (columnFamiliesBuilder_ == null) {
@@ -2357,9 +1818,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder addColumnFamilies(ohmdb.client.generated.HBaseProtos.ColumnFamilySchema value) {
         if (columnFamiliesBuilder_ == null) {
           if (value == null) {
@@ -2373,9 +1831,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder addColumnFamilies(
           int index, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema value) {
         if (columnFamiliesBuilder_ == null) {
@@ -2390,9 +1845,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder addColumnFamilies(
           ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder builderForValue) {
         if (columnFamiliesBuilder_ == null) {
@@ -2404,9 +1856,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder addColumnFamilies(
           int index, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder builderForValue) {
         if (columnFamiliesBuilder_ == null) {
@@ -2418,9 +1867,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder addAllColumnFamilies(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.ColumnFamilySchema> values) {
         if (columnFamiliesBuilder_ == null) {
@@ -2432,9 +1878,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder clearColumnFamilies() {
         if (columnFamiliesBuilder_ == null) {
           columnFamilies_ = java.util.Collections.emptyList();
@@ -2445,9 +1888,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public Builder removeColumnFamilies(int index) {
         if (columnFamiliesBuilder_ == null) {
           ensureColumnFamiliesIsMutable();
@@ -2458,16 +1898,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder getColumnFamiliesBuilder(
           int index) {
         return getColumnFamiliesFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder getColumnFamiliesOrBuilder(
           int index) {
         if (columnFamiliesBuilder_ == null) {
@@ -2475,9 +1909,6 @@ public final class HBaseProtos {
           return columnFamiliesBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder> 
            getColumnFamiliesOrBuilderList() {
         if (columnFamiliesBuilder_ != null) {
@@ -2486,24 +1917,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(columnFamilies_);
         }
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder addColumnFamiliesBuilder() {
         return getColumnFamiliesFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.getDefaultInstance());
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder addColumnFamiliesBuilder(
           int index) {
         return getColumnFamiliesFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.getDefaultInstance());
       }
-      /**
-       * <code>repeated .ColumnFamilySchema columnFamilies = 3;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder> 
            getColumnFamiliesBuilderList() {
         return getColumnFamiliesFieldBuilder().getBuilderList();
@@ -2522,7 +1944,7 @@ public final class HBaseProtos {
         }
         return columnFamiliesBuilder_;
       }
-
+      
       // repeated .NameStringPair configuration = 4;
       private java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> configuration_ =
         java.util.Collections.emptyList();
@@ -2532,13 +1954,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000008;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.NameStringPair, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder, ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> configurationBuilder_;
-
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> getConfigurationList() {
         if (configurationBuilder_ == null) {
           return java.util.Collections.unmodifiableList(configuration_);
@@ -2546,9 +1965,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public int getConfigurationCount() {
         if (configurationBuilder_ == null) {
           return configuration_.size();
@@ -2556,9 +1972,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index) {
         if (configurationBuilder_ == null) {
           return configuration_.get(index);
@@ -2566,9 +1979,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder setConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
@@ -2583,9 +1993,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder setConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -2597,9 +2004,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder addConfiguration(ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
           if (value == null) {
@@ -2613,9 +2017,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder addConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
@@ -2630,9 +2031,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder addConfiguration(
           ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -2644,9 +2042,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder addConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -2658,9 +2053,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder addAllConfiguration(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.NameStringPair> values) {
         if (configurationBuilder_ == null) {
@@ -2672,9 +2064,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder clearConfiguration() {
         if (configurationBuilder_ == null) {
           configuration_ = java.util.Collections.emptyList();
@@ -2685,9 +2074,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public Builder removeConfiguration(int index) {
         if (configurationBuilder_ == null) {
           ensureConfigurationIsMutable();
@@ -2698,16 +2084,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder getConfigurationBuilder(
           int index) {
         return getConfigurationFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
           int index) {
         if (configurationBuilder_ == null) {
@@ -2715,9 +2095,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
            getConfigurationOrBuilderList() {
         if (configurationBuilder_ != null) {
@@ -2726,24 +2103,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(configuration_);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder addConfigurationBuilder() {
         return getConfigurationFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder addConfigurationBuilder(
           int index) {
         return getConfigurationFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 4;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair.Builder> 
            getConfigurationBuilderList() {
         return getConfigurationFieldBuilder().getBuilderList();
@@ -2762,293 +2130,126 @@ public final class HBaseProtos {
         }
         return configurationBuilder_;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:TableSchema)
     }
-
+    
     static {
       defaultInstance = new TableSchema(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:TableSchema)
   }
-
+  
   public interface ColumnFamilySchemaOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required bytes name = 1;
-    /**
-     * <code>required bytes name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>required bytes name = 1;</code>
-     */
     com.google.protobuf.ByteString getName();
-
+    
     // repeated .BytesBytesPair attributes = 2;
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> 
         getAttributesList();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index);
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     int getAttributesCount();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getAttributesOrBuilderList();
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
         int index);
-
+    
     // repeated .NameStringPair configuration = 3;
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> 
         getConfigurationList();
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index);
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     int getConfigurationCount();
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
         getConfigurationOrBuilderList();
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
         int index);
   }
-  /**
-   * Protobuf type {@code ColumnFamilySchema}
-   *
-   * <pre>
-   **
-   * Column Family Schema
-   * Inspired by the rest ColumSchemaMessage
-   * </pre>
-   */
   public static final class ColumnFamilySchema extends
       com.google.protobuf.GeneratedMessage
       implements ColumnFamilySchemaOrBuilder {
     // Use ColumnFamilySchema.newBuilder() to construct.
-    private ColumnFamilySchema(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private ColumnFamilySchema(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private ColumnFamilySchema(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private ColumnFamilySchema(boolean noInit) {}
+    
     private static final ColumnFamilySchema defaultInstance;
     public static ColumnFamilySchema getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public ColumnFamilySchema getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ColumnFamilySchema(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                attributes_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.BytesBytesPair>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              attributes_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.BytesBytesPair.PARSER, extensionRegistry));
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                configuration_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.NameStringPair>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              configuration_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.NameStringPair.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-          attributes_ = java.util.Collections.unmodifiableList(attributes_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-          configuration_ = java.util.Collections.unmodifiableList(configuration_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.class, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<ColumnFamilySchema> PARSER =
-        new com.google.protobuf.AbstractParser<ColumnFamilySchema>() {
-      public ColumnFamilySchema parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ColumnFamilySchema(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ColumnFamilySchema> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required bytes name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString name_;
-    /**
-     * <code>required bytes name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required bytes name = 1;</code>
-     */
     public com.google.protobuf.ByteString getName() {
       return name_;
     }
-
+    
     // repeated .BytesBytesPair attributes = 2;
     public static final int ATTRIBUTES_FIELD_NUMBER = 2;
     private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> attributes_;
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getAttributesList() {
       return attributes_;
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getAttributesOrBuilderList() {
       return attributes_;
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public int getAttributesCount() {
       return attributes_.size();
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index) {
       return attributes_.get(index);
     }
-    /**
-     * <code>repeated .BytesBytesPair attributes = 2;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
         int index) {
       return attributes_.get(index);
     }
-
+    
     // repeated .NameStringPair configuration = 3;
     public static final int CONFIGURATION_FIELD_NUMBER = 3;
     private java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> configuration_;
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> getConfigurationList() {
       return configuration_;
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
         getConfigurationOrBuilderList() {
       return configuration_;
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     public int getConfigurationCount() {
       return configuration_.size();
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index) {
       return configuration_.get(index);
     }
-    /**
-     * <code>repeated .NameStringPair configuration = 3;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
         int index) {
       return configuration_.get(index);
     }
-
+    
     private void initFields() {
       name_ = com.google.protobuf.ByteString.EMPTY;
       attributes_ = java.util.Collections.emptyList();
@@ -3058,7 +2259,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -3078,7 +2279,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -3093,12 +2294,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -3116,14 +2317,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -3133,7 +2334,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.ColumnFamilySchema other = (ohmdb.client.generated.HBaseProtos.ColumnFamilySchema) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -3148,13 +2349,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -3170,85 +2367,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getConfigurationList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.ColumnFamilySchema prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code ColumnFamilySchema}
-     *
-     * <pre>
-     **
-     * Column Family Schema
-     * Inspired by the rest ColumSchemaMessage
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.ColumnFamilySchemaOrBuilder {
@@ -3256,21 +2457,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.class, ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3283,7 +2481,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = com.google.protobuf.ByteString.EMPTY;
@@ -3302,20 +2500,20 @@ public final class HBaseProtos {
         }
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ColumnFamilySchema_descriptor;
+        return ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema build() {
         ohmdb.client.generated.HBaseProtos.ColumnFamilySchema result = buildPartial();
         if (!result.isInitialized()) {
@@ -3323,7 +2521,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.ColumnFamilySchema buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.ColumnFamilySchema result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.ColumnFamilySchema buildPartial() {
         ohmdb.client.generated.HBaseProtos.ColumnFamilySchema result = new ohmdb.client.generated.HBaseProtos.ColumnFamilySchema(this);
         int from_bitField0_ = bitField0_;
@@ -3354,7 +2562,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.ColumnFamilySchema) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.ColumnFamilySchema)other);
@@ -3363,7 +2571,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.ColumnFamilySchema other) {
         if (other == ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.getDefaultInstance()) return this;
         if (other.hasName()) {
@@ -3424,7 +2632,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasName()) {
           
@@ -3444,43 +2652,61 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.ColumnFamilySchema parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.ColumnFamilySchema) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder subBuilder = ohmdb.client.generated.HBaseProtos.BytesBytesPair.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addAttributes(subBuilder.buildPartial());
+              break;
+            }
+            case 26: {
+              ohmdb.client.generated.HBaseProtos.NameStringPair.Builder subBuilder = ohmdb.client.generated.HBaseProtos.NameStringPair.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addConfiguration(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required bytes name = 1;
       private com.google.protobuf.ByteString name_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required bytes name = 1;</code>
-       */
       public com.google.protobuf.ByteString getName() {
         return name_;
       }
-      /**
-       * <code>required bytes name = 1;</code>
-       */
       public Builder setName(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -3490,16 +2716,13 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-
+      
       // repeated .BytesBytesPair attributes = 2;
       private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> attributes_ =
         java.util.Collections.emptyList();
@@ -3509,13 +2732,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000002;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.BytesBytesPair, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder, ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> attributesBuilder_;
-
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getAttributesList() {
         if (attributesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(attributes_);
@@ -3523,9 +2743,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public int getAttributesCount() {
         if (attributesBuilder_ == null) {
           return attributes_.size();
@@ -3533,9 +2750,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair getAttributes(int index) {
         if (attributesBuilder_ == null) {
           return attributes_.get(index);
@@ -3543,9 +2757,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder setAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
@@ -3560,9 +2771,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder setAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -3574,9 +2782,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
           if (value == null) {
@@ -3590,9 +2795,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (attributesBuilder_ == null) {
@@ -3607,9 +2809,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -3621,9 +2820,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAttributes(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (attributesBuilder_ == null) {
@@ -3635,9 +2831,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder addAllAttributes(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPair> values) {
         if (attributesBuilder_ == null) {
@@ -3649,9 +2842,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder clearAttributes() {
         if (attributesBuilder_ == null) {
           attributes_ = java.util.Collections.emptyList();
@@ -3662,9 +2852,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public Builder removeAttributes(int index) {
         if (attributesBuilder_ == null) {
           ensureAttributesIsMutable();
@@ -3675,16 +2862,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder getAttributesBuilder(
           int index) {
         return getAttributesFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getAttributesOrBuilder(
           int index) {
         if (attributesBuilder_ == null) {
@@ -3692,9 +2873,6 @@ public final class HBaseProtos {
           return attributesBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
            getAttributesOrBuilderList() {
         if (attributesBuilder_ != null) {
@@ -3703,24 +2881,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(attributes_);
         }
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addAttributesBuilder() {
         return getAttributesFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addAttributesBuilder(
           int index) {
         return getAttributesFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .BytesBytesPair attributes = 2;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder> 
            getAttributesBuilderList() {
         return getAttributesFieldBuilder().getBuilderList();
@@ -3739,7 +2908,7 @@ public final class HBaseProtos {
         }
         return attributesBuilder_;
       }
-
+      
       // repeated .NameStringPair configuration = 3;
       private java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> configuration_ =
         java.util.Collections.emptyList();
@@ -3749,13 +2918,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000004;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.NameStringPair, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder, ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> configurationBuilder_;
-
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair> getConfigurationList() {
         if (configurationBuilder_ == null) {
           return java.util.Collections.unmodifiableList(configuration_);
@@ -3763,9 +2929,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public int getConfigurationCount() {
         if (configurationBuilder_ == null) {
           return configuration_.size();
@@ -3773,9 +2936,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair getConfiguration(int index) {
         if (configurationBuilder_ == null) {
           return configuration_.get(index);
@@ -3783,9 +2943,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder setConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
@@ -3800,9 +2957,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder setConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -3814,9 +2968,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder addConfiguration(ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
           if (value == null) {
@@ -3830,9 +2981,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder addConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair value) {
         if (configurationBuilder_ == null) {
@@ -3847,9 +2995,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder addConfiguration(
           ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -3861,9 +3006,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder addConfiguration(
           int index, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder builderForValue) {
         if (configurationBuilder_ == null) {
@@ -3875,9 +3017,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder addAllConfiguration(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.NameStringPair> values) {
         if (configurationBuilder_ == null) {
@@ -3889,9 +3028,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder clearConfiguration() {
         if (configurationBuilder_ == null) {
           configuration_ = java.util.Collections.emptyList();
@@ -3902,9 +3038,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public Builder removeConfiguration(int index) {
         if (configurationBuilder_ == null) {
           ensureConfigurationIsMutable();
@@ -3915,16 +3048,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder getConfigurationBuilder(
           int index) {
         return getConfigurationFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder getConfigurationOrBuilder(
           int index) {
         if (configurationBuilder_ == null) {
@@ -3932,9 +3059,6 @@ public final class HBaseProtos {
           return configurationBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder> 
            getConfigurationOrBuilderList() {
         if (configurationBuilder_ != null) {
@@ -3943,24 +3067,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(configuration_);
         }
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder addConfigurationBuilder() {
         return getConfigurationFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.NameStringPair.Builder addConfigurationBuilder(
           int index) {
         return getConfigurationFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance());
       }
-      /**
-       * <code>repeated .NameStringPair configuration = 3;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.NameStringPair.Builder> 
            getConfigurationBuilderList() {
         return getConfigurationFieldBuilder().getBuilderList();
@@ -3979,334 +3094,148 @@ public final class HBaseProtos {
         }
         return configurationBuilder_;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:ColumnFamilySchema)
     }
-
+    
     static {
       defaultInstance = new ColumnFamilySchema(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:ColumnFamilySchema)
   }
-
+  
   public interface RegionInfoOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required uint64 regionId = 1;
-    /**
-     * <code>required uint64 regionId = 1;</code>
-     */
     boolean hasRegionId();
-    /**
-     * <code>required uint64 regionId = 1;</code>
-     */
     long getRegionId();
-
+    
     // required bytes tableName = 2;
-    /**
-     * <code>required bytes tableName = 2;</code>
-     */
     boolean hasTableName();
-    /**
-     * <code>required bytes tableName = 2;</code>
-     */
     com.google.protobuf.ByteString getTableName();
-
+    
     // optional bytes startKey = 3;
-    /**
-     * <code>optional bytes startKey = 3;</code>
-     */
     boolean hasStartKey();
-    /**
-     * <code>optional bytes startKey = 3;</code>
-     */
     com.google.protobuf.ByteString getStartKey();
-
+    
     // optional bytes endKey = 4;
-    /**
-     * <code>optional bytes endKey = 4;</code>
-     */
     boolean hasEndKey();
-    /**
-     * <code>optional bytes endKey = 4;</code>
-     */
     com.google.protobuf.ByteString getEndKey();
-
+    
     // optional bool offline = 5;
-    /**
-     * <code>optional bool offline = 5;</code>
-     */
     boolean hasOffline();
-    /**
-     * <code>optional bool offline = 5;</code>
-     */
     boolean getOffline();
-
+    
     // optional bool split = 6;
-    /**
-     * <code>optional bool split = 6;</code>
-     */
     boolean hasSplit();
-    /**
-     * <code>optional bool split = 6;</code>
-     */
     boolean getSplit();
-
+    
     // optional bool recovering = 7;
-    /**
-     * <code>optional bool recovering = 7;</code>
-     */
     boolean hasRecovering();
-    /**
-     * <code>optional bool recovering = 7;</code>
-     */
     boolean getRecovering();
   }
-  /**
-   * Protobuf type {@code RegionInfo}
-   *
-   * <pre>
-   **
-   * Protocol buffer version of HRegionInfo.
-   * </pre>
-   */
   public static final class RegionInfo extends
       com.google.protobuf.GeneratedMessage
       implements RegionInfoOrBuilder {
     // Use RegionInfo.newBuilder() to construct.
-    private RegionInfo(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private RegionInfo(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private RegionInfo(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private RegionInfo(boolean noInit) {}
+    
     private static final RegionInfo defaultInstance;
     public static RegionInfo getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public RegionInfo getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private RegionInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              regionId_ = input.readUInt64();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              tableName_ = input.readBytes();
-              break;
-            }
-            case 26: {
-              bitField0_ |= 0x00000004;
-              startKey_ = input.readBytes();
-              break;
-            }
-            case 34: {
-              bitField0_ |= 0x00000008;
-              endKey_ = input.readBytes();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              offline_ = input.readBool();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000020;
-              split_ = input.readBool();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000040;
-              recovering_ = input.readBool();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.RegionInfo.class, ohmdb.client.generated.HBaseProtos.RegionInfo.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<RegionInfo> PARSER =
-        new com.google.protobuf.AbstractParser<RegionInfo>() {
-      public RegionInfo parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegionInfo(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RegionInfo> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required uint64 regionId = 1;
     public static final int REGIONID_FIELD_NUMBER = 1;
     private long regionId_;
-    /**
-     * <code>required uint64 regionId = 1;</code>
-     */
     public boolean hasRegionId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required uint64 regionId = 1;</code>
-     */
     public long getRegionId() {
       return regionId_;
     }
-
+    
     // required bytes tableName = 2;
     public static final int TABLENAME_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString tableName_;
-    /**
-     * <code>required bytes tableName = 2;</code>
-     */
     public boolean hasTableName() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>required bytes tableName = 2;</code>
-     */
     public com.google.protobuf.ByteString getTableName() {
       return tableName_;
     }
-
+    
     // optional bytes startKey = 3;
     public static final int STARTKEY_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString startKey_;
-    /**
-     * <code>optional bytes startKey = 3;</code>
-     */
     public boolean hasStartKey() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-    /**
-     * <code>optional bytes startKey = 3;</code>
-     */
     public com.google.protobuf.ByteString getStartKey() {
       return startKey_;
     }
-
+    
     // optional bytes endKey = 4;
     public static final int ENDKEY_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString endKey_;
-    /**
-     * <code>optional bytes endKey = 4;</code>
-     */
     public boolean hasEndKey() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
-    /**
-     * <code>optional bytes endKey = 4;</code>
-     */
     public com.google.protobuf.ByteString getEndKey() {
       return endKey_;
     }
-
+    
     // optional bool offline = 5;
     public static final int OFFLINE_FIELD_NUMBER = 5;
     private boolean offline_;
-    /**
-     * <code>optional bool offline = 5;</code>
-     */
     public boolean hasOffline() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
-    /**
-     * <code>optional bool offline = 5;</code>
-     */
     public boolean getOffline() {
       return offline_;
     }
-
+    
     // optional bool split = 6;
     public static final int SPLIT_FIELD_NUMBER = 6;
     private boolean split_;
-    /**
-     * <code>optional bool split = 6;</code>
-     */
     public boolean hasSplit() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
-    /**
-     * <code>optional bool split = 6;</code>
-     */
     public boolean getSplit() {
       return split_;
     }
-
+    
     // optional bool recovering = 7;
     public static final int RECOVERING_FIELD_NUMBER = 7;
     private boolean recovering_;
-    /**
-     * <code>optional bool recovering = 7;</code>
-     */
     public boolean hasRecovering() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
-    /**
-     * <code>optional bool recovering = 7;</code>
-     */
     public boolean getRecovering() {
       return recovering_;
     }
-
+    
     private void initFields() {
       regionId_ = 0L;
       tableName_ = com.google.protobuf.ByteString.EMPTY;
@@ -4320,7 +3249,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasRegionId()) {
         memoizedIsInitialized = 0;
         return false;
@@ -4332,7 +3261,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -4359,12 +3288,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4398,14 +3327,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -4415,7 +3344,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.RegionInfo other = (ohmdb.client.generated.HBaseProtos.RegionInfo) obj;
-
+      
       boolean result = true;
       result = result && (hasRegionId() == other.hasRegionId());
       if (hasRegionId()) {
@@ -4456,13 +3385,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasRegionId()) {
@@ -4494,84 +3419,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashBoolean(getRecovering());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.RegionInfo prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code RegionInfo}
-     *
-     * <pre>
-     **
-     * Protocol buffer version of HRegionInfo.
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.RegionInfoOrBuilder {
@@ -4579,21 +3509,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.RegionInfo.class, ohmdb.client.generated.HBaseProtos.RegionInfo.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.RegionInfo.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -4604,7 +3531,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         regionId_ = 0L;
@@ -4623,20 +3550,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionInfo_descriptor;
+        return ohmdb.client.generated.HBaseProtos.RegionInfo.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.RegionInfo getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.RegionInfo.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.RegionInfo build() {
         ohmdb.client.generated.HBaseProtos.RegionInfo result = buildPartial();
         if (!result.isInitialized()) {
@@ -4644,7 +3571,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.RegionInfo buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.RegionInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.RegionInfo buildPartial() {
         ohmdb.client.generated.HBaseProtos.RegionInfo result = new ohmdb.client.generated.HBaseProtos.RegionInfo(this);
         int from_bitField0_ = bitField0_;
@@ -4681,7 +3618,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.RegionInfo) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.RegionInfo)other);
@@ -4690,7 +3627,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.RegionInfo other) {
         if (other == ohmdb.client.generated.HBaseProtos.RegionInfo.getDefaultInstance()) return this;
         if (other.hasRegionId()) {
@@ -4717,7 +3654,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasRegionId()) {
           
@@ -4729,76 +3666,100 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.RegionInfo parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.RegionInfo) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              regionId_ = input.readUInt64();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              tableName_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              startKey_ = input.readBytes();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              endKey_ = input.readBytes();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              offline_ = input.readBool();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              split_ = input.readBool();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              recovering_ = input.readBool();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required uint64 regionId = 1;
       private long regionId_ ;
-      /**
-       * <code>required uint64 regionId = 1;</code>
-       */
       public boolean hasRegionId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required uint64 regionId = 1;</code>
-       */
       public long getRegionId() {
         return regionId_;
       }
-      /**
-       * <code>required uint64 regionId = 1;</code>
-       */
       public Builder setRegionId(long value) {
         bitField0_ |= 0x00000001;
         regionId_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>required uint64 regionId = 1;</code>
-       */
       public Builder clearRegionId() {
         bitField0_ = (bitField0_ & ~0x00000001);
         regionId_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // required bytes tableName = 2;
       private com.google.protobuf.ByteString tableName_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes tableName = 2;</code>
-       */
       public boolean hasTableName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>required bytes tableName = 2;</code>
-       */
       public com.google.protobuf.ByteString getTableName() {
         return tableName_;
       }
-      /**
-       * <code>required bytes tableName = 2;</code>
-       */
       public Builder setTableName(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -4808,33 +3769,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes tableName = 2;</code>
-       */
       public Builder clearTableName() {
         bitField0_ = (bitField0_ & ~0x00000002);
         tableName_ = getDefaultInstance().getTableName();
         onChanged();
         return this;
       }
-
+      
       // optional bytes startKey = 3;
       private com.google.protobuf.ByteString startKey_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes startKey = 3;</code>
-       */
       public boolean hasStartKey() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional bytes startKey = 3;</code>
-       */
       public com.google.protobuf.ByteString getStartKey() {
         return startKey_;
       }
-      /**
-       * <code>optional bytes startKey = 3;</code>
-       */
       public Builder setStartKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -4844,33 +3793,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes startKey = 3;</code>
-       */
       public Builder clearStartKey() {
         bitField0_ = (bitField0_ & ~0x00000004);
         startKey_ = getDefaultInstance().getStartKey();
         onChanged();
         return this;
       }
-
+      
       // optional bytes endKey = 4;
       private com.google.protobuf.ByteString endKey_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes endKey = 4;</code>
-       */
       public boolean hasEndKey() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional bytes endKey = 4;</code>
-       */
       public com.google.protobuf.ByteString getEndKey() {
         return endKey_;
       }
-      /**
-       * <code>optional bytes endKey = 4;</code>
-       */
       public Builder setEndKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -4880,296 +3817,149 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes endKey = 4;</code>
-       */
       public Builder clearEndKey() {
         bitField0_ = (bitField0_ & ~0x00000008);
         endKey_ = getDefaultInstance().getEndKey();
         onChanged();
         return this;
       }
-
+      
       // optional bool offline = 5;
       private boolean offline_ ;
-      /**
-       * <code>optional bool offline = 5;</code>
-       */
       public boolean hasOffline() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      /**
-       * <code>optional bool offline = 5;</code>
-       */
       public boolean getOffline() {
         return offline_;
       }
-      /**
-       * <code>optional bool offline = 5;</code>
-       */
       public Builder setOffline(boolean value) {
         bitField0_ |= 0x00000010;
         offline_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bool offline = 5;</code>
-       */
       public Builder clearOffline() {
         bitField0_ = (bitField0_ & ~0x00000010);
         offline_ = false;
         onChanged();
         return this;
       }
-
+      
       // optional bool split = 6;
       private boolean split_ ;
-      /**
-       * <code>optional bool split = 6;</code>
-       */
       public boolean hasSplit() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
-      /**
-       * <code>optional bool split = 6;</code>
-       */
       public boolean getSplit() {
         return split_;
       }
-      /**
-       * <code>optional bool split = 6;</code>
-       */
       public Builder setSplit(boolean value) {
         bitField0_ |= 0x00000020;
         split_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bool split = 6;</code>
-       */
       public Builder clearSplit() {
         bitField0_ = (bitField0_ & ~0x00000020);
         split_ = false;
         onChanged();
         return this;
       }
-
+      
       // optional bool recovering = 7;
       private boolean recovering_ ;
-      /**
-       * <code>optional bool recovering = 7;</code>
-       */
       public boolean hasRecovering() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
-      /**
-       * <code>optional bool recovering = 7;</code>
-       */
       public boolean getRecovering() {
         return recovering_;
       }
-      /**
-       * <code>optional bool recovering = 7;</code>
-       */
       public Builder setRecovering(boolean value) {
         bitField0_ |= 0x00000040;
         recovering_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bool recovering = 7;</code>
-       */
       public Builder clearRecovering() {
         bitField0_ = (bitField0_ & ~0x00000040);
         recovering_ = false;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:RegionInfo)
     }
-
+    
     static {
       defaultInstance = new RegionInfo(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:RegionInfo)
   }
-
+  
   public interface FavoredNodesOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // repeated .ServerName favoredNode = 1;
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.ServerName> 
         getFavoredNodeList();
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     ohmdb.client.generated.HBaseProtos.ServerName getFavoredNode(int index);
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     int getFavoredNodeCount();
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder> 
         getFavoredNodeOrBuilderList();
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder getFavoredNodeOrBuilder(
         int index);
   }
-  /**
-   * Protobuf type {@code FavoredNodes}
-   *
-   * <pre>
-   **
-   * Protocol buffer for favored nodes
-   * </pre>
-   */
   public static final class FavoredNodes extends
       com.google.protobuf.GeneratedMessage
       implements FavoredNodesOrBuilder {
     // Use FavoredNodes.newBuilder() to construct.
-    private FavoredNodes(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private FavoredNodes(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private FavoredNodes(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private FavoredNodes(boolean noInit) {}
+    
     private static final FavoredNodes defaultInstance;
     public static FavoredNodes getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public FavoredNodes getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private FavoredNodes(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                favoredNode_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.ServerName>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              favoredNode_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.ServerName.PARSER, extensionRegistry));
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          favoredNode_ = java.util.Collections.unmodifiableList(favoredNode_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.FavoredNodes.class, ohmdb.client.generated.HBaseProtos.FavoredNodes.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<FavoredNodes> PARSER =
-        new com.google.protobuf.AbstractParser<FavoredNodes>() {
-      public FavoredNodes parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FavoredNodes(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<FavoredNodes> getParserForType() {
-      return PARSER;
-    }
-
+    
     // repeated .ServerName favoredNode = 1;
     public static final int FAVOREDNODE_FIELD_NUMBER = 1;
     private java.util.List<ohmdb.client.generated.HBaseProtos.ServerName> favoredNode_;
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.ServerName> getFavoredNodeList() {
       return favoredNode_;
     }
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder> 
         getFavoredNodeOrBuilderList() {
       return favoredNode_;
     }
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     public int getFavoredNodeCount() {
       return favoredNode_.size();
     }
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.ServerName getFavoredNode(int index) {
       return favoredNode_.get(index);
     }
-    /**
-     * <code>repeated .ServerName favoredNode = 1;</code>
-     */
     public ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder getFavoredNodeOrBuilder(
         int index) {
       return favoredNode_.get(index);
     }
-
+    
     private void initFields() {
       favoredNode_ = java.util.Collections.emptyList();
     }
@@ -5177,7 +3967,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       for (int i = 0; i < getFavoredNodeCount(); i++) {
         if (!getFavoredNode(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -5187,7 +3977,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -5196,12 +3986,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       for (int i = 0; i < favoredNode_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -5211,14 +4001,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -5228,7 +4018,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.FavoredNodes other = (ohmdb.client.generated.HBaseProtos.FavoredNodes) obj;
-
+      
       boolean result = true;
       result = result && getFavoredNodeList()
           .equals(other.getFavoredNodeList());
@@ -5236,13 +4026,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (getFavoredNodeCount() > 0) {
@@ -5250,84 +4036,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getFavoredNodeList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.FavoredNodes parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.FavoredNodes prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code FavoredNodes}
-     *
-     * <pre>
-     **
-     * Protocol buffer for favored nodes
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.FavoredNodesOrBuilder {
@@ -5335,21 +4126,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.FavoredNodes.class, ohmdb.client.generated.HBaseProtos.FavoredNodes.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.FavoredNodes.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -5361,7 +4149,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         if (favoredNodeBuilder_ == null) {
@@ -5372,20 +4160,20 @@ public final class HBaseProtos {
         }
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_FavoredNodes_descriptor;
+        return ohmdb.client.generated.HBaseProtos.FavoredNodes.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.FavoredNodes getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.FavoredNodes.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.FavoredNodes build() {
         ohmdb.client.generated.HBaseProtos.FavoredNodes result = buildPartial();
         if (!result.isInitialized()) {
@@ -5393,7 +4181,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.FavoredNodes buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.FavoredNodes result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.FavoredNodes buildPartial() {
         ohmdb.client.generated.HBaseProtos.FavoredNodes result = new ohmdb.client.generated.HBaseProtos.FavoredNodes(this);
         int from_bitField0_ = bitField0_;
@@ -5409,7 +4207,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.FavoredNodes) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.FavoredNodes)other);
@@ -5418,7 +4216,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.FavoredNodes other) {
         if (other == ohmdb.client.generated.HBaseProtos.FavoredNodes.getDefaultInstance()) return this;
         if (favoredNodeBuilder_ == null) {
@@ -5450,7 +4248,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         for (int i = 0; i < getFavoredNodeCount(); i++) {
           if (!getFavoredNode(i).isInitialized()) {
@@ -5460,26 +4258,42 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.FavoredNodes parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.FavoredNodes) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.HBaseProtos.ServerName.Builder subBuilder = ohmdb.client.generated.HBaseProtos.ServerName.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addFavoredNode(subBuilder.buildPartial());
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // repeated .ServerName favoredNode = 1;
       private java.util.List<ohmdb.client.generated.HBaseProtos.ServerName> favoredNode_ =
         java.util.Collections.emptyList();
@@ -5489,13 +4303,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000001;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.ServerName, ohmdb.client.generated.HBaseProtos.ServerName.Builder, ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder> favoredNodeBuilder_;
-
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.ServerName> getFavoredNodeList() {
         if (favoredNodeBuilder_ == null) {
           return java.util.Collections.unmodifiableList(favoredNode_);
@@ -5503,9 +4314,6 @@ public final class HBaseProtos {
           return favoredNodeBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public int getFavoredNodeCount() {
         if (favoredNodeBuilder_ == null) {
           return favoredNode_.size();
@@ -5513,9 +4321,6 @@ public final class HBaseProtos {
           return favoredNodeBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ServerName getFavoredNode(int index) {
         if (favoredNodeBuilder_ == null) {
           return favoredNode_.get(index);
@@ -5523,9 +4328,6 @@ public final class HBaseProtos {
           return favoredNodeBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder setFavoredNode(
           int index, ohmdb.client.generated.HBaseProtos.ServerName value) {
         if (favoredNodeBuilder_ == null) {
@@ -5540,9 +4342,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder setFavoredNode(
           int index, ohmdb.client.generated.HBaseProtos.ServerName.Builder builderForValue) {
         if (favoredNodeBuilder_ == null) {
@@ -5554,9 +4353,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder addFavoredNode(ohmdb.client.generated.HBaseProtos.ServerName value) {
         if (favoredNodeBuilder_ == null) {
           if (value == null) {
@@ -5570,9 +4366,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder addFavoredNode(
           int index, ohmdb.client.generated.HBaseProtos.ServerName value) {
         if (favoredNodeBuilder_ == null) {
@@ -5587,9 +4380,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder addFavoredNode(
           ohmdb.client.generated.HBaseProtos.ServerName.Builder builderForValue) {
         if (favoredNodeBuilder_ == null) {
@@ -5601,9 +4391,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder addFavoredNode(
           int index, ohmdb.client.generated.HBaseProtos.ServerName.Builder builderForValue) {
         if (favoredNodeBuilder_ == null) {
@@ -5615,9 +4402,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder addAllFavoredNode(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.ServerName> values) {
         if (favoredNodeBuilder_ == null) {
@@ -5629,9 +4413,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder clearFavoredNode() {
         if (favoredNodeBuilder_ == null) {
           favoredNode_ = java.util.Collections.emptyList();
@@ -5642,9 +4423,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public Builder removeFavoredNode(int index) {
         if (favoredNodeBuilder_ == null) {
           ensureFavoredNodeIsMutable();
@@ -5655,16 +4433,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ServerName.Builder getFavoredNodeBuilder(
           int index) {
         return getFavoredNodeFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder getFavoredNodeOrBuilder(
           int index) {
         if (favoredNodeBuilder_ == null) {
@@ -5672,9 +4444,6 @@ public final class HBaseProtos {
           return favoredNodeBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder> 
            getFavoredNodeOrBuilderList() {
         if (favoredNodeBuilder_ != null) {
@@ -5683,24 +4452,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(favoredNode_);
         }
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ServerName.Builder addFavoredNodeBuilder() {
         return getFavoredNodeFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.ServerName.getDefaultInstance());
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.ServerName.Builder addFavoredNodeBuilder(
           int index) {
         return getFavoredNodeFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.ServerName.getDefaultInstance());
       }
-      /**
-       * <code>repeated .ServerName favoredNode = 1;</code>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.ServerName.Builder> 
            getFavoredNodeBuilderList() {
         return getFavoredNodeFieldBuilder().getBuilderList();
@@ -5719,97 +4479,468 @@ public final class HBaseProtos {
         }
         return favoredNodeBuilder_;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:FavoredNodes)
     }
-
+    
     static {
       defaultInstance = new FavoredNodes(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:FavoredNodes)
   }
-
+  
   public interface RegionSpecifierOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required .RegionSpecifier.RegionSpecifierType type = 1;
-    /**
-     * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-     */
     boolean hasType();
-    /**
-     * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-     */
     ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType getType();
-
+    
     // required bytes value = 2;
-    /**
-     * <code>required bytes value = 2;</code>
-     */
     boolean hasValue();
-    /**
-     * <code>required bytes value = 2;</code>
-     */
     com.google.protobuf.ByteString getValue();
   }
-  /**
-   * Protobuf type {@code RegionSpecifier}
-   *
-   * <pre>
-   **
-   * Container protocol buffer to specify a region.
-   * You can specify region by region name, or the hash
-   * of the region name, which is known as encoded
-   * region name.
-   * </pre>
-   */
   public static final class RegionSpecifier extends
       com.google.protobuf.GeneratedMessage
       implements RegionSpecifierOrBuilder {
     // Use RegionSpecifier.newBuilder() to construct.
-    private RegionSpecifier(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private RegionSpecifier(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private RegionSpecifier(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private RegionSpecifier(boolean noInit) {}
+    
     private static final RegionSpecifier defaultInstance;
     public static RegionSpecifier getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public RegionSpecifier getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_descriptor;
     }
-    private RegionSpecifier(
-        com.google.protobuf.CodedInputStream input,
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_fieldAccessorTable;
+    }
+    
+    public enum RegionSpecifierType
+        implements com.google.protobuf.ProtocolMessageEnum {
+      REGION_NAME(0, 1),
+      ENCODED_REGION_NAME(1, 2),
+      ;
+      
+      public static final int REGION_NAME_VALUE = 1;
+      public static final int ENCODED_REGION_NAME_VALUE = 2;
+      
+      
+      public final int getNumber() { return value; }
+      
+      public static RegionSpecifierType valueOf(int value) {
+        switch (value) {
+          case 1: return REGION_NAME;
+          case 2: return ENCODED_REGION_NAME;
+          default: return null;
+        }
+      }
+      
+      public static com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>
+          internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>() {
+              public RegionSpecifierType findValueByNumber(int number) {
+                return RegionSpecifierType.valueOf(number);
+              }
+            };
+      
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(index);
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDescriptor().getEnumTypes().get(0);
+      }
+      
+      private static final RegionSpecifierType[] VALUES = {
+        REGION_NAME, ENCODED_REGION_NAME, 
+      };
+      
+      public static RegionSpecifierType valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        return VALUES[desc.getIndex()];
+      }
+      
+      private final int index;
+      private final int value;
+      
+      private RegionSpecifierType(int index, int value) {
+        this.index = index;
+        this.value = value;
+      }
+      
+      // @@protoc_insertion_point(enum_scope:RegionSpecifier.RegionSpecifierType)
+    }
+    
+    private int bitField0_;
+    // required .RegionSpecifier.RegionSpecifierType type = 1;
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType type_;
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    public ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType getType() {
+      return type_;
+    }
+    
+    // required bytes value = 2;
+    public static final int VALUE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString value_;
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    public com.google.protobuf.ByteString getValue() {
+      return value_;
+    }
+    
+    private void initFields() {
+      type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
+      value_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      if (!hasType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasValue()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeEnum(1, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, value_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, value_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.RegionSpecifier)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.HBaseProtos.RegionSpecifier other = (ohmdb.client.generated.HBaseProtos.RegionSpecifier) obj;
+      
+      boolean result = true;
+      result = result && (hasType() == other.hasType());
+      if (hasType()) {
+        result = result &&
+            (getType() == other.getType());
+      }
+      result = result && (hasValue() == other.hasValue());
+      if (hasValue()) {
+        result = result && getValue()
+            .equals(other.getValue());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+    
+    @java.lang.Override
+    public int hashCode() {
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasType()) {
+        hash = (37 * hash) + TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + hashEnum(getType());
+      }
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      return hash;
+    }
+    
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.RegionSpecifier prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_fieldAccessorTable;
+      }
+      
+      // Construct using ohmdb.client.generated.HBaseProtos.RegionSpecifier.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDescriptor();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.RegionSpecifier getDefaultInstanceForType() {
+        return ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.RegionSpecifier build() {
+        ohmdb.client.generated.HBaseProtos.RegionSpecifier result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private ohmdb.client.generated.HBaseProtos.RegionSpecifier buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.RegionSpecifier result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.RegionSpecifier buildPartial() {
+        ohmdb.client.generated.HBaseProtos.RegionSpecifier result = new ohmdb.client.generated.HBaseProtos.RegionSpecifier(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.type_ = type_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.value_ = value_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.HBaseProtos.RegionSpecifier) {
+          return mergeFrom((ohmdb.client.generated.HBaseProtos.RegionSpecifier)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.RegionSpecifier other) {
+        if (other == ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance()) return this;
+        if (other.hasType()) {
+          setType(other.getType());
+        }
+        if (other.hasValue()) {
+          setValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        if (!hasType()) {
+          
+          return false;
+        }
+        if (!hasValue()) {
+          
+          return false;
+        }
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -5831,506 +4962,18 @@ public final class HBaseProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.RegionSpecifier.class, ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<RegionSpecifier> PARSER =
-        new com.google.protobuf.AbstractParser<RegionSpecifier>() {
-      public RegionSpecifier parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegionSpecifier(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RegionSpecifier> getParserForType() {
-      return PARSER;
-    }
-
-    /**
-     * Protobuf enum {@code RegionSpecifier.RegionSpecifierType}
-     */
-    public enum RegionSpecifierType
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>REGION_NAME = 1;</code>
-       *
-       * <pre>
-       * &lt;tablename&gt;,&lt;startkey&gt;,&lt;regionId&gt;.&lt;encodedName&gt;
-       * </pre>
-       */
-      REGION_NAME(0, 1),
-      /**
-       * <code>ENCODED_REGION_NAME = 2;</code>
-       *
-       * <pre>
-       * hash of &lt;tablename&gt;,&lt;startkey&gt;,&lt;regionId&gt;
-       * </pre>
-       */
-      ENCODED_REGION_NAME(1, 2),
-      ;
-
-      /**
-       * <code>REGION_NAME = 1;</code>
-       *
-       * <pre>
-       * &lt;tablename&gt;,&lt;startkey&gt;,&lt;regionId&gt;.&lt;encodedName&gt;
-       * </pre>
-       */
-      public static final int REGION_NAME_VALUE = 1;
-      /**
-       * <code>ENCODED_REGION_NAME = 2;</code>
-       *
-       * <pre>
-       * hash of &lt;tablename&gt;,&lt;startkey&gt;,&lt;regionId&gt;
-       * </pre>
-       */
-      public static final int ENCODED_REGION_NAME_VALUE = 2;
-
-
-      public final int getNumber() { return value; }
-
-      public static RegionSpecifierType valueOf(int value) {
-        switch (value) {
-          case 1: return REGION_NAME;
-          case 2: return ENCODED_REGION_NAME;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>
-          internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<RegionSpecifierType>() {
-              public RegionSpecifierType findValueByNumber(int number) {
-                return RegionSpecifierType.valueOf(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(index);
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final RegionSpecifierType[] VALUES = values();
-
-      public static RegionSpecifierType valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int index;
-      private final int value;
-
-      private RegionSpecifierType(int index, int value) {
-        this.index = index;
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:RegionSpecifier.RegionSpecifierType)
-    }
-
-    private int bitField0_;
-    // required .RegionSpecifier.RegionSpecifierType type = 1;
-    public static final int TYPE_FIELD_NUMBER = 1;
-    private ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType type_;
-    /**
-     * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-     */
-    public boolean hasType() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-     */
-    public ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType getType() {
-      return type_;
-    }
-
-    // required bytes value = 2;
-    public static final int VALUE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString value_;
-    /**
-     * <code>required bytes value = 2;</code>
-     */
-    public boolean hasValue() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required bytes value = 2;</code>
-     */
-    public com.google.protobuf.ByteString getValue() {
-      return value_;
-    }
-
-    private void initFields() {
-      type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
-      value_ = com.google.protobuf.ByteString.EMPTY;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasType()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasValue()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(1, type_.getNumber());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, value_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, type_.getNumber());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, value_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.RegionSpecifier)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.HBaseProtos.RegionSpecifier other = (ohmdb.client.generated.HBaseProtos.RegionSpecifier) obj;
-
-      boolean result = true;
-      result = result && (hasType() == other.hasType());
-      if (hasType()) {
-        result = result &&
-            (getType() == other.getType());
-      }
-      result = result && (hasValue() == other.hasValue());
-      if (hasValue()) {
-        result = result && getValue()
-            .equals(other.getValue());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-
-    private int memoizedHashCode = 0;
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasType()) {
-        hash = (37 * hash) + TYPE_FIELD_NUMBER;
-        hash = (53 * hash) + hashEnum(getType());
-      }
-      if (hasValue()) {
-        hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + getValue().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.RegionSpecifier parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.RegionSpecifier prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code RegionSpecifier}
-     *
-     * <pre>
-     **
-     * Container protocol buffer to specify a region.
-     * You can specify region by region name, or the hash
-     * of the region name, which is known as encoded
-     * region name.
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.RegionSpecifier.class, ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder.class);
-      }
-
-      // Construct using ohmdb.client.generated.HBaseProtos.RegionSpecifier.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        value_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionSpecifier_descriptor;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.RegionSpecifier getDefaultInstanceForType() {
-        return ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance();
-      }
-
-      public ohmdb.client.generated.HBaseProtos.RegionSpecifier build() {
-        ohmdb.client.generated.HBaseProtos.RegionSpecifier result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.RegionSpecifier buildPartial() {
-        ohmdb.client.generated.HBaseProtos.RegionSpecifier result = new ohmdb.client.generated.HBaseProtos.RegionSpecifier(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.type_ = type_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.value_ = value_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.HBaseProtos.RegionSpecifier) {
-          return mergeFrom((ohmdb.client.generated.HBaseProtos.RegionSpecifier)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.RegionSpecifier other) {
-        if (other == ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance()) return this;
-        if (other.hasType()) {
-          setType(other.getType());
-        }
-        if (other.hasValue()) {
-          setValue(other.getValue());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        if (!hasType()) {
-          
-          return false;
-        }
-        if (!hasValue()) {
-          
-          return false;
-        }
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.RegionSpecifier parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.RegionSpecifier) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
+      
       private int bitField0_;
-
+      
       // required .RegionSpecifier.RegionSpecifierType type = 1;
       private ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
-      /**
-       * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-       */
       public boolean hasType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType getType() {
         return type_;
       }
-      /**
-       * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-       */
       public Builder setType(ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType value) {
         if (value == null) {
           throw new NullPointerException();
@@ -6340,33 +4983,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required .RegionSpecifier.RegionSpecifierType type = 1;</code>
-       */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000001);
         type_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME;
         onChanged();
         return this;
       }
-
+      
       // required bytes value = 2;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes value = 2;</code>
-       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>required bytes value = 2;</code>
-       */
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
-      /**
-       * <code>required bytes value = 2;</code>
-       */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -6376,868 +5007,270 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes value = 2;</code>
-       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:RegionSpecifier)
     }
-
+    
     static {
       defaultInstance = new RegionSpecifier(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:RegionSpecifier)
   }
-
+  
   public interface RegionLoadOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required .RegionSpecifier regionSpecifier = 1;
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     boolean hasRegionSpecifier();
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.RegionSpecifier getRegionSpecifier();
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder getRegionSpecifierOrBuilder();
-
+    
     // optional uint32 stores = 2;
-    /**
-     * <code>optional uint32 stores = 2;</code>
-     *
-     * <pre>
-     ** the number of stores for the region 
-     * </pre>
-     */
     boolean hasStores();
-    /**
-     * <code>optional uint32 stores = 2;</code>
-     *
-     * <pre>
-     ** the number of stores for the region 
-     * </pre>
-     */
     int getStores();
-
+    
     // optional uint32 storefiles = 3;
-    /**
-     * <code>optional uint32 storefiles = 3;</code>
-     *
-     * <pre>
-     ** the number of storefiles for the region 
-     * </pre>
-     */
     boolean hasStorefiles();
-    /**
-     * <code>optional uint32 storefiles = 3;</code>
-     *
-     * <pre>
-     ** the number of storefiles for the region 
-     * </pre>
-     */
     int getStorefiles();
-
+    
     // optional uint32 storeUncompressedSizeMB = 4;
-    /**
-     * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-     *
-     * <pre>
-     ** the total size of the store files for the region, uncompressed, in MB 
-     * </pre>
-     */
     boolean hasStoreUncompressedSizeMB();
-    /**
-     * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-     *
-     * <pre>
-     ** the total size of the store files for the region, uncompressed, in MB 
-     * </pre>
-     */
     int getStoreUncompressedSizeMB();
-
+    
     // optional uint32 storefileSizeMB = 5;
-    /**
-     * <code>optional uint32 storefileSizeMB = 5;</code>
-     *
-     * <pre>
-     ** the current total size of the store files for the region, in MB 
-     * </pre>
-     */
     boolean hasStorefileSizeMB();
-    /**
-     * <code>optional uint32 storefileSizeMB = 5;</code>
-     *
-     * <pre>
-     ** the current total size of the store files for the region, in MB 
-     * </pre>
-     */
     int getStorefileSizeMB();
-
+    
     // optional uint32 memstoreSizeMB = 6;
-    /**
-     * <code>optional uint32 memstoreSizeMB = 6;</code>
-     *
-     * <pre>
-     ** the current size of the memstore for the region, in MB 
-     * </pre>
-     */
     boolean hasMemstoreSizeMB();
-    /**
-     * <code>optional uint32 memstoreSizeMB = 6;</code>
-     *
-     * <pre>
-     ** the current size of the memstore for the region, in MB 
-     * </pre>
-     */
     int getMemstoreSizeMB();
-
+    
     // optional uint32 storefileIndexSizeMB = 7;
-    /**
-     * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-     *
-     * <pre>
-     **
-     * The current total size of root-level store file indexes for the region,
-     * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-     * </pre>
-     */
     boolean hasStorefileIndexSizeMB();
-    /**
-     * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-     *
-     * <pre>
-     **
-     * The current total size of root-level store file indexes for the region,
-     * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-     * </pre>
-     */
     int getStorefileIndexSizeMB();
-
+    
     // optional uint64 readRequestsCount = 8;
-    /**
-     * <code>optional uint64 readRequestsCount = 8;</code>
-     *
-     * <pre>
-     ** the current total read requests made to region 
-     * </pre>
-     */
     boolean hasReadRequestsCount();
-    /**
-     * <code>optional uint64 readRequestsCount = 8;</code>
-     *
-     * <pre>
-     ** the current total read requests made to region 
-     * </pre>
-     */
     long getReadRequestsCount();
-
+    
     // optional uint64 writeRequestsCount = 9;
-    /**
-     * <code>optional uint64 writeRequestsCount = 9;</code>
-     *
-     * <pre>
-     ** the current total write requests made to region 
-     * </pre>
-     */
     boolean hasWriteRequestsCount();
-    /**
-     * <code>optional uint64 writeRequestsCount = 9;</code>
-     *
-     * <pre>
-     ** the current total write requests made to region 
-     * </pre>
-     */
     long getWriteRequestsCount();
-
+    
     // optional uint64 totalCompactingKVs = 10;
-    /**
-     * <code>optional uint64 totalCompactingKVs = 10;</code>
-     *
-     * <pre>
-     ** the total compacting key values in currently running compaction 
-     * </pre>
-     */
     boolean hasTotalCompactingKVs();
-    /**
-     * <code>optional uint64 totalCompactingKVs = 10;</code>
-     *
-     * <pre>
-     ** the total compacting key values in currently running compaction 
-     * </pre>
-     */
     long getTotalCompactingKVs();
-
+    
     // optional uint64 currentCompactedKVs = 11;
-    /**
-     * <code>optional uint64 currentCompactedKVs = 11;</code>
-     *
-     * <pre>
-     ** the completed count of key values in currently running compaction 
-     * </pre>
-     */
     boolean hasCurrentCompactedKVs();
-    /**
-     * <code>optional uint64 currentCompactedKVs = 11;</code>
-     *
-     * <pre>
-     ** the completed count of key values in currently running compaction 
-     * </pre>
-     */
     long getCurrentCompactedKVs();
-
+    
     // optional uint32 rootIndexSizeKB = 12;
-    /**
-     * <code>optional uint32 rootIndexSizeKB = 12;</code>
-     *
-     * <pre>
-     ** The current total size of root-level indexes for the region, in KB. 
-     * </pre>
-     */
     boolean hasRootIndexSizeKB();
-    /**
-     * <code>optional uint32 rootIndexSizeKB = 12;</code>
-     *
-     * <pre>
-     ** The current total size of root-level indexes for the region, in KB. 
-     * </pre>
-     */
     int getRootIndexSizeKB();
-
+    
     // optional uint32 totalStaticIndexSizeKB = 13;
-    /**
-     * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-     *
-     * <pre>
-     ** The total size of all index blocks, not just the root level, in KB. 
-     * </pre>
-     */
     boolean hasTotalStaticIndexSizeKB();
-    /**
-     * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-     *
-     * <pre>
-     ** The total size of all index blocks, not just the root level, in KB. 
-     * </pre>
-     */
     int getTotalStaticIndexSizeKB();
-
+    
     // optional uint32 totalStaticBloomSizeKB = 14;
-    /**
-     * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-     *
-     * <pre>
-     **
-     * The total size of all Bloom filter blocks, not just loaded into the
-     * block cache, in KB.
-     * </pre>
-     */
     boolean hasTotalStaticBloomSizeKB();
-    /**
-     * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-     *
-     * <pre>
-     **
-     * The total size of all Bloom filter blocks, not just loaded into the
-     * block cache, in KB.
-     * </pre>
-     */
     int getTotalStaticBloomSizeKB();
-
+    
     // optional uint64 completeSequenceId = 15;
-    /**
-     * <code>optional uint64 completeSequenceId = 15;</code>
-     *
-     * <pre>
-     ** the most recent sequence Id from cache flush 
-     * </pre>
-     */
     boolean hasCompleteSequenceId();
-    /**
-     * <code>optional uint64 completeSequenceId = 15;</code>
-     *
-     * <pre>
-     ** the most recent sequence Id from cache flush 
-     * </pre>
-     */
     long getCompleteSequenceId();
   }
-  /**
-   * Protobuf type {@code RegionLoad}
-   */
   public static final class RegionLoad extends
       com.google.protobuf.GeneratedMessage
       implements RegionLoadOrBuilder {
     // Use RegionLoad.newBuilder() to construct.
-    private RegionLoad(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private RegionLoad(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private RegionLoad(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private RegionLoad(boolean noInit) {}
+    
     private static final RegionLoad defaultInstance;
     public static RegionLoad getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public RegionLoad getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private RegionLoad(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
-                subBuilder = regionSpecifier_.toBuilder();
-              }
-              regionSpecifier_ = input.readMessage(ohmdb.client.generated.HBaseProtos.RegionSpecifier.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(regionSpecifier_);
-                regionSpecifier_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              stores_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              storefiles_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              storeUncompressedSizeMB_ = input.readUInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              storefileSizeMB_ = input.readUInt32();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000020;
-              memstoreSizeMB_ = input.readUInt32();
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000040;
-              storefileIndexSizeMB_ = input.readUInt32();
-              break;
-            }
-            case 64: {
-              bitField0_ |= 0x00000080;
-              readRequestsCount_ = input.readUInt64();
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000100;
-              writeRequestsCount_ = input.readUInt64();
-              break;
-            }
-            case 80: {
-              bitField0_ |= 0x00000200;
-              totalCompactingKVs_ = input.readUInt64();
-              break;
-            }
-            case 88: {
-              bitField0_ |= 0x00000400;
-              currentCompactedKVs_ = input.readUInt64();
-              break;
-            }
-            case 96: {
-              bitField0_ |= 0x00000800;
-              rootIndexSizeKB_ = input.readUInt32();
-              break;
-            }
-            case 104: {
-              bitField0_ |= 0x00001000;
-              totalStaticIndexSizeKB_ = input.readUInt32();
-              break;
-            }
-            case 112: {
-              bitField0_ |= 0x00002000;
-              totalStaticBloomSizeKB_ = input.readUInt32();
-              break;
-            }
-            case 120: {
-              bitField0_ |= 0x00004000;
-              completeSequenceId_ = input.readUInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.RegionLoad.class, ohmdb.client.generated.HBaseProtos.RegionLoad.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<RegionLoad> PARSER =
-        new com.google.protobuf.AbstractParser<RegionLoad>() {
-      public RegionLoad parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegionLoad(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<RegionLoad> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required .RegionSpecifier regionSpecifier = 1;
     public static final int REGIONSPECIFIER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.HBaseProtos.RegionSpecifier regionSpecifier_;
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     public boolean hasRegionSpecifier() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.RegionSpecifier getRegionSpecifier() {
       return regionSpecifier_;
     }
-    /**
-     * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-     *
-     * <pre>
-     ** the region specifier 
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder getRegionSpecifierOrBuilder() {
       return regionSpecifier_;
     }
-
+    
     // optional uint32 stores = 2;
     public static final int STORES_FIELD_NUMBER = 2;
     private int stores_;
-    /**
-     * <code>optional uint32 stores = 2;</code>
-     *
-     * <pre>
-     ** the number of stores for the region 
-     * </pre>
-     */
     public boolean hasStores() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional uint32 stores = 2;</code>
-     *
-     * <pre>
-     ** the number of stores for the region 
-     * </pre>
-     */
     public int getStores() {
       return stores_;
     }
-
+    
     // optional uint32 storefiles = 3;
     public static final int STOREFILES_FIELD_NUMBER = 3;
     private int storefiles_;
-    /**
-     * <code>optional uint32 storefiles = 3;</code>
-     *
-     * <pre>
-     ** the number of storefiles for the region 
-     * </pre>
-     */
     public boolean hasStorefiles() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-    /**
-     * <code>optional uint32 storefiles = 3;</code>
-     *
-     * <pre>
-     ** the number of storefiles for the region 
-     * </pre>
-     */
     public int getStorefiles() {
       return storefiles_;
     }
-
+    
     // optional uint32 storeUncompressedSizeMB = 4;
     public static final int STOREUNCOMPRESSEDSIZEMB_FIELD_NUMBER = 4;
     private int storeUncompressedSizeMB_;
-    /**
-     * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-     *
-     * <pre>
-     ** the total size of the store files for the region, uncompressed, in MB 
-     * </pre>
-     */
     public boolean hasStoreUncompressedSizeMB() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
-    /**
-     * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-     *
-     * <pre>
-     ** the total size of the store files for the region, uncompressed, in MB 
-     * </pre>
-     */
     public int getStoreUncompressedSizeMB() {
       return storeUncompressedSizeMB_;
     }
-
+    
     // optional uint32 storefileSizeMB = 5;
     public static final int STOREFILESIZEMB_FIELD_NUMBER = 5;
     private int storefileSizeMB_;
-    /**
-     * <code>optional uint32 storefileSizeMB = 5;</code>
-     *
-     * <pre>
-     ** the current total size of the store files for the region, in MB 
-     * </pre>
-     */
     public boolean hasStorefileSizeMB() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
-    /**
-     * <code>optional uint32 storefileSizeMB = 5;</code>
-     *
-     * <pre>
-     ** the current total size of the store files for the region, in MB 
-     * </pre>
-     */
     public int getStorefileSizeMB() {
       return storefileSizeMB_;
     }
-
+    
     // optional uint32 memstoreSizeMB = 6;
     public static final int MEMSTORESIZEMB_FIELD_NUMBER = 6;
     private int memstoreSizeMB_;
-    /**
-     * <code>optional uint32 memstoreSizeMB = 6;</code>
-     *
-     * <pre>
-     ** the current size of the memstore for the region, in MB 
-     * </pre>
-     */
     public boolean hasMemstoreSizeMB() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
-    /**
-     * <code>optional uint32 memstoreSizeMB = 6;</code>
-     *
-     * <pre>
-     ** the current size of the memstore for the region, in MB 
-     * </pre>
-     */
     public int getMemstoreSizeMB() {
       return memstoreSizeMB_;
     }
-
+    
     // optional uint32 storefileIndexSizeMB = 7;
     public static final int STOREFILEINDEXSIZEMB_FIELD_NUMBER = 7;
     private int storefileIndexSizeMB_;
-    /**
-     * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-     *
-     * <pre>
-     **
-     * The current total size of root-level store file indexes for the region,
-     * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-     * </pre>
-     */
     public boolean hasStorefileIndexSizeMB() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
-    /**
-     * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-     *
-     * <pre>
-     **
-     * The current total size of root-level store file indexes for the region,
-     * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-     * </pre>
-     */
     public int getStorefileIndexSizeMB() {
       return storefileIndexSizeMB_;
     }
-
+    
     // optional uint64 readRequestsCount = 8;
     public static final int READREQUESTSCOUNT_FIELD_NUMBER = 8;
     private long readRequestsCount_;
-    /**
-     * <code>optional uint64 readRequestsCount = 8;</code>
-     *
-     * <pre>
-     ** the current total read requests made to region 
-     * </pre>
-     */
     public boolean hasReadRequestsCount() {
       return ((bitField0_ & 0x00000080) == 0x00000080);
     }
-    /**
-     * <code>optional uint64 readRequestsCount = 8;</code>
-     *
-     * <pre>
-     ** the current total read requests made to region 
-     * </pre>
-     */
     public long getReadRequestsCount() {
       return readRequestsCount_;
     }
-
+    
     // optional uint64 writeRequestsCount = 9;
     public static final int WRITEREQUESTSCOUNT_FIELD_NUMBER = 9;
     private long writeRequestsCount_;
-    /**
-     * <code>optional uint64 writeRequestsCount = 9;</code>
-     *
-     * <pre>
-     ** the current total write requests made to region 
-     * </pre>
-     */
     public boolean hasWriteRequestsCount() {
       return ((bitField0_ & 0x00000100) == 0x00000100);
     }
-    /**
-     * <code>optional uint64 writeRequestsCount = 9;</code>
-     *
-     * <pre>
-     ** the current total write requests made to region 
-     * </pre>
-     */
     public long getWriteRequestsCount() {
       return writeRequestsCount_;
     }
-
+    
     // optional uint64 totalCompactingKVs = 10;
     public static final int TOTALCOMPACTINGKVS_FIELD_NUMBER = 10;
     private long totalCompactingKVs_;
-    /**
-     * <code>optional uint64 totalCompactingKVs = 10;</code>
-     *
-     * <pre>
-     ** the total compacting key values in currently running compaction 
-     * </pre>
-     */
     public boolean hasTotalCompactingKVs() {
       return ((bitField0_ & 0x00000200) == 0x00000200);
     }
-    /**
-     * <code>optional uint64 totalCompactingKVs = 10;</code>
-     *
-     * <pre>
-     ** the total compacting key values in currently running compaction 
-     * </pre>
-     */
     public long getTotalCompactingKVs() {
       return totalCompactingKVs_;
     }
-
+    
     // optional uint64 currentCompactedKVs = 11;
     public static final int CURRENTCOMPACTEDKVS_FIELD_NUMBER = 11;
     private long currentCompactedKVs_;
-    /**
-     * <code>optional uint64 currentCompactedKVs = 11;</code>
-     *
-     * <pre>
-     ** the completed count of key values in currently running compaction 
-     * </pre>
-     */
     public boolean hasCurrentCompactedKVs() {
       return ((bitField0_ & 0x00000400) == 0x00000400);
     }
-    /**
-     * <code>optional uint64 currentCompactedKVs = 11;</code>
-     *
-     * <pre>
-     ** the completed count of key values in currently running compaction 
-     * </pre>
-     */
     public long getCurrentCompactedKVs() {
       return currentCompactedKVs_;
     }
-
+    
     // optional uint32 rootIndexSizeKB = 12;
     public static final int ROOTINDEXSIZEKB_FIELD_NUMBER = 12;
     private int rootIndexSizeKB_;
-    /**
-     * <code>optional uint32 rootIndexSizeKB = 12;</code>
-     *
-     * <pre>
-     ** The current total size of root-level indexes for the region, in KB. 
-     * </pre>
-     */
     public boolean hasRootIndexSizeKB() {
       return ((bitField0_ & 0x00000800) == 0x00000800);
     }
-    /**
-     * <code>optional uint32 rootIndexSizeKB = 12;</code>
-     *
-     * <pre>
-     ** The current total size of root-level indexes for the region, in KB. 
-     * </pre>
-     */
     public int getRootIndexSizeKB() {
       return rootIndexSizeKB_;
     }
-
+    
     // optional uint32 totalStaticIndexSizeKB = 13;
     public static final int TOTALSTATICINDEXSIZEKB_FIELD_NUMBER = 13;
     private int totalStaticIndexSizeKB_;
-    /**
-     * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-     *
-     * <pre>
-     ** The total size of all index blocks, not just the root level, in KB. 
-     * </pre>
-     */
     public boolean hasTotalStaticIndexSizeKB() {
       return ((bitField0_ & 0x00001000) == 0x00001000);
     }
-    /**
-     * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-     *
-     * <pre>
-     ** The total size of all index blocks, not just the root level, in KB. 
-     * </pre>
-     */
     public int getTotalStaticIndexSizeKB() {
       return totalStaticIndexSizeKB_;
     }
-
+    
     // optional uint32 totalStaticBloomSizeKB = 14;
     public static final int TOTALSTATICBLOOMSIZEKB_FIELD_NUMBER = 14;
     private int totalStaticBloomSizeKB_;
-    /**
-     * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-     *
-     * <pre>
-     **
-     * The total size of all Bloom filter blocks, not just loaded into the
-     * block cache, in KB.
-     * </pre>
-     */
     public boolean hasTotalStaticBloomSizeKB() {
       return ((bitField0_ & 0x00002000) == 0x00002000);
     }
-    /**
-     * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-     *
-     * <pre>
-     **
-     * The total size of all Bloom filter blocks, not just loaded into the
-     * block cache, in KB.
-     * </pre>
-     */
     public int getTotalStaticBloomSizeKB() {
       return totalStaticBloomSizeKB_;
     }
-
+    
     // optional uint64 completeSequenceId = 15;
     public static final int COMPLETESEQUENCEID_FIELD_NUMBER = 15;
     private long completeSequenceId_;
-    /**
-     * <code>optional uint64 completeSequenceId = 15;</code>
-     *
-     * <pre>
-     ** the most recent sequence Id from cache flush 
-     * </pre>
-     */
     public boolean hasCompleteSequenceId() {
       return ((bitField0_ & 0x00004000) == 0x00004000);
     }
-    /**
-     * <code>optional uint64 completeSequenceId = 15;</code>
-     *
-     * <pre>
-     ** the most recent sequence Id from cache flush 
-     * </pre>
-     */
     public long getCompleteSequenceId() {
       return completeSequenceId_;
     }
-
+    
     private void initFields() {
       regionSpecifier_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance();
       stores_ = 0;
@@ -7259,7 +5292,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasRegionSpecifier()) {
         memoizedIsInitialized = 0;
         return false;
@@ -7271,7 +5304,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -7322,12 +5355,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7393,14 +5426,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -7410,7 +5443,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.RegionLoad other = (ohmdb.client.generated.HBaseProtos.RegionLoad) obj;
-
+      
       boolean result = true;
       result = result && (hasRegionSpecifier() == other.hasRegionSpecifier());
       if (hasRegionSpecifier()) {
@@ -7491,13 +5524,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasRegionSpecifier()) {
@@ -7561,79 +5590,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getCompleteSequenceId());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.RegionLoad parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.RegionLoad prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code RegionLoad}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder {
@@ -7641,21 +5680,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.RegionLoad.class, ohmdb.client.generated.HBaseProtos.RegionLoad.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.RegionLoad.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -7667,7 +5703,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         if (regionSpecifierBuilder_ == null) {
@@ -7706,20 +5742,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00004000);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_RegionLoad_descriptor;
+        return ohmdb.client.generated.HBaseProtos.RegionLoad.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.RegionLoad getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.RegionLoad.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.RegionLoad build() {
         ohmdb.client.generated.HBaseProtos.RegionLoad result = buildPartial();
         if (!result.isInitialized()) {
@@ -7727,7 +5763,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.RegionLoad buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.RegionLoad result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.RegionLoad buildPartial() {
         ohmdb.client.generated.HBaseProtos.RegionLoad result = new ohmdb.client.generated.HBaseProtos.RegionLoad(this);
         int from_bitField0_ = bitField0_;
@@ -7800,7 +5846,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.RegionLoad) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.RegionLoad)other);
@@ -7809,7 +5855,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.RegionLoad other) {
         if (other == ohmdb.client.generated.HBaseProtos.RegionLoad.getDefaultInstance()) return this;
         if (other.hasRegionSpecifier()) {
@@ -7860,7 +5906,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasRegionSpecifier()) {
           
@@ -7872,47 +5918,122 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.RegionLoad parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.RegionLoad) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder subBuilder = ohmdb.client.generated.HBaseProtos.RegionSpecifier.newBuilder();
+              if (hasRegionSpecifier()) {
+                subBuilder.mergeFrom(getRegionSpecifier());
+              }
+              input.readMessage(subBuilder, extensionRegistry);
+              setRegionSpecifier(subBuilder.buildPartial());
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              stores_ = input.readUInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              storefiles_ = input.readUInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              storeUncompressedSizeMB_ = input.readUInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              storefileSizeMB_ = input.readUInt32();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              memstoreSizeMB_ = input.readUInt32();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              storefileIndexSizeMB_ = input.readUInt32();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000080;
+              readRequestsCount_ = input.readUInt64();
+              break;
+            }
+            case 72: {
+              bitField0_ |= 0x00000100;
+              writeRequestsCount_ = input.readUInt64();
+              break;
+            }
+            case 80: {
+              bitField0_ |= 0x00000200;
+              totalCompactingKVs_ = input.readUInt64();
+              break;
+            }
+            case 88: {
+              bitField0_ |= 0x00000400;
+              currentCompactedKVs_ = input.readUInt64();
+              break;
+            }
+            case 96: {
+              bitField0_ |= 0x00000800;
+              rootIndexSizeKB_ = input.readUInt32();
+              break;
+            }
+            case 104: {
+              bitField0_ |= 0x00001000;
+              totalStaticIndexSizeKB_ = input.readUInt32();
+              break;
+            }
+            case 112: {
+              bitField0_ |= 0x00002000;
+              totalStaticBloomSizeKB_ = input.readUInt32();
+              break;
+            }
+            case 120: {
+              bitField0_ |= 0x00004000;
+              completeSequenceId_ = input.readUInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required .RegionSpecifier regionSpecifier = 1;
       private ohmdb.client.generated.HBaseProtos.RegionSpecifier regionSpecifier_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.HBaseProtos.RegionSpecifier, ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder, ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder> regionSpecifierBuilder_;
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public boolean hasRegionSpecifier() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionSpecifier getRegionSpecifier() {
         if (regionSpecifierBuilder_ == null) {
           return regionSpecifier_;
@@ -7920,13 +6041,6 @@ public final class HBaseProtos {
           return regionSpecifierBuilder_.getMessage();
         }
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public Builder setRegionSpecifier(ohmdb.client.generated.HBaseProtos.RegionSpecifier value) {
         if (regionSpecifierBuilder_ == null) {
           if (value == null) {
@@ -7940,13 +6054,6 @@ public final class HBaseProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public Builder setRegionSpecifier(
           ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder builderForValue) {
         if (regionSpecifierBuilder_ == null) {
@@ -7958,13 +6065,6 @@ public final class HBaseProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public Builder mergeRegionSpecifier(ohmdb.client.generated.HBaseProtos.RegionSpecifier value) {
         if (regionSpecifierBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -7981,13 +6081,6 @@ public final class HBaseProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public Builder clearRegionSpecifier() {
         if (regionSpecifierBuilder_ == null) {
           regionSpecifier_ = ohmdb.client.generated.HBaseProtos.RegionSpecifier.getDefaultInstance();
@@ -7998,25 +6091,11 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder getRegionSpecifierBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getRegionSpecifierFieldBuilder().getBuilder();
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder getRegionSpecifierOrBuilder() {
         if (regionSpecifierBuilder_ != null) {
           return regionSpecifierBuilder_.getMessageOrBuilder();
@@ -8024,13 +6103,6 @@ public final class HBaseProtos {
           return regionSpecifier_;
         }
       }
-      /**
-       * <code>required .RegionSpecifier regionSpecifier = 1;</code>
-       *
-       * <pre>
-       ** the region specifier 
-       * </pre>
-       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.HBaseProtos.RegionSpecifier, ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder, ohmdb.client.generated.HBaseProtos.RegionSpecifierOrBuilder> 
           getRegionSpecifierFieldBuilder() {
@@ -8044,1425 +6116,504 @@ public final class HBaseProtos {
         }
         return regionSpecifierBuilder_;
       }
-
+      
       // optional uint32 stores = 2;
       private int stores_ ;
-      /**
-       * <code>optional uint32 stores = 2;</code>
-       *
-       * <pre>
-       ** the number of stores for the region 
-       * </pre>
-       */
       public boolean hasStores() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional uint32 stores = 2;</code>
-       *
-       * <pre>
-       ** the number of stores for the region 
-       * </pre>
-       */
       public int getStores() {
         return stores_;
       }
-      /**
-       * <code>optional uint32 stores = 2;</code>
-       *
-       * <pre>
-       ** the number of stores for the region 
-       * </pre>
-       */
       public Builder setStores(int value) {
         bitField0_ |= 0x00000002;
         stores_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 stores = 2;</code>
-       *
-       * <pre>
-       ** the number of stores for the region 
-       * </pre>
-       */
       public Builder clearStores() {
         bitField0_ = (bitField0_ & ~0x00000002);
         stores_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 storefiles = 3;
       private int storefiles_ ;
-      /**
-       * <code>optional uint32 storefiles = 3;</code>
-       *
-       * <pre>
-       ** the number of storefiles for the region 
-       * </pre>
-       */
       public boolean hasStorefiles() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional uint32 storefiles = 3;</code>
-       *
-       * <pre>
-       ** the number of storefiles for the region 
-       * </pre>
-       */
       public int getStorefiles() {
         return storefiles_;
       }
-      /**
-       * <code>optional uint32 storefiles = 3;</code>
-       *
-       * <pre>
-       ** the number of storefiles for the region 
-       * </pre>
-       */
       public Builder setStorefiles(int value) {
         bitField0_ |= 0x00000004;
         storefiles_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 storefiles = 3;</code>
-       *
-       * <pre>
-       ** the number of storefiles for the region 
-       * </pre>
-       */
       public Builder clearStorefiles() {
         bitField0_ = (bitField0_ & ~0x00000004);
         storefiles_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 storeUncompressedSizeMB = 4;
       private int storeUncompressedSizeMB_ ;
-      /**
-       * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-       *
-       * <pre>
-       ** the total size of the store files for the region, uncompressed, in MB 
-       * </pre>
-       */
       public boolean hasStoreUncompressedSizeMB() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-       *
-       * <pre>
-       ** the total size of the store files for the region, uncompressed, in MB 
-       * </pre>
-       */
       public int getStoreUncompressedSizeMB() {
         return storeUncompressedSizeMB_;
       }
-      /**
-       * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-       *
-       * <pre>
-       ** the total size of the store files for the region, uncompressed, in MB 
-       * </pre>
-       */
       public Builder setStoreUncompressedSizeMB(int value) {
         bitField0_ |= 0x00000008;
         storeUncompressedSizeMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 storeUncompressedSizeMB = 4;</code>
-       *
-       * <pre>
-       ** the total size of the store files for the region, uncompressed, in MB 
-       * </pre>
-       */
       public Builder clearStoreUncompressedSizeMB() {
         bitField0_ = (bitField0_ & ~0x00000008);
         storeUncompressedSizeMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 storefileSizeMB = 5;
       private int storefileSizeMB_ ;
-      /**
-       * <code>optional uint32 storefileSizeMB = 5;</code>
-       *
-       * <pre>
-       ** the current total size of the store files for the region, in MB 
-       * </pre>
-       */
       public boolean hasStorefileSizeMB() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      /**
-       * <code>optional uint32 storefileSizeMB = 5;</code>
-       *
-       * <pre>
-       ** the current total size of the store files for the region, in MB 
-       * </pre>
-       */
       public int getStorefileSizeMB() {
         return storefileSizeMB_;
       }
-      /**
-       * <code>optional uint32 storefileSizeMB = 5;</code>
-       *
-       * <pre>
-       ** the current total size of the store files for the region, in MB 
-       * </pre>
-       */
       public Builder setStorefileSizeMB(int value) {
         bitField0_ |= 0x00000010;
         storefileSizeMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 storefileSizeMB = 5;</code>
-       *
-       * <pre>
-       ** the current total size of the store files for the region, in MB 
-       * </pre>
-       */
       public Builder clearStorefileSizeMB() {
         bitField0_ = (bitField0_ & ~0x00000010);
         storefileSizeMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 memstoreSizeMB = 6;
       private int memstoreSizeMB_ ;
-      /**
-       * <code>optional uint32 memstoreSizeMB = 6;</code>
-       *
-       * <pre>
-       ** the current size of the memstore for the region, in MB 
-       * </pre>
-       */
       public boolean hasMemstoreSizeMB() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
-      /**
-       * <code>optional uint32 memstoreSizeMB = 6;</code>
-       *
-       * <pre>
-       ** the current size of the memstore for the region, in MB 
-       * </pre>
-       */
       public int getMemstoreSizeMB() {
         return memstoreSizeMB_;
       }
-      /**
-       * <code>optional uint32 memstoreSizeMB = 6;</code>
-       *
-       * <pre>
-       ** the current size of the memstore for the region, in MB 
-       * </pre>
-       */
       public Builder setMemstoreSizeMB(int value) {
         bitField0_ |= 0x00000020;
         memstoreSizeMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 memstoreSizeMB = 6;</code>
-       *
-       * <pre>
-       ** the current size of the memstore for the region, in MB 
-       * </pre>
-       */
       public Builder clearMemstoreSizeMB() {
         bitField0_ = (bitField0_ & ~0x00000020);
         memstoreSizeMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 storefileIndexSizeMB = 7;
       private int storefileIndexSizeMB_ ;
-      /**
-       * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-       *
-       * <pre>
-       **
-       * The current total size of root-level store file indexes for the region,
-       * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-       * </pre>
-       */
       public boolean hasStorefileIndexSizeMB() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
-      /**
-       * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-       *
-       * <pre>
-       **
-       * The current total size of root-level store file indexes for the region,
-       * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-       * </pre>
-       */
       public int getStorefileIndexSizeMB() {
         return storefileIndexSizeMB_;
       }
-      /**
-       * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-       *
-       * <pre>
-       **
-       * The current total size of root-level store file indexes for the region,
-       * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-       * </pre>
-       */
       public Builder setStorefileIndexSizeMB(int value) {
         bitField0_ |= 0x00000040;
         storefileIndexSizeMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 storefileIndexSizeMB = 7;</code>
-       *
-       * <pre>
-       **
-       * The current total size of root-level store file indexes for the region,
-       * in MB. The same as {&#64;link #rootIndexSizeKB} but in MB.
-       * </pre>
-       */
       public Builder clearStorefileIndexSizeMB() {
         bitField0_ = (bitField0_ & ~0x00000040);
         storefileIndexSizeMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 readRequestsCount = 8;
       private long readRequestsCount_ ;
-      /**
-       * <code>optional uint64 readRequestsCount = 8;</code>
-       *
-       * <pre>
-       ** the current total read requests made to region 
-       * </pre>
-       */
       public boolean hasReadRequestsCount() {
         return ((bitField0_ & 0x00000080) == 0x00000080);
       }
-      /**
-       * <code>optional uint64 readRequestsCount = 8;</code>
-       *
-       * <pre>
-       ** the current total read requests made to region 
-       * </pre>
-       */
       public long getReadRequestsCount() {
         return readRequestsCount_;
       }
-      /**
-       * <code>optional uint64 readRequestsCount = 8;</code>
-       *
-       * <pre>
-       ** the current total read requests made to region 
-       * </pre>
-       */
       public Builder setReadRequestsCount(long value) {
         bitField0_ |= 0x00000080;
         readRequestsCount_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 readRequestsCount = 8;</code>
-       *
-       * <pre>
-       ** the current total read requests made to region 
-       * </pre>
-       */
       public Builder clearReadRequestsCount() {
         bitField0_ = (bitField0_ & ~0x00000080);
         readRequestsCount_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 writeRequestsCount = 9;
       private long writeRequestsCount_ ;
-      /**
-       * <code>optional uint64 writeRequestsCount = 9;</code>
-       *
-       * <pre>
-       ** the current total write requests made to region 
-       * </pre>
-       */
       public boolean hasWriteRequestsCount() {
         return ((bitField0_ & 0x00000100) == 0x00000100);
       }
-      /**
-       * <code>optional uint64 writeRequestsCount = 9;</code>
-       *
-       * <pre>
-       ** the current total write requests made to region 
-       * </pre>
-       */
       public long getWriteRequestsCount() {
         return writeRequestsCount_;
       }
-      /**
-       * <code>optional uint64 writeRequestsCount = 9;</code>
-       *
-       * <pre>
-       ** the current total write requests made to region 
-       * </pre>
-       */
       public Builder setWriteRequestsCount(long value) {
         bitField0_ |= 0x00000100;
         writeRequestsCount_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 writeRequestsCount = 9;</code>
-       *
-       * <pre>
-       ** the current total write requests made to region 
-       * </pre>
-       */
       public Builder clearWriteRequestsCount() {
         bitField0_ = (bitField0_ & ~0x00000100);
         writeRequestsCount_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 totalCompactingKVs = 10;
       private long totalCompactingKVs_ ;
-      /**
-       * <code>optional uint64 totalCompactingKVs = 10;</code>
-       *
-       * <pre>
-       ** the total compacting key values in currently running compaction 
-       * </pre>
-       */
       public boolean hasTotalCompactingKVs() {
         return ((bitField0_ & 0x00000200) == 0x00000200);
       }
-      /**
-       * <code>optional uint64 totalCompactingKVs = 10;</code>
-       *
-       * <pre>
-       ** the total compacting key values in currently running compaction 
-       * </pre>
-       */
       public long getTotalCompactingKVs() {
         return totalCompactingKVs_;
       }
-      /**
-       * <code>optional uint64 totalCompactingKVs = 10;</code>
-       *
-       * <pre>
-       ** the total compacting key values in currently running compaction 
-       * </pre>
-       */
       public Builder setTotalCompactingKVs(long value) {
         bitField0_ |= 0x00000200;
         totalCompactingKVs_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 totalCompactingKVs = 10;</code>
-       *
-       * <pre>
-       ** the total compacting key values in currently running compaction 
-       * </pre>
-       */
       public Builder clearTotalCompactingKVs() {
         bitField0_ = (bitField0_ & ~0x00000200);
         totalCompactingKVs_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 currentCompactedKVs = 11;
       private long currentCompactedKVs_ ;
-      /**
-       * <code>optional uint64 currentCompactedKVs = 11;</code>
-       *
-       * <pre>
-       ** the completed count of key values in currently running compaction 
-       * </pre>
-       */
       public boolean hasCurrentCompactedKVs() {
         return ((bitField0_ & 0x00000400) == 0x00000400);
       }
-      /**
-       * <code>optional uint64 currentCompactedKVs = 11;</code>
-       *
-       * <pre>
-       ** the completed count of key values in currently running compaction 
-       * </pre>
-       */
       public long getCurrentCompactedKVs() {
         return currentCompactedKVs_;
       }
-      /**
-       * <code>optional uint64 currentCompactedKVs = 11;</code>
-       *
-       * <pre>
-       ** the completed count of key values in currently running compaction 
-       * </pre>
-       */
       public Builder setCurrentCompactedKVs(long value) {
         bitField0_ |= 0x00000400;
         currentCompactedKVs_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 currentCompactedKVs = 11;</code>
-       *
-       * <pre>
-       ** the completed count of key values in currently running compaction 
-       * </pre>
-       */
       public Builder clearCurrentCompactedKVs() {
         bitField0_ = (bitField0_ & ~0x00000400);
         currentCompactedKVs_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 rootIndexSizeKB = 12;
       private int rootIndexSizeKB_ ;
-      /**
-       * <code>optional uint32 rootIndexSizeKB = 12;</code>
-       *
-       * <pre>
-       ** The current total size of root-level indexes for the region, in KB. 
-       * </pre>
-       */
       public boolean hasRootIndexSizeKB() {
         return ((bitField0_ & 0x00000800) == 0x00000800);
       }
-      /**
-       * <code>optional uint32 rootIndexSizeKB = 12;</code>
-       *
-       * <pre>
-       ** The current total size of root-level indexes for the region, in KB. 
-       * </pre>
-       */
       public int getRootIndexSizeKB() {
         return rootIndexSizeKB_;
       }
-      /**
-       * <code>optional uint32 rootIndexSizeKB = 12;</code>
-       *
-       * <pre>
-       ** The current total size of root-level indexes for the region, in KB. 
-       * </pre>
-       */
       public Builder setRootIndexSizeKB(int value) {
         bitField0_ |= 0x00000800;
         rootIndexSizeKB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 rootIndexSizeKB = 12;</code>
-       *
-       * <pre>
-       ** The current total size of root-level indexes for the region, in KB. 
-       * </pre>
-       */
       public Builder clearRootIndexSizeKB() {
         bitField0_ = (bitField0_ & ~0x00000800);
         rootIndexSizeKB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 totalStaticIndexSizeKB = 13;
       private int totalStaticIndexSizeKB_ ;
-      /**
-       * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-       *
-       * <pre>
-       ** The total size of all index blocks, not just the root level, in KB. 
-       * </pre>
-       */
       public boolean hasTotalStaticIndexSizeKB() {
         return ((bitField0_ & 0x00001000) == 0x00001000);
       }
-      /**
-       * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-       *
-       * <pre>
-       ** The total size of all index blocks, not just the root level, in KB. 
-       * </pre>
-       */
       public int getTotalStaticIndexSizeKB() {
         return totalStaticIndexSizeKB_;
       }
-      /**
-       * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-       *
-       * <pre>
-       ** The total size of all index blocks, not just the root level, in KB. 
-       * </pre>
-       */
       public Builder setTotalStaticIndexSizeKB(int value) {
         bitField0_ |= 0x00001000;
         totalStaticIndexSizeKB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 totalStaticIndexSizeKB = 13;</code>
-       *
-       * <pre>
-       ** The total size of all index blocks, not just the root level, in KB. 
-       * </pre>
-       */
       public Builder clearTotalStaticIndexSizeKB() {
         bitField0_ = (bitField0_ & ~0x00001000);
         totalStaticIndexSizeKB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 totalStaticBloomSizeKB = 14;
       private int totalStaticBloomSizeKB_ ;
-      /**
-       * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-       *
-       * <pre>
-       **
-       * The total size of all Bloom filter blocks, not just loaded into the
-       * block cache, in KB.
-       * </pre>
-       */
       public boolean hasTotalStaticBloomSizeKB() {
         return ((bitField0_ & 0x00002000) == 0x00002000);
       }
-      /**
-       * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-       *
-       * <pre>
-       **
-       * The total size of all Bloom filter blocks, not just loaded into the
-       * block cache, in KB.
-       * </pre>
-       */
       public int getTotalStaticBloomSizeKB() {
         return totalStaticBloomSizeKB_;
       }
-      /**
-       * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-       *
-       * <pre>
-       **
-       * The total size of all Bloom filter blocks, not just loaded into the
-       * block cache, in KB.
-       * </pre>
-       */
       public Builder setTotalStaticBloomSizeKB(int value) {
         bitField0_ |= 0x00002000;
         totalStaticBloomSizeKB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 totalStaticBloomSizeKB = 14;</code>
-       *
-       * <pre>
-       **
-       * The total size of all Bloom filter blocks, not just loaded into the
-       * block cache, in KB.
-       * </pre>
-       */
       public Builder clearTotalStaticBloomSizeKB() {
         bitField0_ = (bitField0_ & ~0x00002000);
         totalStaticBloomSizeKB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 completeSequenceId = 15;
       private long completeSequenceId_ ;
-      /**
-       * <code>optional uint64 completeSequenceId = 15;</code>
-       *
-       * <pre>
-       ** the most recent sequence Id from cache flush 
-       * </pre>
-       */
       public boolean hasCompleteSequenceId() {
         return ((bitField0_ & 0x00004000) == 0x00004000);
       }
-      /**
-       * <code>optional uint64 completeSequenceId = 15;</code>
-       *
-       * <pre>
-       ** the most recent sequence Id from cache flush 
-       * </pre>
-       */
       public long getCompleteSequenceId() {
         return completeSequenceId_;
       }
-      /**
-       * <code>optional uint64 completeSequenceId = 15;</code>
-       *
-       * <pre>
-       ** the most recent sequence Id from cache flush 
-       * </pre>
-       */
       public Builder setCompleteSequenceId(long value) {
         bitField0_ |= 0x00004000;
         completeSequenceId_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 completeSequenceId = 15;</code>
-       *
-       * <pre>
-       ** the most recent sequence Id from cache flush 
-       * </pre>
-       */
       public Builder clearCompleteSequenceId() {
         bitField0_ = (bitField0_ & ~0x00004000);
         completeSequenceId_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:RegionLoad)
     }
-
+    
     static {
       defaultInstance = new RegionLoad(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:RegionLoad)
   }
-
+  
   public interface ServerLoadOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // optional uint32 numberOfRequests = 1;
-    /**
-     * <code>optional uint32 numberOfRequests = 1;</code>
-     *
-     * <pre>
-     ** Number of requests since last report. 
-     * </pre>
-     */
     boolean hasNumberOfRequests();
-    /**
-     * <code>optional uint32 numberOfRequests = 1;</code>
-     *
-     * <pre>
-     ** Number of requests since last report. 
-     * </pre>
-     */
     int getNumberOfRequests();
-
+    
     // optional uint32 totalNumberOfRequests = 2;
-    /**
-     * <code>optional uint32 totalNumberOfRequests = 2;</code>
-     *
-     * <pre>
-     ** Total Number of requests from the start of the region server. 
-     * </pre>
-     */
     boolean hasTotalNumberOfRequests();
-    /**
-     * <code>optional uint32 totalNumberOfRequests = 2;</code>
-     *
-     * <pre>
-     ** Total Number of requests from the start of the region server. 
-     * </pre>
-     */
     int getTotalNumberOfRequests();
-
+    
     // optional uint32 usedHeapMB = 3;
-    /**
-     * <code>optional uint32 usedHeapMB = 3;</code>
-     *
-     * <pre>
-     ** the amount of used heap, in MB. 
-     * </pre>
-     */
     boolean hasUsedHeapMB();
-    /**
-     * <code>optional uint32 usedHeapMB = 3;</code>
-     *
-     * <pre>
-     ** the amount of used heap, in MB. 
-     * </pre>
-     */
     int getUsedHeapMB();
-
+    
     // optional uint32 maxHeapMB = 4;
-    /**
-     * <code>optional uint32 maxHeapMB = 4;</code>
-     *
-     * <pre>
-     ** the maximum allowable size of the heap, in MB. 
-     * </pre>
-     */
     boolean hasMaxHeapMB();
-    /**
-     * <code>optional uint32 maxHeapMB = 4;</code>
-     *
-     * <pre>
-     ** the maximum allowable size of the heap, in MB. 
-     * </pre>
-     */
     int getMaxHeapMB();
-
+    
     // repeated .RegionLoad regionLoads = 5;
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad> 
         getRegionLoadsList();
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.RegionLoad getRegionLoads(int index);
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     int getRegionLoadsCount();
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder> 
         getRegionLoadsOrBuilderList();
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder getRegionLoadsOrBuilder(
         int index);
-
+    
     // repeated .Coprocessor coprocessors = 6;
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor> 
         getCoprocessorsList();
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.Coprocessor getCoprocessors(int index);
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     int getCoprocessorsCount();
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder> 
         getCoprocessorsOrBuilderList();
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder getCoprocessorsOrBuilder(
         int index);
-
+    
     // optional uint64 reportStartTime = 7;
-    /**
-     * <code>optional uint64 reportStartTime = 7;</code>
-     *
-     * <pre>
-     **
-     * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     boolean hasReportStartTime();
-    /**
-     * <code>optional uint64 reportStartTime = 7;</code>
-     *
-     * <pre>
-     **
-     * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     long getReportStartTime();
-
+    
     // optional uint64 reportEndTime = 8;
-    /**
-     * <code>optional uint64 reportEndTime = 8;</code>
-     *
-     * <pre>
-     **
-     * Time when report was generated.
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     boolean hasReportEndTime();
-    /**
-     * <code>optional uint64 reportEndTime = 8;</code>
-     *
-     * <pre>
-     **
-     * Time when report was generated.
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     long getReportEndTime();
-
+    
     // optional uint32 infoServerPort = 9;
-    /**
-     * <code>optional uint32 infoServerPort = 9;</code>
-     *
-     * <pre>
-     **
-     * The port number that this region server is hosing an info server on.
-     * </pre>
-     */
     boolean hasInfoServerPort();
-    /**
-     * <code>optional uint32 infoServerPort = 9;</code>
-     *
-     * <pre>
-     **
-     * The port number that this region server is hosing an info server on.
-     * </pre>
-     */
     int getInfoServerPort();
   }
-  /**
-   * Protobuf type {@code ServerLoad}
-   */
   public static final class ServerLoad extends
       com.google.protobuf.GeneratedMessage
       implements ServerLoadOrBuilder {
     // Use ServerLoad.newBuilder() to construct.
-    private ServerLoad(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private ServerLoad(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private ServerLoad(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private ServerLoad(boolean noInit) {}
+    
     private static final ServerLoad defaultInstance;
     public static ServerLoad getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public ServerLoad getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ServerLoad(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              numberOfRequests_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              totalNumberOfRequests_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              usedHeapMB_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              maxHeapMB_ = input.readUInt32();
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                regionLoads_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.RegionLoad>();
-                mutable_bitField0_ |= 0x00000010;
-              }
-              regionLoads_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.RegionLoad.PARSER, extensionRegistry));
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                coprocessors_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.Coprocessor>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              coprocessors_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.Coprocessor.PARSER, extensionRegistry));
-              break;
-            }
-            case 56: {
-              bitField0_ |= 0x00000010;
-              reportStartTime_ = input.readUInt64();
-              break;
-            }
-            case 64: {
-              bitField0_ |= 0x00000020;
-              reportEndTime_ = input.readUInt64();
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000040;
-              infoServerPort_ = input.readUInt32();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-          regionLoads_ = java.util.Collections.unmodifiableList(regionLoads_);
-        }
-        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-          coprocessors_ = java.util.Collections.unmodifiableList(coprocessors_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.ServerLoad.class, ohmdb.client.generated.HBaseProtos.ServerLoad.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<ServerLoad> PARSER =
-        new com.google.protobuf.AbstractParser<ServerLoad>() {
-      public ServerLoad parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ServerLoad(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ServerLoad> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // optional uint32 numberOfRequests = 1;
     public static final int NUMBEROFREQUESTS_FIELD_NUMBER = 1;
     private int numberOfRequests_;
-    /**
-     * <code>optional uint32 numberOfRequests = 1;</code>
-     *
-     * <pre>
-     ** Number of requests since last report. 
-     * </pre>
-     */
     public boolean hasNumberOfRequests() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional uint32 numberOfRequests = 1;</code>
-     *
-     * <pre>
-     ** Number of requests since last report. 
-     * </pre>
-     */
     public int getNumberOfRequests() {
       return numberOfRequests_;
     }
-
+    
     // optional uint32 totalNumberOfRequests = 2;
     public static final int TOTALNUMBEROFREQUESTS_FIELD_NUMBER = 2;
     private int totalNumberOfRequests_;
-    /**
-     * <code>optional uint32 totalNumberOfRequests = 2;</code>
-     *
-     * <pre>
-     ** Total Number of requests from the start of the region server. 
-     * </pre>
-     */
     public boolean hasTotalNumberOfRequests() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional uint32 totalNumberOfRequests = 2;</code>
-     *
-     * <pre>
-     ** Total Number of requests from the start of the region server. 
-     * </pre>
-     */
     public int getTotalNumberOfRequests() {
       return totalNumberOfRequests_;
     }
-
+    
     // optional uint32 usedHeapMB = 3;
     public static final int USEDHEAPMB_FIELD_NUMBER = 3;
     private int usedHeapMB_;
-    /**
-     * <code>optional uint32 usedHeapMB = 3;</code>
-     *
-     * <pre>
-     ** the amount of used heap, in MB. 
-     * </pre>
-     */
     public boolean hasUsedHeapMB() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-    /**
-     * <code>optional uint32 usedHeapMB = 3;</code>
-     *
-     * <pre>
-     ** the amount of used heap, in MB. 
-     * </pre>
-     */
     public int getUsedHeapMB() {
       return usedHeapMB_;
     }
-
+    
     // optional uint32 maxHeapMB = 4;
     public static final int MAXHEAPMB_FIELD_NUMBER = 4;
     private int maxHeapMB_;
-    /**
-     * <code>optional uint32 maxHeapMB = 4;</code>
-     *
-     * <pre>
-     ** the maximum allowable size of the heap, in MB. 
-     * </pre>
-     */
     public boolean hasMaxHeapMB() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
-    /**
-     * <code>optional uint32 maxHeapMB = 4;</code>
-     *
-     * <pre>
-     ** the maximum allowable size of the heap, in MB. 
-     * </pre>
-     */
     public int getMaxHeapMB() {
       return maxHeapMB_;
     }
-
+    
     // repeated .RegionLoad regionLoads = 5;
     public static final int REGIONLOADS_FIELD_NUMBER = 5;
     private java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad> regionLoads_;
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad> getRegionLoadsList() {
       return regionLoads_;
     }
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder> 
         getRegionLoadsOrBuilderList() {
       return regionLoads_;
     }
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     public int getRegionLoadsCount() {
       return regionLoads_.size();
     }
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.RegionLoad getRegionLoads(int index) {
       return regionLoads_.get(index);
     }
-    /**
-     * <code>repeated .RegionLoad regionLoads = 5;</code>
-     *
-     * <pre>
-     ** Information on the load of individual regions. 
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder getRegionLoadsOrBuilder(
         int index) {
       return regionLoads_.get(index);
     }
-
+    
     // repeated .Coprocessor coprocessors = 6;
     public static final int COPROCESSORS_FIELD_NUMBER = 6;
     private java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor> coprocessors_;
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor> getCoprocessorsList() {
       return coprocessors_;
     }
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder> 
         getCoprocessorsOrBuilderList() {
       return coprocessors_;
     }
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     public int getCoprocessorsCount() {
       return coprocessors_.size();
     }
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.Coprocessor getCoprocessors(int index) {
       return coprocessors_.get(index);
     }
-    /**
-     * <code>repeated .Coprocessor coprocessors = 6;</code>
-     *
-     * <pre>
-     **
-     * Regionserver-level coprocessors, e.g., WALObserver implementations.
-     * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-     * objects.
-     * </pre>
-     */
     public ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder getCoprocessorsOrBuilder(
         int index) {
       return coprocessors_.get(index);
     }
-
+    
     // optional uint64 reportStartTime = 7;
     public static final int REPORTSTARTTIME_FIELD_NUMBER = 7;
     private long reportStartTime_;
-    /**
-     * <code>optional uint64 reportStartTime = 7;</code>
-     *
-     * <pre>
-     **
-     * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     public boolean hasReportStartTime() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
-    /**
-     * <code>optional uint64 reportStartTime = 7;</code>
-     *
-     * <pre>
-     **
-     * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     public long getReportStartTime() {
       return reportStartTime_;
     }
-
+    
     // optional uint64 reportEndTime = 8;
     public static final int REPORTENDTIME_FIELD_NUMBER = 8;
     private long reportEndTime_;
-    /**
-     * <code>optional uint64 reportEndTime = 8;</code>
-     *
-     * <pre>
-     **
-     * Time when report was generated.
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     public boolean hasReportEndTime() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
-    /**
-     * <code>optional uint64 reportEndTime = 8;</code>
-     *
-     * <pre>
-     **
-     * Time when report was generated.
-     * time is measured as the difference, measured in milliseconds, between the current time
-     * and midnight, January 1, 1970 UTC.
-     * </pre>
-     */
     public long getReportEndTime() {
       return reportEndTime_;
     }
-
+    
     // optional uint32 infoServerPort = 9;
     public static final int INFOSERVERPORT_FIELD_NUMBER = 9;
     private int infoServerPort_;
-    /**
-     * <code>optional uint32 infoServerPort = 9;</code>
-     *
-     * <pre>
-     **
-     * The port number that this region server is hosing an info server on.
-     * </pre>
-     */
     public boolean hasInfoServerPort() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
-    /**
-     * <code>optional uint32 infoServerPort = 9;</code>
-     *
-     * <pre>
-     **
-     * The port number that this region server is hosing an info server on.
-     * </pre>
-     */
     public int getInfoServerPort() {
       return infoServerPort_;
     }
-
+    
     private void initFields() {
       numberOfRequests_ = 0;
       totalNumberOfRequests_ = 0;
@@ -9478,7 +6629,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       for (int i = 0; i < getRegionLoadsCount(); i++) {
         if (!getRegionLoads(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -9494,7 +6645,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -9527,12 +6678,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -9574,14 +6725,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -9591,7 +6742,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.ServerLoad other = (ohmdb.client.generated.HBaseProtos.ServerLoad) obj;
-
+      
       boolean result = true;
       result = result && (hasNumberOfRequests() == other.hasNumberOfRequests());
       if (hasNumberOfRequests()) {
@@ -9636,13 +6787,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasNumberOfRequests()) {
@@ -9682,79 +6829,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getInfoServerPort();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerLoad parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.ServerLoad prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code ServerLoad}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.ServerLoadOrBuilder {
@@ -9762,21 +6919,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.ServerLoad.class, ohmdb.client.generated.HBaseProtos.ServerLoad.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.ServerLoad.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -9789,7 +6943,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         numberOfRequests_ = 0;
@@ -9820,20 +6974,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ServerLoad_descriptor;
+        return ohmdb.client.generated.HBaseProtos.ServerLoad.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ServerLoad getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.ServerLoad.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ServerLoad build() {
         ohmdb.client.generated.HBaseProtos.ServerLoad result = buildPartial();
         if (!result.isInitialized()) {
@@ -9841,7 +6995,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.ServerLoad buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.ServerLoad result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.ServerLoad buildPartial() {
         ohmdb.client.generated.HBaseProtos.ServerLoad result = new ohmdb.client.generated.HBaseProtos.ServerLoad(this);
         int from_bitField0_ = bitField0_;
@@ -9896,7 +7060,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.ServerLoad) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.ServerLoad)other);
@@ -9905,7 +7069,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.ServerLoad other) {
         if (other == ohmdb.client.generated.HBaseProtos.ServerLoad.getDefaultInstance()) return this;
         if (other.hasNumberOfRequests()) {
@@ -9984,7 +7148,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         for (int i = 0; i < getRegionLoadsCount(); i++) {
           if (!getRegionLoads(i).isInitialized()) {
@@ -10000,222 +7164,167 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.ServerLoad parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.ServerLoad) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              numberOfRequests_ = input.readUInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              totalNumberOfRequests_ = input.readUInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              usedHeapMB_ = input.readUInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              maxHeapMB_ = input.readUInt32();
+              break;
+            }
+            case 42: {
+              ohmdb.client.generated.HBaseProtos.RegionLoad.Builder subBuilder = ohmdb.client.generated.HBaseProtos.RegionLoad.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addRegionLoads(subBuilder.buildPartial());
+              break;
+            }
+            case 50: {
+              ohmdb.client.generated.HBaseProtos.Coprocessor.Builder subBuilder = ohmdb.client.generated.HBaseProtos.Coprocessor.newBuilder();
+              input.readMessage(subBuilder, extensionRegistry);
+              addCoprocessors(subBuilder.buildPartial());
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              reportStartTime_ = input.readUInt64();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000080;
+              reportEndTime_ = input.readUInt64();
+              break;
+            }
+            case 72: {
+              bitField0_ |= 0x00000100;
+              infoServerPort_ = input.readUInt32();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // optional uint32 numberOfRequests = 1;
       private int numberOfRequests_ ;
-      /**
-       * <code>optional uint32 numberOfRequests = 1;</code>
-       *
-       * <pre>
-       ** Number of requests since last report. 
-       * </pre>
-       */
       public boolean hasNumberOfRequests() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional uint32 numberOfRequests = 1;</code>
-       *
-       * <pre>
-       ** Number of requests since last report. 
-       * </pre>
-       */
       public int getNumberOfRequests() {
         return numberOfRequests_;
       }
-      /**
-       * <code>optional uint32 numberOfRequests = 1;</code>
-       *
-       * <pre>
-       ** Number of requests since last report. 
-       * </pre>
-       */
       public Builder setNumberOfRequests(int value) {
         bitField0_ |= 0x00000001;
         numberOfRequests_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 numberOfRequests = 1;</code>
-       *
-       * <pre>
-       ** Number of requests since last report. 
-       * </pre>
-       */
       public Builder clearNumberOfRequests() {
         bitField0_ = (bitField0_ & ~0x00000001);
         numberOfRequests_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 totalNumberOfRequests = 2;
       private int totalNumberOfRequests_ ;
-      /**
-       * <code>optional uint32 totalNumberOfRequests = 2;</code>
-       *
-       * <pre>
-       ** Total Number of requests from the start of the region server. 
-       * </pre>
-       */
       public boolean hasTotalNumberOfRequests() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional uint32 totalNumberOfRequests = 2;</code>
-       *
-       * <pre>
-       ** Total Number of requests from the start of the region server. 
-       * </pre>
-       */
       public int getTotalNumberOfRequests() {
         return totalNumberOfRequests_;
       }
-      /**
-       * <code>optional uint32 totalNumberOfRequests = 2;</code>
-       *
-       * <pre>
-       ** Total Number of requests from the start of the region server. 
-       * </pre>
-       */
       public Builder setTotalNumberOfRequests(int value) {
         bitField0_ |= 0x00000002;
         totalNumberOfRequests_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 totalNumberOfRequests = 2;</code>
-       *
-       * <pre>
-       ** Total Number of requests from the start of the region server. 
-       * </pre>
-       */
       public Builder clearTotalNumberOfRequests() {
         bitField0_ = (bitField0_ & ~0x00000002);
         totalNumberOfRequests_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 usedHeapMB = 3;
       private int usedHeapMB_ ;
-      /**
-       * <code>optional uint32 usedHeapMB = 3;</code>
-       *
-       * <pre>
-       ** the amount of used heap, in MB. 
-       * </pre>
-       */
       public boolean hasUsedHeapMB() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional uint32 usedHeapMB = 3;</code>
-       *
-       * <pre>
-       ** the amount of used heap, in MB. 
-       * </pre>
-       */
       public int getUsedHeapMB() {
         return usedHeapMB_;
       }
-      /**
-       * <code>optional uint32 usedHeapMB = 3;</code>
-       *
-       * <pre>
-       ** the amount of used heap, in MB. 
-       * </pre>
-       */
       public Builder setUsedHeapMB(int value) {
         bitField0_ |= 0x00000004;
         usedHeapMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 usedHeapMB = 3;</code>
-       *
-       * <pre>
-       ** the amount of used heap, in MB. 
-       * </pre>
-       */
       public Builder clearUsedHeapMB() {
         bitField0_ = (bitField0_ & ~0x00000004);
         usedHeapMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 maxHeapMB = 4;
       private int maxHeapMB_ ;
-      /**
-       * <code>optional uint32 maxHeapMB = 4;</code>
-       *
-       * <pre>
-       ** the maximum allowable size of the heap, in MB. 
-       * </pre>
-       */
       public boolean hasMaxHeapMB() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional uint32 maxHeapMB = 4;</code>
-       *
-       * <pre>
-       ** the maximum allowable size of the heap, in MB. 
-       * </pre>
-       */
       public int getMaxHeapMB() {
         return maxHeapMB_;
       }
-      /**
-       * <code>optional uint32 maxHeapMB = 4;</code>
-       *
-       * <pre>
-       ** the maximum allowable size of the heap, in MB. 
-       * </pre>
-       */
       public Builder setMaxHeapMB(int value) {
         bitField0_ |= 0x00000008;
         maxHeapMB_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 maxHeapMB = 4;</code>
-       *
-       * <pre>
-       ** the maximum allowable size of the heap, in MB. 
-       * </pre>
-       */
       public Builder clearMaxHeapMB() {
         bitField0_ = (bitField0_ & ~0x00000008);
         maxHeapMB_ = 0;
         onChanged();
         return this;
       }
-
+      
       // repeated .RegionLoad regionLoads = 5;
       private java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad> regionLoads_ =
         java.util.Collections.emptyList();
@@ -10225,17 +7334,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000010;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.RegionLoad, ohmdb.client.generated.HBaseProtos.RegionLoad.Builder, ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder> regionLoadsBuilder_;
-
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad> getRegionLoadsList() {
         if (regionLoadsBuilder_ == null) {
           return java.util.Collections.unmodifiableList(regionLoads_);
@@ -10243,13 +7345,6 @@ public final class HBaseProtos {
           return regionLoadsBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public int getRegionLoadsCount() {
         if (regionLoadsBuilder_ == null) {
           return regionLoads_.size();
@@ -10257,13 +7352,6 @@ public final class HBaseProtos {
           return regionLoadsBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionLoad getRegionLoads(int index) {
         if (regionLoadsBuilder_ == null) {
           return regionLoads_.get(index);
@@ -10271,13 +7359,6 @@ public final class HBaseProtos {
           return regionLoadsBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder setRegionLoads(
           int index, ohmdb.client.generated.HBaseProtos.RegionLoad value) {
         if (regionLoadsBuilder_ == null) {
@@ -10292,13 +7373,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder setRegionLoads(
           int index, ohmdb.client.generated.HBaseProtos.RegionLoad.Builder builderForValue) {
         if (regionLoadsBuilder_ == null) {
@@ -10310,13 +7384,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder addRegionLoads(ohmdb.client.generated.HBaseProtos.RegionLoad value) {
         if (regionLoadsBuilder_ == null) {
           if (value == null) {
@@ -10330,13 +7397,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder addRegionLoads(
           int index, ohmdb.client.generated.HBaseProtos.RegionLoad value) {
         if (regionLoadsBuilder_ == null) {
@@ -10351,13 +7411,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder addRegionLoads(
           ohmdb.client.generated.HBaseProtos.RegionLoad.Builder builderForValue) {
         if (regionLoadsBuilder_ == null) {
@@ -10369,13 +7422,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder addRegionLoads(
           int index, ohmdb.client.generated.HBaseProtos.RegionLoad.Builder builderForValue) {
         if (regionLoadsBuilder_ == null) {
@@ -10387,13 +7433,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder addAllRegionLoads(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.RegionLoad> values) {
         if (regionLoadsBuilder_ == null) {
@@ -10405,13 +7444,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder clearRegionLoads() {
         if (regionLoadsBuilder_ == null) {
           regionLoads_ = java.util.Collections.emptyList();
@@ -10422,13 +7454,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public Builder removeRegionLoads(int index) {
         if (regionLoadsBuilder_ == null) {
           ensureRegionLoadsIsMutable();
@@ -10439,24 +7464,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionLoad.Builder getRegionLoadsBuilder(
           int index) {
         return getRegionLoadsFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder getRegionLoadsOrBuilder(
           int index) {
         if (regionLoadsBuilder_ == null) {
@@ -10464,13 +7475,6 @@ public final class HBaseProtos {
           return regionLoadsBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.RegionLoadOrBuilder> 
            getRegionLoadsOrBuilderList() {
         if (regionLoadsBuilder_ != null) {
@@ -10479,36 +7483,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(regionLoads_);
         }
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionLoad.Builder addRegionLoadsBuilder() {
         return getRegionLoadsFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.RegionLoad.getDefaultInstance());
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.RegionLoad.Builder addRegionLoadsBuilder(
           int index) {
         return getRegionLoadsFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.RegionLoad.getDefaultInstance());
       }
-      /**
-       * <code>repeated .RegionLoad regionLoads = 5;</code>
-       *
-       * <pre>
-       ** Information on the load of individual regions. 
-       * </pre>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.RegionLoad.Builder> 
            getRegionLoadsBuilderList() {
         return getRegionLoadsFieldBuilder().getBuilderList();
@@ -10527,7 +7510,7 @@ public final class HBaseProtos {
         }
         return regionLoadsBuilder_;
       }
-
+      
       // repeated .Coprocessor coprocessors = 6;
       private java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor> coprocessors_ =
         java.util.Collections.emptyList();
@@ -10537,20 +7520,10 @@ public final class HBaseProtos {
           bitField0_ |= 0x00000020;
          }
       }
-
+      
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.Coprocessor, ohmdb.client.generated.HBaseProtos.Coprocessor.Builder, ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder> coprocessorsBuilder_;
-
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
+      
       public java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor> getCoprocessorsList() {
         if (coprocessorsBuilder_ == null) {
           return java.util.Collections.unmodifiableList(coprocessors_);
@@ -10558,16 +7531,6 @@ public final class HBaseProtos {
           return coprocessorsBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public int getCoprocessorsCount() {
         if (coprocessorsBuilder_ == null) {
           return coprocessors_.size();
@@ -10575,16 +7538,6 @@ public final class HBaseProtos {
           return coprocessorsBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.Coprocessor getCoprocessors(int index) {
         if (coprocessorsBuilder_ == null) {
           return coprocessors_.get(index);
@@ -10592,16 +7545,6 @@ public final class HBaseProtos {
           return coprocessorsBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder setCoprocessors(
           int index, ohmdb.client.generated.HBaseProtos.Coprocessor value) {
         if (coprocessorsBuilder_ == null) {
@@ -10616,16 +7559,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder setCoprocessors(
           int index, ohmdb.client.generated.HBaseProtos.Coprocessor.Builder builderForValue) {
         if (coprocessorsBuilder_ == null) {
@@ -10637,16 +7570,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder addCoprocessors(ohmdb.client.generated.HBaseProtos.Coprocessor value) {
         if (coprocessorsBuilder_ == null) {
           if (value == null) {
@@ -10660,16 +7583,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder addCoprocessors(
           int index, ohmdb.client.generated.HBaseProtos.Coprocessor value) {
         if (coprocessorsBuilder_ == null) {
@@ -10684,16 +7597,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder addCoprocessors(
           ohmdb.client.generated.HBaseProtos.Coprocessor.Builder builderForValue) {
         if (coprocessorsBuilder_ == null) {
@@ -10705,16 +7608,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder addCoprocessors(
           int index, ohmdb.client.generated.HBaseProtos.Coprocessor.Builder builderForValue) {
         if (coprocessorsBuilder_ == null) {
@@ -10726,16 +7619,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder addAllCoprocessors(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.Coprocessor> values) {
         if (coprocessorsBuilder_ == null) {
@@ -10747,16 +7630,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder clearCoprocessors() {
         if (coprocessorsBuilder_ == null) {
           coprocessors_ = java.util.Collections.emptyList();
@@ -10767,16 +7640,6 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public Builder removeCoprocessors(int index) {
         if (coprocessorsBuilder_ == null) {
           ensureCoprocessorsIsMutable();
@@ -10787,30 +7650,10 @@ public final class HBaseProtos {
         }
         return this;
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.Coprocessor.Builder getCoprocessorsBuilder(
           int index) {
         return getCoprocessorsFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder getCoprocessorsOrBuilder(
           int index) {
         if (coprocessorsBuilder_ == null) {
@@ -10818,16 +7661,6 @@ public final class HBaseProtos {
           return coprocessorsBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder> 
            getCoprocessorsOrBuilderList() {
         if (coprocessorsBuilder_ != null) {
@@ -10836,45 +7669,15 @@ public final class HBaseProtos {
           return java.util.Collections.unmodifiableList(coprocessors_);
         }
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.Coprocessor.Builder addCoprocessorsBuilder() {
         return getCoprocessorsFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.Coprocessor.getDefaultInstance());
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public ohmdb.client.generated.HBaseProtos.Coprocessor.Builder addCoprocessorsBuilder(
           int index) {
         return getCoprocessorsFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.Coprocessor.getDefaultInstance());
       }
-      /**
-       * <code>repeated .Coprocessor coprocessors = 6;</code>
-       *
-       * <pre>
-       **
-       * Regionserver-level coprocessors, e.g., WALObserver implementations.
-       * Region-level coprocessors, on the other hand, are stored inside RegionLoad
-       * objects.
-       * </pre>
-       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.Coprocessor.Builder> 
            getCoprocessorsBuilderList() {
         return getCoprocessorsFieldBuilder().getBuilderList();
@@ -10893,357 +7696,141 @@ public final class HBaseProtos {
         }
         return coprocessorsBuilder_;
       }
-
+      
       // optional uint64 reportStartTime = 7;
       private long reportStartTime_ ;
-      /**
-       * <code>optional uint64 reportStartTime = 7;</code>
-       *
-       * <pre>
-       **
-       * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public boolean hasReportStartTime() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
-      /**
-       * <code>optional uint64 reportStartTime = 7;</code>
-       *
-       * <pre>
-       **
-       * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public long getReportStartTime() {
         return reportStartTime_;
       }
-      /**
-       * <code>optional uint64 reportStartTime = 7;</code>
-       *
-       * <pre>
-       **
-       * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public Builder setReportStartTime(long value) {
         bitField0_ |= 0x00000040;
         reportStartTime_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 reportStartTime = 7;</code>
-       *
-       * <pre>
-       **
-       * Time when incremental (non-total) counts began being calculated (e.g. numberOfRequests)
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public Builder clearReportStartTime() {
         bitField0_ = (bitField0_ & ~0x00000040);
         reportStartTime_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 reportEndTime = 8;
       private long reportEndTime_ ;
-      /**
-       * <code>optional uint64 reportEndTime = 8;</code>
-       *
-       * <pre>
-       **
-       * Time when report was generated.
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public boolean hasReportEndTime() {
         return ((bitField0_ & 0x00000080) == 0x00000080);
       }
-      /**
-       * <code>optional uint64 reportEndTime = 8;</code>
-       *
-       * <pre>
-       **
-       * Time when report was generated.
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public long getReportEndTime() {
         return reportEndTime_;
       }
-      /**
-       * <code>optional uint64 reportEndTime = 8;</code>
-       *
-       * <pre>
-       **
-       * Time when report was generated.
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public Builder setReportEndTime(long value) {
         bitField0_ |= 0x00000080;
         reportEndTime_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 reportEndTime = 8;</code>
-       *
-       * <pre>
-       **
-       * Time when report was generated.
-       * time is measured as the difference, measured in milliseconds, between the current time
-       * and midnight, January 1, 1970 UTC.
-       * </pre>
-       */
       public Builder clearReportEndTime() {
         bitField0_ = (bitField0_ & ~0x00000080);
         reportEndTime_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint32 infoServerPort = 9;
       private int infoServerPort_ ;
-      /**
-       * <code>optional uint32 infoServerPort = 9;</code>
-       *
-       * <pre>
-       **
-       * The port number that this region server is hosing an info server on.
-       * </pre>
-       */
       public boolean hasInfoServerPort() {
         return ((bitField0_ & 0x00000100) == 0x00000100);
       }
-      /**
-       * <code>optional uint32 infoServerPort = 9;</code>
-       *
-       * <pre>
-       **
-       * The port number that this region server is hosing an info server on.
-       * </pre>
-       */
       public int getInfoServerPort() {
         return infoServerPort_;
       }
-      /**
-       * <code>optional uint32 infoServerPort = 9;</code>
-       *
-       * <pre>
-       **
-       * The port number that this region server is hosing an info server on.
-       * </pre>
-       */
       public Builder setInfoServerPort(int value) {
         bitField0_ |= 0x00000100;
         infoServerPort_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 infoServerPort = 9;</code>
-       *
-       * <pre>
-       **
-       * The port number that this region server is hosing an info server on.
-       * </pre>
-       */
       public Builder clearInfoServerPort() {
         bitField0_ = (bitField0_ & ~0x00000100);
         infoServerPort_ = 0;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:ServerLoad)
     }
-
+    
     static {
       defaultInstance = new ServerLoad(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:ServerLoad)
   }
-
+  
   public interface TimeRangeOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // optional uint64 from = 1;
-    /**
-     * <code>optional uint64 from = 1;</code>
-     */
     boolean hasFrom();
-    /**
-     * <code>optional uint64 from = 1;</code>
-     */
     long getFrom();
-
+    
     // optional uint64 to = 2;
-    /**
-     * <code>optional uint64 to = 2;</code>
-     */
     boolean hasTo();
-    /**
-     * <code>optional uint64 to = 2;</code>
-     */
     long getTo();
   }
-  /**
-   * Protobuf type {@code TimeRange}
-   *
-   * <pre>
-   **
-   * A range of time. Both from and to are Java time
-   * stamp in milliseconds. If you don't specify a time
-   * range, it means all time.  By default, if not
-   * specified, from = 0, and to = Long.MAX_VALUE
-   * </pre>
-   */
   public static final class TimeRange extends
       com.google.protobuf.GeneratedMessage
       implements TimeRangeOrBuilder {
     // Use TimeRange.newBuilder() to construct.
-    private TimeRange(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private TimeRange(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private TimeRange(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private TimeRange(boolean noInit) {}
+    
     private static final TimeRange defaultInstance;
     public static TimeRange getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public TimeRange getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private TimeRange(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              from_ = input.readUInt64();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              to_ = input.readUInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.TimeRange.class, ohmdb.client.generated.HBaseProtos.TimeRange.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<TimeRange> PARSER =
-        new com.google.protobuf.AbstractParser<TimeRange>() {
-      public TimeRange parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TimeRange(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<TimeRange> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // optional uint64 from = 1;
     public static final int FROM_FIELD_NUMBER = 1;
     private long from_;
-    /**
-     * <code>optional uint64 from = 1;</code>
-     */
     public boolean hasFrom() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional uint64 from = 1;</code>
-     */
     public long getFrom() {
       return from_;
     }
-
+    
     // optional uint64 to = 2;
     public static final int TO_FIELD_NUMBER = 2;
     private long to_;
-    /**
-     * <code>optional uint64 to = 2;</code>
-     */
     public boolean hasTo() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional uint64 to = 2;</code>
-     */
     public long getTo() {
       return to_;
     }
-
+    
     private void initFields() {
       from_ = 0L;
       to_ = 0L;
@@ -11252,11 +7839,11 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -11268,12 +7855,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -11287,14 +7874,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -11304,7 +7891,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.TimeRange other = (ohmdb.client.generated.HBaseProtos.TimeRange) obj;
-
+      
       boolean result = true;
       result = result && (hasFrom() == other.hasFrom());
       if (hasFrom()) {
@@ -11320,13 +7907,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasFrom()) {
@@ -11338,87 +7921,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getTo());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.TimeRange parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.TimeRange prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TimeRange}
-     *
-     * <pre>
-     **
-     * A range of time. Both from and to are Java time
-     * stamp in milliseconds. If you don't specify a time
-     * range, it means all time.  By default, if not
-     * specified, from = 0, and to = Long.MAX_VALUE
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.TimeRangeOrBuilder {
@@ -11426,21 +8011,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.TimeRange.class, ohmdb.client.generated.HBaseProtos.TimeRange.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.TimeRange.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -11451,7 +8033,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         from_ = 0L;
@@ -11460,20 +8042,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_TimeRange_descriptor;
+        return ohmdb.client.generated.HBaseProtos.TimeRange.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.TimeRange getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.TimeRange.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.TimeRange build() {
         ohmdb.client.generated.HBaseProtos.TimeRange result = buildPartial();
         if (!result.isInitialized()) {
@@ -11481,7 +8063,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.TimeRange buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.TimeRange result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.TimeRange buildPartial() {
         ohmdb.client.generated.HBaseProtos.TimeRange result = new ohmdb.client.generated.HBaseProtos.TimeRange(this);
         int from_bitField0_ = bitField0_;
@@ -11498,7 +8090,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.TimeRange) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.TimeRange)other);
@@ -11507,7 +8099,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.TimeRange other) {
         if (other == ohmdb.client.generated.HBaseProtos.TimeRange.getDefaultInstance()) return this;
         if (other.hasFrom()) {
@@ -11519,295 +8111,185 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.TimeRange parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.TimeRange) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              from_ = input.readUInt64();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              to_ = input.readUInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // optional uint64 from = 1;
       private long from_ ;
-      /**
-       * <code>optional uint64 from = 1;</code>
-       */
       public boolean hasFrom() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional uint64 from = 1;</code>
-       */
       public long getFrom() {
         return from_;
       }
-      /**
-       * <code>optional uint64 from = 1;</code>
-       */
       public Builder setFrom(long value) {
         bitField0_ |= 0x00000001;
         from_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 from = 1;</code>
-       */
       public Builder clearFrom() {
         bitField0_ = (bitField0_ & ~0x00000001);
         from_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 to = 2;
       private long to_ ;
-      /**
-       * <code>optional uint64 to = 2;</code>
-       */
       public boolean hasTo() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional uint64 to = 2;</code>
-       */
       public long getTo() {
         return to_;
       }
-      /**
-       * <code>optional uint64 to = 2;</code>
-       */
       public Builder setTo(long value) {
         bitField0_ |= 0x00000002;
         to_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 to = 2;</code>
-       */
       public Builder clearTo() {
         bitField0_ = (bitField0_ & ~0x00000002);
         to_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:TimeRange)
     }
-
+    
     static {
       defaultInstance = new TimeRange(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:TimeRange)
   }
-
+  
   public interface FilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required string name = 1;
-    /**
-     * <code>required string name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
+    String getName();
+    
     // optional bytes serializedFilter = 2;
-    /**
-     * <code>optional bytes serializedFilter = 2;</code>
-     */
     boolean hasSerializedFilter();
-    /**
-     * <code>optional bytes serializedFilter = 2;</code>
-     */
     com.google.protobuf.ByteString getSerializedFilter();
   }
-  /**
-   * Protobuf type {@code Filter}
-   */
   public static final class Filter extends
       com.google.protobuf.GeneratedMessage
       implements FilterOrBuilder {
     // Use Filter.newBuilder() to construct.
-    private Filter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Filter(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private Filter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private Filter(boolean noInit) {}
+    
     private static final Filter defaultInstance;
     public static Filter getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public Filter getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Filter(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              serializedFilter_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_Filter_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_Filter_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.Filter.class, ohmdb.client.generated.HBaseProtos.Filter.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_Filter_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<Filter> PARSER =
-        new com.google.protobuf.AbstractParser<Filter>() {
-      public Filter parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Filter(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Filter> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
-    /**
-     * <code>required string name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public java.lang.String getName() {
+    public String getName() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           name_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
+    private com.google.protobuf.ByteString getNameBytes() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     // optional bytes serializedFilter = 2;
     public static final int SERIALIZEDFILTER_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString serializedFilter_;
-    /**
-     * <code>optional bytes serializedFilter = 2;</code>
-     */
     public boolean hasSerializedFilter() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional bytes serializedFilter = 2;</code>
-     */
     public com.google.protobuf.ByteString getSerializedFilter() {
       return serializedFilter_;
     }
-
+    
     private void initFields() {
       name_ = "";
       serializedFilter_ = com.google.protobuf.ByteString.EMPTY;
@@ -11816,7 +8298,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -11824,7 +8306,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -11836,12 +8318,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -11855,14 +8337,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -11872,7 +8354,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.Filter other = (ohmdb.client.generated.HBaseProtos.Filter) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -11888,13 +8370,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -11906,79 +8384,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getSerializedFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Filter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.Filter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code Filter}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.FilterOrBuilder {
@@ -11986,21 +8474,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_Filter_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Filter_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.Filter.class, ohmdb.client.generated.HBaseProtos.Filter.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_Filter_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.Filter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -12011,7 +8496,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -12020,20 +8505,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Filter_descriptor;
+        return ohmdb.client.generated.HBaseProtos.Filter.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.Filter getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.Filter build() {
         ohmdb.client.generated.HBaseProtos.Filter result = buildPartial();
         if (!result.isInitialized()) {
@@ -12041,7 +8526,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.Filter buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.Filter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.Filter buildPartial() {
         ohmdb.client.generated.HBaseProtos.Filter result = new ohmdb.client.generated.HBaseProtos.Filter(this);
         int from_bitField0_ = bitField0_;
@@ -12058,7 +8553,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.Filter) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.Filter)other);
@@ -12067,13 +8562,11 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.Filter other) {
         if (other == ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
+          setName(other.getName());
         }
         if (other.hasSerializedFilter()) {
           setSerializedFilter(other.getSerializedFilter());
@@ -12081,7 +8574,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasName()) {
           
@@ -12089,69 +8582,62 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.Filter parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.Filter) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              serializedFilter_ = input.readBytes();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required string name = 1;
       private java.lang.Object name_ = "";
-      /**
-       * <code>required string name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public java.lang.String getName() {
+      public String getName() {
         java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           name_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
+      public Builder setName(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -12160,46 +8646,26 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional bytes serializedFilter = 2;
       private com.google.protobuf.ByteString serializedFilter_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes serializedFilter = 2;</code>
-       */
       public boolean hasSerializedFilter() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional bytes serializedFilter = 2;</code>
-       */
       public com.google.protobuf.ByteString getSerializedFilter() {
         return serializedFilter_;
       }
-      /**
-       * <code>optional bytes serializedFilter = 2;</code>
-       */
       public Builder setSerializedFilter(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -12209,144 +8675,573 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes serializedFilter = 2;</code>
-       */
       public Builder clearSerializedFilter() {
         bitField0_ = (bitField0_ & ~0x00000002);
         serializedFilter_ = getDefaultInstance().getSerializedFilter();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:Filter)
     }
-
+    
     static {
       defaultInstance = new Filter(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:Filter)
   }
-
+  
   public interface KeyValueOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required bytes row = 1;
-    /**
-     * <code>required bytes row = 1;</code>
-     */
     boolean hasRow();
-    /**
-     * <code>required bytes row = 1;</code>
-     */
     com.google.protobuf.ByteString getRow();
-
+    
     // required bytes family = 2;
-    /**
-     * <code>required bytes family = 2;</code>
-     */
     boolean hasFamily();
-    /**
-     * <code>required bytes family = 2;</code>
-     */
     com.google.protobuf.ByteString getFamily();
-
+    
     // required bytes qualifier = 3;
-    /**
-     * <code>required bytes qualifier = 3;</code>
-     */
     boolean hasQualifier();
-    /**
-     * <code>required bytes qualifier = 3;</code>
-     */
     com.google.protobuf.ByteString getQualifier();
-
+    
     // optional uint64 timestamp = 4;
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
     boolean hasTimestamp();
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
     long getTimestamp();
-
+    
     // optional .CellType keyType = 5;
-    /**
-     * <code>optional .CellType keyType = 5;</code>
-     */
     boolean hasKeyType();
-    /**
-     * <code>optional .CellType keyType = 5;</code>
-     */
     ohmdb.client.generated.HBaseProtos.CellType getKeyType();
-
+    
     // optional bytes value = 6;
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
     boolean hasValue();
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
     com.google.protobuf.ByteString getValue();
   }
-  /**
-   * Protobuf type {@code KeyValue}
-   *
-   * <pre>
-   **
-   * Protocol buffer version of KeyValue.
-   * It doesn't have those transient parameters
-   * </pre>
-   */
   public static final class KeyValue extends
       com.google.protobuf.GeneratedMessage
       implements KeyValueOrBuilder {
     // Use KeyValue.newBuilder() to construct.
-    private KeyValue(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private KeyValue(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private KeyValue(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private KeyValue(boolean noInit) {}
+    
     private static final KeyValue defaultInstance;
     public static KeyValue getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public KeyValue getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_descriptor;
     }
-    private KeyValue(
-        com.google.protobuf.CodedInputStream input,
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_fieldAccessorTable;
+    }
+    
+    private int bitField0_;
+    // required bytes row = 1;
+    public static final int ROW_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString row_;
+    public boolean hasRow() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    public com.google.protobuf.ByteString getRow() {
+      return row_;
+    }
+    
+    // required bytes family = 2;
+    public static final int FAMILY_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString family_;
+    public boolean hasFamily() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    public com.google.protobuf.ByteString getFamily() {
+      return family_;
+    }
+    
+    // required bytes qualifier = 3;
+    public static final int QUALIFIER_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString qualifier_;
+    public boolean hasQualifier() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    public com.google.protobuf.ByteString getQualifier() {
+      return qualifier_;
+    }
+    
+    // optional uint64 timestamp = 4;
+    public static final int TIMESTAMP_FIELD_NUMBER = 4;
+    private long timestamp_;
+    public boolean hasTimestamp() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    public long getTimestamp() {
+      return timestamp_;
+    }
+    
+    // optional .CellType keyType = 5;
+    public static final int KEYTYPE_FIELD_NUMBER = 5;
+    private ohmdb.client.generated.HBaseProtos.CellType keyType_;
+    public boolean hasKeyType() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    public ohmdb.client.generated.HBaseProtos.CellType getKeyType() {
+      return keyType_;
+    }
+    
+    // optional bytes value = 6;
+    public static final int VALUE_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString value_;
+    public boolean hasValue() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    public com.google.protobuf.ByteString getValue() {
+      return value_;
+    }
+    
+    private void initFields() {
+      row_ = com.google.protobuf.ByteString.EMPTY;
+      family_ = com.google.protobuf.ByteString.EMPTY;
+      qualifier_ = com.google.protobuf.ByteString.EMPTY;
+      timestamp_ = 0L;
+      keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
+      value_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      if (!hasRow()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasFamily()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasQualifier()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, row_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, family_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, qualifier_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeUInt64(4, timestamp_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeEnum(5, keyType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(6, value_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, row_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, family_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, qualifier_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(4, timestamp_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, keyType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, value_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.KeyValue)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.HBaseProtos.KeyValue other = (ohmdb.client.generated.HBaseProtos.KeyValue) obj;
+      
+      boolean result = true;
+      result = result && (hasRow() == other.hasRow());
+      if (hasRow()) {
+        result = result && getRow()
+            .equals(other.getRow());
+      }
+      result = result && (hasFamily() == other.hasFamily());
+      if (hasFamily()) {
+        result = result && getFamily()
+            .equals(other.getFamily());
+      }
+      result = result && (hasQualifier() == other.hasQualifier());
+      if (hasQualifier()) {
+        result = result && getQualifier()
+            .equals(other.getQualifier());
+      }
+      result = result && (hasTimestamp() == other.hasTimestamp());
+      if (hasTimestamp()) {
+        result = result && (getTimestamp()
+            == other.getTimestamp());
+      }
+      result = result && (hasKeyType() == other.hasKeyType());
+      if (hasKeyType()) {
+        result = result &&
+            (getKeyType() == other.getKeyType());
+      }
+      result = result && (hasValue() == other.hasValue());
+      if (hasValue()) {
+        result = result && getValue()
+            .equals(other.getValue());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+    
+    @java.lang.Override
+    public int hashCode() {
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasRow()) {
+        hash = (37 * hash) + ROW_FIELD_NUMBER;
+        hash = (53 * hash) + getRow().hashCode();
+      }
+      if (hasFamily()) {
+        hash = (37 * hash) + FAMILY_FIELD_NUMBER;
+        hash = (53 * hash) + getFamily().hashCode();
+      }
+      if (hasQualifier()) {
+        hash = (37 * hash) + QUALIFIER_FIELD_NUMBER;
+        hash = (53 * hash) + getQualifier().hashCode();
+      }
+      if (hasTimestamp()) {
+        hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+        hash = (53 * hash) + hashLong(getTimestamp());
+      }
+      if (hasKeyType()) {
+        hash = (37 * hash) + KEYTYPE_FIELD_NUMBER;
+        hash = (53 * hash) + hashEnum(getKeyType());
+      }
+      if (hasValue()) {
+        hash = (37 * hash) + VALUE_FIELD_NUMBER;
+        hash = (53 * hash) + getValue().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      return hash;
+    }
+    
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.KeyValue prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.HBaseProtos.KeyValueOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_fieldAccessorTable;
+      }
+      
+      // Construct using ohmdb.client.generated.HBaseProtos.KeyValue.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        row_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        family_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        qualifier_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        timestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.HBaseProtos.KeyValue.getDescriptor();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.KeyValue getDefaultInstanceForType() {
+        return ohmdb.client.generated.HBaseProtos.KeyValue.getDefaultInstance();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.KeyValue build() {
+        ohmdb.client.generated.HBaseProtos.KeyValue result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private ohmdb.client.generated.HBaseProtos.KeyValue buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.KeyValue result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.KeyValue buildPartial() {
+        ohmdb.client.generated.HBaseProtos.KeyValue result = new ohmdb.client.generated.HBaseProtos.KeyValue(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.row_ = row_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.family_ = family_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.qualifier_ = qualifier_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.timestamp_ = timestamp_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.keyType_ = keyType_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.value_ = value_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.HBaseProtos.KeyValue) {
+          return mergeFrom((ohmdb.client.generated.HBaseProtos.KeyValue)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.KeyValue other) {
+        if (other == ohmdb.client.generated.HBaseProtos.KeyValue.getDefaultInstance()) return this;
+        if (other.hasRow()) {
+          setRow(other.getRow());
+        }
+        if (other.hasFamily()) {
+          setFamily(other.getFamily());
+        }
+        if (other.hasQualifier()) {
+          setQualifier(other.getQualifier());
+        }
+        if (other.hasTimestamp()) {
+          setTimestamp(other.getTimestamp());
+        }
+        if (other.hasKeyType()) {
+          setKeyType(other.getKeyType());
+        }
+        if (other.hasValue()) {
+          setValue(other.getValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        if (!hasRow()) {
+          
+          return false;
+        }
+        if (!hasFamily()) {
+          
+          return false;
+        }
+        if (!hasQualifier()) {
+          
+          return false;
+        }
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -12388,582 +9283,18 @@ public final class HBaseProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.KeyValue.class, ohmdb.client.generated.HBaseProtos.KeyValue.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<KeyValue> PARSER =
-        new com.google.protobuf.AbstractParser<KeyValue>() {
-      public KeyValue parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new KeyValue(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<KeyValue> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // required bytes row = 1;
-    public static final int ROW_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString row_;
-    /**
-     * <code>required bytes row = 1;</code>
-     */
-    public boolean hasRow() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required bytes row = 1;</code>
-     */
-    public com.google.protobuf.ByteString getRow() {
-      return row_;
-    }
-
-    // required bytes family = 2;
-    public static final int FAMILY_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString family_;
-    /**
-     * <code>required bytes family = 2;</code>
-     */
-    public boolean hasFamily() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required bytes family = 2;</code>
-     */
-    public com.google.protobuf.ByteString getFamily() {
-      return family_;
-    }
-
-    // required bytes qualifier = 3;
-    public static final int QUALIFIER_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString qualifier_;
-    /**
-     * <code>required bytes qualifier = 3;</code>
-     */
-    public boolean hasQualifier() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required bytes qualifier = 3;</code>
-     */
-    public com.google.protobuf.ByteString getQualifier() {
-      return qualifier_;
-    }
-
-    // optional uint64 timestamp = 4;
-    public static final int TIMESTAMP_FIELD_NUMBER = 4;
-    private long timestamp_;
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
-    public boolean hasTimestamp() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional uint64 timestamp = 4;</code>
-     */
-    public long getTimestamp() {
-      return timestamp_;
-    }
-
-    // optional .CellType keyType = 5;
-    public static final int KEYTYPE_FIELD_NUMBER = 5;
-    private ohmdb.client.generated.HBaseProtos.CellType keyType_;
-    /**
-     * <code>optional .CellType keyType = 5;</code>
-     */
-    public boolean hasKeyType() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional .CellType keyType = 5;</code>
-     */
-    public ohmdb.client.generated.HBaseProtos.CellType getKeyType() {
-      return keyType_;
-    }
-
-    // optional bytes value = 6;
-    public static final int VALUE_FIELD_NUMBER = 6;
-    private com.google.protobuf.ByteString value_;
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
-    public boolean hasValue() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional bytes value = 6;</code>
-     */
-    public com.google.protobuf.ByteString getValue() {
-      return value_;
-    }
-
-    private void initFields() {
-      row_ = com.google.protobuf.ByteString.EMPTY;
-      family_ = com.google.protobuf.ByteString.EMPTY;
-      qualifier_ = com.google.protobuf.ByteString.EMPTY;
-      timestamp_ = 0L;
-      keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-      value_ = com.google.protobuf.ByteString.EMPTY;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasRow()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasFamily()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasQualifier()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, row_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, family_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, qualifier_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeUInt64(4, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeEnum(5, keyType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(6, value_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, row_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, family_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, qualifier_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(4, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(5, keyType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(6, value_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.KeyValue)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.HBaseProtos.KeyValue other = (ohmdb.client.generated.HBaseProtos.KeyValue) obj;
-
-      boolean result = true;
-      result = result && (hasRow() == other.hasRow());
-      if (hasRow()) {
-        result = result && getRow()
-            .equals(other.getRow());
-      }
-      result = result && (hasFamily() == other.hasFamily());
-      if (hasFamily()) {
-        result = result && getFamily()
-            .equals(other.getFamily());
-      }
-      result = result && (hasQualifier() == other.hasQualifier());
-      if (hasQualifier()) {
-        result = result && getQualifier()
-            .equals(other.getQualifier());
-      }
-      result = result && (hasTimestamp() == other.hasTimestamp());
-      if (hasTimestamp()) {
-        result = result && (getTimestamp()
-            == other.getTimestamp());
-      }
-      result = result && (hasKeyType() == other.hasKeyType());
-      if (hasKeyType()) {
-        result = result &&
-            (getKeyType() == other.getKeyType());
-      }
-      result = result && (hasValue() == other.hasValue());
-      if (hasValue()) {
-        result = result && getValue()
-            .equals(other.getValue());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-
-    private int memoizedHashCode = 0;
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasRow()) {
-        hash = (37 * hash) + ROW_FIELD_NUMBER;
-        hash = (53 * hash) + getRow().hashCode();
-      }
-      if (hasFamily()) {
-        hash = (37 * hash) + FAMILY_FIELD_NUMBER;
-        hash = (53 * hash) + getFamily().hashCode();
-      }
-      if (hasQualifier()) {
-        hash = (37 * hash) + QUALIFIER_FIELD_NUMBER;
-        hash = (53 * hash) + getQualifier().hashCode();
-      }
-      if (hasTimestamp()) {
-        hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + hashLong(getTimestamp());
-      }
-      if (hasKeyType()) {
-        hash = (37 * hash) + KEYTYPE_FIELD_NUMBER;
-        hash = (53 * hash) + hashEnum(getKeyType());
-      }
-      if (hasValue()) {
-        hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + getValue().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.KeyValue parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.KeyValue prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code KeyValue}
-     *
-     * <pre>
-     **
-     * Protocol buffer version of KeyValue.
-     * It doesn't have those transient parameters
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.HBaseProtos.KeyValueOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.KeyValue.class, ohmdb.client.generated.HBaseProtos.KeyValue.Builder.class);
-      }
-
-      // Construct using ohmdb.client.generated.HBaseProtos.KeyValue.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        row_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        family_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        qualifier_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        timestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        value_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_KeyValue_descriptor;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.KeyValue getDefaultInstanceForType() {
-        return ohmdb.client.generated.HBaseProtos.KeyValue.getDefaultInstance();
-      }
-
-      public ohmdb.client.generated.HBaseProtos.KeyValue build() {
-        ohmdb.client.generated.HBaseProtos.KeyValue result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.KeyValue buildPartial() {
-        ohmdb.client.generated.HBaseProtos.KeyValue result = new ohmdb.client.generated.HBaseProtos.KeyValue(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.row_ = row_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.family_ = family_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.qualifier_ = qualifier_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.timestamp_ = timestamp_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.keyType_ = keyType_;
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.value_ = value_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.HBaseProtos.KeyValue) {
-          return mergeFrom((ohmdb.client.generated.HBaseProtos.KeyValue)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.KeyValue other) {
-        if (other == ohmdb.client.generated.HBaseProtos.KeyValue.getDefaultInstance()) return this;
-        if (other.hasRow()) {
-          setRow(other.getRow());
-        }
-        if (other.hasFamily()) {
-          setFamily(other.getFamily());
-        }
-        if (other.hasQualifier()) {
-          setQualifier(other.getQualifier());
-        }
-        if (other.hasTimestamp()) {
-          setTimestamp(other.getTimestamp());
-        }
-        if (other.hasKeyType()) {
-          setKeyType(other.getKeyType());
-        }
-        if (other.hasValue()) {
-          setValue(other.getValue());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        if (!hasRow()) {
-          
-          return false;
-        }
-        if (!hasFamily()) {
-          
-          return false;
-        }
-        if (!hasQualifier()) {
-          
-          return false;
-        }
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.KeyValue parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.KeyValue) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
+      
       private int bitField0_;
-
+      
       // required bytes row = 1;
       private com.google.protobuf.ByteString row_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes row = 1;</code>
-       */
       public boolean hasRow() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required bytes row = 1;</code>
-       */
       public com.google.protobuf.ByteString getRow() {
         return row_;
       }
-      /**
-       * <code>required bytes row = 1;</code>
-       */
       public Builder setRow(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -12973,33 +9304,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes row = 1;</code>
-       */
       public Builder clearRow() {
         bitField0_ = (bitField0_ & ~0x00000001);
         row_ = getDefaultInstance().getRow();
         onChanged();
         return this;
       }
-
+      
       // required bytes family = 2;
       private com.google.protobuf.ByteString family_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes family = 2;</code>
-       */
       public boolean hasFamily() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>required bytes family = 2;</code>
-       */
       public com.google.protobuf.ByteString getFamily() {
         return family_;
       }
-      /**
-       * <code>required bytes family = 2;</code>
-       */
       public Builder setFamily(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -13009,33 +9328,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes family = 2;</code>
-       */
       public Builder clearFamily() {
         bitField0_ = (bitField0_ & ~0x00000002);
         family_ = getDefaultInstance().getFamily();
         onChanged();
         return this;
       }
-
+      
       // required bytes qualifier = 3;
       private com.google.protobuf.ByteString qualifier_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes qualifier = 3;</code>
-       */
       public boolean hasQualifier() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>required bytes qualifier = 3;</code>
-       */
       public com.google.protobuf.ByteString getQualifier() {
         return qualifier_;
       }
-      /**
-       * <code>required bytes qualifier = 3;</code>
-       */
       public Builder setQualifier(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -13045,66 +9352,42 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes qualifier = 3;</code>
-       */
       public Builder clearQualifier() {
         bitField0_ = (bitField0_ & ~0x00000004);
         qualifier_ = getDefaultInstance().getQualifier();
         onChanged();
         return this;
       }
-
+      
       // optional uint64 timestamp = 4;
       private long timestamp_ ;
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public boolean hasTimestamp() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public long getTimestamp() {
         return timestamp_;
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public Builder setTimestamp(long value) {
         bitField0_ |= 0x00000008;
         timestamp_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 timestamp = 4;</code>
-       */
       public Builder clearTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000008);
         timestamp_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional .CellType keyType = 5;
       private ohmdb.client.generated.HBaseProtos.CellType keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
-      /**
-       * <code>optional .CellType keyType = 5;</code>
-       */
       public boolean hasKeyType() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      /**
-       * <code>optional .CellType keyType = 5;</code>
-       */
       public ohmdb.client.generated.HBaseProtos.CellType getKeyType() {
         return keyType_;
       }
-      /**
-       * <code>optional .CellType keyType = 5;</code>
-       */
       public Builder setKeyType(ohmdb.client.generated.HBaseProtos.CellType value) {
         if (value == null) {
           throw new NullPointerException();
@@ -13114,33 +9397,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional .CellType keyType = 5;</code>
-       */
       public Builder clearKeyType() {
         bitField0_ = (bitField0_ & ~0x00000010);
         keyType_ = ohmdb.client.generated.HBaseProtos.CellType.MINIMUM;
         onChanged();
         return this;
       }
-
+      
       // optional bytes value = 6;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -13150,251 +9421,120 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes value = 6;</code>
-       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000020);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:KeyValue)
     }
-
+    
     static {
       defaultInstance = new KeyValue(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:KeyValue)
   }
-
+  
   public interface ServerNameOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required string hostName = 1;
-    /**
-     * <code>required string hostName = 1;</code>
-     */
     boolean hasHostName();
-    /**
-     * <code>required string hostName = 1;</code>
-     */
-    java.lang.String getHostName();
-    /**
-     * <code>required string hostName = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getHostNameBytes();
-
+    String getHostName();
+    
     // optional uint32 port = 2;
-    /**
-     * <code>optional uint32 port = 2;</code>
-     */
     boolean hasPort();
-    /**
-     * <code>optional uint32 port = 2;</code>
-     */
     int getPort();
-
+    
     // optional uint64 startCode = 3;
-    /**
-     * <code>optional uint64 startCode = 3;</code>
-     */
     boolean hasStartCode();
-    /**
-     * <code>optional uint64 startCode = 3;</code>
-     */
     long getStartCode();
   }
-  /**
-   * Protobuf type {@code ServerName}
-   *
-   * <pre>
-   **
-   * Protocol buffer version of ServerName
-   * </pre>
-   */
   public static final class ServerName extends
       com.google.protobuf.GeneratedMessage
       implements ServerNameOrBuilder {
     // Use ServerName.newBuilder() to construct.
-    private ServerName(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private ServerName(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private ServerName(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private ServerName(boolean noInit) {}
+    
     private static final ServerName defaultInstance;
     public static ServerName getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public ServerName getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private ServerName(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              hostName_ = input.readBytes();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              port_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              startCode_ = input.readUInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.ServerName.class, ohmdb.client.generated.HBaseProtos.ServerName.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<ServerName> PARSER =
-        new com.google.protobuf.AbstractParser<ServerName>() {
-      public ServerName parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ServerName(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<ServerName> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required string hostName = 1;
     public static final int HOSTNAME_FIELD_NUMBER = 1;
     private java.lang.Object hostName_;
-    /**
-     * <code>required string hostName = 1;</code>
-     */
     public boolean hasHostName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required string hostName = 1;</code>
-     */
-    public java.lang.String getHostName() {
+    public String getHostName() {
       java.lang.Object ref = hostName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           hostName_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string hostName = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getHostNameBytes() {
+    private com.google.protobuf.ByteString getHostNameBytes() {
       java.lang.Object ref = hostName_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         hostName_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     // optional uint32 port = 2;
     public static final int PORT_FIELD_NUMBER = 2;
     private int port_;
-    /**
-     * <code>optional uint32 port = 2;</code>
-     */
     public boolean hasPort() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional uint32 port = 2;</code>
-     */
     public int getPort() {
       return port_;
     }
-
+    
     // optional uint64 startCode = 3;
     public static final int STARTCODE_FIELD_NUMBER = 3;
     private long startCode_;
-    /**
-     * <code>optional uint64 startCode = 3;</code>
-     */
     public boolean hasStartCode() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-    /**
-     * <code>optional uint64 startCode = 3;</code>
-     */
     public long getStartCode() {
       return startCode_;
     }
-
+    
     private void initFields() {
       hostName_ = "";
       port_ = 0;
@@ -13404,7 +9544,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasHostName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -13412,7 +9552,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -13427,12 +9567,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -13450,14 +9590,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -13467,7 +9607,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.ServerName other = (ohmdb.client.generated.HBaseProtos.ServerName) obj;
-
+      
       boolean result = true;
       result = result && (hasHostName() == other.hasHostName());
       if (hasHostName()) {
@@ -13488,13 +9628,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasHostName()) {
@@ -13510,84 +9646,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getStartCode());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.ServerName parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.ServerName prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code ServerName}
-     *
-     * <pre>
-     **
-     * Protocol buffer version of ServerName
-     * </pre>
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.ServerNameOrBuilder {
@@ -13595,21 +9736,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.ServerName.class, ohmdb.client.generated.HBaseProtos.ServerName.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.ServerName.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -13620,7 +9758,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         hostName_ = "";
@@ -13631,20 +9769,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_ServerName_descriptor;
+        return ohmdb.client.generated.HBaseProtos.ServerName.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ServerName getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.ServerName.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.ServerName build() {
         ohmdb.client.generated.HBaseProtos.ServerName result = buildPartial();
         if (!result.isInitialized()) {
@@ -13652,7 +9790,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.ServerName buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.ServerName result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.ServerName buildPartial() {
         ohmdb.client.generated.HBaseProtos.ServerName result = new ohmdb.client.generated.HBaseProtos.ServerName(this);
         int from_bitField0_ = bitField0_;
@@ -13673,7 +9821,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.ServerName) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.ServerName)other);
@@ -13682,13 +9830,11 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.ServerName other) {
         if (other == ohmdb.client.generated.HBaseProtos.ServerName.getDefaultInstance()) return this;
         if (other.hasHostName()) {
-          bitField0_ |= 0x00000001;
-          hostName_ = other.hostName_;
-          onChanged();
+          setHostName(other.getHostName());
         }
         if (other.hasPort()) {
           setPort(other.getPort());
@@ -13699,7 +9845,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasHostName()) {
           
@@ -13707,69 +9853,67 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.ServerName parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.ServerName) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              hostName_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              port_ = input.readUInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              startCode_ = input.readUInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required string hostName = 1;
       private java.lang.Object hostName_ = "";
-      /**
-       * <code>required string hostName = 1;</code>
-       */
       public boolean hasHostName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required string hostName = 1;</code>
-       */
-      public java.lang.String getHostName() {
+      public String getHostName() {
         java.lang.Object ref = hostName_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           hostName_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>required string hostName = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getHostNameBytes() {
-        java.lang.Object ref = hostName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          hostName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string hostName = 1;</code>
-       */
-      public Builder setHostName(
-          java.lang.String value) {
+      public Builder setHostName(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -13778,263 +9922,139 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required string hostName = 1;</code>
-       */
       public Builder clearHostName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         hostName_ = getDefaultInstance().getHostName();
         onChanged();
         return this;
       }
-      /**
-       * <code>required string hostName = 1;</code>
-       */
-      public Builder setHostNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      void setHostName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
         hostName_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional uint32 port = 2;
       private int port_ ;
-      /**
-       * <code>optional uint32 port = 2;</code>
-       */
       public boolean hasPort() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional uint32 port = 2;</code>
-       */
       public int getPort() {
         return port_;
       }
-      /**
-       * <code>optional uint32 port = 2;</code>
-       */
       public Builder setPort(int value) {
         bitField0_ |= 0x00000002;
         port_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint32 port = 2;</code>
-       */
       public Builder clearPort() {
         bitField0_ = (bitField0_ & ~0x00000002);
         port_ = 0;
         onChanged();
         return this;
       }
-
+      
       // optional uint64 startCode = 3;
       private long startCode_ ;
-      /**
-       * <code>optional uint64 startCode = 3;</code>
-       */
       public boolean hasStartCode() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional uint64 startCode = 3;</code>
-       */
       public long getStartCode() {
         return startCode_;
       }
-      /**
-       * <code>optional uint64 startCode = 3;</code>
-       */
       public Builder setStartCode(long value) {
         bitField0_ |= 0x00000004;
         startCode_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional uint64 startCode = 3;</code>
-       */
       public Builder clearStartCode() {
         bitField0_ = (bitField0_ & ~0x00000004);
         startCode_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:ServerName)
     }
-
+    
     static {
       defaultInstance = new ServerName(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:ServerName)
   }
-
+  
   public interface CoprocessorOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required string name = 1;
-    /**
-     * <code>required string name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
+    String getName();
   }
-  /**
-   * Protobuf type {@code Coprocessor}
-   */
   public static final class Coprocessor extends
       com.google.protobuf.GeneratedMessage
       implements CoprocessorOrBuilder {
     // Use Coprocessor.newBuilder() to construct.
-    private Coprocessor(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Coprocessor(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private Coprocessor(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private Coprocessor(boolean noInit) {}
+    
     private static final Coprocessor defaultInstance;
     public static Coprocessor getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public Coprocessor getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private Coprocessor(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.Coprocessor.class, ohmdb.client.generated.HBaseProtos.Coprocessor.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<Coprocessor> PARSER =
-        new com.google.protobuf.AbstractParser<Coprocessor>() {
-      public Coprocessor parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Coprocessor(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<Coprocessor> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
-    /**
-     * <code>required string name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public java.lang.String getName() {
+    public String getName() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           name_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
+    private com.google.protobuf.ByteString getNameBytes() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     private void initFields() {
       name_ = "";
     }
@@ -14042,7 +10062,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -14050,7 +10070,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -14059,12 +10079,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -14074,14 +10094,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -14091,7 +10111,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.Coprocessor other = (ohmdb.client.generated.HBaseProtos.Coprocessor) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -14102,13 +10122,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -14116,79 +10132,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getName().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.Coprocessor parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.Coprocessor prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code Coprocessor}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.CoprocessorOrBuilder {
@@ -14196,21 +10222,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.Coprocessor.class, ohmdb.client.generated.HBaseProtos.Coprocessor.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.Coprocessor.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -14221,27 +10244,27 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_Coprocessor_descriptor;
+        return ohmdb.client.generated.HBaseProtos.Coprocessor.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.Coprocessor getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.Coprocessor.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.Coprocessor build() {
         ohmdb.client.generated.HBaseProtos.Coprocessor result = buildPartial();
         if (!result.isInitialized()) {
@@ -14249,7 +10272,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.Coprocessor buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.Coprocessor result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.Coprocessor buildPartial() {
         ohmdb.client.generated.HBaseProtos.Coprocessor result = new ohmdb.client.generated.HBaseProtos.Coprocessor(this);
         int from_bitField0_ = bitField0_;
@@ -14262,7 +10295,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.Coprocessor) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.Coprocessor)other);
@@ -14271,18 +10304,16 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.Coprocessor other) {
         if (other == ohmdb.client.generated.HBaseProtos.Coprocessor.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
+          setName(other.getName());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasName()) {
           
@@ -14290,192 +10321,27 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.Coprocessor parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.Coprocessor) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // required string name = 1;
-      private java.lang.Object name_ = "";
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public boolean hasName() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        name_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        name_ = getDefaultInstance().getName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        name_ = value;
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:Coprocessor)
-    }
-
-    static {
-      defaultInstance = new Coprocessor(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:Coprocessor)
-  }
-
-  public interface NameStringPairOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required string name = 1;
-    /**
-     * <code>required string name = 1;</code>
-     */
-    boolean hasName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
-    // required string value = 2;
-    /**
-     * <code>required string value = 2;</code>
-     */
-    boolean hasValue();
-    /**
-     * <code>required string value = 2;</code>
-     */
-    java.lang.String getValue();
-    /**
-     * <code>required string value = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getValueBytes();
-  }
-  /**
-   * Protobuf type {@code NameStringPair}
-   */
-  public static final class NameStringPair extends
-      com.google.protobuf.GeneratedMessage
-      implements NameStringPairOrBuilder {
-    // Use NameStringPair.newBuilder() to construct.
-    private NameStringPair(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private NameStringPair(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final NameStringPair defaultInstance;
-    public static NameStringPair getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public NameStringPair getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private NameStringPair(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -14484,137 +10350,163 @@ public final class HBaseProtos {
               name_ = input.readBytes();
               break;
             }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              value_ = input.readBytes();
-              break;
-            }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
+      
+      private int bitField0_;
+      
+      // required string name = 1;
+      private java.lang.Object name_ = "";
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setName(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+      }
+      
+      // @@protoc_insertion_point(builder_scope:Coprocessor)
     }
+    
+    static {
+      defaultInstance = new Coprocessor(true);
+      defaultInstance.initFields();
+    }
+    
+    // @@protoc_insertion_point(class_scope:Coprocessor)
+  }
+  
+  public interface NameStringPairOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+    
+    // required string name = 1;
+    boolean hasName();
+    String getName();
+    
+    // required string value = 2;
+    boolean hasValue();
+    String getValue();
+  }
+  public static final class NameStringPair extends
+      com.google.protobuf.GeneratedMessage
+      implements NameStringPairOrBuilder {
+    // Use NameStringPair.newBuilder() to construct.
+    private NameStringPair(Builder builder) {
+      super(builder);
+    }
+    private NameStringPair(boolean noInit) {}
+    
+    private static final NameStringPair defaultInstance;
+    public static NameStringPair getDefaultInstance() {
+      return defaultInstance;
+    }
+    
+    public NameStringPair getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.NameStringPair.class, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<NameStringPair> PARSER =
-        new com.google.protobuf.AbstractParser<NameStringPair>() {
-      public NameStringPair parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NameStringPair(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<NameStringPair> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
-    /**
-     * <code>required string name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public java.lang.String getName() {
+    public String getName() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           name_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
+    private com.google.protobuf.ByteString getNameBytes() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     // required string value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private java.lang.Object value_;
-    /**
-     * <code>required string value = 2;</code>
-     */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>required string value = 2;</code>
-     */
-    public java.lang.String getValue() {
+    public String getValue() {
       java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           value_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string value = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getValueBytes() {
+    private com.google.protobuf.ByteString getValueBytes() {
       java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         value_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     private void initFields() {
       name_ = "";
       value_ = "";
@@ -14623,7 +10515,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -14635,7 +10527,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -14647,12 +10539,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -14666,14 +10558,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -14683,7 +10575,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.NameStringPair other = (ohmdb.client.generated.HBaseProtos.NameStringPair) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -14699,13 +10591,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -14717,79 +10605,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getValue().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameStringPair parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.NameStringPair prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code NameStringPair}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.NameStringPairOrBuilder {
@@ -14797,21 +10695,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.NameStringPair.class, ohmdb.client.generated.HBaseProtos.NameStringPair.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.NameStringPair.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -14822,7 +10717,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -14831,20 +10726,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameStringPair_descriptor;
+        return ohmdb.client.generated.HBaseProtos.NameStringPair.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameStringPair getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameStringPair build() {
         ohmdb.client.generated.HBaseProtos.NameStringPair result = buildPartial();
         if (!result.isInitialized()) {
@@ -14852,7 +10747,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.NameStringPair buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.NameStringPair result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.NameStringPair buildPartial() {
         ohmdb.client.generated.HBaseProtos.NameStringPair result = new ohmdb.client.generated.HBaseProtos.NameStringPair(this);
         int from_bitField0_ = bitField0_;
@@ -14869,7 +10774,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.NameStringPair) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.NameStringPair)other);
@@ -14878,23 +10783,19 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.NameStringPair other) {
         if (other == ohmdb.client.generated.HBaseProtos.NameStringPair.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
+          setName(other.getName());
         }
         if (other.hasValue()) {
-          bitField0_ |= 0x00000002;
-          value_ = other.value_;
-          onChanged();
+          setValue(other.getValue());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasName()) {
           
@@ -14906,261 +10807,27 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.NameStringPair parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.NameStringPair) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // required string name = 1;
-      private java.lang.Object name_ = "";
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public boolean hasName() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        name_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        name_ = getDefaultInstance().getName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        name_ = value;
-        onChanged();
-        return this;
-      }
-
-      // required string value = 2;
-      private java.lang.Object value_ = "";
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public boolean hasValue() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public java.lang.String getValue() {
-        java.lang.Object ref = value_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          value_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getValueBytes() {
-        java.lang.Object ref = value_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          value_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public Builder setValue(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public Builder clearValue() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        value_ = getDefaultInstance().getValue();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string value = 2;</code>
-       */
-      public Builder setValueBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        value_ = value;
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:NameStringPair)
-    }
-
-    static {
-      defaultInstance = new NameStringPair(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:NameStringPair)
-  }
-
-  public interface NameBytesPairOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // required string name = 1;
-    /**
-     * <code>required string name = 1;</code>
-     */
-    boolean hasName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
-    // optional bytes value = 2;
-    /**
-     * <code>optional bytes value = 2;</code>
-     */
-    boolean hasValue();
-    /**
-     * <code>optional bytes value = 2;</code>
-     */
-    com.google.protobuf.ByteString getValue();
-  }
-  /**
-   * Protobuf type {@code NameBytesPair}
-   */
-  public static final class NameBytesPair extends
-      com.google.protobuf.GeneratedMessage
-      implements NameBytesPairOrBuilder {
-    // Use NameBytesPair.newBuilder() to construct.
-    private NameBytesPair(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private NameBytesPair(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final NameBytesPair defaultInstance;
-    public static NameBytesPair getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public NameBytesPair getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private NameBytesPair(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -15176,103 +10843,175 @@ public final class HBaseProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
+      
+      private int bitField0_;
+      
+      // required string name = 1;
+      private java.lang.Object name_ = "";
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      public String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setName(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+      }
+      
+      // required string value = 2;
+      private java.lang.Object value_ = "";
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      public String getValue() {
+        java.lang.Object ref = value_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          value_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setValue(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+      void setValue(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000002;
+        value_ = value;
+        onChanged();
+      }
+      
+      // @@protoc_insertion_point(builder_scope:NameStringPair)
     }
+    
+    static {
+      defaultInstance = new NameStringPair(true);
+      defaultInstance.initFields();
+    }
+    
+    // @@protoc_insertion_point(class_scope:NameStringPair)
+  }
+  
+  public interface NameBytesPairOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+    
+    // required string name = 1;
+    boolean hasName();
+    String getName();
+    
+    // optional bytes value = 2;
+    boolean hasValue();
+    com.google.protobuf.ByteString getValue();
+  }
+  public static final class NameBytesPair extends
+      com.google.protobuf.GeneratedMessage
+      implements NameBytesPairOrBuilder {
+    // Use NameBytesPair.newBuilder() to construct.
+    private NameBytesPair(Builder builder) {
+      super(builder);
+    }
+    private NameBytesPair(boolean noInit) {}
+    
+    private static final NameBytesPair defaultInstance;
+    public static NameBytesPair getDefaultInstance() {
+      return defaultInstance;
+    }
+    
+    public NameBytesPair getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.NameBytesPair.class, ohmdb.client.generated.HBaseProtos.NameBytesPair.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<NameBytesPair> PARSER =
-        new com.google.protobuf.AbstractParser<NameBytesPair>() {
-      public NameBytesPair parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NameBytesPair(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<NameBytesPair> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
-    /**
-     * <code>required string name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public java.lang.String getName() {
+    public String getName() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           name_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
+    private com.google.protobuf.ByteString getNameBytes() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     // optional bytes value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString value_;
-    /**
-     * <code>optional bytes value = 2;</code>
-     */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional bytes value = 2;</code>
-     */
     public com.google.protobuf.ByteString getValue() {
       return value_;
     }
-
+    
     private void initFields() {
       name_ = "";
       value_ = com.google.protobuf.ByteString.EMPTY;
@@ -15281,7 +11020,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
@@ -15289,7 +11028,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -15301,12 +11040,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -15320,14 +11059,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -15337,7 +11076,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.NameBytesPair other = (ohmdb.client.generated.HBaseProtos.NameBytesPair) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -15353,13 +11092,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -15371,79 +11106,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getValue().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameBytesPair parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.NameBytesPair prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code NameBytesPair}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.NameBytesPairOrBuilder {
@@ -15451,21 +11196,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.NameBytesPair.class, ohmdb.client.generated.HBaseProtos.NameBytesPair.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.NameBytesPair.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -15476,7 +11218,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -15485,20 +11227,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameBytesPair_descriptor;
+        return ohmdb.client.generated.HBaseProtos.NameBytesPair.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameBytesPair getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.NameBytesPair.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameBytesPair build() {
         ohmdb.client.generated.HBaseProtos.NameBytesPair result = buildPartial();
         if (!result.isInitialized()) {
@@ -15506,7 +11248,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.NameBytesPair buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.NameBytesPair result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.NameBytesPair buildPartial() {
         ohmdb.client.generated.HBaseProtos.NameBytesPair result = new ohmdb.client.generated.HBaseProtos.NameBytesPair(this);
         int from_bitField0_ = bitField0_;
@@ -15523,7 +11275,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.NameBytesPair) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.NameBytesPair)other);
@@ -15532,13 +11284,11 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.NameBytesPair other) {
         if (other == ohmdb.client.generated.HBaseProtos.NameBytesPair.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
+          setName(other.getName());
         }
         if (other.hasValue()) {
           setValue(other.getValue());
@@ -15546,7 +11296,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasName()) {
           
@@ -15554,69 +11304,62 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.NameBytesPair parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.NameBytesPair) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              value_ = input.readBytes();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required string name = 1;
       private java.lang.Object name_ = "";
-      /**
-       * <code>required string name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public java.lang.String getName() {
+      public String getName() {
         java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           name_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
+      public Builder setName(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -15625,46 +11368,26 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional bytes value = 2;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes value = 2;</code>
-       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional bytes value = 2;</code>
-       */
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
-      /**
-       * <code>optional bytes value = 2;</code>
-       */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -15674,183 +11397,84 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional bytes value = 2;</code>
-       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:NameBytesPair)
     }
-
+    
     static {
       defaultInstance = new NameBytesPair(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:NameBytesPair)
   }
-
+  
   public interface BytesBytesPairOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required bytes first = 1;
-    /**
-     * <code>required bytes first = 1;</code>
-     */
     boolean hasFirst();
-    /**
-     * <code>required bytes first = 1;</code>
-     */
     com.google.protobuf.ByteString getFirst();
-
+    
     // required bytes second = 2;
-    /**
-     * <code>required bytes second = 2;</code>
-     */
     boolean hasSecond();
-    /**
-     * <code>required bytes second = 2;</code>
-     */
     com.google.protobuf.ByteString getSecond();
   }
-  /**
-   * Protobuf type {@code BytesBytesPair}
-   */
   public static final class BytesBytesPair extends
       com.google.protobuf.GeneratedMessage
       implements BytesBytesPairOrBuilder {
     // Use BytesBytesPair.newBuilder() to construct.
-    private BytesBytesPair(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private BytesBytesPair(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private BytesBytesPair(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private BytesBytesPair(boolean noInit) {}
+    
     private static final BytesBytesPair defaultInstance;
     public static BytesBytesPair getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public BytesBytesPair getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private BytesBytesPair(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              first_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              second_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.BytesBytesPair.class, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<BytesBytesPair> PARSER =
-        new com.google.protobuf.AbstractParser<BytesBytesPair>() {
-      public BytesBytesPair parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BytesBytesPair(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<BytesBytesPair> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required bytes first = 1;
     public static final int FIRST_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString first_;
-    /**
-     * <code>required bytes first = 1;</code>
-     */
     public boolean hasFirst() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required bytes first = 1;</code>
-     */
     public com.google.protobuf.ByteString getFirst() {
       return first_;
     }
-
+    
     // required bytes second = 2;
     public static final int SECOND_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString second_;
-    /**
-     * <code>required bytes second = 2;</code>
-     */
     public boolean hasSecond() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>required bytes second = 2;</code>
-     */
     public com.google.protobuf.ByteString getSecond() {
       return second_;
     }
-
+    
     private void initFields() {
       first_ = com.google.protobuf.ByteString.EMPTY;
       second_ = com.google.protobuf.ByteString.EMPTY;
@@ -15859,7 +11483,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasFirst()) {
         memoizedIsInitialized = 0;
         return false;
@@ -15871,7 +11495,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -15883,12 +11507,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -15902,14 +11526,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -15919,7 +11543,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.BytesBytesPair other = (ohmdb.client.generated.HBaseProtos.BytesBytesPair) obj;
-
+      
       boolean result = true;
       result = result && (hasFirst() == other.hasFirst());
       if (hasFirst()) {
@@ -15935,13 +11559,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasFirst()) {
@@ -15953,79 +11573,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getSecond().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BytesBytesPair parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.BytesBytesPair prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code BytesBytesPair}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder {
@@ -16033,21 +11663,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.BytesBytesPair.class, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.BytesBytesPair.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -16058,7 +11685,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         first_ = com.google.protobuf.ByteString.EMPTY;
@@ -16067,20 +11694,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_BytesBytesPair_descriptor;
+        return ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair build() {
         ohmdb.client.generated.HBaseProtos.BytesBytesPair result = buildPartial();
         if (!result.isInitialized()) {
@@ -16088,7 +11715,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.BytesBytesPair buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.BytesBytesPair result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair buildPartial() {
         ohmdb.client.generated.HBaseProtos.BytesBytesPair result = new ohmdb.client.generated.HBaseProtos.BytesBytesPair(this);
         int from_bitField0_ = bitField0_;
@@ -16105,7 +11742,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.BytesBytesPair) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.BytesBytesPair)other);
@@ -16114,7 +11751,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.BytesBytesPair other) {
         if (other == ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance()) return this;
         if (other.hasFirst()) {
@@ -16126,7 +11763,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasFirst()) {
           
@@ -16138,43 +11775,54 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.BytesBytesPair parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.BytesBytesPair) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              first_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              second_ = input.readBytes();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required bytes first = 1;
       private com.google.protobuf.ByteString first_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes first = 1;</code>
-       */
       public boolean hasFirst() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required bytes first = 1;</code>
-       */
       public com.google.protobuf.ByteString getFirst() {
         return first_;
       }
-      /**
-       * <code>required bytes first = 1;</code>
-       */
       public Builder setFirst(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -16184,33 +11832,21 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes first = 1;</code>
-       */
       public Builder clearFirst() {
         bitField0_ = (bitField0_ & ~0x00000001);
         first_ = getDefaultInstance().getFirst();
         onChanged();
         return this;
       }
-
+      
       // required bytes second = 2;
       private com.google.protobuf.ByteString second_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes second = 2;</code>
-       */
       public boolean hasSecond() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>required bytes second = 2;</code>
-       */
       public com.google.protobuf.ByteString getSecond() {
         return second_;
       }
-      /**
-       * <code>required bytes second = 2;</code>
-       */
       public Builder setSecond(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -16220,215 +11856,106 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes second = 2;</code>
-       */
       public Builder clearSecond() {
         bitField0_ = (bitField0_ & ~0x00000002);
         second_ = getDefaultInstance().getSecond();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:BytesBytesPair)
     }
-
+    
     static {
       defaultInstance = new BytesBytesPair(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:BytesBytesPair)
   }
-
+  
   public interface NameInt64PairOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // optional string name = 1;
-    /**
-     * <code>optional string name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>optional string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>optional string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
+    String getName();
+    
     // optional int64 value = 2;
-    /**
-     * <code>optional int64 value = 2;</code>
-     */
     boolean hasValue();
-    /**
-     * <code>optional int64 value = 2;</code>
-     */
     long getValue();
   }
-  /**
-   * Protobuf type {@code NameInt64Pair}
-   */
   public static final class NameInt64Pair extends
       com.google.protobuf.GeneratedMessage
       implements NameInt64PairOrBuilder {
     // Use NameInt64Pair.newBuilder() to construct.
-    private NameInt64Pair(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private NameInt64Pair(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private NameInt64Pair(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private NameInt64Pair(boolean noInit) {}
+    
     private static final NameInt64Pair defaultInstance;
     public static NameInt64Pair getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public NameInt64Pair getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private NameInt64Pair(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              value_ = input.readInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.NameInt64Pair.class, ohmdb.client.generated.HBaseProtos.NameInt64Pair.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<NameInt64Pair> PARSER =
-        new com.google.protobuf.AbstractParser<NameInt64Pair>() {
-      public NameInt64Pair parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NameInt64Pair(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<NameInt64Pair> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // optional string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
-    /**
-     * <code>optional string name = 1;</code>
-     */
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>optional string name = 1;</code>
-     */
-    public java.lang.String getName() {
+    public String getName() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
           name_ = s;
         }
         return s;
       }
     }
-    /**
-     * <code>optional string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
+    private com.google.protobuf.ByteString getNameBytes() {
       java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
         name_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
-
+    
     // optional int64 value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private long value_;
-    /**
-     * <code>optional int64 value = 2;</code>
-     */
     public boolean hasValue() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>optional int64 value = 2;</code>
-     */
     public long getValue() {
       return value_;
     }
-
+    
     private void initFields() {
       name_ = "";
       value_ = 0L;
@@ -16437,11 +11964,11 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -16453,12 +11980,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -16472,14 +11999,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -16489,7 +12016,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.NameInt64Pair other = (ohmdb.client.generated.HBaseProtos.NameInt64Pair) obj;
-
+      
       boolean result = true;
       result = result && (hasName() == other.hasName());
       if (hasName()) {
@@ -16505,13 +12032,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasName()) {
@@ -16523,79 +12046,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getValue());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.NameInt64Pair parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.NameInt64Pair prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code NameInt64Pair}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.NameInt64PairOrBuilder {
@@ -16603,21 +12136,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.NameInt64Pair.class, ohmdb.client.generated.HBaseProtos.NameInt64Pair.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.NameInt64Pair.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -16628,7 +12158,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -16637,20 +12167,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_NameInt64Pair_descriptor;
+        return ohmdb.client.generated.HBaseProtos.NameInt64Pair.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameInt64Pair getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.NameInt64Pair.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.NameInt64Pair build() {
         ohmdb.client.generated.HBaseProtos.NameInt64Pair result = buildPartial();
         if (!result.isInitialized()) {
@@ -16658,7 +12188,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.NameInt64Pair buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.NameInt64Pair result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.NameInt64Pair buildPartial() {
         ohmdb.client.generated.HBaseProtos.NameInt64Pair result = new ohmdb.client.generated.HBaseProtos.NameInt64Pair(this);
         int from_bitField0_ = bitField0_;
@@ -16675,7 +12215,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.NameInt64Pair) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.NameInt64Pair)other);
@@ -16684,13 +12224,11 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.NameInt64Pair other) {
         if (other == ohmdb.client.generated.HBaseProtos.NameInt64Pair.getDefaultInstance()) return this;
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
+          setName(other.getName());
         }
         if (other.hasValue()) {
           setValue(other.getValue());
@@ -16698,73 +12236,66 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.NameInt64Pair parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.NameInt64Pair) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              value_ = input.readInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // optional string name = 1;
       private java.lang.Object name_ = "";
-      /**
-       * <code>optional string name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>optional string name = 1;</code>
-       */
-      public java.lang.String getName() {
+      public String getName() {
         java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           name_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>optional string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
+      public Builder setName(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -16773,201 +12304,656 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional int64 value = 2;
       private long value_ ;
-      /**
-       * <code>optional int64 value = 2;</code>
-       */
       public boolean hasValue() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional int64 value = 2;</code>
-       */
       public long getValue() {
         return value_;
       }
-      /**
-       * <code>optional int64 value = 2;</code>
-       */
       public Builder setValue(long value) {
         bitField0_ |= 0x00000002;
         value_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int64 value = 2;</code>
-       */
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000002);
         value_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:NameInt64Pair)
     }
-
+    
     static {
       defaultInstance = new NameInt64Pair(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:NameInt64Pair)
   }
-
+  
   public interface SnapshotDescriptionOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required string name = 1;
-    /**
-     * <code>required string name = 1;</code>
-     */
     boolean hasName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    java.lang.String getName();
-    /**
-     * <code>required string name = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
-
+    String getName();
+    
     // optional string table = 2;
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
     boolean hasTable();
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
-    java.lang.String getTable();
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
-    com.google.protobuf.ByteString
-        getTableBytes();
-
+    String getTable();
+    
     // optional int64 creationTime = 3 [default = 0];
-    /**
-     * <code>optional int64 creationTime = 3 [default = 0];</code>
-     */
     boolean hasCreationTime();
-    /**
-     * <code>optional int64 creationTime = 3 [default = 0];</code>
-     */
     long getCreationTime();
-
+    
     // optional .SnapshotDescription.Type type = 4 [default = FLUSH];
-    /**
-     * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-     */
     boolean hasType();
-    /**
-     * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-     */
     ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type getType();
-
+    
     // optional int32 version = 5;
-    /**
-     * <code>optional int32 version = 5;</code>
-     */
     boolean hasVersion();
-    /**
-     * <code>optional int32 version = 5;</code>
-     */
     int getVersion();
   }
-  /**
-   * Protobuf type {@code SnapshotDescription}
-   *
-   * <pre>
-   **
-   * Description of the snapshot to take
-   * </pre>
-   */
   public static final class SnapshotDescription extends
       com.google.protobuf.GeneratedMessage
       implements SnapshotDescriptionOrBuilder {
     // Use SnapshotDescription.newBuilder() to construct.
-    private SnapshotDescription(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private SnapshotDescription(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private SnapshotDescription(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private SnapshotDescription(boolean noInit) {}
+    
     private static final SnapshotDescription defaultInstance;
     public static SnapshotDescription getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public SnapshotDescription getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
+    
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_descriptor;
     }
-    private SnapshotDescription(
-        com.google.protobuf.CodedInputStream input,
+    
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_fieldAccessorTable;
+    }
+    
+    public enum Type
+        implements com.google.protobuf.ProtocolMessageEnum {
+      DISABLED(0, 0),
+      FLUSH(1, 1),
+      ;
+      
+      public static final int DISABLED_VALUE = 0;
+      public static final int FLUSH_VALUE = 1;
+      
+      
+      public final int getNumber() { return value; }
+      
+      public static Type valueOf(int value) {
+        switch (value) {
+          case 0: return DISABLED;
+          case 1: return FLUSH;
+          default: return null;
+        }
+      }
+      
+      public static com.google.protobuf.Internal.EnumLiteMap<Type>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static com.google.protobuf.Internal.EnumLiteMap<Type>
+          internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Type>() {
+              public Type findValueByNumber(int number) {
+                return Type.valueOf(number);
+              }
+            };
+      
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(index);
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDescriptor().getEnumTypes().get(0);
+      }
+      
+      private static final Type[] VALUES = {
+        DISABLED, FLUSH, 
+      };
+      
+      public static Type valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        return VALUES[desc.getIndex()];
+      }
+      
+      private final int index;
+      private final int value;
+      
+      private Type(int index, int value) {
+        this.index = index;
+        this.value = value;
+      }
+      
+      // @@protoc_insertion_point(enum_scope:SnapshotDescription.Type)
+    }
+    
+    private int bitField0_;
+    // required string name = 1;
+    public static final int NAME_FIELD_NUMBER = 1;
+    private java.lang.Object name_;
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    public String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
+    // optional string table = 2;
+    public static final int TABLE_FIELD_NUMBER = 2;
+    private java.lang.Object table_;
+    public boolean hasTable() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    public String getTable() {
+      java.lang.Object ref = table_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          table_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getTableBytes() {
+      java.lang.Object ref = table_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        table_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
+    // optional int64 creationTime = 3 [default = 0];
+    public static final int CREATIONTIME_FIELD_NUMBER = 3;
+    private long creationTime_;
+    public boolean hasCreationTime() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    public long getCreationTime() {
+      return creationTime_;
+    }
+    
+    // optional .SnapshotDescription.Type type = 4 [default = FLUSH];
+    public static final int TYPE_FIELD_NUMBER = 4;
+    private ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type type_;
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    public ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type getType() {
+      return type_;
+    }
+    
+    // optional int32 version = 5;
+    public static final int VERSION_FIELD_NUMBER = 5;
+    private int version_;
+    public boolean hasVersion() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    public int getVersion() {
+      return version_;
+    }
+    
+    private void initFields() {
+      name_ = "";
+      table_ = "";
+      creationTime_ = 0L;
+      type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
+      version_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+      
+      if (!hasName()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+    
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getTableBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, creationTime_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeEnum(4, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(5, version_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+    
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+    
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getTableBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, creationTime_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, version_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+    
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+    
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.SnapshotDescription)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.HBaseProtos.SnapshotDescription other = (ohmdb.client.generated.HBaseProtos.SnapshotDescription) obj;
+      
+      boolean result = true;
+      result = result && (hasName() == other.hasName());
+      if (hasName()) {
+        result = result && getName()
+            .equals(other.getName());
+      }
+      result = result && (hasTable() == other.hasTable());
+      if (hasTable()) {
+        result = result && getTable()
+            .equals(other.getTable());
+      }
+      result = result && (hasCreationTime() == other.hasCreationTime());
+      if (hasCreationTime()) {
+        result = result && (getCreationTime()
+            == other.getCreationTime());
+      }
+      result = result && (hasType() == other.hasType());
+      if (hasType()) {
+        result = result &&
+            (getType() == other.getType());
+      }
+      result = result && (hasVersion() == other.hasVersion());
+      if (hasVersion()) {
+        result = result && (getVersion()
+            == other.getVersion());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+    
+    @java.lang.Override
+    public int hashCode() {
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasName()) {
+        hash = (37 * hash) + NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getName().hashCode();
+      }
+      if (hasTable()) {
+        hash = (37 * hash) + TABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getTable().hashCode();
+      }
+      if (hasCreationTime()) {
+        hash = (37 * hash) + CREATIONTIME_FIELD_NUMBER;
+        hash = (53 * hash) + hashLong(getCreationTime());
+      }
+      if (hasType()) {
+        hash = (37 * hash) + TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + hashEnum(getType());
+      }
+      if (hasVersion()) {
+        hash = (37 * hash) + VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getVersion();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      return hash;
+    }
+    
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input).buildParsed();
+    }
+    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
+    }
+    
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.SnapshotDescription prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+    
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.HBaseProtos.SnapshotDescriptionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_descriptor;
+      }
+      
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_fieldAccessorTable;
+      }
+      
+      // Construct using ohmdb.client.generated.HBaseProtos.SnapshotDescription.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+      
+      private Builder(BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+      
+      public Builder clear() {
+        super.clear();
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        table_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        creationTime_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        version_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        return this;
+      }
+      
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+      
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDescriptor();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.SnapshotDescription getDefaultInstanceForType() {
+        return ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDefaultInstance();
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.SnapshotDescription build() {
+        ohmdb.client.generated.HBaseProtos.SnapshotDescription result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+      
+      private ohmdb.client.generated.HBaseProtos.SnapshotDescription buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.SnapshotDescription result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
+      public ohmdb.client.generated.HBaseProtos.SnapshotDescription buildPartial() {
+        ohmdb.client.generated.HBaseProtos.SnapshotDescription result = new ohmdb.client.generated.HBaseProtos.SnapshotDescription(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.name_ = name_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.table_ = table_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.creationTime_ = creationTime_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.type_ = type_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.version_ = version_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+      
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.HBaseProtos.SnapshotDescription) {
+          return mergeFrom((ohmdb.client.generated.HBaseProtos.SnapshotDescription)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+      
+      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.SnapshotDescription other) {
+        if (other == ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDefaultInstance()) return this;
+        if (other.hasName()) {
+          setName(other.getName());
+        }
+        if (other.hasTable()) {
+          setTable(other.getTable());
+        }
+        if (other.hasCreationTime()) {
+          setCreationTime(other.getCreationTime());
+        }
+        if (other.hasType()) {
+          setType(other.getType());
+        }
+        if (other.hasVersion()) {
+          setVersion(other.getVersion());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+      
+      public final boolean isInitialized() {
+        if (!hasName()) {
+          
+          return false;
+        }
+        return true;
+      }
+      
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              done = true;
-              break;
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                done = true;
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
               }
               break;
             }
@@ -17004,701 +12990,26 @@ public final class HBaseProtos {
             }
           }
         }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
       }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.SnapshotDescription.class, ohmdb.client.generated.HBaseProtos.SnapshotDescription.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<SnapshotDescription> PARSER =
-        new com.google.protobuf.AbstractParser<SnapshotDescription>() {
-      public SnapshotDescription parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SnapshotDescription(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<SnapshotDescription> getParserForType() {
-      return PARSER;
-    }
-
-    /**
-     * Protobuf enum {@code SnapshotDescription.Type}
-     */
-    public enum Type
-        implements com.google.protobuf.ProtocolMessageEnum {
-      /**
-       * <code>DISABLED = 0;</code>
-       */
-      DISABLED(0, 0),
-      /**
-       * <code>FLUSH = 1;</code>
-       */
-      FLUSH(1, 1),
-      ;
-
-      /**
-       * <code>DISABLED = 0;</code>
-       */
-      public static final int DISABLED_VALUE = 0;
-      /**
-       * <code>FLUSH = 1;</code>
-       */
-      public static final int FLUSH_VALUE = 1;
-
-
-      public final int getNumber() { return value; }
-
-      public static Type valueOf(int value) {
-        switch (value) {
-          case 0: return DISABLED;
-          case 1: return FLUSH;
-          default: return null;
-        }
-      }
-
-      public static com.google.protobuf.Internal.EnumLiteMap<Type>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static com.google.protobuf.Internal.EnumLiteMap<Type>
-          internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Type>() {
-              public Type findValueByNumber(int number) {
-                return Type.valueOf(number);
-              }
-            };
-
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(index);
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDescriptor().getEnumTypes().get(0);
-      }
-
-      private static final Type[] VALUES = values();
-
-      public static Type valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
-        }
-        return VALUES[desc.getIndex()];
-      }
-
-      private final int index;
-      private final int value;
-
-      private Type(int index, int value) {
-        this.index = index;
-        this.value = value;
-      }
-
-      // @@protoc_insertion_point(enum_scope:SnapshotDescription.Type)
-    }
-
-    private int bitField0_;
-    // required string name = 1;
-    public static final int NAME_FIELD_NUMBER = 1;
-    private java.lang.Object name_;
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public boolean hasName() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          name_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string name = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    // optional string table = 2;
-    public static final int TABLE_FIELD_NUMBER = 2;
-    private java.lang.Object table_;
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
-    public boolean hasTable() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
-    public java.lang.String getTable() {
-      java.lang.Object ref = table_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          table_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string table = 2;</code>
-     *
-     * <pre>
-     * not needed for delete, but checked for in taking snapshot
-     * </pre>
-     */
-    public com.google.protobuf.ByteString
-        getTableBytes() {
-      java.lang.Object ref = table_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        table_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    // optional int64 creationTime = 3 [default = 0];
-    public static final int CREATIONTIME_FIELD_NUMBER = 3;
-    private long creationTime_;
-    /**
-     * <code>optional int64 creationTime = 3 [default = 0];</code>
-     */
-    public boolean hasCreationTime() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional int64 creationTime = 3 [default = 0];</code>
-     */
-    public long getCreationTime() {
-      return creationTime_;
-    }
-
-    // optional .SnapshotDescription.Type type = 4 [default = FLUSH];
-    public static final int TYPE_FIELD_NUMBER = 4;
-    private ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type type_;
-    /**
-     * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-     */
-    public boolean hasType() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-     */
-    public ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type getType() {
-      return type_;
-    }
-
-    // optional int32 version = 5;
-    public static final int VERSION_FIELD_NUMBER = 5;
-    private int version_;
-    /**
-     * <code>optional int32 version = 5;</code>
-     */
-    public boolean hasVersion() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional int32 version = 5;</code>
-     */
-    public int getVersion() {
-      return version_;
-    }
-
-    private void initFields() {
-      name_ = "";
-      table_ = "";
-      creationTime_ = 0L;
-      type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
-      version_ = 0;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      if (!hasName()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getNameBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getTableBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, creationTime_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeEnum(4, type_.getNumber());
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeInt32(5, version_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getNameBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getTableBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, creationTime_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(4, type_.getNumber());
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, version_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.HBaseProtos.SnapshotDescription)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.HBaseProtos.SnapshotDescription other = (ohmdb.client.generated.HBaseProtos.SnapshotDescription) obj;
-
-      boolean result = true;
-      result = result && (hasName() == other.hasName());
-      if (hasName()) {
-        result = result && getName()
-            .equals(other.getName());
-      }
-      result = result && (hasTable() == other.hasTable());
-      if (hasTable()) {
-        result = result && getTable()
-            .equals(other.getTable());
-      }
-      result = result && (hasCreationTime() == other.hasCreationTime());
-      if (hasCreationTime()) {
-        result = result && (getCreationTime()
-            == other.getCreationTime());
-      }
-      result = result && (hasType() == other.hasType());
-      if (hasType()) {
-        result = result &&
-            (getType() == other.getType());
-      }
-      result = result && (hasVersion() == other.hasVersion());
-      if (hasVersion()) {
-        result = result && (getVersion()
-            == other.getVersion());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-
-    private int memoizedHashCode = 0;
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasName()) {
-        hash = (37 * hash) + NAME_FIELD_NUMBER;
-        hash = (53 * hash) + getName().hashCode();
-      }
-      if (hasTable()) {
-        hash = (37 * hash) + TABLE_FIELD_NUMBER;
-        hash = (53 * hash) + getTable().hashCode();
-      }
-      if (hasCreationTime()) {
-        hash = (37 * hash) + CREATIONTIME_FIELD_NUMBER;
-        hash = (53 * hash) + hashLong(getCreationTime());
-      }
-      if (hasType()) {
-        hash = (37 * hash) + TYPE_FIELD_NUMBER;
-        hash = (53 * hash) + hashEnum(getType());
-      }
-      if (hasVersion()) {
-        hash = (37 * hash) + VERSION_FIELD_NUMBER;
-        hash = (53 * hash) + getVersion();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static ohmdb.client.generated.HBaseProtos.SnapshotDescription parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.SnapshotDescription prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code SnapshotDescription}
-     *
-     * <pre>
-     **
-     * Description of the snapshot to take
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.HBaseProtos.SnapshotDescriptionOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.SnapshotDescription.class, ohmdb.client.generated.HBaseProtos.SnapshotDescription.Builder.class);
-      }
-
-      // Construct using ohmdb.client.generated.HBaseProtos.SnapshotDescription.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        name_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        table_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        creationTime_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        version_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_SnapshotDescription_descriptor;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.SnapshotDescription getDefaultInstanceForType() {
-        return ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDefaultInstance();
-      }
-
-      public ohmdb.client.generated.HBaseProtos.SnapshotDescription build() {
-        ohmdb.client.generated.HBaseProtos.SnapshotDescription result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public ohmdb.client.generated.HBaseProtos.SnapshotDescription buildPartial() {
-        ohmdb.client.generated.HBaseProtos.SnapshotDescription result = new ohmdb.client.generated.HBaseProtos.SnapshotDescription(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.name_ = name_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.table_ = table_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.creationTime_ = creationTime_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.type_ = type_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.version_ = version_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.HBaseProtos.SnapshotDescription) {
-          return mergeFrom((ohmdb.client.generated.HBaseProtos.SnapshotDescription)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.SnapshotDescription other) {
-        if (other == ohmdb.client.generated.HBaseProtos.SnapshotDescription.getDefaultInstance()) return this;
-        if (other.hasName()) {
-          bitField0_ |= 0x00000001;
-          name_ = other.name_;
-          onChanged();
-        }
-        if (other.hasTable()) {
-          bitField0_ |= 0x00000002;
-          table_ = other.table_;
-          onChanged();
-        }
-        if (other.hasCreationTime()) {
-          setCreationTime(other.getCreationTime());
-        }
-        if (other.hasType()) {
-          setType(other.getType());
-        }
-        if (other.hasVersion()) {
-          setVersion(other.getVersion());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        if (!hasName()) {
-          
-          return false;
-        }
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.SnapshotDescription parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.SnapshotDescription) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
+      
       private int bitField0_;
-
+      
       // required string name = 1;
       private java.lang.Object name_ = "";
-      /**
-       * <code>required string name = 1;</code>
-       */
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public java.lang.String getName() {
+      public String getName() {
         java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           name_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setName(
-          java.lang.String value) {
+      public Builder setName(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -17707,88 +13018,34 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
       public Builder clearName() {
         bitField0_ = (bitField0_ & ~0x00000001);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
-      /**
-       * <code>required string name = 1;</code>
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      void setName(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000001;
         name_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional string table = 2;
       private java.lang.Object table_ = "";
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
       public boolean hasTable() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
-      public java.lang.String getTable() {
+      public String getTable() {
         java.lang.Object ref = table_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
           table_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
-      public com.google.protobuf.ByteString
-          getTableBytes() {
-        java.lang.Object ref = table_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          table_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
-      public Builder setTable(
-          java.lang.String value) {
+      public Builder setTable(String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -17797,87 +13054,47 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
       public Builder clearTable() {
         bitField0_ = (bitField0_ & ~0x00000002);
         table_ = getDefaultInstance().getTable();
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string table = 2;</code>
-       *
-       * <pre>
-       * not needed for delete, but checked for in taking snapshot
-       * </pre>
-       */
-      public Builder setTableBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+      void setTable(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000002;
         table_ = value;
         onChanged();
-        return this;
       }
-
+      
       // optional int64 creationTime = 3 [default = 0];
       private long creationTime_ ;
-      /**
-       * <code>optional int64 creationTime = 3 [default = 0];</code>
-       */
       public boolean hasCreationTime() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-      /**
-       * <code>optional int64 creationTime = 3 [default = 0];</code>
-       */
       public long getCreationTime() {
         return creationTime_;
       }
-      /**
-       * <code>optional int64 creationTime = 3 [default = 0];</code>
-       */
       public Builder setCreationTime(long value) {
         bitField0_ |= 0x00000004;
         creationTime_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int64 creationTime = 3 [default = 0];</code>
-       */
       public Builder clearCreationTime() {
         bitField0_ = (bitField0_ & ~0x00000004);
         creationTime_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // optional .SnapshotDescription.Type type = 4 [default = FLUSH];
       private ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
-      /**
-       * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-       */
       public boolean hasType() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-      /**
-       * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-       */
       public ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type getType() {
         return type_;
       }
-      /**
-       * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-       */
       public Builder setType(ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type value) {
         if (value == null) {
           throw new NullPointerException();
@@ -17887,187 +13104,111 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>optional .SnapshotDescription.Type type = 4 [default = FLUSH];</code>
-       */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000008);
         type_ = ohmdb.client.generated.HBaseProtos.SnapshotDescription.Type.FLUSH;
         onChanged();
         return this;
       }
-
+      
       // optional int32 version = 5;
       private int version_ ;
-      /**
-       * <code>optional int32 version = 5;</code>
-       */
       public boolean hasVersion() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
-      /**
-       * <code>optional int32 version = 5;</code>
-       */
       public int getVersion() {
         return version_;
       }
-      /**
-       * <code>optional int32 version = 5;</code>
-       */
       public Builder setVersion(int value) {
         bitField0_ |= 0x00000010;
         version_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int32 version = 5;</code>
-       */
       public Builder clearVersion() {
         bitField0_ = (bitField0_ & ~0x00000010);
         version_ = 0;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:SnapshotDescription)
     }
-
+    
     static {
       defaultInstance = new SnapshotDescription(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:SnapshotDescription)
   }
-
+  
   public interface EmptyMsgOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
   }
-  /**
-   * Protobuf type {@code EmptyMsg}
-   */
   public static final class EmptyMsg extends
       com.google.protobuf.GeneratedMessage
       implements EmptyMsgOrBuilder {
     // Use EmptyMsg.newBuilder() to construct.
-    private EmptyMsg(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private EmptyMsg(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private EmptyMsg(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private EmptyMsg(boolean noInit) {}
+    
     private static final EmptyMsg defaultInstance;
     public static EmptyMsg getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public EmptyMsg getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private EmptyMsg(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.EmptyMsg.class, ohmdb.client.generated.HBaseProtos.EmptyMsg.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<EmptyMsg> PARSER =
-        new com.google.protobuf.AbstractParser<EmptyMsg>() {
-      public EmptyMsg parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new EmptyMsg(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<EmptyMsg> getParserForType() {
-      return PARSER;
-    }
-
+    
     private void initFields() {
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -18077,95 +13218,101 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.EmptyMsg other = (ohmdb.client.generated.HBaseProtos.EmptyMsg) obj;
-
+      
       boolean result = true;
       result = result &&
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.EmptyMsg parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.EmptyMsg prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code EmptyMsg}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.EmptyMsgOrBuilder {
@@ -18173,21 +13320,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.EmptyMsg.class, ohmdb.client.generated.HBaseProtos.EmptyMsg.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.EmptyMsg.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -18198,25 +13342,25 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_EmptyMsg_descriptor;
+        return ohmdb.client.generated.HBaseProtos.EmptyMsg.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.EmptyMsg getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.EmptyMsg.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.EmptyMsg build() {
         ohmdb.client.generated.HBaseProtos.EmptyMsg result = buildPartial();
         if (!result.isInitialized()) {
@@ -18224,13 +13368,23 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.EmptyMsg buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.EmptyMsg result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.EmptyMsg buildPartial() {
         ohmdb.client.generated.HBaseProtos.EmptyMsg result = new ohmdb.client.generated.HBaseProtos.EmptyMsg(this);
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.EmptyMsg) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.EmptyMsg)other);
@@ -18239,171 +13393,102 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.EmptyMsg other) {
         if (other == ohmdb.client.generated.HBaseProtos.EmptyMsg.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.EmptyMsg parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.EmptyMsg) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
           }
         }
-        return this;
       }
-
+      
+      
       // @@protoc_insertion_point(builder_scope:EmptyMsg)
     }
-
+    
     static {
       defaultInstance = new EmptyMsg(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:EmptyMsg)
   }
-
+  
   public interface LongMsgOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required int64 longMsg = 1;
-    /**
-     * <code>required int64 longMsg = 1;</code>
-     */
     boolean hasLongMsg();
-    /**
-     * <code>required int64 longMsg = 1;</code>
-     */
     long getLongMsg();
   }
-  /**
-   * Protobuf type {@code LongMsg}
-   */
   public static final class LongMsg extends
       com.google.protobuf.GeneratedMessage
       implements LongMsgOrBuilder {
     // Use LongMsg.newBuilder() to construct.
-    private LongMsg(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private LongMsg(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private LongMsg(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private LongMsg(boolean noInit) {}
+    
     private static final LongMsg defaultInstance;
     public static LongMsg getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public LongMsg getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private LongMsg(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              longMsg_ = input.readInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.LongMsg.class, ohmdb.client.generated.HBaseProtos.LongMsg.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<LongMsg> PARSER =
-        new com.google.protobuf.AbstractParser<LongMsg>() {
-      public LongMsg parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new LongMsg(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<LongMsg> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required int64 longMsg = 1;
     public static final int LONGMSG_FIELD_NUMBER = 1;
     private long longMsg_;
-    /**
-     * <code>required int64 longMsg = 1;</code>
-     */
     public boolean hasLongMsg() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required int64 longMsg = 1;</code>
-     */
     public long getLongMsg() {
       return longMsg_;
     }
-
+    
     private void initFields() {
       longMsg_ = 0L;
     }
@@ -18411,7 +13496,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasLongMsg()) {
         memoizedIsInitialized = 0;
         return false;
@@ -18419,7 +13504,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -18428,12 +13513,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -18443,14 +13528,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -18460,7 +13545,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.LongMsg other = (ohmdb.client.generated.HBaseProtos.LongMsg) obj;
-
+      
       boolean result = true;
       result = result && (hasLongMsg() == other.hasLongMsg());
       if (hasLongMsg()) {
@@ -18471,13 +13556,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasLongMsg()) {
@@ -18485,79 +13566,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getLongMsg());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.LongMsg parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.LongMsg prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code LongMsg}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.LongMsgOrBuilder {
@@ -18565,21 +13656,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.LongMsg.class, ohmdb.client.generated.HBaseProtos.LongMsg.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.LongMsg.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -18590,27 +13678,27 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         longMsg_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_LongMsg_descriptor;
+        return ohmdb.client.generated.HBaseProtos.LongMsg.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.LongMsg getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.LongMsg.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.LongMsg build() {
         ohmdb.client.generated.HBaseProtos.LongMsg result = buildPartial();
         if (!result.isInitialized()) {
@@ -18618,7 +13706,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.LongMsg buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.LongMsg result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.LongMsg buildPartial() {
         ohmdb.client.generated.HBaseProtos.LongMsg result = new ohmdb.client.generated.HBaseProtos.LongMsg(this);
         int from_bitField0_ = bitField0_;
@@ -18631,7 +13729,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.LongMsg) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.LongMsg)other);
@@ -18640,7 +13738,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.LongMsg other) {
         if (other == ohmdb.client.generated.HBaseProtos.LongMsg.getDefaultInstance()) return this;
         if (other.hasLongMsg()) {
@@ -18649,7 +13747,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasLongMsg()) {
           
@@ -18657,195 +13755,119 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.LongMsg parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.LongMsg) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              longMsg_ = input.readInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required int64 longMsg = 1;
       private long longMsg_ ;
-      /**
-       * <code>required int64 longMsg = 1;</code>
-       */
       public boolean hasLongMsg() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required int64 longMsg = 1;</code>
-       */
       public long getLongMsg() {
         return longMsg_;
       }
-      /**
-       * <code>required int64 longMsg = 1;</code>
-       */
       public Builder setLongMsg(long value) {
         bitField0_ |= 0x00000001;
         longMsg_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>required int64 longMsg = 1;</code>
-       */
       public Builder clearLongMsg() {
         bitField0_ = (bitField0_ & ~0x00000001);
         longMsg_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:LongMsg)
     }
-
+    
     static {
       defaultInstance = new LongMsg(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:LongMsg)
   }
-
+  
   public interface BigDecimalMsgOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required bytes bigdecimalMsg = 1;
-    /**
-     * <code>required bytes bigdecimalMsg = 1;</code>
-     */
     boolean hasBigdecimalMsg();
-    /**
-     * <code>required bytes bigdecimalMsg = 1;</code>
-     */
     com.google.protobuf.ByteString getBigdecimalMsg();
   }
-  /**
-   * Protobuf type {@code BigDecimalMsg}
-   */
   public static final class BigDecimalMsg extends
       com.google.protobuf.GeneratedMessage
       implements BigDecimalMsgOrBuilder {
     // Use BigDecimalMsg.newBuilder() to construct.
-    private BigDecimalMsg(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private BigDecimalMsg(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private BigDecimalMsg(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private BigDecimalMsg(boolean noInit) {}
+    
     private static final BigDecimalMsg defaultInstance;
     public static BigDecimalMsg getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public BigDecimalMsg getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private BigDecimalMsg(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              bigdecimalMsg_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.BigDecimalMsg.class, ohmdb.client.generated.HBaseProtos.BigDecimalMsg.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<BigDecimalMsg> PARSER =
-        new com.google.protobuf.AbstractParser<BigDecimalMsg>() {
-      public BigDecimalMsg parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BigDecimalMsg(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<BigDecimalMsg> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required bytes bigdecimalMsg = 1;
     public static final int BIGDECIMALMSG_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString bigdecimalMsg_;
-    /**
-     * <code>required bytes bigdecimalMsg = 1;</code>
-     */
     public boolean hasBigdecimalMsg() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required bytes bigdecimalMsg = 1;</code>
-     */
     public com.google.protobuf.ByteString getBigdecimalMsg() {
       return bigdecimalMsg_;
     }
-
+    
     private void initFields() {
       bigdecimalMsg_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -18853,7 +13875,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasBigdecimalMsg()) {
         memoizedIsInitialized = 0;
         return false;
@@ -18861,7 +13883,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -18870,12 +13892,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -18885,14 +13907,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -18902,7 +13924,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.BigDecimalMsg other = (ohmdb.client.generated.HBaseProtos.BigDecimalMsg) obj;
-
+      
       boolean result = true;
       result = result && (hasBigdecimalMsg() == other.hasBigdecimalMsg());
       if (hasBigdecimalMsg()) {
@@ -18913,13 +13935,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasBigdecimalMsg()) {
@@ -18927,79 +13945,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + getBigdecimalMsg().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.BigDecimalMsg parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.BigDecimalMsg prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code BigDecimalMsg}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.BigDecimalMsgOrBuilder {
@@ -19007,21 +14035,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.BigDecimalMsg.class, ohmdb.client.generated.HBaseProtos.BigDecimalMsg.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.BigDecimalMsg.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -19032,27 +14057,27 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         bigdecimalMsg_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_BigDecimalMsg_descriptor;
+        return ohmdb.client.generated.HBaseProtos.BigDecimalMsg.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.BigDecimalMsg getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.BigDecimalMsg.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.BigDecimalMsg build() {
         ohmdb.client.generated.HBaseProtos.BigDecimalMsg result = buildPartial();
         if (!result.isInitialized()) {
@@ -19060,7 +14085,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.BigDecimalMsg buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.BigDecimalMsg result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.BigDecimalMsg buildPartial() {
         ohmdb.client.generated.HBaseProtos.BigDecimalMsg result = new ohmdb.client.generated.HBaseProtos.BigDecimalMsg(this);
         int from_bitField0_ = bitField0_;
@@ -19073,7 +14108,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.BigDecimalMsg) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.BigDecimalMsg)other);
@@ -19082,7 +14117,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.BigDecimalMsg other) {
         if (other == ohmdb.client.generated.HBaseProtos.BigDecimalMsg.getDefaultInstance()) return this;
         if (other.hasBigdecimalMsg()) {
@@ -19091,7 +14126,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasBigdecimalMsg()) {
           
@@ -19099,43 +14134,49 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.BigDecimalMsg parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.BigDecimalMsg) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              bigdecimalMsg_ = input.readBytes();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required bytes bigdecimalMsg = 1;
       private com.google.protobuf.ByteString bigdecimalMsg_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>required bytes bigdecimalMsg = 1;</code>
-       */
       public boolean hasBigdecimalMsg() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required bytes bigdecimalMsg = 1;</code>
-       */
       public com.google.protobuf.ByteString getBigdecimalMsg() {
         return bigdecimalMsg_;
       }
-      /**
-       * <code>required bytes bigdecimalMsg = 1;</code>
-       */
       public Builder setBigdecimalMsg(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -19145,183 +14186,84 @@ public final class HBaseProtos {
         onChanged();
         return this;
       }
-      /**
-       * <code>required bytes bigdecimalMsg = 1;</code>
-       */
       public Builder clearBigdecimalMsg() {
         bitField0_ = (bitField0_ & ~0x00000001);
         bigdecimalMsg_ = getDefaultInstance().getBigdecimalMsg();
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:BigDecimalMsg)
     }
-
+    
     static {
       defaultInstance = new BigDecimalMsg(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:BigDecimalMsg)
   }
-
+  
   public interface UUIDOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-
+    
     // required uint64 leastSigBits = 1;
-    /**
-     * <code>required uint64 leastSigBits = 1;</code>
-     */
     boolean hasLeastSigBits();
-    /**
-     * <code>required uint64 leastSigBits = 1;</code>
-     */
     long getLeastSigBits();
-
+    
     // required uint64 mostSigBits = 2;
-    /**
-     * <code>required uint64 mostSigBits = 2;</code>
-     */
     boolean hasMostSigBits();
-    /**
-     * <code>required uint64 mostSigBits = 2;</code>
-     */
     long getMostSigBits();
   }
-  /**
-   * Protobuf type {@code UUID}
-   */
   public static final class UUID extends
       com.google.protobuf.GeneratedMessage
       implements UUIDOrBuilder {
     // Use UUID.newBuilder() to construct.
-    private UUID(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private UUID(Builder builder) {
       super(builder);
-      this.unknownFields = builder.getUnknownFields();
     }
-    private UUID(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
+    private UUID(boolean noInit) {}
+    
     private static final UUID defaultInstance;
     public static UUID getDefaultInstance() {
       return defaultInstance;
     }
-
+    
     public UUID getDefaultInstanceForType() {
       return defaultInstance;
     }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private UUID(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              leastSigBits_ = input.readUInt64();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              mostSigBits_ = input.readUInt64();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
+    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.HBaseProtos.internal_static_UUID_descriptor;
     }
-
+    
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.HBaseProtos.internal_static_UUID_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              ohmdb.client.generated.HBaseProtos.UUID.class, ohmdb.client.generated.HBaseProtos.UUID.Builder.class);
+      return ohmdb.client.generated.HBaseProtos.internal_static_UUID_fieldAccessorTable;
     }
-
-    public static com.google.protobuf.Parser<UUID> PARSER =
-        new com.google.protobuf.AbstractParser<UUID>() {
-      public UUID parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UUID(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<UUID> getParserForType() {
-      return PARSER;
-    }
-
+    
     private int bitField0_;
     // required uint64 leastSigBits = 1;
     public static final int LEASTSIGBITS_FIELD_NUMBER = 1;
     private long leastSigBits_;
-    /**
-     * <code>required uint64 leastSigBits = 1;</code>
-     */
     public boolean hasLeastSigBits() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    /**
-     * <code>required uint64 leastSigBits = 1;</code>
-     */
     public long getLeastSigBits() {
       return leastSigBits_;
     }
-
+    
     // required uint64 mostSigBits = 2;
     public static final int MOSTSIGBITS_FIELD_NUMBER = 2;
     private long mostSigBits_;
-    /**
-     * <code>required uint64 mostSigBits = 2;</code>
-     */
     public boolean hasMostSigBits() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-    /**
-     * <code>required uint64 mostSigBits = 2;</code>
-     */
     public long getMostSigBits() {
       return mostSigBits_;
     }
-
+    
     private void initFields() {
       leastSigBits_ = 0L;
       mostSigBits_ = 0L;
@@ -19330,7 +14272,7 @@ public final class HBaseProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-
+      
       if (!hasLeastSigBits()) {
         memoizedIsInitialized = 0;
         return false;
@@ -19342,7 +14284,7 @@ public final class HBaseProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-
+    
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -19354,12 +14296,12 @@ public final class HBaseProtos {
       }
       getUnknownFields().writeTo(output);
     }
-
+    
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-
+    
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -19373,14 +14315,14 @@ public final class HBaseProtos {
       memoizedSerializedSize = size;
       return size;
     }
-
+    
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-
+    
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -19390,7 +14332,7 @@ public final class HBaseProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.HBaseProtos.UUID other = (ohmdb.client.generated.HBaseProtos.UUID) obj;
-
+      
       boolean result = true;
       result = result && (hasLeastSigBits() == other.hasLeastSigBits());
       if (hasLeastSigBits()) {
@@ -19406,13 +14348,9 @@ public final class HBaseProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-
-    private int memoizedHashCode = 0;
+    
     @java.lang.Override
     public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasLeastSigBits()) {
@@ -19424,79 +14362,89 @@ public final class HBaseProtos {
         hash = (53 * hash) + hashLong(getMostSigBits());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
-      memoizedHashCode = hash;
       return hash;
     }
-
+    
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return newBuilder().mergeFrom(data).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
+      return newBuilder().mergeFrom(data, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      Builder builder = newBuilder();
+      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+        return builder.buildParsed();
+      } else {
+        return null;
+      }
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return PARSER.parseFrom(input);
+      return newBuilder().mergeFrom(input).buildParsed();
     }
     public static ohmdb.client.generated.HBaseProtos.UUID parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
+      return newBuilder().mergeFrom(input, extensionRegistry)
+               .buildParsed();
     }
-
+    
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.HBaseProtos.UUID prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-
+    
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code UUID}
-     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.HBaseProtos.UUIDOrBuilder {
@@ -19504,21 +14452,18 @@ public final class HBaseProtos {
           getDescriptor() {
         return ohmdb.client.generated.HBaseProtos.internal_static_UUID_descriptor;
       }
-
+      
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_UUID_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                ohmdb.client.generated.HBaseProtos.UUID.class, ohmdb.client.generated.HBaseProtos.UUID.Builder.class);
+        return ohmdb.client.generated.HBaseProtos.internal_static_UUID_fieldAccessorTable;
       }
-
+      
       // Construct using ohmdb.client.generated.HBaseProtos.UUID.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      
+      private Builder(BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -19529,7 +14474,7 @@ public final class HBaseProtos {
       private static Builder create() {
         return new Builder();
       }
-
+      
       public Builder clear() {
         super.clear();
         leastSigBits_ = 0L;
@@ -19538,20 +14483,20 @@ public final class HBaseProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-
+      
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-
+      
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.HBaseProtos.internal_static_UUID_descriptor;
+        return ohmdb.client.generated.HBaseProtos.UUID.getDescriptor();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.UUID getDefaultInstanceForType() {
         return ohmdb.client.generated.HBaseProtos.UUID.getDefaultInstance();
       }
-
+      
       public ohmdb.client.generated.HBaseProtos.UUID build() {
         ohmdb.client.generated.HBaseProtos.UUID result = buildPartial();
         if (!result.isInitialized()) {
@@ -19559,7 +14504,17 @@ public final class HBaseProtos {
         }
         return result;
       }
-
+      
+      private ohmdb.client.generated.HBaseProtos.UUID buildParsed()
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        ohmdb.client.generated.HBaseProtos.UUID result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(
+            result).asInvalidProtocolBufferException();
+        }
+        return result;
+      }
+      
       public ohmdb.client.generated.HBaseProtos.UUID buildPartial() {
         ohmdb.client.generated.HBaseProtos.UUID result = new ohmdb.client.generated.HBaseProtos.UUID(this);
         int from_bitField0_ = bitField0_;
@@ -19576,7 +14531,7 @@ public final class HBaseProtos {
         onBuilt();
         return result;
       }
-
+      
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.HBaseProtos.UUID) {
           return mergeFrom((ohmdb.client.generated.HBaseProtos.UUID)other);
@@ -19585,7 +14540,7 @@ public final class HBaseProtos {
           return this;
         }
       }
-
+      
       public Builder mergeFrom(ohmdb.client.generated.HBaseProtos.UUID other) {
         if (other == ohmdb.client.generated.HBaseProtos.UUID.getDefaultInstance()) return this;
         if (other.hasLeastSigBits()) {
@@ -19597,7 +14552,7 @@ public final class HBaseProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-
+      
       public final boolean isInitialized() {
         if (!hasLeastSigBits()) {
           
@@ -19609,103 +14564,99 @@ public final class HBaseProtos {
         }
         return true;
       }
-
+      
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        ohmdb.client.generated.HBaseProtos.UUID parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (ohmdb.client.generated.HBaseProtos.UUID) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder(
+            this.getUnknownFields());
+        while (true) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              this.setUnknownFields(unknownFields.build());
+              onChanged();
+              return this;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                this.setUnknownFields(unknownFields.build());
+                onChanged();
+                return this;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              leastSigBits_ = input.readUInt64();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              mostSigBits_ = input.readUInt64();
+              break;
+            }
           }
         }
-        return this;
       }
+      
       private int bitField0_;
-
+      
       // required uint64 leastSigBits = 1;
       private long leastSigBits_ ;
-      /**
-       * <code>required uint64 leastSigBits = 1;</code>
-       */
       public boolean hasLeastSigBits() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      /**
-       * <code>required uint64 leastSigBits = 1;</code>
-       */
       public long getLeastSigBits() {
         return leastSigBits_;
       }
-      /**
-       * <code>required uint64 leastSigBits = 1;</code>
-       */
       public Builder setLeastSigBits(long value) {
         bitField0_ |= 0x00000001;
         leastSigBits_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>required uint64 leastSigBits = 1;</code>
-       */
       public Builder clearLeastSigBits() {
         bitField0_ = (bitField0_ & ~0x00000001);
         leastSigBits_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // required uint64 mostSigBits = 2;
       private long mostSigBits_ ;
-      /**
-       * <code>required uint64 mostSigBits = 2;</code>
-       */
       public boolean hasMostSigBits() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-      /**
-       * <code>required uint64 mostSigBits = 2;</code>
-       */
       public long getMostSigBits() {
         return mostSigBits_;
       }
-      /**
-       * <code>required uint64 mostSigBits = 2;</code>
-       */
       public Builder setMostSigBits(long value) {
         bitField0_ |= 0x00000002;
         mostSigBits_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>required uint64 mostSigBits = 2;</code>
-       */
       public Builder clearMostSigBits() {
         bitField0_ = (bitField0_ & ~0x00000002);
         mostSigBits_ = 0L;
         onChanged();
         return this;
       }
-
+      
       // @@protoc_insertion_point(builder_scope:UUID)
     }
-
+    
     static {
       defaultInstance = new UUID(true);
       defaultInstance.initFields();
     }
-
+    
     // @@protoc_insertion_point(class_scope:UUID)
   }
-
+  
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_Cell_descriptor;
   private static
@@ -19816,7 +14767,7 @@ public final class HBaseProtos {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_UUID_fieldAccessorTable;
-
+  
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -19899,133 +14850,177 @@ public final class HBaseProtos {
           internal_static_Cell_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_Cell_descriptor,
-              new java.lang.String[] { "Row", "Family", "Qualifier", "Timestamp", "CellType", "Value", });
+              new java.lang.String[] { "Row", "Family", "Qualifier", "Timestamp", "CellType", "Value", },
+              ohmdb.client.generated.HBaseProtos.Cell.class,
+              ohmdb.client.generated.HBaseProtos.Cell.Builder.class);
           internal_static_TableSchema_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_TableSchema_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_TableSchema_descriptor,
-              new java.lang.String[] { "Name", "Attributes", "ColumnFamilies", "Configuration", });
+              new java.lang.String[] { "Name", "Attributes", "ColumnFamilies", "Configuration", },
+              ohmdb.client.generated.HBaseProtos.TableSchema.class,
+              ohmdb.client.generated.HBaseProtos.TableSchema.Builder.class);
           internal_static_ColumnFamilySchema_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_ColumnFamilySchema_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ColumnFamilySchema_descriptor,
-              new java.lang.String[] { "Name", "Attributes", "Configuration", });
+              new java.lang.String[] { "Name", "Attributes", "Configuration", },
+              ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.class,
+              ohmdb.client.generated.HBaseProtos.ColumnFamilySchema.Builder.class);
           internal_static_RegionInfo_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_RegionInfo_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RegionInfo_descriptor,
-              new java.lang.String[] { "RegionId", "TableName", "StartKey", "EndKey", "Offline", "Split", "Recovering", });
+              new java.lang.String[] { "RegionId", "TableName", "StartKey", "EndKey", "Offline", "Split", "Recovering", },
+              ohmdb.client.generated.HBaseProtos.RegionInfo.class,
+              ohmdb.client.generated.HBaseProtos.RegionInfo.Builder.class);
           internal_static_FavoredNodes_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_FavoredNodes_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FavoredNodes_descriptor,
-              new java.lang.String[] { "FavoredNode", });
+              new java.lang.String[] { "FavoredNode", },
+              ohmdb.client.generated.HBaseProtos.FavoredNodes.class,
+              ohmdb.client.generated.HBaseProtos.FavoredNodes.Builder.class);
           internal_static_RegionSpecifier_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_RegionSpecifier_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RegionSpecifier_descriptor,
-              new java.lang.String[] { "Type", "Value", });
+              new java.lang.String[] { "Type", "Value", },
+              ohmdb.client.generated.HBaseProtos.RegionSpecifier.class,
+              ohmdb.client.generated.HBaseProtos.RegionSpecifier.Builder.class);
           internal_static_RegionLoad_descriptor =
             getDescriptor().getMessageTypes().get(6);
           internal_static_RegionLoad_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RegionLoad_descriptor,
-              new java.lang.String[] { "RegionSpecifier", "Stores", "Storefiles", "StoreUncompressedSizeMB", "StorefileSizeMB", "MemstoreSizeMB", "StorefileIndexSizeMB", "ReadRequestsCount", "WriteRequestsCount", "TotalCompactingKVs", "CurrentCompactedKVs", "RootIndexSizeKB", "TotalStaticIndexSizeKB", "TotalStaticBloomSizeKB", "CompleteSequenceId", });
+              new java.lang.String[] { "RegionSpecifier", "Stores", "Storefiles", "StoreUncompressedSizeMB", "StorefileSizeMB", "MemstoreSizeMB", "StorefileIndexSizeMB", "ReadRequestsCount", "WriteRequestsCount", "TotalCompactingKVs", "CurrentCompactedKVs", "RootIndexSizeKB", "TotalStaticIndexSizeKB", "TotalStaticBloomSizeKB", "CompleteSequenceId", },
+              ohmdb.client.generated.HBaseProtos.RegionLoad.class,
+              ohmdb.client.generated.HBaseProtos.RegionLoad.Builder.class);
           internal_static_ServerLoad_descriptor =
             getDescriptor().getMessageTypes().get(7);
           internal_static_ServerLoad_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ServerLoad_descriptor,
-              new java.lang.String[] { "NumberOfRequests", "TotalNumberOfRequests", "UsedHeapMB", "MaxHeapMB", "RegionLoads", "Coprocessors", "ReportStartTime", "ReportEndTime", "InfoServerPort", });
+              new java.lang.String[] { "NumberOfRequests", "TotalNumberOfRequests", "UsedHeapMB", "MaxHeapMB", "RegionLoads", "Coprocessors", "ReportStartTime", "ReportEndTime", "InfoServerPort", },
+              ohmdb.client.generated.HBaseProtos.ServerLoad.class,
+              ohmdb.client.generated.HBaseProtos.ServerLoad.Builder.class);
           internal_static_TimeRange_descriptor =
             getDescriptor().getMessageTypes().get(8);
           internal_static_TimeRange_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_TimeRange_descriptor,
-              new java.lang.String[] { "From", "To", });
+              new java.lang.String[] { "From", "To", },
+              ohmdb.client.generated.HBaseProtos.TimeRange.class,
+              ohmdb.client.generated.HBaseProtos.TimeRange.Builder.class);
           internal_static_Filter_descriptor =
             getDescriptor().getMessageTypes().get(9);
           internal_static_Filter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_Filter_descriptor,
-              new java.lang.String[] { "Name", "SerializedFilter", });
+              new java.lang.String[] { "Name", "SerializedFilter", },
+              ohmdb.client.generated.HBaseProtos.Filter.class,
+              ohmdb.client.generated.HBaseProtos.Filter.Builder.class);
           internal_static_KeyValue_descriptor =
             getDescriptor().getMessageTypes().get(10);
           internal_static_KeyValue_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_KeyValue_descriptor,
-              new java.lang.String[] { "Row", "Family", "Qualifier", "Timestamp", "KeyType", "Value", });
+              new java.lang.String[] { "Row", "Family", "Qualifier", "Timestamp", "KeyType", "Value", },
+              ohmdb.client.generated.HBaseProtos.KeyValue.class,
+              ohmdb.client.generated.HBaseProtos.KeyValue.Builder.class);
           internal_static_ServerName_descriptor =
             getDescriptor().getMessageTypes().get(11);
           internal_static_ServerName_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ServerName_descriptor,
-              new java.lang.String[] { "HostName", "Port", "StartCode", });
+              new java.lang.String[] { "HostName", "Port", "StartCode", },
+              ohmdb.client.generated.HBaseProtos.ServerName.class,
+              ohmdb.client.generated.HBaseProtos.ServerName.Builder.class);
           internal_static_Coprocessor_descriptor =
             getDescriptor().getMessageTypes().get(12);
           internal_static_Coprocessor_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_Coprocessor_descriptor,
-              new java.lang.String[] { "Name", });
+              new java.lang.String[] { "Name", },
+              ohmdb.client.generated.HBaseProtos.Coprocessor.class,
+              ohmdb.client.generated.HBaseProtos.Coprocessor.Builder.class);
           internal_static_NameStringPair_descriptor =
             getDescriptor().getMessageTypes().get(13);
           internal_static_NameStringPair_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_NameStringPair_descriptor,
-              new java.lang.String[] { "Name", "Value", });
+              new java.lang.String[] { "Name", "Value", },
+              ohmdb.client.generated.HBaseProtos.NameStringPair.class,
+              ohmdb.client.generated.HBaseProtos.NameStringPair.Builder.class);
           internal_static_NameBytesPair_descriptor =
             getDescriptor().getMessageTypes().get(14);
           internal_static_NameBytesPair_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_NameBytesPair_descriptor,
-              new java.lang.String[] { "Name", "Value", });
+              new java.lang.String[] { "Name", "Value", },
+              ohmdb.client.generated.HBaseProtos.NameBytesPair.class,
+              ohmdb.client.generated.HBaseProtos.NameBytesPair.Builder.class);
           internal_static_BytesBytesPair_descriptor =
             getDescriptor().getMessageTypes().get(15);
           internal_static_BytesBytesPair_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_BytesBytesPair_descriptor,
-              new java.lang.String[] { "First", "Second", });
+              new java.lang.String[] { "First", "Second", },
+              ohmdb.client.generated.HBaseProtos.BytesBytesPair.class,
+              ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder.class);
           internal_static_NameInt64Pair_descriptor =
             getDescriptor().getMessageTypes().get(16);
           internal_static_NameInt64Pair_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_NameInt64Pair_descriptor,
-              new java.lang.String[] { "Name", "Value", });
+              new java.lang.String[] { "Name", "Value", },
+              ohmdb.client.generated.HBaseProtos.NameInt64Pair.class,
+              ohmdb.client.generated.HBaseProtos.NameInt64Pair.Builder.class);
           internal_static_SnapshotDescription_descriptor =
             getDescriptor().getMessageTypes().get(17);
           internal_static_SnapshotDescription_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_SnapshotDescription_descriptor,
-              new java.lang.String[] { "Name", "Table", "CreationTime", "Type", "Version", });
+              new java.lang.String[] { "Name", "Table", "CreationTime", "Type", "Version", },
+              ohmdb.client.generated.HBaseProtos.SnapshotDescription.class,
+              ohmdb.client.generated.HBaseProtos.SnapshotDescription.Builder.class);
           internal_static_EmptyMsg_descriptor =
             getDescriptor().getMessageTypes().get(18);
           internal_static_EmptyMsg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_EmptyMsg_descriptor,
-              new java.lang.String[] { });
+              new java.lang.String[] { },
+              ohmdb.client.generated.HBaseProtos.EmptyMsg.class,
+              ohmdb.client.generated.HBaseProtos.EmptyMsg.Builder.class);
           internal_static_LongMsg_descriptor =
             getDescriptor().getMessageTypes().get(19);
           internal_static_LongMsg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_LongMsg_descriptor,
-              new java.lang.String[] { "LongMsg", });
+              new java.lang.String[] { "LongMsg", },
+              ohmdb.client.generated.HBaseProtos.LongMsg.class,
+              ohmdb.client.generated.HBaseProtos.LongMsg.Builder.class);
           internal_static_BigDecimalMsg_descriptor =
             getDescriptor().getMessageTypes().get(20);
           internal_static_BigDecimalMsg_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_BigDecimalMsg_descriptor,
-              new java.lang.String[] { "BigdecimalMsg", });
+              new java.lang.String[] { "BigdecimalMsg", },
+              ohmdb.client.generated.HBaseProtos.BigDecimalMsg.class,
+              ohmdb.client.generated.HBaseProtos.BigDecimalMsg.Builder.class);
           internal_static_UUID_descriptor =
             getDescriptor().getMessageTypes().get(21);
           internal_static_UUID_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_UUID_descriptor,
-              new java.lang.String[] { "LeastSigBits", "MostSigBits", });
+              new java.lang.String[] { "LeastSigBits", "MostSigBits", },
+              ohmdb.client.generated.HBaseProtos.UUID.class,
+              ohmdb.client.generated.HBaseProtos.UUID.Builder.class);
           return null;
         }
       };
@@ -20034,6 +15029,6 @@ public final class HBaseProtos {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
   }
-
+  
   // @@protoc_insertion_point(outer_class_scope)
 }

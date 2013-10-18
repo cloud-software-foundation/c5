@@ -22,34 +22,26 @@ package ohmdb.client;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundMessageHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import ohmdb.client.generated.ClientProtos;
 import ohmdb.client.scanner.ClientScanner;
 import ohmdb.client.scanner.ClientScannerManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RequestHandler
-    extends ChannelInboundMessageHandlerAdapter<ClientProtos.Response> {
-  private Channel channel;
-
-  private static final Logger logger = Logger.getLogger(
-      RequestHandler.class.getName());
-
-  private final ConcurrentHashMap<Long, SettableFuture>
-      futures = new ConcurrentHashMap<>();
-
+    extends SimpleChannelInboundHandler<ClientProtos.Response> {
+  private final ConcurrentHashMap<Long, SettableFuture> futures = new ConcurrentHashMap<>();
   ClientScannerManager manager = ClientScannerManager.INSTANCE;
+  public static final Log LOG = LogFactory.getLog(RequestHandler.class);
 
   @Override
-  public void messageReceived(final ChannelHandlerContext ctx,
-                              final ClientProtos.Response msg)
+  public void channelRead0(final ChannelHandlerContext ctx, final ClientProtos.Response msg)
       throws Exception {
     SettableFuture f = futures.get(msg.getCommandId());
-
     switch (msg.getCommand()) {
       case MUTATE:
         if (!msg.getMutate().getProcessed()) {
@@ -73,32 +65,21 @@ public class RequestHandler
           clientScanner.close();
         }
         break;
-
       default:
+        LOG.error("msg:" +msg);
         f.set(msg);
         break;
     }
   }
 
-  public void call(ClientProtos.Call request,
-                   SettableFuture future)
+  public void call(final ClientProtos.Call request, final SettableFuture future, final Channel channel)
       throws InterruptedException, IOException {
     futures.put(request.getCommandId(), future);
-    channel.write(request);
-    channel.flush();
+    channel.writeAndFlush(request);
   }
 
   @Override
-  public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-    channel = ctx.channel();
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-      throws Exception {
-    logger.log(
-        Level.WARNING,
-        "Unexpected exception from downstream.", cause);
-    ctx.close();
+  public void channelReadComplete(ChannelHandlerContext ctx) {
+    ctx.flush();
   }
 }

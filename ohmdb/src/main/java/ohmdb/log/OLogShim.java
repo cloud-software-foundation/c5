@@ -16,30 +16,61 @@
  */
 package ohmdb.log;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
 import ohmdb.generated.Log;
+import ohmdb.replication.InRamLog;
+import ohmdb.replication.RaftInfoPersistence;
+import ohmdb.replication.RaftInformationInterface;
+import ohmdb.replication.ReplicatorInstance;
+import ohmdb.replication.ReplicatorInstanceStateChange;
+import ohmdb.replication.rpc.RpcRequest;
+import ohmdb.replication.rpc.RpcWireReply;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.exceptions.FailedLogCloseException;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
+import org.jetlang.channels.Channel;
+import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.MemoryRequestChannel;
+import org.jetlang.channels.RequestChannel;
+import org.jetlang.fibers.PoolFiberFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * A distributed WriteAheadLog using RAFT
+ */
 public class OLogShim extends OLog implements Syncable, HLog {
-
+  private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
+  final Map<Long, ReplicatorInstance> replicators = new HashMap<>();
+  final RequestChannel<RpcRequest, RpcWireReply> rpcChannel = new MemoryRequestChannel<>();
+  final Map<Long, Moring> morings = new HashMap<>();
+  final Map<String, Long> replicatorLookup = new HashMap<>();
+  final List<Long> peerIds = new ArrayList<>();
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final UUID uuid;
+  private final PoolFiberFactory fiberPool;
+
 
   public OLogShim(String basePath) throws IOException {
     super(basePath);
     this.uuid = UUID.randomUUID();
+    this.fiberPool = new PoolFiberFactory(Executors.newCachedThreadPool());
 
   }
 
@@ -72,7 +103,6 @@ public class OLogShim extends OLog implements Syncable, HLog {
   @Override
   public void registerWALActionsListener(WALActionsListener listener) {
     LOG.error("reg");
-
   }
 
   @Override
@@ -85,19 +115,21 @@ public class OLogShim extends OLog implements Syncable, HLog {
     return null;
   }
 
-
   @Override
   public byte[][] rollWriter() throws IOException {
-    roll();
+    try {
+      roll();
+    } catch (ExecutionException | InterruptedException e) {
+      throw new IOException(e);
+    }
     return null;
   }
 
   @Override
   public byte[][] rollWriter(boolean force)
-      throws FailedLogCloseException, IOException {
+      throws IOException {
     return rollWriter();
   }
-
 
   public void closeAndDelete() throws IOException {
     close();
@@ -124,6 +156,17 @@ public class OLogShim extends OLog implements Syncable, HLog {
   }
 
   @Override
+  public void sync() throws IOException {
+    SettableFuture<Boolean> f = SettableFuture.create();
+    this.sync(f);
+  }
+
+  @Override
+  public long getSequenceNumber() {
+    return logSeqNum.get();
+  }
+
+  @Override
   public void setSequenceNumber(long newValue) {
     for (long id = this.logSeqNum.get(); id < newValue &&
         !this.logSeqNum.compareAndSet(id, newValue); id = this.logSeqNum.get()) {
@@ -132,16 +175,9 @@ public class OLogShim extends OLog implements Syncable, HLog {
   }
 
   @Override
-  public long getSequenceNumber() {
-    return logSeqNum.get();
-
-  }
-
-  @Override
   public long obtainSeqNum() {
     return this.logSeqNum.incrementAndGet();
   }
-
 
   @Override
   public void append(HRegionInfo info,
@@ -152,6 +188,15 @@ public class OLogShim extends OLog implements Syncable, HLog {
     this.append(info, tableName, edits, uuid, now, htd);
   }
 
+//  @Override
+  public void append(HRegionInfo info,
+                     byte[] tableName,
+                     WALEdit edits,
+                     long now,
+                     HTableDescriptor htd,
+                     boolean isInMemstore) throws IOException {
+    this.append(info, tableName, edits, uuid, now, htd);
+  }
 
   @Override
   public long appendNoSync(HRegionInfo info,
@@ -160,6 +205,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
                            UUID clusterId,
                            long now,
                            HTableDescriptor htd) throws IOException {
+    ReplicatorInstance replicator = getReplicator(info);
 
     for (KeyValue edit : edits.getKeyValues()) {
       Log.Entry entry = Log
@@ -172,20 +218,108 @@ public class OLogShim extends OLog implements Syncable, HLog {
           .setTs(edit.getTimestamp())
           .setValue(ByteString.copyFrom(edit.getValue()))
           .build();
-      addEdit(entry);
+      try {
+        replicator.logData(entry.toByteArray());
+      } catch (InterruptedException e) {
+        throw new IOException(e);
+      }
     }
     return 0;
   }
 
-  @Override
-  public long append(HRegionInfo info, byte[] tableName, WALEdit edits, UUID clusterId, long now, HTableDescriptor htd) throws IOException {
+  private Channel<ReplicatorInstanceStateChange> stateChangeChannel = new MemoryChannel<>();
+  private ReplicatorInstance getReplicator(HRegionInfo info) {
+    if (replicatorLookup.containsKey(info.getRegionNameAsString())) {
+      return replicators.get(replicatorLookup.get(info.getRegionNameAsString()));
+    }
+    long plusMillis = 0;
 
+    // Some concurrent magic TODO
+    long peerId = replicatorLookup.size();
+    replicatorLookup.put(info.getRegionNameAsString(), peerId);
+      peerIds.add(peerId);
+
+
+    ReplicatorInstance replicator = new ReplicatorInstance(fiberPool.create(),
+        peerId,
+        "foobar",
+        peerIds,
+        new InRamLog(),
+        new Info(plusMillis),
+        new Persister(),
+        rpcChannel,
+        stateChangeChannel);
+    replicators.put(peerId, replicator);
+    return replicator;
+  }
+
+  private Moring getMoring(long peerId) {
+    if (this.morings.containsKey(peerId)) {
+      return this.morings.get(peerId);
+    }
+    Moring moring = new Moring(this, peerId);
+    this.morings.put(peerId, moring);
+    return moring;
+  }
+
+  public long append(HRegionInfo info,
+                     byte[] tableName,
+                     WALEdit edits,
+                     UUID clusterId,
+                     long now,
+                     HTableDescriptor htd) throws IOException {
     appendNoSync(info, tableName, edits, null, now, htd);
     this.sync();
-    return now++;
+    return ++now;
   }
 
   public long getFilenum() {
     return this.fileNum;
+  }
+
+  public static class Info implements RaftInformationInterface {
+
+    public final long offset;
+
+    public Info(long offset) {
+      this.offset = offset;
+    }
+
+    @Override
+    public long currentTimeMillis() {
+      return System.currentTimeMillis() + offset;
+    }
+
+    @Override
+    public long electionCheckRate() {
+      return 100;
+    }
+
+    @Override
+    public long electionTimeout() {
+      return 1000;
+    }
+
+    @Override
+    public long groupCommitDelay() {
+      return 50;
+    }
+  }
+
+  public static class Persister implements RaftInfoPersistence {
+    @Override
+    public long readCurrentTerm(String quorumId) {
+      return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public long readVotedFor(String quorumId) {
+      return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void writeCurrentTermAndVotedFor(String quorumId, long currentTerm, long votedFor) {
+      //To change body of implemented methods use File | Settings | File Templates.
+    }
   }
 }

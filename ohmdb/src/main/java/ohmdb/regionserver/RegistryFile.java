@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,15 +33,23 @@ import java.util.Map;
 
 public class RegistryFile {
 
-  private final String ohmPath;
+  private final Path ohmPath;
   private File registryFile;
 
-  public RegistryFile(String ohmPath) throws IOException {
+  public RegistryFile(Path ohmPath) throws IOException {
     this.ohmPath = ohmPath;
-    this.registryFile = new File(ohmPath, "REGISTRY");
+    if (!(ohmPath.toFile().exists() && ohmPath.toFile().isDirectory())) {
+      boolean success = ohmPath.toFile().mkdirs();
+      if (!success) {
+        throw new IOException("Unable to create ohmPath:" + ohmPath);
+      }
+
+    }
+
+    this.registryFile = new File(ohmPath.toString(), "REGISTRY");
     if (!registryFile.exists()) {
       boolean success = registryFile.createNewFile();
-      if (!success){
+      if (!success) {
         throw new IOException("Unable to create registry file");
       }
     }
@@ -48,10 +57,10 @@ public class RegistryFile {
 
   public void truncate() throws IOException {
     boolean success = this.registryFile.delete();
-    if (!success){
+    if (!success) {
       throw new IOException("Unable to delete registry file");
     }
-    this.registryFile = new File(ohmPath, "REGISTRY");
+    this.registryFile = new File(ohmPath.toString(), "REGISTRY");
   }
 
   public void addEntry(HRegionInfo hRegionInfo, HColumnDescriptor cf)
