@@ -52,6 +52,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
   private final ClientScannerManager clientScannerManager
       = ClientScannerManager.INSTANCE;
   private AtomicLong commandId = new AtomicLong(0);
+  private Channel channel = ohmConnectionManager.getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
 
   /**
    * OhmTable is the main entry points for clients of OhmDB
@@ -61,9 +62,6 @@ public class OhmTable extends OhmShim implements AutoCloseable {
   public OhmTable(ByteString tableName) throws IOException, InterruptedException {
     super(tableName);
 
-    Channel channel =
-        ohmConnectionManager
-            .getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
     handler = channel
         .pipeline()
         .get(RequestHandler.class);
@@ -83,7 +81,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
     call.setCommandId(commandId.incrementAndGet());
 
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       return ProtobufUtil.toResult(resultFuture.get().getGet().getResult());
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
@@ -103,7 +101,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
     call.setCommandId(commandId.incrementAndGet());
 
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       ClientProtos.MultiGetResponse response = resultFuture.get().getMultiGet();
 
       for (ClientProtos.Result rawResult : response.getResultList()) {
@@ -130,7 +128,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
     call.setCommandId(commandId.incrementAndGet());
 
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       return resultFuture.get().getGet().getExists();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
@@ -166,7 +164,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
         .build();
 
     try {
-      handler.call(call, future);
+      handler.call(call, future, channel);
       Long scannerId = future.get();
       return clientScannerManager.getOrCreate(scannerId);
     } catch (InterruptedException | ExecutionException e) {
@@ -190,7 +188,6 @@ public class OhmTable extends OhmShim implements AutoCloseable {
 
   @Override
   public Boolean[] exists(List<Get> gets) throws IOException {
-    final Collection<Result> results = new ArrayList<>();
     ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
     final SettableFuture<ClientProtos.Response> resultFuture
         = SettableFuture.create();
@@ -200,13 +197,10 @@ public class OhmTable extends OhmShim implements AutoCloseable {
     call.setMultiGet(multiGet);
     call.setCommandId(commandId.incrementAndGet());
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       ClientProtos.MultiGetResponse response = resultFuture.get().getMultiGet();
-
-      for (ClientProtos.Result rawResult : response.getResultList()) {
-        results.add(ProtobufUtil.toResult(rawResult));
-      }
-      return results.toArray(new Boolean[results.size()]);
+      List<Boolean> existsList = response.getExistsList();
+      return existsList.toArray(new Boolean[existsList.size()]);
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
@@ -225,7 +219,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
         = SettableFuture.create();
 
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       resultFuture.get();
 
     } catch (InterruptedException | ExecutionException e) {
@@ -252,7 +246,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
         = SettableFuture.create();
 
     try {
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       resultFuture.get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
@@ -278,7 +272,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
       final SettableFuture<ClientProtos.Response> resultFuture
           = SettableFuture.create();
 
-      handler.call(call.build(), resultFuture);
+      handler.call(call.build(), resultFuture, channel);
       resultFuture.get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);

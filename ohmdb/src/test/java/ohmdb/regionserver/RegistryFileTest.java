@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public class RegistryFileTest {
   @Before
   public void setup() {
     try {
-      registryFile = new RegistryFile("/tmp");
+      registryFile = new RegistryFile(Paths.get("/tmp"));
       registryFile.truncate();
     } catch (FileNotFoundException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

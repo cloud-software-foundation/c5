@@ -2,9 +2,9 @@ package ohmdb.regionserver.scanner;
 
 
 import io.netty.channel.ChannelHandlerContext;
+import ohmdb.OhmStatic;
 import ohmdb.client.OhmConstants;
 import ohmdb.client.generated.ClientProtos;
-import ohmdb.regionserver.OhmServer;
 import ohmdb.regionserver.ReverseProtobufUtil;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Scan;
@@ -15,6 +15,8 @@ import org.jetlang.core.Callback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ohmdb.OhmStatic.*;
 
 public class ScanRunnable implements Callback<Integer> {
   private final long scannerId;
@@ -31,7 +33,7 @@ public class ScanRunnable implements Callback<Integer> {
     this.ctx = ctx;
     this.call = call;
     this.scannerId = scannerId;
-    HRegion region = OhmServer.getOnlineRegion("1");
+    HRegion region = getOnlineRegion("1");
     this.scanner = region.getScanner(scan);
     this.close = false;
   }
@@ -83,7 +85,7 @@ public class ScanRunnable implements Callback<Integer> {
           .setCommandId(call.getCommandId())
           .setScan(scanResponse.build()).build();
 
-      ctx.write(response);
+      ctx.writeAndFlush(response);
       numberOfMsgsLeft -= rowsToSend;
     }
   }
