@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
 import ohmdb.generated.Log;
 import ohmdb.replication.InRamLog;
+import ohmdb.replication.IndexCommitNotice;
 import ohmdb.replication.RaftInfoPersistence;
 import ohmdb.replication.RaftInformationInterface;
 import ohmdb.replication.ReplicatorInstance;
@@ -228,6 +229,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
     }
 
     private Channel<ReplicatorInstanceStateChange> stateChangeChannel = new MemoryChannel<>();
+    private Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
 
     private ReplicatorInstance getReplicator(HRegionInfo info) {
         if (replicatorLookup.containsKey(info.getRegionNameAsString())) {
@@ -249,7 +251,8 @@ public class OLogShim extends OLog implements Syncable, HLog {
                 new Info(plusMillis),
                 new Persister(),
                 rpcChannel,
-                stateChangeChannel);
+                stateChangeChannel,
+                commitNoticeChannel);
         replicators.put(peerId, replicator);
         return replicator;
     }

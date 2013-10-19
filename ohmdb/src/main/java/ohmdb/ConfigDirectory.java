@@ -49,7 +49,14 @@ public class ConfigDirectory {
         init();
     }
 
+    /**
+     * Verifies that the 'config directory' is actually usable.  If it doesn't exist, create it.  If it exists,
+     * ensure that it's writable.  Ensure that primary configuration files aren't directories.
+     *
+     * @throws Exception
+     */
     private void init() throws Exception {
+
 
         if (Files.exists(baseConfigPath) && !Files.isDirectory(baseConfigPath)) {
             throw new Exception("Base config path exists and is not a directory " + baseConfigPath);
