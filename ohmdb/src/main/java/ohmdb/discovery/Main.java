@@ -30,6 +30,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
+import ohmdb.DiscoveryService;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -43,12 +44,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.discovery.Beacon.Availability;
-import static ohmdb.discovery.BeaconService.NodeInfo;
+import static ohmdb.DiscoveryService.NodeInfo;
 
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    final BeaconService beaconService = null;
+    final DiscoveryService beaconService = null;
     private final String clusterName;
     private final int discoveryPort;
     private final int servicePort;
@@ -107,7 +108,7 @@ public class Main {
                     ImmutableMap<Long,NodeInfo> state = fut.get();
 
                     System.out.println("State info:");
-                    for(BeaconService.NodeInfo info : state.values()) {
+                    for(DiscoveryService.NodeInfo info : state.values()) {
                         System.out.println(info);
                     }
 
