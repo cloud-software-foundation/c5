@@ -18,7 +18,7 @@ package ohmdb.log;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
-import ohmdb.ReplicationService;
+import ohmdb.interfaces.ReplicationService;
 import ohmdb.generated.Log;
 import ohmdb.replication.InRamLog;
 import ohmdb.replication.RaftInfoPersistence;
