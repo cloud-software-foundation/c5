@@ -20,6 +20,7 @@ import com.google.protobuf.ByteString;
 import ohmdb.generated.RegionRegistryLine;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.TableName;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -99,7 +100,7 @@ public class RegistryFile {
         }
 
         HRegionInfo regionInfo = new HRegionInfo(
-            entry.getTableName().toByteArray(),
+            TableName.valueOf(entry.getTableName().toByteArray()),
             entry.getStartKey().toByteArray(),
             entry.getEndKey().toByteArray(),
             false,

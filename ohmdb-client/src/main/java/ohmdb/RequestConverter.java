@@ -66,9 +66,9 @@ public class RequestConverter {
     ClientProtos.GetRequest.Builder builder = ClientProtos.GetRequest.newBuilder();
     HBaseProtos.RegionSpecifier region = buildRegionSpecifier(
         HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    builder.setExistenceOnly(existenceOnly);
+
     builder.setRegion(region);
-    builder.setGet(ProtobufUtil.toGet(get));
+    builder.setGet(ProtobufUtil.toGet(get, existenceOnly));
     return builder.build();
   }
 
@@ -124,67 +124,42 @@ public class RequestConverter {
     return builder.build();
   }
 
-  /**
-   * Create a protocol buffer MultiGetRequest for client Gets All gets are going to be run against
-   * the same region.
-   *
-   * @param regionName    the name of the region to get from
-   * @param gets          the client Gets
-   * @param existenceOnly indicate if check rows existence only
-   * @return a protocol buffer MultiGetRequest
-   */
-  public static ClientProtos.MultiGetRequest buildMultiGetRequest(final byte[] regionName,
-                                                                  final Collection<Get> gets,
-                                                                  final boolean existenceOnly) throws IOException {
-    ClientProtos.MultiGetRequest.Builder builder = ClientProtos.MultiGetRequest.newBuilder();
-    HBaseProtos.RegionSpecifier region =
-        buildRegionSpecifier(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    builder.setExistenceOnly(existenceOnly);
-    builder.setRegion(region);
-    for (Get get : gets) {
-      builder.addGet(ProtobufUtil.toGet(get));
+
+    private static ClientProtos.RegionAction.Builder getRegionActionBuilderWithRegion(final byte [] regionName) {
+        ClientProtos.RegionAction.Builder builder = ClientProtos.RegionAction.newBuilder();
+        HBaseProtos.RegionSpecifier region =
+                buildRegionSpecifier(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+        builder.setRegion(region);
+        return builder;
     }
-    return builder.build();
-  }
 
-  /**
-   * Create a protocol buffer MultiRequest for a row mutations
-   *
-   * @param regionName
-   * @param rowMutations
-   * @return a multi request
-   * @throws IOException
-   */
-  public static ClientProtos.MultiRequest buildMultiRequest(final byte[] regionName,
-                                                            final RowMutations rowMutations)
-      throws IOException {
-    ClientProtos.MultiRequest.Builder builder = getMultiRequestBuilderWithRegionAndAtomicSet(regionName, true);
-    for (Mutation mutation : rowMutations.getMutations()) {
-      ClientProtos.MutationProto.MutationType mutateType;
-      if (mutation instanceof Put) {
-        mutateType = ClientProtos.MutationProto.MutationType.PUT;
-      } else if (mutation instanceof Delete) {
-        mutateType = ClientProtos.MutationProto.MutationType.DELETE;
-      } else {
-        throw new DoNotRetryIOException("RowMutations supports only put and delete, not " +
-            mutation.getClass().getName());
-      }
-      ClientProtos.MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
-      builder.addAction(ClientProtos.MultiAction.newBuilder().setMutation(mp).build());
+    /**
+     * Create a protocol buffer MultiRequest for row mutations.
+     * Does not propagate Action absolute position.  Does not set atomic action on the created
+     * RegionAtomic.  Caller should do that if wanted.
+     * @param regionName
+     * @param rowMutations
+     * @return a data-laden RegionMutation.Builder
+     * @throws IOException
+     */
+    public static ClientProtos.RegionAction.Builder buildRegionAction(final byte [] regionName,
+                                                         final RowMutations rowMutations)
+            throws IOException {
+        ClientProtos.RegionAction.Builder builder = getRegionActionBuilderWithRegion(regionName);
+        for (Mutation mutation: rowMutations.getMutations()) {
+            ClientProtos.MutationProto.MutationType mutateType = null;
+            if (mutation instanceof Put) {
+                mutateType = ClientProtos.MutationProto.MutationType.PUT;
+            } else if (mutation instanceof Delete) {
+                mutateType = ClientProtos.MutationProto.MutationType.DELETE;
+            } else {
+                throw new DoNotRetryIOException("RowMutations supports only put and delete, not " +
+                        mutation.getClass().getName());
+            }
+            ClientProtos.MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
+            builder.addAction(ClientProtos.Action.newBuilder().setMutation(mp).build());
+        }
+        return builder;
     }
-    return builder.build();
-  }
-
-
-  private static ClientProtos.MultiRequest.Builder
-  getMultiRequestBuilderWithRegionAndAtomicSet(final byte[] regionName,
-                                               final boolean atomic) {
-    ClientProtos.MultiRequest.Builder builder = ClientProtos.MultiRequest.newBuilder();
-    HBaseProtos.RegionSpecifier region =
-        buildRegionSpecifier(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME,
-            regionName);
-    builder.setRegion(region);
-    return builder.setAtomic(atomic);
-  }
 
 }

@@ -18,6 +18,7 @@ package ohmdb.regionserver;
 
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,13 +63,13 @@ public class RegistryFileTest {
 
   private HRegionInfo getFakeHRegionInfo(Integer i) {
     if (i % 3 == 0) {
-      byte[] tableName = Bytes.toBytes("fake");
+      TableName tableName = TableName.valueOf("fake");
       byte[] startKey = Bytes.toBytes("astart");
       byte[] endKey = Bytes.toBytes("zend");
       long regionId = 0;
       return new HRegionInfo(tableName, startKey, endKey, false, regionId);
     } else {
-      byte[] tableName = Bytes.toBytes("fake" + i.toString());
+      TableName tableName = TableName.valueOf("fake" + i.toString());
       byte[] startKey = Bytes.toBytes("astart" + i.toString());
       byte[] endKey = Bytes.toBytes("zend" + i.toString());
       return new HRegionInfo(tableName, startKey, endKey);
