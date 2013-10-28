@@ -181,7 +181,7 @@ public class ClientScanner extends AbstractClientScanner {
   }
 
   public void add(ClientProtos.ScanResponse response) {
-    for (ClientProtos.Result result : response.getResultList()) {
+    for (ClientProtos.Result result : response.getResultsList()) {
       scanResults.add(result);
       this.outStandingRequests--;
     }

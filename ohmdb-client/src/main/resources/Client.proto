@@ -44,8 +44,10 @@ option java_generic_services = true;
 option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
 
+import "HBase.proto";
+import "Filter.proto";
+import "Cell.proto";
 import "Comparator.proto";
-import "hbase.proto";
 
 /**
  * Container for a list of column qualifier names of a family.
@@ -56,18 +58,29 @@ message Column {
 }
 
 /**
- * The protocol buffer version of Get
+ * The protocol buffer version of Get.
+ * Unless existence_only is specified, return all the requested data
+ * for the row that matches exactly, or the one that immediately
+ * precedes it if closest_row_before is specified.
  */
 message Get {
   required bytes row = 1;
   repeated Column column = 2;
   repeated NameBytesPair attribute = 3;
   optional Filter filter = 4;
-  optional TimeRange timeRange = 5;
-  optional uint32 maxVersions = 6 [default = 1];
-  optional bool cacheBlocks = 7 [default = true];
-  optional uint32 storeLimit = 8;
-  optional uint32 storeOffset = 9;
+  optional TimeRange time_range = 5;
+  optional uint32 max_versions = 6 [default = 1];
+  optional bool cache_blocks = 7 [default = true];
+  optional uint32 store_limit = 8;
+  optional uint32 store_offset = 9;
+
+  // The result isn't asked for, just check for
+  // the existence.
+  optional bool existence_only = 10 [default = false];
+
+  // If the row to get doesn't exist, return the
+  // closest row before.
+  optional bool closest_row_before = 11 [default = false];
 }
 
 message Result {
@@ -78,59 +91,25 @@ message Result {
   // not part of this protobuf message; they are passed alongside
   // and then this Message is just a placeholder with metadata.
   // The count is needed to know how many to peel off the block of Cells as
-  // ours.  NOTE: This is different from the pb managed cellCount of the
+  // ours.  NOTE: This is different from the pb managed cell_count of the
   // 'cell' field above which is non-null when the cells are pb'd.
-  optional int32 associatedCellCount = 2;
+  optional int32 associated_cell_count = 2;
+
+  // used for Get to check existence only. Not set if existence_only was not set to true
+  //  in the query.
+  optional bool exists = 3;
 }
 
 /**
  * The get request. Perform a single Get operation.
- * Unless existenceOnly is specified, return all the requested data
- * for the row that matches exactly, or the one that immediately
- * precedes it if closestRowBefore is specified.
- *
- * If existenceOnly is set, only the existence will be returned.
  */
 message GetRequest {
   required RegionSpecifier region = 1;
   required Get get = 2;
-
-  // If the row to get doesn't exist, return the
-  // closest row before.
-  optional bool closestRowBefore = 3;
-
-  // The result isn't asked for, just check for
-  // the existence. If closestRowBefore specified,
-  // this will be ignored
-  optional bool existenceOnly = 4;
-}
-
-message MultiGetRequest {
-  required RegionSpecifier region = 1;
-  repeated Get get = 2;
-
-  // If the row to get doesn't exist, return the
-  // closest row before.
-  optional bool closestRowBefore = 3;
-
-  // The result isn't asked for, just check for
-  // the existence. If closestRowBefore specified,
-  // this will be ignored
-  optional bool existenceOnly = 4;
 }
 
 message GetResponse {
   optional Result result = 1;
-
-  // used for Get to check existence only
-  optional bool exists = 2;
-}
-
-message MultiGetResponse {
-  repeated Result result = 1;
-
-  // used for Get to check existence only
-  repeated bool exists = 2;
 }
 
 /**
@@ -143,7 +122,7 @@ message Condition {
   required bytes row = 1;
   required bytes family = 2;
   required bytes qualifier = 3;
-  required CompareType compareType = 4;
+  required CompareType compare_type = 4;
   required Comparator comparator = 5;
 }
 
@@ -157,22 +136,22 @@ message Condition {
  */
 message MutationProto {
   optional bytes row = 1;
-  optional MutationType mutateType = 2;
-  repeated ColumnValue columnValue = 3;
+  optional MutationType mutate_type = 2;
+  repeated ColumnValue column_value = 3;
   optional uint64 timestamp = 4;
   repeated NameBytesPair attribute = 5;
   optional Durability durability = 6 [default = USE_DEFAULT];
 
   // For some mutations, a result may be returned, in which case,
   // time range can be specified for potential performance gain
-  optional TimeRange timeRange = 7;
+  optional TimeRange time_range = 7;
   // The below count is set when the associated cells are NOT
   // part of this protobuf message; they are passed alongside
   // and then this Message is a placeholder with metadata.  The
   // count is needed to know how many to peel off the block of Cells as
-  // ours.  NOTE: This is different from the pb managed cellCount of the
+  // ours.  NOTE: This is different from the pb managed cell_count of the
   // 'cell' field above which is non-null when the cells are pb'd.
-  optional int32 associatedCellCount = 8;
+  optional int32 associated_cell_count = 8;
 
   enum Durability {
     USE_DEFAULT  = 0;
@@ -193,17 +172,18 @@ message MutationProto {
     DELETE_ONE_VERSION = 0;
     DELETE_MULTIPLE_VERSIONS = 1;
     DELETE_FAMILY = 2;
+    DELETE_FAMILY_VERSION = 3;
   }
 
   message ColumnValue {
     required bytes family = 1;
-    repeated QualifierValue qualifierValue = 2;
+    repeated QualifierValue qualifier_value = 2;
 
     message QualifierValue {
       optional bytes qualifier = 1;
       optional bytes value = 2;
       optional uint64 timestamp = 3;
-      optional DeleteType deleteType = 4;
+      optional DeleteType delete_type = 4;
     }
   }
 }
@@ -242,17 +222,18 @@ message MutateResponse {
 message Scan {
   repeated Column column = 1;
   repeated NameBytesPair attribute = 2;
-  optional bytes startRow = 3;
-  optional bytes stopRow = 4;
+  optional bytes start_row = 3;
+  optional bytes stop_row = 4;
   optional Filter filter = 5;
-  optional TimeRange timeRange = 6;
-  optional uint32 maxVersions = 7 [default = 1];
-  optional bool cacheBlocks = 8 [default = true];
-  optional uint32 batchSize = 9;
-  optional uint64 maxResultSize = 10;
-  optional uint32 storeLimit = 11;
-  optional uint32 storeOffset = 12;
-  optional bool loadColumnFamiliesOnDemand = 13; /* DO NOT add defaults to loadColumnFamiliesOnDemand. */
+  optional TimeRange time_range = 6;
+  optional uint32 max_versions = 7 [default = 1];
+  optional bool cache_blocks = 8 [default = true];
+  optional uint32 batch_size = 9;
+  optional uint64 max_result_size = 10;
+  optional uint32 store_limit = 11;
+  optional uint32 store_offset = 12;
+  optional bool load_column_families_on_demand = 13; /* DO NOT add defaults to load_column_families_on_demand. */
+  optional bool small = 14;
 }
 
 /**
@@ -269,22 +250,32 @@ message Scan {
 message ScanRequest {
   optional RegionSpecifier region = 1;
   optional Scan scan = 2;
-  optional uint64 scannerId = 3;
-  optional uint32 numberOfRows = 4;
-  optional bool closeScanner = 5;
-  optional uint64 nextCallSeq = 6;
+  optional uint64 scanner_id = 3;
+  optional uint32 number_of_rows = 4;
+  optional bool close_scanner = 5;
+  optional uint64 next_call_seq = 6;
 }
 
 /**
- * The scan response. If there are no more results, moreResults will
+ * The scan response. If there are no more results, more_results will
  * be false.  If it is not specified, it means there are more.
  */
 message ScanResponse {
-  repeated Result result = 1;
-  optional uint64 scannerId = 2;
-  optional bool moreResults = 3;
+  // This field is filled in if we are doing cellblocks.  A cellblock is made up
+  // of all Cells serialized out as one cellblock BUT responses from a server
+  // have their Cells grouped by Result.  So we can reconstitute the
+  // Results on the client-side, this field is a list of counts of Cells
+  // in each Result that makes up the response.  For example, if this field
+  // has 3, 3, 3 in it, then we know that on the client, we are to make
+  // three Results each of three Cells each.
+  repeated uint32 cells_per_result = 1;
+  optional uint64 scanner_id = 2;
+  optional bool more_results = 3;
   optional uint32 ttl = 4;
-  optional uint64 resultSizeBytes = 5;
+  // If cells are not carried in an accompanying cellblock, then they are pb'd here.
+  // This field is mutually exclusive with cells_per_result (since the Cells will
+  // be inside the pb'd Result)
+  repeated Result results = 5;
 }
 
 /**
@@ -293,8 +284,8 @@ message ScanResponse {
  */
 message BulkLoadHFileRequest {
   required RegionSpecifier region = 1;
-  repeated FamilyPath familyPath = 2;
-  optional bool assignSeqNum = 3;
+  repeated FamilyPath family_path = 2;
+  optional bool assign_seq_num = 3;
 
   message FamilyPath {
     required bytes family = 1;
@@ -306,76 +297,107 @@ message BulkLoadHFileResponse {
   required bool loaded = 1;
 }
 
-/**
- * An action that is part of MultiRequest.
- * This is a union type - exactly one of the fields will be set.
- */
-message MultiAction {
-  optional MutationProto mutation = 1;
-  optional Get get = 2;
+message CoprocessorServiceCall {
+  required bytes row = 1;
+  required string service_name = 2;
+  required string method_name = 3;
+  required bytes request = 4;
 }
 
-/**
- * An individual action result. The result will in the
- * same order as the action in the request. If an action
- * returns a value, it is set in value field. If it doesn't
- * return anything, the result will be empty. If an action
- * fails to execute due to any exception, the exception
- * is returned as a stringified parameter.
- */
-message ActionResult {
-  optional Result value = 1;
-  optional NameBytesPair exception = 2;
-}
-
-/**
- * You can execute a list of actions on a given region in order.
- *
- * If it is a list of mutate actions, atomic can be set
- * to make sure they can be processed atomically, just like
- * RowMutations.
- */
-message MultiRequest {
+message CoprocessorServiceRequest {
   required RegionSpecifier region = 1;
-  repeated MultiAction action = 2;
-  optional bool atomic = 3;
+  required CoprocessorServiceCall call = 2;
 }
 
-message MultiResponse {
-  repeated ActionResult result = 1;
+message CoprocessorServiceResponse {
+  required RegionSpecifier region = 1;
+  required NameBytesPair value = 2;
 }
 
-message Call {
-    enum Command {
-        GET = 0;
-        MULTI_GET = 1;
-        MUTATE = 2;
-        SCAN = 3;
-        MULTI = 4;
-    }
-    required Command command = 1;
-    required int64 commandId = 2;
-    optional GetRequest get = 3;
-    optional MultiGetRequest multiGet = 4;
-    optional MutateRequest mutate = 5;
-    optional ScanRequest scan = 6;
-    optional MultiRequest multi = 7;
+// Either a Get or a Mutation
+message Action {
+  // If part of a multi action, useful aligning
+  // result with what was originally submitted.
+  optional uint32 index = 1;
+  optional MutationProto mutation = 2;
+  optional Get get = 3;
 }
 
 message Response {
     enum Command {
         GET = 0;
-        MULTI_GET = 1;
-        MUTATE = 2;
-        SCAN = 3;
-        MULTI = 4;
+        MUTATE = 1;
+        SCAN = 2;
+        MULTI = 3;
     }
     required Command command = 1;
     required int64 commandId = 2;
 
     optional GetResponse get = 3;
-    optional MultiGetResponse multiGet = 4;
-    optional MutateResponse mutate = 5;
-    optional ScanResponse scan = 6;
-    optional MultiResponse multi = 7;
+    optional MutateResponse mutate = 4;
+    optional ScanResponse scan = 5;
+    optional MultiResponse multi = 6;
+}
+
+message Call {
+    enum Command {
+        GET = 0;
+        MUTATE = 1;
+        SCAN = 2;
+        MULTI = 3;
+    }
+    required Command command = 1;
+    required int64 commandId = 2;
+    optional GetRequest get = 3;
+    optional MutateRequest mutate = 4;
+    optional ScanRequest scan = 5;
+    optional MultiRequest multi = 6;
+}
+
+
+/**
+ * Actions to run against a Region.
+ */
+message RegionAction {
+  required RegionSpecifier region = 1;
+  // When set, run mutations as atomic unit.
+  optional bool atomic = 2;
+  repeated Action action = 3;
+}
+
+/**
+ * Either a Result or an Exception NameBytesPair (keyed by
+ * exception name whose value is the exception stringified)
+ * or maybe empty if no result and no exception.
+ */
+message ResultOrException {
+  // If part of a multi call, save original index of the list of all
+  // passed so can align this response w/ original request.
+  optional uint32 index = 1;
+  optional Result result = 2;
+  optional NameBytesPair exception = 3;
+}
+
+/**
+ * The result of a RegionAction.
+ */
+message RegionActionResult {
+  repeated ResultOrException resultOrException = 1;
+  // If the operation failed globally for this region, this exception is set
+  optional NameBytesPair exception = 2;
+}
+
+/**
+ * Execute a list of actions on a given region in order.
+ * Nothing prevents a request to contains a set of RegionAction on the same region.
+ * For this reason, the matching between the MultiRequest and the MultiResponse is not
+ *  done by the region specifier but by keeping the order of the RegionActionResult vs.
+ *  the order of the RegionAction.
+ */
+message MultiRequest {
+  repeated RegionAction regionAction = 1;
+}
+
+message MultiResponse {
+  repeated RegionActionResult regionActionResult = 1;
 }

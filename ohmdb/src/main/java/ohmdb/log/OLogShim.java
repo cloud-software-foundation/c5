@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
@@ -179,18 +180,19 @@ public class OLogShim extends OLog implements Syncable, HLog {
         return this.logSeqNum.incrementAndGet();
     }
 
+
     @Override
     public void append(HRegionInfo info,
-                       byte[] tableName,
+                       TableName tableName,
                        WALEdit edits,
                        long now,
                        HTableDescriptor htd) throws IOException {
         this.append(info, tableName, edits, uuid, now, htd);
     }
 
-    //  @Override
+    @Override
     public void append(HRegionInfo info,
-                       byte[] tableName,
+                       TableName tableName,
                        WALEdit edits,
                        long now,
                        HTableDescriptor htd,
@@ -199,12 +201,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
     }
 
     @Override
-    public long appendNoSync(HRegionInfo info,
-                             byte[] tableName,
-                             WALEdit edits,
-                             UUID clusterId,
-                             long now,
-                             HTableDescriptor htd) throws IOException {
+    public long appendNoSync(HRegionInfo info, TableName tableName, WALEdit edits, List<UUID> clusterIds, long now, HTableDescriptor htd) throws IOException {
         ReplicatorInstance replicator = getReplicator(info);
 
         for (KeyValue edit : edits.getKeyValues()) {
@@ -266,7 +263,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
     }
 
     public long append(HRegionInfo info,
-                       byte[] tableName,
+                       TableName tableName,
                        WALEdit edits,
                        UUID clusterId,
                        long now,
