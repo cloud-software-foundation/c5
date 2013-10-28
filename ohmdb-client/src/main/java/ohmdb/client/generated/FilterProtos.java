@@ -8,231 +8,387 @@ public final class FilterProtos {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface ColumnCountGetFilterOrBuilder
+  public interface FilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required int32 limit = 1;
-    boolean hasLimit();
-    int getLimit();
+
+    // required string name = 1;
+    /**
+     * <code>required string name = 1;</code>
+     */
+    boolean hasName();
+    /**
+     * <code>required string name = 1;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>required string name = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    // optional bytes serialized_filter = 2;
+    /**
+     * <code>optional bytes serialized_filter = 2;</code>
+     */
+    boolean hasSerializedFilter();
+    /**
+     * <code>optional bytes serialized_filter = 2;</code>
+     */
+    com.google.protobuf.ByteString getSerializedFilter();
   }
-  public static final class ColumnCountGetFilter extends
+  /**
+   * Protobuf type {@code Filter}
+   */
+  public static final class Filter extends
       com.google.protobuf.GeneratedMessage
-      implements ColumnCountGetFilterOrBuilder {
-    // Use ColumnCountGetFilter.newBuilder() to construct.
-    private ColumnCountGetFilter(Builder builder) {
+      implements FilterOrBuilder {
+    // Use Filter.newBuilder() to construct.
+    private Filter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private ColumnCountGetFilter(boolean noInit) {}
-    
-    private static final ColumnCountGetFilter defaultInstance;
-    public static ColumnCountGetFilter getDefaultInstance() {
+    private Filter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final Filter defaultInstance;
+    public static Filter getDefaultInstance() {
       return defaultInstance;
     }
-    
-    public ColumnCountGetFilter getDefaultInstanceForType() {
+
+    public Filter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Filter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              name_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              serializedFilter_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_descriptor;
+      return ohmdb.client.generated.FilterProtos.internal_static_Filter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_Filter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.Filter.class, ohmdb.client.generated.FilterProtos.Filter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<Filter> PARSER =
+        new com.google.protobuf.AbstractParser<Filter>() {
+      public Filter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Filter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Filter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required int32 limit = 1;
-    public static final int LIMIT_FIELD_NUMBER = 1;
-    private int limit_;
-    public boolean hasLimit() {
+    // required string name = 1;
+    public static final int NAME_FIELD_NUMBER = 1;
+    private java.lang.Object name_;
+    /**
+     * <code>required string name = 1;</code>
+     */
+    public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    public int getLimit() {
-      return limit_;
+    /**
+     * <code>required string name = 1;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
     }
-    
+    /**
+     * <code>required string name = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional bytes serialized_filter = 2;
+    public static final int SERIALIZED_FILTER_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString serializedFilter_;
+    /**
+     * <code>optional bytes serialized_filter = 2;</code>
+     */
+    public boolean hasSerializedFilter() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes serialized_filter = 2;</code>
+     */
+    public com.google.protobuf.ByteString getSerializedFilter() {
+      return serializedFilter_;
+    }
+
     private void initFields() {
-      limit_ = 0;
+      name_ = "";
+      serializedFilter_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
-      if (!hasLimit()) {
+
+      if (!hasName()) {
         memoizedIsInitialized = 0;
         return false;
       }
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, limit_);
+        output.writeBytes(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, serializedFilter_);
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, limit_);
+          .computeBytesSize(1, getNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, serializedFilter_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnCountGetFilter)) {
+      if (!(obj instanceof ohmdb.client.generated.FilterProtos.Filter)) {
         return super.equals(obj);
       }
-      ohmdb.client.generated.FilterProtos.ColumnCountGetFilter other = (ohmdb.client.generated.FilterProtos.ColumnCountGetFilter) obj;
-      
+      ohmdb.client.generated.FilterProtos.Filter other = (ohmdb.client.generated.FilterProtos.Filter) obj;
+
       boolean result = true;
-      result = result && (hasLimit() == other.hasLimit());
-      if (hasLimit()) {
-        result = result && (getLimit()
-            == other.getLimit());
+      result = result && (hasName() == other.hasName());
+      if (hasName()) {
+        result = result && getName()
+            .equals(other.getName());
+      }
+      result = result && (hasSerializedFilter() == other.hasSerializedFilter());
+      if (hasSerializedFilter()) {
+        result = result && getSerializedFilter()
+            .equals(other.getSerializedFilter());
       }
       result = result &&
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasLimit()) {
-        hash = (37 * hash) + LIMIT_FIELD_NUMBER;
-        hash = (53 * hash) + getLimit();
+      if (hasName()) {
+        hash = (37 * hash) + NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getName().hashCode();
+      }
+      if (hasSerializedFilter()) {
+        hash = (37 * hash) + SERIALIZED_FILTER_FIELD_NUMBER;
+        hash = (53 * hash) + getSerializedFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(byte[] data)
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(java.io.InputStream input)
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseDelimitedFrom(java.io.InputStream input)
+    public static ohmdb.client.generated.FilterProtos.Filter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseDelimitedFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.Filter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnCountGetFilter prototype) {
+    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.Filter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code Filter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.FilterProtos.ColumnCountGetFilterOrBuilder {
+       implements ohmdb.client.generated.FilterProtos.FilterOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_descriptor;
+        return ohmdb.client.generated.FilterProtos.internal_static_Filter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_Filter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.Filter.class, ohmdb.client.generated.FilterProtos.Filter.Builder.class);
       }
-      
-      // Construct using ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.newBuilder()
+
+      // Construct using ohmdb.client.generated.FilterProtos.Filter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -243,27 +399,557 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
+      public Builder clear() {
+        super.clear();
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        serializedFilter_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.FilterProtos.internal_static_Filter_descriptor;
+      }
+
+      public ohmdb.client.generated.FilterProtos.Filter getDefaultInstanceForType() {
+        return ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
+      }
+
+      public ohmdb.client.generated.FilterProtos.Filter build() {
+        ohmdb.client.generated.FilterProtos.Filter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public ohmdb.client.generated.FilterProtos.Filter buildPartial() {
+        ohmdb.client.generated.FilterProtos.Filter result = new ohmdb.client.generated.FilterProtos.Filter(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.name_ = name_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.serializedFilter_ = serializedFilter_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.FilterProtos.Filter) {
+          return mergeFrom((ohmdb.client.generated.FilterProtos.Filter)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ohmdb.client.generated.FilterProtos.Filter other) {
+        if (other == ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance()) return this;
+        if (other.hasName()) {
+          bitField0_ |= 0x00000001;
+          name_ = other.name_;
+          onChanged();
+        }
+        if (other.hasSerializedFilter()) {
+          setSerializedFilter(other.getSerializedFilter());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasName()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ohmdb.client.generated.FilterProtos.Filter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.Filter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string name = 1;
+      private java.lang.Object name_ = "";
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string name = 1;</code>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes serialized_filter = 2;
+      private com.google.protobuf.ByteString serializedFilter_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes serialized_filter = 2;</code>
+       */
+      public boolean hasSerializedFilter() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes serialized_filter = 2;</code>
+       */
+      public com.google.protobuf.ByteString getSerializedFilter() {
+        return serializedFilter_;
+      }
+      /**
+       * <code>optional bytes serialized_filter = 2;</code>
+       */
+      public Builder setSerializedFilter(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        serializedFilter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes serialized_filter = 2;</code>
+       */
+      public Builder clearSerializedFilter() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        serializedFilter_ = getDefaultInstance().getSerializedFilter();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Filter)
+    }
+
+    static {
+      defaultInstance = new Filter(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:Filter)
+  }
+
+  public interface ColumnCountGetFilterOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 limit = 1;
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    boolean hasLimit();
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    int getLimit();
+  }
+  /**
+   * Protobuf type {@code ColumnCountGetFilter}
+   */
+  public static final class ColumnCountGetFilter extends
+      com.google.protobuf.GeneratedMessage
+      implements ColumnCountGetFilterOrBuilder {
+    // Use ColumnCountGetFilter.newBuilder() to construct.
+    private ColumnCountGetFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ColumnCountGetFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ColumnCountGetFilter defaultInstance;
+    public static ColumnCountGetFilter getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ColumnCountGetFilter getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ColumnCountGetFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              limit_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.class, ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ColumnCountGetFilter> PARSER =
+        new com.google.protobuf.AbstractParser<ColumnCountGetFilter>() {
+      public ColumnCountGetFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ColumnCountGetFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ColumnCountGetFilter> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 limit = 1;
+    public static final int LIMIT_FIELD_NUMBER = 1;
+    private int limit_;
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    public boolean hasLimit() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    public int getLimit() {
+      return limit_;
+    }
+
+    private void initFields() {
+      limit_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasLimit()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, limit_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, limit_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnCountGetFilter)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.FilterProtos.ColumnCountGetFilter other = (ohmdb.client.generated.FilterProtos.ColumnCountGetFilter) obj;
+
+      boolean result = true;
+      result = result && (hasLimit() == other.hasLimit());
+      if (hasLimit()) {
+        result = result && (getLimit()
+            == other.getLimit());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+
+    private int memoizedHashCode = 0;
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasLimit()) {
+        hash = (37 * hash) + LIMIT_FIELD_NUMBER;
+        hash = (53 * hash) + getLimit();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnCountGetFilter prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ColumnCountGetFilter}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.FilterProtos.ColumnCountGetFilterOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.class, ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.Builder.class);
+      }
+
+      // Construct using ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
       public Builder clear() {
         super.clear();
         limit_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnCountGetFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnCountGetFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnCountGetFilter build() {
         ohmdb.client.generated.FilterProtos.ColumnCountGetFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -271,17 +957,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.ColumnCountGetFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.ColumnCountGetFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnCountGetFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.ColumnCountGetFilter result = new ohmdb.client.generated.FilterProtos.ColumnCountGetFilter(this);
         int from_bitField0_ = bitField0_;
@@ -294,7 +970,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.ColumnCountGetFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnCountGetFilter)other);
@@ -303,7 +979,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnCountGetFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.getDefaultInstance()) return this;
         if (other.hasLimit()) {
@@ -312,7 +988,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasLimit()) {
           
@@ -320,486 +996,151 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              limit_ = input.readInt32();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.ColumnCountGetFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.ColumnCountGetFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required int32 limit = 1;
       private int limit_ ;
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
       public boolean hasLimit() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
       public int getLimit() {
         return limit_;
       }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
       public Builder setLimit(int value) {
         bitField0_ |= 0x00000001;
         limit_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
       public Builder clearLimit() {
         bitField0_ = (bitField0_ & ~0x00000001);
         limit_ = 0;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:ColumnCountGetFilter)
     }
-    
+
     static {
       defaultInstance = new ColumnCountGetFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:ColumnCountGetFilter)
   }
-  
+
   public interface ColumnPaginationFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required int32 limit = 1;
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
     boolean hasLimit();
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
     int getLimit();
-    
+
     // optional int32 offset = 2;
+    /**
+     * <code>optional int32 offset = 2;</code>
+     */
     boolean hasOffset();
+    /**
+     * <code>optional int32 offset = 2;</code>
+     */
     int getOffset();
-    
-    // optional bytes columnOffset = 3;
+
+    // optional bytes column_offset = 3;
+    /**
+     * <code>optional bytes column_offset = 3;</code>
+     */
     boolean hasColumnOffset();
+    /**
+     * <code>optional bytes column_offset = 3;</code>
+     */
     com.google.protobuf.ByteString getColumnOffset();
   }
+  /**
+   * Protobuf type {@code ColumnPaginationFilter}
+   */
   public static final class ColumnPaginationFilter extends
       com.google.protobuf.GeneratedMessage
       implements ColumnPaginationFilterOrBuilder {
     // Use ColumnPaginationFilter.newBuilder() to construct.
-    private ColumnPaginationFilter(Builder builder) {
+    private ColumnPaginationFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private ColumnPaginationFilter(boolean noInit) {}
-    
+    private ColumnPaginationFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final ColumnPaginationFilter defaultInstance;
     public static ColumnPaginationFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public ColumnPaginationFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_fieldAccessorTable;
-    }
-    
-    private int bitField0_;
-    // required int32 limit = 1;
-    public static final int LIMIT_FIELD_NUMBER = 1;
-    private int limit_;
-    public boolean hasLimit() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public int getLimit() {
-      return limit_;
-    }
-    
-    // optional int32 offset = 2;
-    public static final int OFFSET_FIELD_NUMBER = 2;
-    private int offset_;
-    public boolean hasOffset() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public int getOffset() {
-      return offset_;
-    }
-    
-    // optional bytes columnOffset = 3;
-    public static final int COLUMNOFFSET_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString columnOffset_;
-    public boolean hasColumnOffset() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    public com.google.protobuf.ByteString getColumnOffset() {
-      return columnOffset_;
-    }
-    
-    private void initFields() {
-      limit_ = 0;
-      offset_ = 0;
-      columnOffset_ = com.google.protobuf.ByteString.EMPTY;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      if (!hasLimit()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, limit_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, offset_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, columnOffset_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, limit_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, offset_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, columnOffset_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
     }
-    
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnPaginationFilter)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.FilterProtos.ColumnPaginationFilter other = (ohmdb.client.generated.FilterProtos.ColumnPaginationFilter) obj;
-      
-      boolean result = true;
-      result = result && (hasLimit() == other.hasLimit());
-      if (hasLimit()) {
-        result = result && (getLimit()
-            == other.getLimit());
-      }
-      result = result && (hasOffset() == other.hasOffset());
-      if (hasOffset()) {
-        result = result && (getOffset()
-            == other.getOffset());
-      }
-      result = result && (hasColumnOffset() == other.hasColumnOffset());
-      if (hasColumnOffset()) {
-        result = result && getColumnOffset()
-            .equals(other.getColumnOffset());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-    
-    @java.lang.Override
-    public int hashCode() {
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasLimit()) {
-        hash = (37 * hash) + LIMIT_FIELD_NUMBER;
-        hash = (53 * hash) + getLimit();
-      }
-      if (hasOffset()) {
-        hash = (37 * hash) + OFFSET_FIELD_NUMBER;
-        hash = (53 * hash) + getOffset();
-      }
-      if (hasColumnOffset()) {
-        hash = (37 * hash) + COLUMNOFFSET_FIELD_NUMBER;
-        hash = (53 * hash) + getColumnOffset().hashCode();
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      return hash;
-    }
-    
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
+    private ColumnPaginationFilter(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnPaginationFilter prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.FilterProtos.ColumnPaginationFilterOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_fieldAccessorTable;
-      }
-      
-      // Construct using ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        limit_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        offset_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        columnOffset_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.getDescriptor();
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter getDefaultInstanceForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.getDefaultInstance();
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter build() {
-        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private ohmdb.client.generated.FilterProtos.ColumnPaginationFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter buildPartial() {
-        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter result = new ohmdb.client.generated.FilterProtos.ColumnPaginationFilter(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.limit_ = limit_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.offset_ = offset_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.columnOffset_ = columnOffset_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.FilterProtos.ColumnPaginationFilter) {
-          return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnPaginationFilter)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnPaginationFilter other) {
-        if (other == ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.getDefaultInstance()) return this;
-        if (other.hasLimit()) {
-          setLimit(other.getLimit());
-        }
-        if (other.hasOffset()) {
-          setOffset(other.getOffset());
-        }
-        if (other.hasColumnOffset()) {
-          setColumnOffset(other.getColumnOffset());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        if (!hasLimit()) {
-          
-          return false;
-        }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
+              done = true;
+              break;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
+                done = true;
               }
               break;
             }
@@ -820,312 +1161,302 @@ public final class FilterProtos {
             }
           }
         }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
       }
-      
-      private int bitField0_;
-      
-      // required int32 limit = 1;
-      private int limit_ ;
-      public boolean hasLimit() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public int getLimit() {
-        return limit_;
-      }
-      public Builder setLimit(int value) {
-        bitField0_ |= 0x00000001;
-        limit_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearLimit() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        limit_ = 0;
-        onChanged();
-        return this;
-      }
-      
-      // optional int32 offset = 2;
-      private int offset_ ;
-      public boolean hasOffset() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public int getOffset() {
-        return offset_;
-      }
-      public Builder setOffset(int value) {
-        bitField0_ |= 0x00000002;
-        offset_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearOffset() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        offset_ = 0;
-        onChanged();
-        return this;
-      }
-      
-      // optional bytes columnOffset = 3;
-      private com.google.protobuf.ByteString columnOffset_ = com.google.protobuf.ByteString.EMPTY;
-      public boolean hasColumnOffset() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      public com.google.protobuf.ByteString getColumnOffset() {
-        return columnOffset_;
-      }
-      public Builder setColumnOffset(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        columnOffset_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearColumnOffset() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        columnOffset_ = getDefaultInstance().getColumnOffset();
-        onChanged();
-        return this;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:ColumnPaginationFilter)
     }
-    
-    static {
-      defaultInstance = new ColumnPaginationFilter(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:ColumnPaginationFilter)
-  }
-  
-  public interface ColumnPrefixFilterOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // required bytes prefix = 1;
-    boolean hasPrefix();
-    com.google.protobuf.ByteString getPrefix();
-  }
-  public static final class ColumnPrefixFilter extends
-      com.google.protobuf.GeneratedMessage
-      implements ColumnPrefixFilterOrBuilder {
-    // Use ColumnPrefixFilter.newBuilder() to construct.
-    private ColumnPrefixFilter(Builder builder) {
-      super(builder);
-    }
-    private ColumnPrefixFilter(boolean noInit) {}
-    
-    private static final ColumnPrefixFilter defaultInstance;
-    public static ColumnPrefixFilter getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public ColumnPrefixFilter getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_descriptor;
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.class, ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<ColumnPaginationFilter> PARSER =
+        new com.google.protobuf.AbstractParser<ColumnPaginationFilter>() {
+      public ColumnPaginationFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ColumnPaginationFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ColumnPaginationFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required bytes prefix = 1;
-    public static final int PREFIX_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString prefix_;
-    public boolean hasPrefix() {
+    // required int32 limit = 1;
+    public static final int LIMIT_FIELD_NUMBER = 1;
+    private int limit_;
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    public boolean hasLimit() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    public com.google.protobuf.ByteString getPrefix() {
-      return prefix_;
+    /**
+     * <code>required int32 limit = 1;</code>
+     */
+    public int getLimit() {
+      return limit_;
     }
-    
+
+    // optional int32 offset = 2;
+    public static final int OFFSET_FIELD_NUMBER = 2;
+    private int offset_;
+    /**
+     * <code>optional int32 offset = 2;</code>
+     */
+    public boolean hasOffset() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 offset = 2;</code>
+     */
+    public int getOffset() {
+      return offset_;
+    }
+
+    // optional bytes column_offset = 3;
+    public static final int COLUMN_OFFSET_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString columnOffset_;
+    /**
+     * <code>optional bytes column_offset = 3;</code>
+     */
+    public boolean hasColumnOffset() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes column_offset = 3;</code>
+     */
+    public com.google.protobuf.ByteString getColumnOffset() {
+      return columnOffset_;
+    }
+
     private void initFields() {
-      prefix_ = com.google.protobuf.ByteString.EMPTY;
+      limit_ = 0;
+      offset_ = 0;
+      columnOffset_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
-      if (!hasPrefix()) {
+
+      if (!hasLimit()) {
         memoizedIsInitialized = 0;
         return false;
       }
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, prefix_);
+        output.writeInt32(1, limit_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, offset_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, columnOffset_);
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, prefix_);
+          .computeInt32Size(1, limit_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, offset_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, columnOffset_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnPrefixFilter)) {
+      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnPaginationFilter)) {
         return super.equals(obj);
       }
-      ohmdb.client.generated.FilterProtos.ColumnPrefixFilter other = (ohmdb.client.generated.FilterProtos.ColumnPrefixFilter) obj;
-      
+      ohmdb.client.generated.FilterProtos.ColumnPaginationFilter other = (ohmdb.client.generated.FilterProtos.ColumnPaginationFilter) obj;
+
       boolean result = true;
-      result = result && (hasPrefix() == other.hasPrefix());
-      if (hasPrefix()) {
-        result = result && getPrefix()
-            .equals(other.getPrefix());
+      result = result && (hasLimit() == other.hasLimit());
+      if (hasLimit()) {
+        result = result && (getLimit()
+            == other.getLimit());
+      }
+      result = result && (hasOffset() == other.hasOffset());
+      if (hasOffset()) {
+        result = result && (getOffset()
+            == other.getOffset());
+      }
+      result = result && (hasColumnOffset() == other.hasColumnOffset());
+      if (hasColumnOffset()) {
+        result = result && getColumnOffset()
+            .equals(other.getColumnOffset());
       }
       result = result &&
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasPrefix()) {
-        hash = (37 * hash) + PREFIX_FIELD_NUMBER;
-        hash = (53 * hash) + getPrefix().hashCode();
+      if (hasLimit()) {
+        hash = (37 * hash) + LIMIT_FIELD_NUMBER;
+        hash = (53 * hash) + getLimit();
+      }
+      if (hasOffset()) {
+        hash = (37 * hash) + OFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + getOffset();
+      }
+      if (hasColumnOffset()) {
+        hash = (37 * hash) + COLUMN_OFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + getColumnOffset().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(byte[] data)
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(java.io.InputStream input)
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseDelimitedFrom(java.io.InputStream input)
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseDelimitedFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
-    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+    public static ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnPrefixFilter prototype) {
+    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnPaginationFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code ColumnPaginationFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.FilterProtos.ColumnPrefixFilterOrBuilder {
+       implements ohmdb.client.generated.FilterProtos.ColumnPaginationFilterOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_descriptor;
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.class, ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.Builder.class);
       }
-      
-      // Construct using ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.newBuilder()
+
+      // Construct using ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1136,27 +1467,556 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
+      public Builder clear() {
+        super.clear();
+        limit_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        offset_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        columnOffset_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPaginationFilter_descriptor;
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter getDefaultInstanceForType() {
+        return ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.getDefaultInstance();
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter build() {
+        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnPaginationFilter buildPartial() {
+        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter result = new ohmdb.client.generated.FilterProtos.ColumnPaginationFilter(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.limit_ = limit_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.offset_ = offset_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.columnOffset_ = columnOffset_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.FilterProtos.ColumnPaginationFilter) {
+          return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnPaginationFilter)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnPaginationFilter other) {
+        if (other == ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.getDefaultInstance()) return this;
+        if (other.hasLimit()) {
+          setLimit(other.getLimit());
+        }
+        if (other.hasOffset()) {
+          setOffset(other.getOffset());
+        }
+        if (other.hasColumnOffset()) {
+          setColumnOffset(other.getColumnOffset());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasLimit()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ohmdb.client.generated.FilterProtos.ColumnPaginationFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.ColumnPaginationFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 limit = 1;
+      private int limit_ ;
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
+      public boolean hasLimit() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
+      public int getLimit() {
+        return limit_;
+      }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
+      public Builder setLimit(int value) {
+        bitField0_ |= 0x00000001;
+        limit_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 limit = 1;</code>
+       */
+      public Builder clearLimit() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        limit_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 offset = 2;
+      private int offset_ ;
+      /**
+       * <code>optional int32 offset = 2;</code>
+       */
+      public boolean hasOffset() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 offset = 2;</code>
+       */
+      public int getOffset() {
+        return offset_;
+      }
+      /**
+       * <code>optional int32 offset = 2;</code>
+       */
+      public Builder setOffset(int value) {
+        bitField0_ |= 0x00000002;
+        offset_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 offset = 2;</code>
+       */
+      public Builder clearOffset() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        offset_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes column_offset = 3;
+      private com.google.protobuf.ByteString columnOffset_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes column_offset = 3;</code>
+       */
+      public boolean hasColumnOffset() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes column_offset = 3;</code>
+       */
+      public com.google.protobuf.ByteString getColumnOffset() {
+        return columnOffset_;
+      }
+      /**
+       * <code>optional bytes column_offset = 3;</code>
+       */
+      public Builder setColumnOffset(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        columnOffset_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes column_offset = 3;</code>
+       */
+      public Builder clearColumnOffset() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        columnOffset_ = getDefaultInstance().getColumnOffset();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:ColumnPaginationFilter)
+    }
+
+    static {
+      defaultInstance = new ColumnPaginationFilter(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:ColumnPaginationFilter)
+  }
+
+  public interface ColumnPrefixFilterOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required bytes prefix = 1;
+    /**
+     * <code>required bytes prefix = 1;</code>
+     */
+    boolean hasPrefix();
+    /**
+     * <code>required bytes prefix = 1;</code>
+     */
+    com.google.protobuf.ByteString getPrefix();
+  }
+  /**
+   * Protobuf type {@code ColumnPrefixFilter}
+   */
+  public static final class ColumnPrefixFilter extends
+      com.google.protobuf.GeneratedMessage
+      implements ColumnPrefixFilterOrBuilder {
+    // Use ColumnPrefixFilter.newBuilder() to construct.
+    private ColumnPrefixFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ColumnPrefixFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ColumnPrefixFilter defaultInstance;
+    public static ColumnPrefixFilter getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ColumnPrefixFilter getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ColumnPrefixFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              prefix_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.class, ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ColumnPrefixFilter> PARSER =
+        new com.google.protobuf.AbstractParser<ColumnPrefixFilter>() {
+      public ColumnPrefixFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ColumnPrefixFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ColumnPrefixFilter> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required bytes prefix = 1;
+    public static final int PREFIX_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString prefix_;
+    /**
+     * <code>required bytes prefix = 1;</code>
+     */
+    public boolean hasPrefix() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required bytes prefix = 1;</code>
+     */
+    public com.google.protobuf.ByteString getPrefix() {
+      return prefix_;
+    }
+
+    private void initFields() {
+      prefix_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasPrefix()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, prefix_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, prefix_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnPrefixFilter)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.FilterProtos.ColumnPrefixFilter other = (ohmdb.client.generated.FilterProtos.ColumnPrefixFilter) obj;
+
+      boolean result = true;
+      result = result && (hasPrefix() == other.hasPrefix());
+      if (hasPrefix()) {
+        result = result && getPrefix()
+            .equals(other.getPrefix());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+
+    private int memoizedHashCode = 0;
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasPrefix()) {
+        hash = (37 * hash) + PREFIX_FIELD_NUMBER;
+        hash = (53 * hash) + getPrefix().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnPrefixFilter prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ColumnPrefixFilter}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.FilterProtos.ColumnPrefixFilterOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.class, ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.Builder.class);
+      }
+
+      // Construct using ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
       public Builder clear() {
         super.clear();
         prefix_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnPrefixFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnPrefixFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnPrefixFilter build() {
         ohmdb.client.generated.FilterProtos.ColumnPrefixFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -1164,17 +2024,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.ColumnPrefixFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.ColumnPrefixFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.ColumnPrefixFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.ColumnPrefixFilter result = new ohmdb.client.generated.FilterProtos.ColumnPrefixFilter(this);
         int from_bitField0_ = bitField0_;
@@ -1187,7 +2037,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.ColumnPrefixFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnPrefixFilter)other);
@@ -1196,7 +2046,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnPrefixFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.getDefaultInstance()) return this;
         if (other.hasPrefix()) {
@@ -1205,7 +2055,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasPrefix()) {
           
@@ -1213,49 +2063,43 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              prefix_ = input.readBytes();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.ColumnPrefixFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.ColumnPrefixFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required bytes prefix = 1;
       private com.google.protobuf.ByteString prefix_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>required bytes prefix = 1;</code>
+       */
       public boolean hasPrefix() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required bytes prefix = 1;</code>
+       */
       public com.google.protobuf.ByteString getPrefix() {
         return prefix_;
       }
+      /**
+       * <code>required bytes prefix = 1;</code>
+       */
       public Builder setPrefix(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1265,469 +2109,118 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>required bytes prefix = 1;</code>
+       */
       public Builder clearPrefix() {
         bitField0_ = (bitField0_ & ~0x00000001);
         prefix_ = getDefaultInstance().getPrefix();
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:ColumnPrefixFilter)
     }
-    
+
     static {
       defaultInstance = new ColumnPrefixFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:ColumnPrefixFilter)
   }
-  
+
   public interface ColumnRangeFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional bytes minColumn = 1;
+
+    // optional bytes min_column = 1;
+    /**
+     * <code>optional bytes min_column = 1;</code>
+     */
     boolean hasMinColumn();
+    /**
+     * <code>optional bytes min_column = 1;</code>
+     */
     com.google.protobuf.ByteString getMinColumn();
-    
-    // optional bool minColumnInclusive = 2;
+
+    // optional bool min_column_inclusive = 2;
+    /**
+     * <code>optional bool min_column_inclusive = 2;</code>
+     */
     boolean hasMinColumnInclusive();
+    /**
+     * <code>optional bool min_column_inclusive = 2;</code>
+     */
     boolean getMinColumnInclusive();
-    
-    // optional bytes maxColumn = 3;
+
+    // optional bytes max_column = 3;
+    /**
+     * <code>optional bytes max_column = 3;</code>
+     */
     boolean hasMaxColumn();
+    /**
+     * <code>optional bytes max_column = 3;</code>
+     */
     com.google.protobuf.ByteString getMaxColumn();
-    
-    // optional bool maxColumnInclusive = 4;
+
+    // optional bool max_column_inclusive = 4;
+    /**
+     * <code>optional bool max_column_inclusive = 4;</code>
+     */
     boolean hasMaxColumnInclusive();
+    /**
+     * <code>optional bool max_column_inclusive = 4;</code>
+     */
     boolean getMaxColumnInclusive();
   }
+  /**
+   * Protobuf type {@code ColumnRangeFilter}
+   */
   public static final class ColumnRangeFilter extends
       com.google.protobuf.GeneratedMessage
       implements ColumnRangeFilterOrBuilder {
     // Use ColumnRangeFilter.newBuilder() to construct.
-    private ColumnRangeFilter(Builder builder) {
+    private ColumnRangeFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private ColumnRangeFilter(boolean noInit) {}
-    
+    private ColumnRangeFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final ColumnRangeFilter defaultInstance;
     public static ColumnRangeFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public ColumnRangeFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_fieldAccessorTable;
-    }
-    
-    private int bitField0_;
-    // optional bytes minColumn = 1;
-    public static final int MINCOLUMN_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString minColumn_;
-    public boolean hasMinColumn() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public com.google.protobuf.ByteString getMinColumn() {
-      return minColumn_;
-    }
-    
-    // optional bool minColumnInclusive = 2;
-    public static final int MINCOLUMNINCLUSIVE_FIELD_NUMBER = 2;
-    private boolean minColumnInclusive_;
-    public boolean hasMinColumnInclusive() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public boolean getMinColumnInclusive() {
-      return minColumnInclusive_;
-    }
-    
-    // optional bytes maxColumn = 3;
-    public static final int MAXCOLUMN_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString maxColumn_;
-    public boolean hasMaxColumn() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    public com.google.protobuf.ByteString getMaxColumn() {
-      return maxColumn_;
-    }
-    
-    // optional bool maxColumnInclusive = 4;
-    public static final int MAXCOLUMNINCLUSIVE_FIELD_NUMBER = 4;
-    private boolean maxColumnInclusive_;
-    public boolean hasMaxColumnInclusive() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    public boolean getMaxColumnInclusive() {
-      return maxColumnInclusive_;
-    }
-    
-    private void initFields() {
-      minColumn_ = com.google.protobuf.ByteString.EMPTY;
-      minColumnInclusive_ = false;
-      maxColumn_ = com.google.protobuf.ByteString.EMPTY;
-      maxColumnInclusive_ = false;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, minColumn_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBool(2, minColumnInclusive_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, maxColumn_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBool(4, maxColumnInclusive_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, minColumn_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, minColumnInclusive_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, maxColumn_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(4, maxColumnInclusive_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
     @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
     }
-    
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnRangeFilter)) {
-        return super.equals(obj);
-      }
-      ohmdb.client.generated.FilterProtos.ColumnRangeFilter other = (ohmdb.client.generated.FilterProtos.ColumnRangeFilter) obj;
-      
-      boolean result = true;
-      result = result && (hasMinColumn() == other.hasMinColumn());
-      if (hasMinColumn()) {
-        result = result && getMinColumn()
-            .equals(other.getMinColumn());
-      }
-      result = result && (hasMinColumnInclusive() == other.hasMinColumnInclusive());
-      if (hasMinColumnInclusive()) {
-        result = result && (getMinColumnInclusive()
-            == other.getMinColumnInclusive());
-      }
-      result = result && (hasMaxColumn() == other.hasMaxColumn());
-      if (hasMaxColumn()) {
-        result = result && getMaxColumn()
-            .equals(other.getMaxColumn());
-      }
-      result = result && (hasMaxColumnInclusive() == other.hasMaxColumnInclusive());
-      if (hasMaxColumnInclusive()) {
-        result = result && (getMaxColumnInclusive()
-            == other.getMaxColumnInclusive());
-      }
-      result = result &&
-          getUnknownFields().equals(other.getUnknownFields());
-      return result;
-    }
-    
-    @java.lang.Override
-    public int hashCode() {
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasMinColumn()) {
-        hash = (37 * hash) + MINCOLUMN_FIELD_NUMBER;
-        hash = (53 * hash) + getMinColumn().hashCode();
-      }
-      if (hasMinColumnInclusive()) {
-        hash = (37 * hash) + MINCOLUMNINCLUSIVE_FIELD_NUMBER;
-        hash = (53 * hash) + hashBoolean(getMinColumnInclusive());
-      }
-      if (hasMaxColumn()) {
-        hash = (37 * hash) + MAXCOLUMN_FIELD_NUMBER;
-        hash = (53 * hash) + getMaxColumn().hashCode();
-      }
-      if (hasMaxColumnInclusive()) {
-        hash = (37 * hash) + MAXCOLUMNINCLUSIVE_FIELD_NUMBER;
-        hash = (53 * hash) + hashBoolean(getMaxColumnInclusive());
-      }
-      hash = (29 * hash) + getUnknownFields().hashCode();
-      return hash;
-    }
-    
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+    private ColumnRangeFilter(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnRangeFilter prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements ohmdb.client.generated.FilterProtos.ColumnRangeFilterOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_fieldAccessorTable;
-      }
-      
-      // Construct using ohmdb.client.generated.FilterProtos.ColumnRangeFilter.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        minColumn_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        minColumnInclusive_ = false;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        maxColumn_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        maxColumnInclusive_ = false;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnRangeFilter.getDescriptor();
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter getDefaultInstanceForType() {
-        return ohmdb.client.generated.FilterProtos.ColumnRangeFilter.getDefaultInstance();
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter build() {
-        ohmdb.client.generated.FilterProtos.ColumnRangeFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private ohmdb.client.generated.FilterProtos.ColumnRangeFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.ColumnRangeFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter buildPartial() {
-        ohmdb.client.generated.FilterProtos.ColumnRangeFilter result = new ohmdb.client.generated.FilterProtos.ColumnRangeFilter(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.minColumn_ = minColumn_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.minColumnInclusive_ = minColumnInclusive_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.maxColumn_ = maxColumn_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.maxColumnInclusive_ = maxColumnInclusive_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ohmdb.client.generated.FilterProtos.ColumnRangeFilter) {
-          return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnRangeFilter)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnRangeFilter other) {
-        if (other == ohmdb.client.generated.FilterProtos.ColumnRangeFilter.getDefaultInstance()) return this;
-        if (other.hasMinColumn()) {
-          setMinColumn(other.getMinColumn());
-        }
-        if (other.hasMinColumnInclusive()) {
-          setMinColumnInclusive(other.getMinColumnInclusive());
-        }
-        if (other.hasMaxColumn()) {
-          setMaxColumn(other.getMaxColumn());
-        }
-        if (other.hasMaxColumnInclusive()) {
-          setMaxColumnInclusive(other.getMaxColumnInclusive());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
           int tag = input.readTag();
           switch (tag) {
             case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
+              done = true;
+              break;
             default: {
               if (!parseUnknownField(input, unknownFields,
                                      extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
+                done = true;
               }
               break;
             }
@@ -1753,18 +2246,468 @@ public final class FilterProtos {
             }
           }
         }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
       }
-      
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.ColumnRangeFilter.class, ohmdb.client.generated.FilterProtos.ColumnRangeFilter.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ColumnRangeFilter> PARSER =
+        new com.google.protobuf.AbstractParser<ColumnRangeFilter>() {
+      public ColumnRangeFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ColumnRangeFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ColumnRangeFilter> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes min_column = 1;
+    public static final int MIN_COLUMN_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString minColumn_;
+    /**
+     * <code>optional bytes min_column = 1;</code>
+     */
+    public boolean hasMinColumn() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes min_column = 1;</code>
+     */
+    public com.google.protobuf.ByteString getMinColumn() {
+      return minColumn_;
+    }
+
+    // optional bool min_column_inclusive = 2;
+    public static final int MIN_COLUMN_INCLUSIVE_FIELD_NUMBER = 2;
+    private boolean minColumnInclusive_;
+    /**
+     * <code>optional bool min_column_inclusive = 2;</code>
+     */
+    public boolean hasMinColumnInclusive() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bool min_column_inclusive = 2;</code>
+     */
+    public boolean getMinColumnInclusive() {
+      return minColumnInclusive_;
+    }
+
+    // optional bytes max_column = 3;
+    public static final int MAX_COLUMN_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString maxColumn_;
+    /**
+     * <code>optional bytes max_column = 3;</code>
+     */
+    public boolean hasMaxColumn() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes max_column = 3;</code>
+     */
+    public com.google.protobuf.ByteString getMaxColumn() {
+      return maxColumn_;
+    }
+
+    // optional bool max_column_inclusive = 4;
+    public static final int MAX_COLUMN_INCLUSIVE_FIELD_NUMBER = 4;
+    private boolean maxColumnInclusive_;
+    /**
+     * <code>optional bool max_column_inclusive = 4;</code>
+     */
+    public boolean hasMaxColumnInclusive() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bool max_column_inclusive = 4;</code>
+     */
+    public boolean getMaxColumnInclusive() {
+      return maxColumnInclusive_;
+    }
+
+    private void initFields() {
+      minColumn_ = com.google.protobuf.ByteString.EMPTY;
+      minColumnInclusive_ = false;
+      maxColumn_ = com.google.protobuf.ByteString.EMPTY;
+      maxColumnInclusive_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, minColumn_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBool(2, minColumnInclusive_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, maxColumn_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, maxColumnInclusive_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, minColumn_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, minColumnInclusive_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, maxColumn_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, maxColumnInclusive_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof ohmdb.client.generated.FilterProtos.ColumnRangeFilter)) {
+        return super.equals(obj);
+      }
+      ohmdb.client.generated.FilterProtos.ColumnRangeFilter other = (ohmdb.client.generated.FilterProtos.ColumnRangeFilter) obj;
+
+      boolean result = true;
+      result = result && (hasMinColumn() == other.hasMinColumn());
+      if (hasMinColumn()) {
+        result = result && getMinColumn()
+            .equals(other.getMinColumn());
+      }
+      result = result && (hasMinColumnInclusive() == other.hasMinColumnInclusive());
+      if (hasMinColumnInclusive()) {
+        result = result && (getMinColumnInclusive()
+            == other.getMinColumnInclusive());
+      }
+      result = result && (hasMaxColumn() == other.hasMaxColumn());
+      if (hasMaxColumn()) {
+        result = result && getMaxColumn()
+            .equals(other.getMaxColumn());
+      }
+      result = result && (hasMaxColumnInclusive() == other.hasMaxColumnInclusive());
+      if (hasMaxColumnInclusive()) {
+        result = result && (getMaxColumnInclusive()
+            == other.getMaxColumnInclusive());
+      }
+      result = result &&
+          getUnknownFields().equals(other.getUnknownFields());
+      return result;
+    }
+
+    private int memoizedHashCode = 0;
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasMinColumn()) {
+        hash = (37 * hash) + MIN_COLUMN_FIELD_NUMBER;
+        hash = (53 * hash) + getMinColumn().hashCode();
+      }
+      if (hasMinColumnInclusive()) {
+        hash = (37 * hash) + MIN_COLUMN_INCLUSIVE_FIELD_NUMBER;
+        hash = (53 * hash) + hashBoolean(getMinColumnInclusive());
+      }
+      if (hasMaxColumn()) {
+        hash = (37 * hash) + MAX_COLUMN_FIELD_NUMBER;
+        hash = (53 * hash) + getMaxColumn().hashCode();
+      }
+      if (hasMaxColumnInclusive()) {
+        hash = (37 * hash) + MAX_COLUMN_INCLUSIVE_FIELD_NUMBER;
+        hash = (53 * hash) + hashBoolean(getMaxColumnInclusive());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static ohmdb.client.generated.FilterProtos.ColumnRangeFilter parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ColumnRangeFilter prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ColumnRangeFilter}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements ohmdb.client.generated.FilterProtos.ColumnRangeFilterOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.ColumnRangeFilter.class, ohmdb.client.generated.FilterProtos.ColumnRangeFilter.Builder.class);
+      }
+
+      // Construct using ohmdb.client.generated.FilterProtos.ColumnRangeFilter.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        minColumn_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        minColumnInclusive_ = false;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        maxColumn_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        maxColumnInclusive_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return ohmdb.client.generated.FilterProtos.internal_static_ColumnRangeFilter_descriptor;
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter getDefaultInstanceForType() {
+        return ohmdb.client.generated.FilterProtos.ColumnRangeFilter.getDefaultInstance();
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter build() {
+        ohmdb.client.generated.FilterProtos.ColumnRangeFilter result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public ohmdb.client.generated.FilterProtos.ColumnRangeFilter buildPartial() {
+        ohmdb.client.generated.FilterProtos.ColumnRangeFilter result = new ohmdb.client.generated.FilterProtos.ColumnRangeFilter(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.minColumn_ = minColumn_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.minColumnInclusive_ = minColumnInclusive_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.maxColumn_ = maxColumn_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.maxColumnInclusive_ = maxColumnInclusive_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof ohmdb.client.generated.FilterProtos.ColumnRangeFilter) {
+          return mergeFrom((ohmdb.client.generated.FilterProtos.ColumnRangeFilter)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ColumnRangeFilter other) {
+        if (other == ohmdb.client.generated.FilterProtos.ColumnRangeFilter.getDefaultInstance()) return this;
+        if (other.hasMinColumn()) {
+          setMinColumn(other.getMinColumn());
+        }
+        if (other.hasMinColumnInclusive()) {
+          setMinColumnInclusive(other.getMinColumnInclusive());
+        }
+        if (other.hasMaxColumn()) {
+          setMaxColumn(other.getMaxColumn());
+        }
+        if (other.hasMaxColumnInclusive()) {
+          setMaxColumnInclusive(other.getMaxColumnInclusive());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        ohmdb.client.generated.FilterProtos.ColumnRangeFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.ColumnRangeFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
       private int bitField0_;
-      
-      // optional bytes minColumn = 1;
+
+      // optional bytes min_column = 1;
       private com.google.protobuf.ByteString minColumn_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes min_column = 1;</code>
+       */
       public boolean hasMinColumn() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>optional bytes min_column = 1;</code>
+       */
       public com.google.protobuf.ByteString getMinColumn() {
         return minColumn_;
       }
+      /**
+       * <code>optional bytes min_column = 1;</code>
+       */
       public Builder setMinColumn(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1774,42 +2717,66 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes min_column = 1;</code>
+       */
       public Builder clearMinColumn() {
         bitField0_ = (bitField0_ & ~0x00000001);
         minColumn_ = getDefaultInstance().getMinColumn();
         onChanged();
         return this;
       }
-      
-      // optional bool minColumnInclusive = 2;
+
+      // optional bool min_column_inclusive = 2;
       private boolean minColumnInclusive_ ;
+      /**
+       * <code>optional bool min_column_inclusive = 2;</code>
+       */
       public boolean hasMinColumnInclusive() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>optional bool min_column_inclusive = 2;</code>
+       */
       public boolean getMinColumnInclusive() {
         return minColumnInclusive_;
       }
+      /**
+       * <code>optional bool min_column_inclusive = 2;</code>
+       */
       public Builder setMinColumnInclusive(boolean value) {
         bitField0_ |= 0x00000002;
         minColumnInclusive_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bool min_column_inclusive = 2;</code>
+       */
       public Builder clearMinColumnInclusive() {
         bitField0_ = (bitField0_ & ~0x00000002);
         minColumnInclusive_ = false;
         onChanged();
         return this;
       }
-      
-      // optional bytes maxColumn = 3;
+
+      // optional bytes max_column = 3;
       private com.google.protobuf.ByteString maxColumn_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes max_column = 3;</code>
+       */
       public boolean hasMaxColumn() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>optional bytes max_column = 3;</code>
+       */
       public com.google.protobuf.ByteString getMaxColumn() {
         return maxColumn_;
       }
+      /**
+       * <code>optional bytes max_column = 3;</code>
+       */
       public Builder setMaxColumn(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -1819,109 +2786,240 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes max_column = 3;</code>
+       */
       public Builder clearMaxColumn() {
         bitField0_ = (bitField0_ & ~0x00000004);
         maxColumn_ = getDefaultInstance().getMaxColumn();
         onChanged();
         return this;
       }
-      
-      // optional bool maxColumnInclusive = 4;
+
+      // optional bool max_column_inclusive = 4;
       private boolean maxColumnInclusive_ ;
+      /**
+       * <code>optional bool max_column_inclusive = 4;</code>
+       */
       public boolean hasMaxColumnInclusive() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>optional bool max_column_inclusive = 4;</code>
+       */
       public boolean getMaxColumnInclusive() {
         return maxColumnInclusive_;
       }
+      /**
+       * <code>optional bool max_column_inclusive = 4;</code>
+       */
       public Builder setMaxColumnInclusive(boolean value) {
         bitField0_ |= 0x00000008;
         maxColumnInclusive_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bool max_column_inclusive = 4;</code>
+       */
       public Builder clearMaxColumnInclusive() {
         bitField0_ = (bitField0_ & ~0x00000008);
         maxColumnInclusive_ = false;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:ColumnRangeFilter)
     }
-    
+
     static {
       defaultInstance = new ColumnRangeFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:ColumnRangeFilter)
   }
-  
+
   public interface CompareFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareType compareOp = 1;
+
+    // required .CompareType compare_op = 1;
+    /**
+     * <code>required .CompareType compare_op = 1;</code>
+     */
     boolean hasCompareOp();
+    /**
+     * <code>required .CompareType compare_op = 1;</code>
+     */
     ohmdb.client.generated.HBaseProtos.CompareType getCompareOp();
-    
+
     // optional .Comparator comparator = 2;
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     boolean hasComparator();
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     ohmdb.client.generated.ComparatorProtos.Comparator getComparator();
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder();
   }
+  /**
+   * Protobuf type {@code CompareFilter}
+   */
   public static final class CompareFilter extends
       com.google.protobuf.GeneratedMessage
       implements CompareFilterOrBuilder {
     // Use CompareFilter.newBuilder() to construct.
-    private CompareFilter(Builder builder) {
+    private CompareFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private CompareFilter(boolean noInit) {}
-    
+    private CompareFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final CompareFilter defaultInstance;
     public static CompareFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public CompareFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CompareFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+              ohmdb.client.generated.HBaseProtos.CompareType value = ohmdb.client.generated.HBaseProtos.CompareType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(1, rawValue);
+              } else {
+                bitField0_ |= 0x00000001;
+                compareOp_ = value;
+              }
+              break;
+            }
+            case 18: {
+              ohmdb.client.generated.ComparatorProtos.Comparator.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = comparator_.toBuilder();
+              }
+              comparator_ = input.readMessage(ohmdb.client.generated.ComparatorProtos.Comparator.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(comparator_);
+                comparator_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000002;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.CompareFilter.class, ohmdb.client.generated.FilterProtos.CompareFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<CompareFilter> PARSER =
+        new com.google.protobuf.AbstractParser<CompareFilter>() {
+      public CompareFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CompareFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CompareFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareType compareOp = 1;
-    public static final int COMPAREOP_FIELD_NUMBER = 1;
+    // required .CompareType compare_op = 1;
+    public static final int COMPARE_OP_FIELD_NUMBER = 1;
     private ohmdb.client.generated.HBaseProtos.CompareType compareOp_;
+    /**
+     * <code>required .CompareType compare_op = 1;</code>
+     */
     public boolean hasCompareOp() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareType compare_op = 1;</code>
+     */
     public ohmdb.client.generated.HBaseProtos.CompareType getCompareOp() {
       return compareOp_;
     }
-    
+
     // optional .Comparator comparator = 2;
     public static final int COMPARATOR_FIELD_NUMBER = 2;
     private ohmdb.client.generated.ComparatorProtos.Comparator comparator_;
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     public boolean hasComparator() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     public ohmdb.client.generated.ComparatorProtos.Comparator getComparator() {
       return comparator_;
     }
+    /**
+     * <code>optional .Comparator comparator = 2;</code>
+     */
     public ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder() {
       return comparator_;
     }
-    
+
     private void initFields() {
       compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
       comparator_ = ohmdb.client.generated.ComparatorProtos.Comparator.getDefaultInstance();
@@ -1930,7 +3028,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareOp()) {
         memoizedIsInitialized = 0;
         return false;
@@ -1944,7 +3042,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -1956,12 +3054,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1975,14 +3073,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -1992,7 +3090,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.CompareFilter other = (ohmdb.client.generated.FilterProtos.CompareFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareOp() == other.hasCompareOp());
       if (hasCompareOp()) {
@@ -2008,13 +3106,17 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareOp()) {
-        hash = (37 * hash) + COMPAREOP_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_OP_FIELD_NUMBER;
         hash = (53 * hash) + hashEnum(getCompareOp());
       }
       if (hasComparator()) {
@@ -2022,89 +3124,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getComparator().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.CompareFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.CompareFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code CompareFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder {
@@ -2112,18 +3204,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.CompareFilter.class, ohmdb.client.generated.FilterProtos.CompareFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -2135,7 +3230,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
@@ -2148,20 +3243,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.CompareFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_CompareFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.CompareFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.CompareFilter build() {
         ohmdb.client.generated.FilterProtos.CompareFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -2169,17 +3264,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.CompareFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.CompareFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.CompareFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.CompareFilter result = new ohmdb.client.generated.FilterProtos.CompareFilter(this);
         int from_bitField0_ = bitField0_;
@@ -2200,7 +3285,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.CompareFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.CompareFilter)other);
@@ -2209,7 +3294,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.CompareFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance()) return this;
         if (other.hasCompareOp()) {
@@ -2221,7 +3306,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareOp()) {
           
@@ -2235,64 +3320,43 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              int rawValue = input.readEnum();
-              ohmdb.client.generated.HBaseProtos.CompareType value = ohmdb.client.generated.HBaseProtos.CompareType.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                compareOp_ = value;
-              }
-              break;
-            }
-            case 18: {
-              ohmdb.client.generated.ComparatorProtos.Comparator.Builder subBuilder = ohmdb.client.generated.ComparatorProtos.Comparator.newBuilder();
-              if (hasComparator()) {
-                subBuilder.mergeFrom(getComparator());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setComparator(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.CompareFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.CompareFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareType compareOp = 1;
+
+      // required .CompareType compare_op = 1;
       private ohmdb.client.generated.HBaseProtos.CompareType compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
+      /**
+       * <code>required .CompareType compare_op = 1;</code>
+       */
       public boolean hasCompareOp() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareType compare_op = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.CompareType getCompareOp() {
         return compareOp_;
       }
+      /**
+       * <code>required .CompareType compare_op = 1;</code>
+       */
       public Builder setCompareOp(ohmdb.client.generated.HBaseProtos.CompareType value) {
         if (value == null) {
           throw new NullPointerException();
@@ -2302,20 +3366,29 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>required .CompareType compare_op = 1;</code>
+       */
       public Builder clearCompareOp() {
         bitField0_ = (bitField0_ & ~0x00000001);
         compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
         onChanged();
         return this;
       }
-      
+
       // optional .Comparator comparator = 2;
       private ohmdb.client.generated.ComparatorProtos.Comparator comparator_ = ohmdb.client.generated.ComparatorProtos.Comparator.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.ComparatorProtos.Comparator, ohmdb.client.generated.ComparatorProtos.Comparator.Builder, ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder> comparatorBuilder_;
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public boolean hasComparator() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.Comparator getComparator() {
         if (comparatorBuilder_ == null) {
           return comparator_;
@@ -2323,6 +3396,9 @@ public final class FilterProtos {
           return comparatorBuilder_.getMessage();
         }
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public Builder setComparator(ohmdb.client.generated.ComparatorProtos.Comparator value) {
         if (comparatorBuilder_ == null) {
           if (value == null) {
@@ -2336,6 +3412,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public Builder setComparator(
           ohmdb.client.generated.ComparatorProtos.Comparator.Builder builderForValue) {
         if (comparatorBuilder_ == null) {
@@ -2347,6 +3426,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public Builder mergeComparator(ohmdb.client.generated.ComparatorProtos.Comparator value) {
         if (comparatorBuilder_ == null) {
           if (((bitField0_ & 0x00000002) == 0x00000002) &&
@@ -2363,6 +3445,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000002;
         return this;
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public Builder clearComparator() {
         if (comparatorBuilder_ == null) {
           comparator_ = ohmdb.client.generated.ComparatorProtos.Comparator.getDefaultInstance();
@@ -2373,11 +3458,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.Comparator.Builder getComparatorBuilder() {
         bitField0_ |= 0x00000002;
         onChanged();
         return getComparatorFieldBuilder().getBuilder();
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder() {
         if (comparatorBuilder_ != null) {
           return comparatorBuilder_.getMessageOrBuilder();
@@ -2385,6 +3476,9 @@ public final class FilterProtos {
           return comparator_;
         }
       }
+      /**
+       * <code>optional .Comparator comparator = 2;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.ComparatorProtos.Comparator, ohmdb.client.generated.ComparatorProtos.Comparator.Builder, ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder> 
           getComparatorFieldBuilder() {
@@ -2398,110 +3492,254 @@ public final class FilterProtos {
         }
         return comparatorBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:CompareFilter)
     }
-    
+
     static {
       defaultInstance = new CompareFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:CompareFilter)
   }
-  
+
   public interface DependentColumnFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareFilter compareFilter = 1;
+
+    // required .CompareFilter compare_filter = 1;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     boolean hasCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder();
-    
-    // optional bytes columnFamily = 2;
+
+    // optional bytes column_family = 2;
+    /**
+     * <code>optional bytes column_family = 2;</code>
+     */
     boolean hasColumnFamily();
+    /**
+     * <code>optional bytes column_family = 2;</code>
+     */
     com.google.protobuf.ByteString getColumnFamily();
-    
-    // optional bytes columnQualifier = 3;
+
+    // optional bytes column_qualifier = 3;
+    /**
+     * <code>optional bytes column_qualifier = 3;</code>
+     */
     boolean hasColumnQualifier();
+    /**
+     * <code>optional bytes column_qualifier = 3;</code>
+     */
     com.google.protobuf.ByteString getColumnQualifier();
-    
-    // optional bool dropDependentColumn = 4;
+
+    // optional bool drop_dependent_column = 4;
+    /**
+     * <code>optional bool drop_dependent_column = 4;</code>
+     */
     boolean hasDropDependentColumn();
+    /**
+     * <code>optional bool drop_dependent_column = 4;</code>
+     */
     boolean getDropDependentColumn();
   }
+  /**
+   * Protobuf type {@code DependentColumnFilter}
+   */
   public static final class DependentColumnFilter extends
       com.google.protobuf.GeneratedMessage
       implements DependentColumnFilterOrBuilder {
     // Use DependentColumnFilter.newBuilder() to construct.
-    private DependentColumnFilter(Builder builder) {
+    private DependentColumnFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private DependentColumnFilter(boolean noInit) {}
-    
+    private DependentColumnFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final DependentColumnFilter defaultInstance;
     public static DependentColumnFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public DependentColumnFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DependentColumnFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = compareFilter_.toBuilder();
+              }
+              compareFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.CompareFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(compareFilter_);
+                compareFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              columnFamily_ = input.readBytes();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              columnQualifier_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              dropDependentColumn_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.DependentColumnFilter.class, ohmdb.client.generated.FilterProtos.DependentColumnFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<DependentColumnFilter> PARSER =
+        new com.google.protobuf.AbstractParser<DependentColumnFilter>() {
+      public DependentColumnFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DependentColumnFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DependentColumnFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareFilter compareFilter = 1;
-    public static final int COMPAREFILTER_FIELD_NUMBER = 1;
+    // required .CompareFilter compare_filter = 1;
+    public static final int COMPARE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public boolean hasCompareFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
       return compareFilter_;
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
       return compareFilter_;
     }
-    
-    // optional bytes columnFamily = 2;
-    public static final int COLUMNFAMILY_FIELD_NUMBER = 2;
+
+    // optional bytes column_family = 2;
+    public static final int COLUMN_FAMILY_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString columnFamily_;
+    /**
+     * <code>optional bytes column_family = 2;</code>
+     */
     public boolean hasColumnFamily() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
+    /**
+     * <code>optional bytes column_family = 2;</code>
+     */
     public com.google.protobuf.ByteString getColumnFamily() {
       return columnFamily_;
     }
-    
-    // optional bytes columnQualifier = 3;
-    public static final int COLUMNQUALIFIER_FIELD_NUMBER = 3;
+
+    // optional bytes column_qualifier = 3;
+    public static final int COLUMN_QUALIFIER_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString columnQualifier_;
+    /**
+     * <code>optional bytes column_qualifier = 3;</code>
+     */
     public boolean hasColumnQualifier() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
+    /**
+     * <code>optional bytes column_qualifier = 3;</code>
+     */
     public com.google.protobuf.ByteString getColumnQualifier() {
       return columnQualifier_;
     }
-    
-    // optional bool dropDependentColumn = 4;
-    public static final int DROPDEPENDENTCOLUMN_FIELD_NUMBER = 4;
+
+    // optional bool drop_dependent_column = 4;
+    public static final int DROP_DEPENDENT_COLUMN_FIELD_NUMBER = 4;
     private boolean dropDependentColumn_;
+    /**
+     * <code>optional bool drop_dependent_column = 4;</code>
+     */
     public boolean hasDropDependentColumn() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
+    /**
+     * <code>optional bool drop_dependent_column = 4;</code>
+     */
     public boolean getDropDependentColumn() {
       return dropDependentColumn_;
     }
-    
+
     private void initFields() {
       compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       columnFamily_ = com.google.protobuf.ByteString.EMPTY;
@@ -2512,7 +3750,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -2524,7 +3762,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -2542,12 +3780,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -2569,14 +3807,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -2586,7 +3824,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.DependentColumnFilter other = (ohmdb.client.generated.FilterProtos.DependentColumnFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareFilter() == other.hasCompareFilter());
       if (hasCompareFilter()) {
@@ -2612,111 +3850,105 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareFilter()) {
-        hash = (37 * hash) + COMPAREFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getCompareFilter().hashCode();
       }
       if (hasColumnFamily()) {
-        hash = (37 * hash) + COLUMNFAMILY_FIELD_NUMBER;
+        hash = (37 * hash) + COLUMN_FAMILY_FIELD_NUMBER;
         hash = (53 * hash) + getColumnFamily().hashCode();
       }
       if (hasColumnQualifier()) {
-        hash = (37 * hash) + COLUMNQUALIFIER_FIELD_NUMBER;
+        hash = (37 * hash) + COLUMN_QUALIFIER_FIELD_NUMBER;
         hash = (53 * hash) + getColumnQualifier().hashCode();
       }
       if (hasDropDependentColumn()) {
-        hash = (37 * hash) + DROPDEPENDENTCOLUMN_FIELD_NUMBER;
+        hash = (37 * hash) + DROP_DEPENDENT_COLUMN_FIELD_NUMBER;
         hash = (53 * hash) + hashBoolean(getDropDependentColumn());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.DependentColumnFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.DependentColumnFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code DependentColumnFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.DependentColumnFilterOrBuilder {
@@ -2724,18 +3956,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.DependentColumnFilter.class, ohmdb.client.generated.FilterProtos.DependentColumnFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.DependentColumnFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -2747,7 +3982,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (compareFilterBuilder_ == null) {
@@ -2764,20 +3999,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.DependentColumnFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_DependentColumnFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.DependentColumnFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.DependentColumnFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.DependentColumnFilter build() {
         ohmdb.client.generated.FilterProtos.DependentColumnFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -2785,17 +4020,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.DependentColumnFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.DependentColumnFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.DependentColumnFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.DependentColumnFilter result = new ohmdb.client.generated.FilterProtos.DependentColumnFilter(this);
         int from_bitField0_ = bitField0_;
@@ -2824,7 +4049,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.DependentColumnFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.DependentColumnFilter)other);
@@ -2833,7 +4058,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.DependentColumnFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.DependentColumnFilter.getDefaultInstance()) return this;
         if (other.hasCompareFilter()) {
@@ -2851,7 +4076,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareFilter()) {
           
@@ -2863,67 +4088,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder();
-              if (hasCompareFilter()) {
-                subBuilder.mergeFrom(getCompareFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setCompareFilter(subBuilder.buildPartial());
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              columnFamily_ = input.readBytes();
-              break;
-            }
-            case 26: {
-              bitField0_ |= 0x00000004;
-              columnQualifier_ = input.readBytes();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              dropDependentColumn_ = input.readBool();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.DependentColumnFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.DependentColumnFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareFilter compareFilter = 1;
+
+      // required .CompareFilter compare_filter = 1;
       private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> compareFilterBuilder_;
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public boolean hasCompareFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
         if (compareFilterBuilder_ == null) {
           return compareFilter_;
@@ -2931,6 +4128,9 @@ public final class FilterProtos {
           return compareFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (value == null) {
@@ -2944,6 +4144,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(
           ohmdb.client.generated.FilterProtos.CompareFilter.Builder builderForValue) {
         if (compareFilterBuilder_ == null) {
@@ -2955,6 +4158,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder mergeCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -2971,6 +4177,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder clearCompareFilter() {
         if (compareFilterBuilder_ == null) {
           compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
@@ -2981,11 +4190,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter.Builder getCompareFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getCompareFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
         if (compareFilterBuilder_ != null) {
           return compareFilterBuilder_.getMessageOrBuilder();
@@ -2993,6 +4208,9 @@ public final class FilterProtos {
           return compareFilter_;
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> 
           getCompareFilterFieldBuilder() {
@@ -3006,15 +4224,24 @@ public final class FilterProtos {
         }
         return compareFilterBuilder_;
       }
-      
-      // optional bytes columnFamily = 2;
+
+      // optional bytes column_family = 2;
       private com.google.protobuf.ByteString columnFamily_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes column_family = 2;</code>
+       */
       public boolean hasColumnFamily() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>optional bytes column_family = 2;</code>
+       */
       public com.google.protobuf.ByteString getColumnFamily() {
         return columnFamily_;
       }
+      /**
+       * <code>optional bytes column_family = 2;</code>
+       */
       public Builder setColumnFamily(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -3024,21 +4251,33 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes column_family = 2;</code>
+       */
       public Builder clearColumnFamily() {
         bitField0_ = (bitField0_ & ~0x00000002);
         columnFamily_ = getDefaultInstance().getColumnFamily();
         onChanged();
         return this;
       }
-      
-      // optional bytes columnQualifier = 3;
+
+      // optional bytes column_qualifier = 3;
       private com.google.protobuf.ByteString columnQualifier_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes column_qualifier = 3;</code>
+       */
       public boolean hasColumnQualifier() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>optional bytes column_qualifier = 3;</code>
+       */
       public com.google.protobuf.ByteString getColumnQualifier() {
         return columnQualifier_;
       }
+      /**
+       * <code>optional bytes column_qualifier = 3;</code>
+       */
       public Builder setColumnQualifier(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -3048,95 +4287,203 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes column_qualifier = 3;</code>
+       */
       public Builder clearColumnQualifier() {
         bitField0_ = (bitField0_ & ~0x00000004);
         columnQualifier_ = getDefaultInstance().getColumnQualifier();
         onChanged();
         return this;
       }
-      
-      // optional bool dropDependentColumn = 4;
+
+      // optional bool drop_dependent_column = 4;
       private boolean dropDependentColumn_ ;
+      /**
+       * <code>optional bool drop_dependent_column = 4;</code>
+       */
       public boolean hasDropDependentColumn() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>optional bool drop_dependent_column = 4;</code>
+       */
       public boolean getDropDependentColumn() {
         return dropDependentColumn_;
       }
+      /**
+       * <code>optional bool drop_dependent_column = 4;</code>
+       */
       public Builder setDropDependentColumn(boolean value) {
         bitField0_ |= 0x00000008;
         dropDependentColumn_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bool drop_dependent_column = 4;</code>
+       */
       public Builder clearDropDependentColumn() {
         bitField0_ = (bitField0_ & ~0x00000008);
         dropDependentColumn_ = false;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:DependentColumnFilter)
     }
-    
+
     static {
       defaultInstance = new DependentColumnFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:DependentColumnFilter)
   }
-  
+
   public interface FamilyFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareFilter compareFilter = 1;
+
+    // required .CompareFilter compare_filter = 1;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     boolean hasCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code FamilyFilter}
+   */
   public static final class FamilyFilter extends
       com.google.protobuf.GeneratedMessage
       implements FamilyFilterOrBuilder {
     // Use FamilyFilter.newBuilder() to construct.
-    private FamilyFilter(Builder builder) {
+    private FamilyFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FamilyFilter(boolean noInit) {}
-    
+    private FamilyFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FamilyFilter defaultInstance;
     public static FamilyFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FamilyFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FamilyFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = compareFilter_.toBuilder();
+              }
+              compareFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.CompareFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(compareFilter_);
+                compareFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FamilyFilter.class, ohmdb.client.generated.FilterProtos.FamilyFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<FamilyFilter> PARSER =
+        new com.google.protobuf.AbstractParser<FamilyFilter>() {
+      public FamilyFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FamilyFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FamilyFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareFilter compareFilter = 1;
-    public static final int COMPAREFILTER_FIELD_NUMBER = 1;
+    // required .CompareFilter compare_filter = 1;
+    public static final int COMPARE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public boolean hasCompareFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
       return compareFilter_;
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
       return compareFilter_;
     }
-    
+
     private void initFields() {
       compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
     }
@@ -3144,7 +4491,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -3156,7 +4503,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -3165,12 +4512,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -3180,14 +4527,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -3197,7 +4544,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FamilyFilter other = (ohmdb.client.generated.FilterProtos.FamilyFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareFilter() == other.hasCompareFilter());
       if (hasCompareFilter()) {
@@ -3208,99 +4555,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareFilter()) {
-        hash = (37 * hash) + COMPAREFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getCompareFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FamilyFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FamilyFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FamilyFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FamilyFilterOrBuilder {
@@ -3308,18 +4649,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FamilyFilter.class, ohmdb.client.generated.FilterProtos.FamilyFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FamilyFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3331,7 +4675,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (compareFilterBuilder_ == null) {
@@ -3342,20 +4686,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FamilyFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FamilyFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FamilyFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FamilyFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FamilyFilter build() {
         ohmdb.client.generated.FilterProtos.FamilyFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -3363,17 +4707,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FamilyFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FamilyFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FamilyFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.FamilyFilter result = new ohmdb.client.generated.FilterProtos.FamilyFilter(this);
         int from_bitField0_ = bitField0_;
@@ -3390,7 +4724,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FamilyFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FamilyFilter)other);
@@ -3399,7 +4733,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FamilyFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.FamilyFilter.getDefaultInstance()) return this;
         if (other.hasCompareFilter()) {
@@ -3408,7 +4742,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareFilter()) {
           
@@ -3420,52 +4754,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder();
-              if (hasCompareFilter()) {
-                subBuilder.mergeFrom(getCompareFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setCompareFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FamilyFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FamilyFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareFilter compareFilter = 1;
+
+      // required .CompareFilter compare_filter = 1;
       private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> compareFilterBuilder_;
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public boolean hasCompareFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
         if (compareFilterBuilder_ == null) {
           return compareFilter_;
@@ -3473,6 +4794,9 @@ public final class FilterProtos {
           return compareFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (value == null) {
@@ -3486,6 +4810,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(
           ohmdb.client.generated.FilterProtos.CompareFilter.Builder builderForValue) {
         if (compareFilterBuilder_ == null) {
@@ -3497,6 +4824,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder mergeCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -3513,6 +4843,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder clearCompareFilter() {
         if (compareFilterBuilder_ == null) {
           compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
@@ -3523,11 +4856,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter.Builder getCompareFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getCompareFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
         if (compareFilterBuilder_ != null) {
           return compareFilterBuilder_.getMessageOrBuilder();
@@ -3535,6 +4874,9 @@ public final class FilterProtos {
           return compareFilter_;
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> 
           getCompareFilterFieldBuilder() {
@@ -3548,75 +4890,195 @@ public final class FilterProtos {
         }
         return compareFilterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:FamilyFilter)
     }
-    
+
     static {
       defaultInstance = new FamilyFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FamilyFilter)
   }
-  
+
   public interface FilterListOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required .FilterList.Operator operator = 1;
+    /**
+     * <code>required .FilterList.Operator operator = 1;</code>
+     */
     boolean hasOperator();
+    /**
+     * <code>required .FilterList.Operator operator = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.FilterList.Operator getOperator();
-    
+
     // repeated .Filter filters = 2;
-    java.util.List<ohmdb.client.generated.HBaseProtos.Filter> 
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    java.util.List<ohmdb.client.generated.FilterProtos.Filter> 
         getFiltersList();
-    ohmdb.client.generated.HBaseProtos.Filter getFilters(int index);
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    ohmdb.client.generated.FilterProtos.Filter getFilters(int index);
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
     int getFiltersCount();
-    java.util.List<? extends ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    java.util.List<? extends ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
         getFiltersOrBuilderList();
-    ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFiltersOrBuilder(
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    ohmdb.client.generated.FilterProtos.FilterOrBuilder getFiltersOrBuilder(
         int index);
   }
+  /**
+   * Protobuf type {@code FilterList}
+   */
   public static final class FilterList extends
       com.google.protobuf.GeneratedMessage
       implements FilterListOrBuilder {
     // Use FilterList.newBuilder() to construct.
-    private FilterList(Builder builder) {
+    private FilterList(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FilterList(boolean noInit) {}
-    
+    private FilterList(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FilterList defaultInstance;
     public static FilterList getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FilterList getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FilterList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              int rawValue = input.readEnum();
+              ohmdb.client.generated.FilterProtos.FilterList.Operator value = ohmdb.client.generated.FilterProtos.FilterList.Operator.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(1, rawValue);
+              } else {
+                bitField0_ |= 0x00000001;
+                operator_ = value;
+              }
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                filters_ = new java.util.ArrayList<ohmdb.client.generated.FilterProtos.Filter>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              filters_.add(input.readMessage(ohmdb.client.generated.FilterProtos.Filter.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          filters_ = java.util.Collections.unmodifiableList(filters_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FilterList_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FilterList_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FilterList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FilterList.class, ohmdb.client.generated.FilterProtos.FilterList.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<FilterList> PARSER =
+        new com.google.protobuf.AbstractParser<FilterList>() {
+      public FilterList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FilterList(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FilterList> getParserForType() {
+      return PARSER;
+    }
+
+    /**
+     * Protobuf enum {@code FilterList.Operator}
+     */
     public enum Operator
         implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>MUST_PASS_ALL = 1;</code>
+       */
       MUST_PASS_ALL(0, 1),
+      /**
+       * <code>MUST_PASS_ONE = 2;</code>
+       */
       MUST_PASS_ONE(1, 2),
       ;
-      
+
+      /**
+       * <code>MUST_PASS_ALL = 1;</code>
+       */
       public static final int MUST_PASS_ALL_VALUE = 1;
+      /**
+       * <code>MUST_PASS_ONE = 2;</code>
+       */
       public static final int MUST_PASS_ONE_VALUE = 2;
-      
-      
+
+
       public final int getNumber() { return value; }
-      
+
       public static Operator valueOf(int value) {
         switch (value) {
           case 1: return MUST_PASS_ALL;
@@ -3624,7 +5086,7 @@ public final class FilterProtos {
           default: return null;
         }
       }
-      
+
       public static com.google.protobuf.Internal.EnumLiteMap<Operator>
           internalGetValueMap() {
         return internalValueMap;
@@ -3636,7 +5098,7 @@ public final class FilterProtos {
                 return Operator.valueOf(number);
               }
             };
-      
+
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
         return getDescriptor().getValues().get(index);
@@ -3649,11 +5111,9 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.FilterList.getDescriptor().getEnumTypes().get(0);
       }
-      
-      private static final Operator[] VALUES = {
-        MUST_PASS_ALL, MUST_PASS_ONE, 
-      };
-      
+
+      private static final Operator[] VALUES = values();
+
       public static Operator valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
         if (desc.getType() != getDescriptor()) {
@@ -3662,50 +5122,71 @@ public final class FilterProtos {
         }
         return VALUES[desc.getIndex()];
       }
-      
+
       private final int index;
       private final int value;
-      
+
       private Operator(int index, int value) {
         this.index = index;
         this.value = value;
       }
-      
+
       // @@protoc_insertion_point(enum_scope:FilterList.Operator)
     }
-    
+
     private int bitField0_;
     // required .FilterList.Operator operator = 1;
     public static final int OPERATOR_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.FilterList.Operator operator_;
+    /**
+     * <code>required .FilterList.Operator operator = 1;</code>
+     */
     public boolean hasOperator() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .FilterList.Operator operator = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.FilterList.Operator getOperator() {
       return operator_;
     }
-    
+
     // repeated .Filter filters = 2;
     public static final int FILTERS_FIELD_NUMBER = 2;
-    private java.util.List<ohmdb.client.generated.HBaseProtos.Filter> filters_;
-    public java.util.List<ohmdb.client.generated.HBaseProtos.Filter> getFiltersList() {
+    private java.util.List<ohmdb.client.generated.FilterProtos.Filter> filters_;
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    public java.util.List<ohmdb.client.generated.FilterProtos.Filter> getFiltersList() {
       return filters_;
     }
-    public java.util.List<? extends ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    public java.util.List<? extends ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
         getFiltersOrBuilderList() {
       return filters_;
     }
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
     public int getFiltersCount() {
       return filters_.size();
     }
-    public ohmdb.client.generated.HBaseProtos.Filter getFilters(int index) {
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.Filter getFilters(int index) {
       return filters_.get(index);
     }
-    public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFiltersOrBuilder(
+    /**
+     * <code>repeated .Filter filters = 2;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFiltersOrBuilder(
         int index) {
       return filters_.get(index);
     }
-    
+
     private void initFields() {
       operator_ = ohmdb.client.generated.FilterProtos.FilterList.Operator.MUST_PASS_ALL;
       filters_ = java.util.Collections.emptyList();
@@ -3714,7 +5195,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasOperator()) {
         memoizedIsInitialized = 0;
         return false;
@@ -3728,7 +5209,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -3740,12 +5221,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -3759,14 +5240,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -3776,7 +5257,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FilterList other = (ohmdb.client.generated.FilterProtos.FilterList) obj;
-      
+
       boolean result = true;
       result = result && (hasOperator() == other.hasOperator());
       if (hasOperator()) {
@@ -3789,9 +5270,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasOperator()) {
@@ -3803,89 +5288,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getFiltersList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterList parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FilterList prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FilterList}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FilterListOrBuilder {
@@ -3893,18 +5368,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FilterList_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FilterList_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FilterList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FilterList.class, ohmdb.client.generated.FilterProtos.FilterList.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FilterList.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -3916,7 +5394,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         operator_ = ohmdb.client.generated.FilterProtos.FilterList.Operator.MUST_PASS_ALL;
@@ -3929,20 +5407,20 @@ public final class FilterProtos {
         }
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FilterList.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FilterList_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterList getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FilterList.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterList build() {
         ohmdb.client.generated.FilterProtos.FilterList result = buildPartial();
         if (!result.isInitialized()) {
@@ -3950,17 +5428,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FilterList buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FilterList result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterList buildPartial() {
         ohmdb.client.generated.FilterProtos.FilterList result = new ohmdb.client.generated.FilterProtos.FilterList(this);
         int from_bitField0_ = bitField0_;
@@ -3982,7 +5450,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FilterList) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FilterList)other);
@@ -3991,7 +5459,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FilterList other) {
         if (other == ohmdb.client.generated.FilterProtos.FilterList.getDefaultInstance()) return this;
         if (other.hasOperator()) {
@@ -4026,7 +5494,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasOperator()) {
           
@@ -4040,61 +5508,43 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              int rawValue = input.readEnum();
-              ohmdb.client.generated.FilterProtos.FilterList.Operator value = ohmdb.client.generated.FilterProtos.FilterList.Operator.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
-                bitField0_ |= 0x00000001;
-                operator_ = value;
-              }
-              break;
-            }
-            case 18: {
-              ohmdb.client.generated.HBaseProtos.Filter.Builder subBuilder = ohmdb.client.generated.HBaseProtos.Filter.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addFilters(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FilterList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FilterList) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required .FilterList.Operator operator = 1;
       private ohmdb.client.generated.FilterProtos.FilterList.Operator operator_ = ohmdb.client.generated.FilterProtos.FilterList.Operator.MUST_PASS_ALL;
+      /**
+       * <code>required .FilterList.Operator operator = 1;</code>
+       */
       public boolean hasOperator() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .FilterList.Operator operator = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.FilterList.Operator getOperator() {
         return operator_;
       }
+      /**
+       * <code>required .FilterList.Operator operator = 1;</code>
+       */
       public Builder setOperator(ohmdb.client.generated.FilterProtos.FilterList.Operator value) {
         if (value == null) {
           throw new NullPointerException();
@@ -4104,33 +5554,42 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>required .FilterList.Operator operator = 1;</code>
+       */
       public Builder clearOperator() {
         bitField0_ = (bitField0_ & ~0x00000001);
         operator_ = ohmdb.client.generated.FilterProtos.FilterList.Operator.MUST_PASS_ALL;
         onChanged();
         return this;
       }
-      
+
       // repeated .Filter filters = 2;
-      private java.util.List<ohmdb.client.generated.HBaseProtos.Filter> filters_ =
+      private java.util.List<ohmdb.client.generated.FilterProtos.Filter> filters_ =
         java.util.Collections.emptyList();
       private void ensureFiltersIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          filters_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.Filter>(filters_);
+          filters_ = new java.util.ArrayList<ohmdb.client.generated.FilterProtos.Filter>(filters_);
           bitField0_ |= 0x00000002;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> filtersBuilder_;
-      
-      public java.util.List<ohmdb.client.generated.HBaseProtos.Filter> getFiltersList() {
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> filtersBuilder_;
+
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public java.util.List<ohmdb.client.generated.FilterProtos.Filter> getFiltersList() {
         if (filtersBuilder_ == null) {
           return java.util.Collections.unmodifiableList(filters_);
         } else {
           return filtersBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public int getFiltersCount() {
         if (filtersBuilder_ == null) {
           return filters_.size();
@@ -4138,15 +5597,21 @@ public final class FilterProtos {
           return filtersBuilder_.getCount();
         }
       }
-      public ohmdb.client.generated.HBaseProtos.Filter getFilters(int index) {
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter getFilters(int index) {
         if (filtersBuilder_ == null) {
           return filters_.get(index);
         } else {
           return filtersBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder setFilters(
-          int index, ohmdb.client.generated.HBaseProtos.Filter value) {
+          int index, ohmdb.client.generated.FilterProtos.Filter value) {
         if (filtersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4159,8 +5624,11 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder setFilters(
-          int index, ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          int index, ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filtersBuilder_ == null) {
           ensureFiltersIsMutable();
           filters_.set(index, builderForValue.build());
@@ -4170,7 +5638,10 @@ public final class FilterProtos {
         }
         return this;
       }
-      public Builder addFilters(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public Builder addFilters(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filtersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4183,8 +5654,11 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder addFilters(
-          int index, ohmdb.client.generated.HBaseProtos.Filter value) {
+          int index, ohmdb.client.generated.FilterProtos.Filter value) {
         if (filtersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4197,8 +5671,11 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder addFilters(
-          ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filtersBuilder_ == null) {
           ensureFiltersIsMutable();
           filters_.add(builderForValue.build());
@@ -4208,8 +5685,11 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder addFilters(
-          int index, ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          int index, ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filtersBuilder_ == null) {
           ensureFiltersIsMutable();
           filters_.add(index, builderForValue.build());
@@ -4219,8 +5699,11 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder addAllFilters(
-          java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.Filter> values) {
+          java.lang.Iterable<? extends ohmdb.client.generated.FilterProtos.Filter> values) {
         if (filtersBuilder_ == null) {
           ensureFiltersIsMutable();
           super.addAll(values, filters_);
@@ -4230,6 +5713,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder clearFilters() {
         if (filtersBuilder_ == null) {
           filters_ = java.util.Collections.emptyList();
@@ -4240,6 +5726,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
       public Builder removeFilters(int index) {
         if (filtersBuilder_ == null) {
           ensureFiltersIsMutable();
@@ -4250,18 +5739,27 @@ public final class FilterProtos {
         }
         return this;
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder getFiltersBuilder(
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder getFiltersBuilder(
           int index) {
         return getFiltersFieldBuilder().getBuilder(index);
       }
-      public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFiltersOrBuilder(
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFiltersOrBuilder(
           int index) {
         if (filtersBuilder_ == null) {
           return filters_.get(index);  } else {
           return filtersBuilder_.getMessageOrBuilder(index);
         }
       }
-      public java.util.List<? extends ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public java.util.List<? extends ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
            getFiltersOrBuilderList() {
         if (filtersBuilder_ != null) {
           return filtersBuilder_.getMessageOrBuilderList();
@@ -4269,25 +5767,34 @@ public final class FilterProtos {
           return java.util.Collections.unmodifiableList(filters_);
         }
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder addFiltersBuilder() {
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder addFiltersBuilder() {
         return getFiltersFieldBuilder().addBuilder(
-            ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance());
+            ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance());
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder addFiltersBuilder(
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder addFiltersBuilder(
           int index) {
         return getFiltersFieldBuilder().addBuilder(
-            index, ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance());
+            index, ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance());
       }
-      public java.util.List<ohmdb.client.generated.HBaseProtos.Filter.Builder> 
+      /**
+       * <code>repeated .Filter filters = 2;</code>
+       */
+      public java.util.List<ohmdb.client.generated.FilterProtos.Filter.Builder> 
            getFiltersBuilderList() {
         return getFiltersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
           getFiltersFieldBuilder() {
         if (filtersBuilder_ == null) {
           filtersBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder>(
+              ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder>(
                   filters_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -4296,76 +5803,169 @@ public final class FilterProtos {
         }
         return filtersBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:FilterList)
     }
-    
+
     static {
       defaultInstance = new FilterList(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FilterList)
   }
-  
+
   public interface FilterWrapperOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required .Filter filter = 1;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     boolean hasFilter();
-    ohmdb.client.generated.HBaseProtos.Filter getFilter();
-    ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.Filter getFilter();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code FilterWrapper}
+   */
   public static final class FilterWrapper extends
       com.google.protobuf.GeneratedMessage
       implements FilterWrapperOrBuilder {
     // Use FilterWrapper.newBuilder() to construct.
-    private FilterWrapper(Builder builder) {
+    private FilterWrapper(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FilterWrapper(boolean noInit) {}
-    
+    private FilterWrapper(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FilterWrapper defaultInstance;
     public static FilterWrapper getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FilterWrapper getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FilterWrapper(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.Filter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = filter_.toBuilder();
+              }
+              filter_ = input.readMessage(ohmdb.client.generated.FilterProtos.Filter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(filter_);
+                filter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FilterWrapper.class, ohmdb.client.generated.FilterProtos.FilterWrapper.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<FilterWrapper> PARSER =
+        new com.google.protobuf.AbstractParser<FilterWrapper>() {
+      public FilterWrapper parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FilterWrapper(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FilterWrapper> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
     // required .Filter filter = 1;
     public static final int FILTER_FIELD_NUMBER = 1;
-    private ohmdb.client.generated.HBaseProtos.Filter filter_;
+    private ohmdb.client.generated.FilterProtos.Filter filter_;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     public boolean hasFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.Filter getFilter() {
       return filter_;
     }
-    public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
       return filter_;
     }
-    
+
     private void initFields() {
-      filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -4377,7 +5977,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -4386,12 +5986,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4401,14 +6001,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -4418,7 +6018,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FilterWrapper other = (ohmdb.client.generated.FilterProtos.FilterWrapper) obj;
-      
+
       boolean result = true;
       result = result && (hasFilter() == other.hasFilter());
       if (hasFilter()) {
@@ -4429,9 +6029,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasFilter()) {
@@ -4439,89 +6043,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FilterWrapper parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FilterWrapper prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FilterWrapper}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FilterWrapperOrBuilder {
@@ -4529,18 +6123,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FilterWrapper.class, ohmdb.client.generated.FilterProtos.FilterWrapper.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FilterWrapper.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -4552,31 +6149,31 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
         } else {
           filterBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FilterWrapper.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FilterWrapper_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterWrapper getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FilterWrapper.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterWrapper build() {
         ohmdb.client.generated.FilterProtos.FilterWrapper result = buildPartial();
         if (!result.isInitialized()) {
@@ -4584,17 +6181,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FilterWrapper buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FilterWrapper result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FilterWrapper buildPartial() {
         ohmdb.client.generated.FilterProtos.FilterWrapper result = new ohmdb.client.generated.FilterProtos.FilterWrapper(this);
         int from_bitField0_ = bitField0_;
@@ -4611,7 +6198,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FilterWrapper) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FilterWrapper)other);
@@ -4620,7 +6207,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FilterWrapper other) {
         if (other == ohmdb.client.generated.FilterProtos.FilterWrapper.getDefaultInstance()) return this;
         if (other.hasFilter()) {
@@ -4629,7 +6216,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasFilter()) {
           
@@ -4641,60 +6228,50 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.HBaseProtos.Filter.Builder subBuilder = ohmdb.client.generated.HBaseProtos.Filter.newBuilder();
-              if (hasFilter()) {
-                subBuilder.mergeFrom(getFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FilterWrapper parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FilterWrapper) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required .Filter filter = 1;
-      private ohmdb.client.generated.HBaseProtos.Filter filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      private ohmdb.client.generated.FilterProtos.Filter filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> filterBuilder_;
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> filterBuilder_;
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public boolean hasFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter getFilter() {
         if (filterBuilder_ == null) {
           return filter_;
         } else {
           return filterBuilder_.getMessage();
         }
       }
-      public Builder setFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder setFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4707,8 +6284,11 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder setFilter(
-          ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filterBuilder_ == null) {
           filter_ = builderForValue.build();
           onChanged();
@@ -4718,12 +6298,15 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      public Builder mergeFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder mergeFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              filter_ != ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance()) {
+              filter_ != ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance()) {
             filter_ =
-              ohmdb.client.generated.HBaseProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
+              ohmdb.client.generated.FilterProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
           } else {
             filter_ = value;
           }
@@ -4734,9 +6317,12 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder clearFilter() {
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
           onChanged();
         } else {
           filterBuilder_.clear();
@@ -4744,24 +6330,33 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder getFilterBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder getFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getFilterFieldBuilder().getBuilder();
       }
-      public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
         if (filterBuilder_ != null) {
           return filterBuilder_.getMessageOrBuilder();
         } else {
           return filter_;
         }
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
           getFilterFieldBuilder() {
         if (filterBuilder_ == null) {
           filterBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder>(
+              ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder>(
                   filter_,
                   getParentForChildren(),
                   isClean());
@@ -4769,84 +6364,145 @@ public final class FilterProtos {
         }
         return filterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:FilterWrapper)
     }
-    
+
     static {
       defaultInstance = new FilterWrapper(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FilterWrapper)
   }
-  
+
   public interface FirstKeyOnlyFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
   }
+  /**
+   * Protobuf type {@code FirstKeyOnlyFilter}
+   */
   public static final class FirstKeyOnlyFilter extends
       com.google.protobuf.GeneratedMessage
       implements FirstKeyOnlyFilterOrBuilder {
     // Use FirstKeyOnlyFilter.newBuilder() to construct.
-    private FirstKeyOnlyFilter(Builder builder) {
+    private FirstKeyOnlyFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FirstKeyOnlyFilter(boolean noInit) {}
-    
+    private FirstKeyOnlyFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FirstKeyOnlyFilter defaultInstance;
     public static FirstKeyOnlyFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FirstKeyOnlyFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FirstKeyOnlyFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.class, ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<FirstKeyOnlyFilter> PARSER =
+        new com.google.protobuf.AbstractParser<FirstKeyOnlyFilter>() {
+      public FirstKeyOnlyFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FirstKeyOnlyFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FirstKeyOnlyFilter> getParserForType() {
+      return PARSER;
+    }
+
     private void initFields() {
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -4856,101 +6512,95 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter other = (ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter) obj;
-      
+
       boolean result = true;
       result = result &&
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FirstKeyOnlyFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilterOrBuilder {
@@ -4958,18 +6608,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.class, ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -4980,25 +6633,25 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyOnlyFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter build() {
         ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -5006,23 +6659,13 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter result = new ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter(this);
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter)other);
@@ -5031,118 +6674,199 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
-      
+
       // @@protoc_insertion_point(builder_scope:FirstKeyOnlyFilter)
     }
-    
+
     static {
       defaultInstance = new FirstKeyOnlyFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FirstKeyOnlyFilter)
   }
-  
+
   public interface FirstKeyValueMatchingQualifiersFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // repeated bytes qualifiers = 1;
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     java.util.List<com.google.protobuf.ByteString> getQualifiersList();
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     int getQualifiersCount();
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     com.google.protobuf.ByteString getQualifiers(int index);
   }
+  /**
+   * Protobuf type {@code FirstKeyValueMatchingQualifiersFilter}
+   */
   public static final class FirstKeyValueMatchingQualifiersFilter extends
       com.google.protobuf.GeneratedMessage
       implements FirstKeyValueMatchingQualifiersFilterOrBuilder {
     // Use FirstKeyValueMatchingQualifiersFilter.newBuilder() to construct.
-    private FirstKeyValueMatchingQualifiersFilter(Builder builder) {
+    private FirstKeyValueMatchingQualifiersFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FirstKeyValueMatchingQualifiersFilter(boolean noInit) {}
-    
+    private FirstKeyValueMatchingQualifiersFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FirstKeyValueMatchingQualifiersFilter defaultInstance;
     public static FirstKeyValueMatchingQualifiersFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FirstKeyValueMatchingQualifiersFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FirstKeyValueMatchingQualifiersFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                qualifiers_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              qualifiers_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          qualifiers_ = java.util.Collections.unmodifiableList(qualifiers_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.class, ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<FirstKeyValueMatchingQualifiersFilter> PARSER =
+        new com.google.protobuf.AbstractParser<FirstKeyValueMatchingQualifiersFilter>() {
+      public FirstKeyValueMatchingQualifiersFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FirstKeyValueMatchingQualifiersFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FirstKeyValueMatchingQualifiersFilter> getParserForType() {
+      return PARSER;
+    }
+
     // repeated bytes qualifiers = 1;
     public static final int QUALIFIERS_FIELD_NUMBER = 1;
     private java.util.List<com.google.protobuf.ByteString> qualifiers_;
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     public java.util.List<com.google.protobuf.ByteString>
         getQualifiersList() {
       return qualifiers_;
     }
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     public int getQualifiersCount() {
       return qualifiers_.size();
     }
+    /**
+     * <code>repeated bytes qualifiers = 1;</code>
+     */
     public com.google.protobuf.ByteString getQualifiers(int index) {
       return qualifiers_.get(index);
     }
-    
+
     private void initFields() {
-      qualifiers_ = java.util.Collections.emptyList();;
+      qualifiers_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -5151,12 +6875,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       {
         int dataSize = 0;
@@ -5171,14 +6895,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -5188,7 +6912,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter other = (ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter) obj;
-      
+
       boolean result = true;
       result = result && getQualifiersList()
           .equals(other.getQualifiersList());
@@ -5196,9 +6920,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (getQualifiersCount() > 0) {
@@ -5206,89 +6934,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getQualifiersList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FirstKeyValueMatchingQualifiersFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilterOrBuilder {
@@ -5296,18 +7014,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.class, ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -5318,27 +7039,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
-        qualifiers_ = java.util.Collections.emptyList();;
+        qualifiers_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FirstKeyValueMatchingQualifiersFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter build() {
         ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -5346,17 +7067,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter result = new ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter(this);
         int from_bitField0_ = bitField0_;
@@ -5368,7 +7079,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter)other);
@@ -5377,7 +7088,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.getDefaultInstance()) return this;
         if (!other.qualifiers_.isEmpty()) {
@@ -5393,63 +7104,60 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ensureQualifiersIsMutable();
-              qualifiers_.add(input.readBytes());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // repeated bytes qualifiers = 1;
-      private java.util.List<com.google.protobuf.ByteString> qualifiers_ = java.util.Collections.emptyList();;
+      private java.util.List<com.google.protobuf.ByteString> qualifiers_ = java.util.Collections.emptyList();
       private void ensureQualifiersIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
           qualifiers_ = new java.util.ArrayList<com.google.protobuf.ByteString>(qualifiers_);
           bitField0_ |= 0x00000001;
          }
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public java.util.List<com.google.protobuf.ByteString>
           getQualifiersList() {
         return java.util.Collections.unmodifiableList(qualifiers_);
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public int getQualifiersCount() {
         return qualifiers_.size();
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public com.google.protobuf.ByteString getQualifiers(int index) {
         return qualifiers_.get(index);
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public Builder setQualifiers(
           int index, com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -5460,6 +7168,9 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public Builder addQualifiers(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -5469,6 +7180,9 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public Builder addAllQualifiers(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
         ensureQualifiersIsMutable();
@@ -5476,86 +7190,192 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes qualifiers = 1;</code>
+       */
       public Builder clearQualifiers() {
-        qualifiers_ = java.util.Collections.emptyList();;
+        qualifiers_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:FirstKeyValueMatchingQualifiersFilter)
     }
-    
+
     static {
       defaultInstance = new FirstKeyValueMatchingQualifiersFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FirstKeyValueMatchingQualifiersFilter)
   }
-  
+
   public interface FuzzyRowFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // repeated .BytesBytesPair fuzzyKeysData = 1;
+
+    // repeated .BytesBytesPair fuzzy_keys_data = 1;
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> 
         getFuzzyKeysDataList();
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPair getFuzzyKeysData(int index);
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     int getFuzzyKeysDataCount();
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getFuzzyKeysDataOrBuilderList();
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getFuzzyKeysDataOrBuilder(
         int index);
   }
+  /**
+   * Protobuf type {@code FuzzyRowFilter}
+   */
   public static final class FuzzyRowFilter extends
       com.google.protobuf.GeneratedMessage
       implements FuzzyRowFilterOrBuilder {
     // Use FuzzyRowFilter.newBuilder() to construct.
-    private FuzzyRowFilter(Builder builder) {
+    private FuzzyRowFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private FuzzyRowFilter(boolean noInit) {}
-    
+    private FuzzyRowFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final FuzzyRowFilter defaultInstance;
     public static FuzzyRowFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public FuzzyRowFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FuzzyRowFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                fuzzyKeysData_ = new java.util.ArrayList<ohmdb.client.generated.HBaseProtos.BytesBytesPair>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              fuzzyKeysData_.add(input.readMessage(ohmdb.client.generated.HBaseProtos.BytesBytesPair.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          fuzzyKeysData_ = java.util.Collections.unmodifiableList(fuzzyKeysData_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.FuzzyRowFilter.class, ohmdb.client.generated.FilterProtos.FuzzyRowFilter.Builder.class);
     }
-    
-    // repeated .BytesBytesPair fuzzyKeysData = 1;
-    public static final int FUZZYKEYSDATA_FIELD_NUMBER = 1;
+
+    public static com.google.protobuf.Parser<FuzzyRowFilter> PARSER =
+        new com.google.protobuf.AbstractParser<FuzzyRowFilter>() {
+      public FuzzyRowFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FuzzyRowFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FuzzyRowFilter> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated .BytesBytesPair fuzzy_keys_data = 1;
+    public static final int FUZZY_KEYS_DATA_FIELD_NUMBER = 1;
     private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> fuzzyKeysData_;
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getFuzzyKeysDataList() {
       return fuzzyKeysData_;
     }
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
         getFuzzyKeysDataOrBuilderList() {
       return fuzzyKeysData_;
     }
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     public int getFuzzyKeysDataCount() {
       return fuzzyKeysData_.size();
     }
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPair getFuzzyKeysData(int index) {
       return fuzzyKeysData_.get(index);
     }
+    /**
+     * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+     */
     public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getFuzzyKeysDataOrBuilder(
         int index) {
       return fuzzyKeysData_.get(index);
     }
-    
+
     private void initFields() {
       fuzzyKeysData_ = java.util.Collections.emptyList();
     }
@@ -5563,7 +7383,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       for (int i = 0; i < getFuzzyKeysDataCount(); i++) {
         if (!getFuzzyKeysData(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -5573,7 +7393,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -5582,12 +7402,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       for (int i = 0; i < fuzzyKeysData_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -5597,14 +7417,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -5614,7 +7434,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.FuzzyRowFilter other = (ohmdb.client.generated.FilterProtos.FuzzyRowFilter) obj;
-      
+
       boolean result = true;
       result = result && getFuzzyKeysDataList()
           .equals(other.getFuzzyKeysDataList());
@@ -5622,99 +7442,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (getFuzzyKeysDataCount() > 0) {
-        hash = (37 * hash) + FUZZYKEYSDATA_FIELD_NUMBER;
+        hash = (37 * hash) + FUZZY_KEYS_DATA_FIELD_NUMBER;
         hash = (53 * hash) + getFuzzyKeysDataList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.FuzzyRowFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.FuzzyRowFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code FuzzyRowFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.FuzzyRowFilterOrBuilder {
@@ -5722,18 +7536,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.FuzzyRowFilter.class, ohmdb.client.generated.FilterProtos.FuzzyRowFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.FuzzyRowFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -5745,7 +7562,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5756,20 +7573,20 @@ public final class FilterProtos {
         }
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.FuzzyRowFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_FuzzyRowFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FuzzyRowFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.FuzzyRowFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.FuzzyRowFilter build() {
         ohmdb.client.generated.FilterProtos.FuzzyRowFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -5777,17 +7594,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.FuzzyRowFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.FuzzyRowFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.FuzzyRowFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.FuzzyRowFilter result = new ohmdb.client.generated.FilterProtos.FuzzyRowFilter(this);
         int from_bitField0_ = bitField0_;
@@ -5803,7 +7610,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.FuzzyRowFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.FuzzyRowFilter)other);
@@ -5812,7 +7619,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.FuzzyRowFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.FuzzyRowFilter.getDefaultInstance()) return this;
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5844,7 +7651,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         for (int i = 0; i < getFuzzyKeysDataCount(); i++) {
           if (!getFuzzyKeysData(i).isInitialized()) {
@@ -5854,43 +7661,27 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder subBuilder = ohmdb.client.generated.HBaseProtos.BytesBytesPair.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addFuzzyKeysData(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.FuzzyRowFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.FuzzyRowFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // repeated .BytesBytesPair fuzzyKeysData = 1;
+
+      // repeated .BytesBytesPair fuzzy_keys_data = 1;
       private java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> fuzzyKeysData_ =
         java.util.Collections.emptyList();
       private void ensureFuzzyKeysDataIsMutable() {
@@ -5899,10 +7690,13 @@ public final class FilterProtos {
           bitField0_ |= 0x00000001;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           ohmdb.client.generated.HBaseProtos.BytesBytesPair, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder, ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> fuzzyKeysDataBuilder_;
-      
+
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair> getFuzzyKeysDataList() {
         if (fuzzyKeysDataBuilder_ == null) {
           return java.util.Collections.unmodifiableList(fuzzyKeysData_);
@@ -5910,6 +7704,9 @@ public final class FilterProtos {
           return fuzzyKeysDataBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public int getFuzzyKeysDataCount() {
         if (fuzzyKeysDataBuilder_ == null) {
           return fuzzyKeysData_.size();
@@ -5917,6 +7714,9 @@ public final class FilterProtos {
           return fuzzyKeysDataBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair getFuzzyKeysData(int index) {
         if (fuzzyKeysDataBuilder_ == null) {
           return fuzzyKeysData_.get(index);
@@ -5924,6 +7724,9 @@ public final class FilterProtos {
           return fuzzyKeysDataBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder setFuzzyKeysData(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5938,6 +7741,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder setFuzzyKeysData(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5949,6 +7755,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder addFuzzyKeysData(ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (fuzzyKeysDataBuilder_ == null) {
           if (value == null) {
@@ -5962,6 +7771,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder addFuzzyKeysData(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair value) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5976,6 +7788,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder addFuzzyKeysData(
           ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5987,6 +7802,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder addFuzzyKeysData(
           int index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder builderForValue) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -5998,6 +7816,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder addAllFuzzyKeysData(
           java.lang.Iterable<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPair> values) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -6009,6 +7830,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder clearFuzzyKeysData() {
         if (fuzzyKeysDataBuilder_ == null) {
           fuzzyKeysData_ = java.util.Collections.emptyList();
@@ -6019,6 +7843,9 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public Builder removeFuzzyKeysData(int index) {
         if (fuzzyKeysDataBuilder_ == null) {
           ensureFuzzyKeysDataIsMutable();
@@ -6029,10 +7856,16 @@ public final class FilterProtos {
         }
         return this;
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder getFuzzyKeysDataBuilder(
           int index) {
         return getFuzzyKeysDataFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder getFuzzyKeysDataOrBuilder(
           int index) {
         if (fuzzyKeysDataBuilder_ == null) {
@@ -6040,6 +7873,9 @@ public final class FilterProtos {
           return fuzzyKeysDataBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public java.util.List<? extends ohmdb.client.generated.HBaseProtos.BytesBytesPairOrBuilder> 
            getFuzzyKeysDataOrBuilderList() {
         if (fuzzyKeysDataBuilder_ != null) {
@@ -6048,15 +7884,24 @@ public final class FilterProtos {
           return java.util.Collections.unmodifiableList(fuzzyKeysData_);
         }
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addFuzzyKeysDataBuilder() {
         return getFuzzyKeysDataFieldBuilder().addBuilder(
             ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder addFuzzyKeysDataBuilder(
           int index) {
         return getFuzzyKeysDataFieldBuilder().addBuilder(
             index, ohmdb.client.generated.HBaseProtos.BytesBytesPair.getDefaultInstance());
       }
+      /**
+       * <code>repeated .BytesBytesPair fuzzy_keys_data = 1;</code>
+       */
       public java.util.List<ohmdb.client.generated.HBaseProtos.BytesBytesPair.Builder> 
            getFuzzyKeysDataBuilderList() {
         return getFuzzyKeysDataFieldBuilder().getBuilderList();
@@ -6075,64 +7920,143 @@ public final class FilterProtos {
         }
         return fuzzyKeysDataBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:FuzzyRowFilter)
     }
-    
+
     static {
       defaultInstance = new FuzzyRowFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:FuzzyRowFilter)
   }
-  
+
   public interface InclusiveStopFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional bytes stopRowKey = 1;
+
+    // optional bytes stop_row_key = 1;
+    /**
+     * <code>optional bytes stop_row_key = 1;</code>
+     */
     boolean hasStopRowKey();
+    /**
+     * <code>optional bytes stop_row_key = 1;</code>
+     */
     com.google.protobuf.ByteString getStopRowKey();
   }
+  /**
+   * Protobuf type {@code InclusiveStopFilter}
+   */
   public static final class InclusiveStopFilter extends
       com.google.protobuf.GeneratedMessage
       implements InclusiveStopFilterOrBuilder {
     // Use InclusiveStopFilter.newBuilder() to construct.
-    private InclusiveStopFilter(Builder builder) {
+    private InclusiveStopFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private InclusiveStopFilter(boolean noInit) {}
-    
+    private InclusiveStopFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final InclusiveStopFilter defaultInstance;
     public static InclusiveStopFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public InclusiveStopFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private InclusiveStopFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              stopRowKey_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.InclusiveStopFilter.class, ohmdb.client.generated.FilterProtos.InclusiveStopFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<InclusiveStopFilter> PARSER =
+        new com.google.protobuf.AbstractParser<InclusiveStopFilter>() {
+      public InclusiveStopFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new InclusiveStopFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<InclusiveStopFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // optional bytes stopRowKey = 1;
-    public static final int STOPROWKEY_FIELD_NUMBER = 1;
+    // optional bytes stop_row_key = 1;
+    public static final int STOP_ROW_KEY_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString stopRowKey_;
+    /**
+     * <code>optional bytes stop_row_key = 1;</code>
+     */
     public boolean hasStopRowKey() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>optional bytes stop_row_key = 1;</code>
+     */
     public com.google.protobuf.ByteString getStopRowKey() {
       return stopRowKey_;
     }
-    
+
     private void initFields() {
       stopRowKey_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -6140,11 +8064,11 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -6153,12 +8077,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6168,14 +8092,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -6185,7 +8109,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.InclusiveStopFilter other = (ohmdb.client.generated.FilterProtos.InclusiveStopFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasStopRowKey() == other.hasStopRowKey());
       if (hasStopRowKey()) {
@@ -6196,99 +8120,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasStopRowKey()) {
-        hash = (37 * hash) + STOPROWKEY_FIELD_NUMBER;
+        hash = (37 * hash) + STOP_ROW_KEY_FIELD_NUMBER;
         hash = (53 * hash) + getStopRowKey().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.InclusiveStopFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.InclusiveStopFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code InclusiveStopFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.InclusiveStopFilterOrBuilder {
@@ -6296,18 +8214,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.InclusiveStopFilter.class, ohmdb.client.generated.FilterProtos.InclusiveStopFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.InclusiveStopFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -6318,27 +8239,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         stopRowKey_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.InclusiveStopFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_InclusiveStopFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.InclusiveStopFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.InclusiveStopFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.InclusiveStopFilter build() {
         ohmdb.client.generated.FilterProtos.InclusiveStopFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -6346,17 +8267,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.InclusiveStopFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.InclusiveStopFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.InclusiveStopFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.InclusiveStopFilter result = new ohmdb.client.generated.FilterProtos.InclusiveStopFilter(this);
         int from_bitField0_ = bitField0_;
@@ -6369,7 +8280,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.InclusiveStopFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.InclusiveStopFilter)other);
@@ -6378,7 +8289,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.InclusiveStopFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.InclusiveStopFilter.getDefaultInstance()) return this;
         if (other.hasStopRowKey()) {
@@ -6387,53 +8298,47 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              stopRowKey_ = input.readBytes();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.InclusiveStopFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.InclusiveStopFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // optional bytes stopRowKey = 1;
+
+      // optional bytes stop_row_key = 1;
       private com.google.protobuf.ByteString stopRowKey_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes stop_row_key = 1;</code>
+       */
       public boolean hasStopRowKey() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>optional bytes stop_row_key = 1;</code>
+       */
       public com.google.protobuf.ByteString getStopRowKey() {
         return stopRowKey_;
       }
+      /**
+       * <code>optional bytes stop_row_key = 1;</code>
+       */
       public Builder setStopRowKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -6443,70 +8348,152 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes stop_row_key = 1;</code>
+       */
       public Builder clearStopRowKey() {
         bitField0_ = (bitField0_ & ~0x00000001);
         stopRowKey_ = getDefaultInstance().getStopRowKey();
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:InclusiveStopFilter)
     }
-    
+
     static {
       defaultInstance = new InclusiveStopFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:InclusiveStopFilter)
   }
-  
+
   public interface KeyOnlyFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required bool lenAsVal = 1;
+
+    // required bool len_as_val = 1;
+    /**
+     * <code>required bool len_as_val = 1;</code>
+     */
     boolean hasLenAsVal();
+    /**
+     * <code>required bool len_as_val = 1;</code>
+     */
     boolean getLenAsVal();
   }
+  /**
+   * Protobuf type {@code KeyOnlyFilter}
+   */
   public static final class KeyOnlyFilter extends
       com.google.protobuf.GeneratedMessage
       implements KeyOnlyFilterOrBuilder {
     // Use KeyOnlyFilter.newBuilder() to construct.
-    private KeyOnlyFilter(Builder builder) {
+    private KeyOnlyFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private KeyOnlyFilter(boolean noInit) {}
-    
+    private KeyOnlyFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final KeyOnlyFilter defaultInstance;
     public static KeyOnlyFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public KeyOnlyFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private KeyOnlyFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              lenAsVal_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.KeyOnlyFilter.class, ohmdb.client.generated.FilterProtos.KeyOnlyFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<KeyOnlyFilter> PARSER =
+        new com.google.protobuf.AbstractParser<KeyOnlyFilter>() {
+      public KeyOnlyFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new KeyOnlyFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KeyOnlyFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required bool lenAsVal = 1;
-    public static final int LENASVAL_FIELD_NUMBER = 1;
+    // required bool len_as_val = 1;
+    public static final int LEN_AS_VAL_FIELD_NUMBER = 1;
     private boolean lenAsVal_;
+    /**
+     * <code>required bool len_as_val = 1;</code>
+     */
     public boolean hasLenAsVal() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required bool len_as_val = 1;</code>
+     */
     public boolean getLenAsVal() {
       return lenAsVal_;
     }
-    
+
     private void initFields() {
       lenAsVal_ = false;
     }
@@ -6514,7 +8501,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasLenAsVal()) {
         memoizedIsInitialized = 0;
         return false;
@@ -6522,7 +8509,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -6531,12 +8518,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6546,14 +8533,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -6563,7 +8550,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.KeyOnlyFilter other = (ohmdb.client.generated.FilterProtos.KeyOnlyFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasLenAsVal() == other.hasLenAsVal());
       if (hasLenAsVal()) {
@@ -6574,99 +8561,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasLenAsVal()) {
-        hash = (37 * hash) + LENASVAL_FIELD_NUMBER;
+        hash = (37 * hash) + LEN_AS_VAL_FIELD_NUMBER;
         hash = (53 * hash) + hashBoolean(getLenAsVal());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.KeyOnlyFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.KeyOnlyFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code KeyOnlyFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.KeyOnlyFilterOrBuilder {
@@ -6674,18 +8655,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.KeyOnlyFilter.class, ohmdb.client.generated.FilterProtos.KeyOnlyFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.KeyOnlyFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -6696,27 +8680,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         lenAsVal_ = false;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.KeyOnlyFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_KeyOnlyFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.KeyOnlyFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.KeyOnlyFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.KeyOnlyFilter build() {
         ohmdb.client.generated.FilterProtos.KeyOnlyFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -6724,17 +8708,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.KeyOnlyFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.KeyOnlyFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.KeyOnlyFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.KeyOnlyFilter result = new ohmdb.client.generated.FilterProtos.KeyOnlyFilter(this);
         int from_bitField0_ = bitField0_;
@@ -6747,7 +8721,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.KeyOnlyFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.KeyOnlyFilter)other);
@@ -6756,7 +8730,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.KeyOnlyFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.KeyOnlyFilter.getDefaultInstance()) return this;
         if (other.hasLenAsVal()) {
@@ -6765,7 +8739,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasLenAsVal()) {
           
@@ -6773,135 +8747,223 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              lenAsVal_ = input.readBool();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.KeyOnlyFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.KeyOnlyFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required bool lenAsVal = 1;
+
+      // required bool len_as_val = 1;
       private boolean lenAsVal_ ;
+      /**
+       * <code>required bool len_as_val = 1;</code>
+       */
       public boolean hasLenAsVal() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required bool len_as_val = 1;</code>
+       */
       public boolean getLenAsVal() {
         return lenAsVal_;
       }
+      /**
+       * <code>required bool len_as_val = 1;</code>
+       */
       public Builder setLenAsVal(boolean value) {
         bitField0_ |= 0x00000001;
         lenAsVal_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required bool len_as_val = 1;</code>
+       */
       public Builder clearLenAsVal() {
         bitField0_ = (bitField0_ & ~0x00000001);
         lenAsVal_ = false;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:KeyOnlyFilter)
     }
-    
+
     static {
       defaultInstance = new KeyOnlyFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:KeyOnlyFilter)
   }
-  
+
   public interface MultipleColumnPrefixFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // repeated bytes sortedPrefixes = 1;
+
+    // repeated bytes sorted_prefixes = 1;
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     java.util.List<com.google.protobuf.ByteString> getSortedPrefixesList();
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     int getSortedPrefixesCount();
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     com.google.protobuf.ByteString getSortedPrefixes(int index);
   }
+  /**
+   * Protobuf type {@code MultipleColumnPrefixFilter}
+   */
   public static final class MultipleColumnPrefixFilter extends
       com.google.protobuf.GeneratedMessage
       implements MultipleColumnPrefixFilterOrBuilder {
     // Use MultipleColumnPrefixFilter.newBuilder() to construct.
-    private MultipleColumnPrefixFilter(Builder builder) {
+    private MultipleColumnPrefixFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private MultipleColumnPrefixFilter(boolean noInit) {}
-    
+    private MultipleColumnPrefixFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final MultipleColumnPrefixFilter defaultInstance;
     public static MultipleColumnPrefixFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public MultipleColumnPrefixFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private MultipleColumnPrefixFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                sortedPrefixes_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              sortedPrefixes_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          sortedPrefixes_ = java.util.Collections.unmodifiableList(sortedPrefixes_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.class, ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.Builder.class);
     }
-    
-    // repeated bytes sortedPrefixes = 1;
-    public static final int SORTEDPREFIXES_FIELD_NUMBER = 1;
+
+    public static com.google.protobuf.Parser<MultipleColumnPrefixFilter> PARSER =
+        new com.google.protobuf.AbstractParser<MultipleColumnPrefixFilter>() {
+      public MultipleColumnPrefixFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new MultipleColumnPrefixFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<MultipleColumnPrefixFilter> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated bytes sorted_prefixes = 1;
+    public static final int SORTED_PREFIXES_FIELD_NUMBER = 1;
     private java.util.List<com.google.protobuf.ByteString> sortedPrefixes_;
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     public java.util.List<com.google.protobuf.ByteString>
         getSortedPrefixesList() {
       return sortedPrefixes_;
     }
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     public int getSortedPrefixesCount() {
       return sortedPrefixes_.size();
     }
+    /**
+     * <code>repeated bytes sorted_prefixes = 1;</code>
+     */
     public com.google.protobuf.ByteString getSortedPrefixes(int index) {
       return sortedPrefixes_.get(index);
     }
-    
+
     private void initFields() {
-      sortedPrefixes_ = java.util.Collections.emptyList();;
+      sortedPrefixes_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -6910,12 +8972,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       {
         int dataSize = 0;
@@ -6930,14 +8992,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -6947,7 +9009,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter other = (ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter) obj;
-      
+
       boolean result = true;
       result = result && getSortedPrefixesList()
           .equals(other.getSortedPrefixesList());
@@ -6955,99 +9017,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (getSortedPrefixesCount() > 0) {
-        hash = (37 * hash) + SORTEDPREFIXES_FIELD_NUMBER;
+        hash = (37 * hash) + SORTED_PREFIXES_FIELD_NUMBER;
         hash = (53 * hash) + getSortedPrefixesList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code MultipleColumnPrefixFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilterOrBuilder {
@@ -7055,18 +9111,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.class, ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -7077,27 +9136,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
-        sortedPrefixes_ = java.util.Collections.emptyList();;
+        sortedPrefixes_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_MultipleColumnPrefixFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter build() {
         ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -7105,17 +9164,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter result = new ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter(this);
         int from_bitField0_ = bitField0_;
@@ -7127,7 +9176,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter)other);
@@ -7136,7 +9185,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.getDefaultInstance()) return this;
         if (!other.sortedPrefixes_.isEmpty()) {
@@ -7152,63 +9201,60 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ensureSortedPrefixesIsMutable();
-              sortedPrefixes_.add(input.readBytes());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // repeated bytes sortedPrefixes = 1;
-      private java.util.List<com.google.protobuf.ByteString> sortedPrefixes_ = java.util.Collections.emptyList();;
+
+      // repeated bytes sorted_prefixes = 1;
+      private java.util.List<com.google.protobuf.ByteString> sortedPrefixes_ = java.util.Collections.emptyList();
       private void ensureSortedPrefixesIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
           sortedPrefixes_ = new java.util.ArrayList<com.google.protobuf.ByteString>(sortedPrefixes_);
           bitField0_ |= 0x00000001;
          }
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public java.util.List<com.google.protobuf.ByteString>
           getSortedPrefixesList() {
         return java.util.Collections.unmodifiableList(sortedPrefixes_);
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public int getSortedPrefixesCount() {
         return sortedPrefixes_.size();
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public com.google.protobuf.ByteString getSortedPrefixes(int index) {
         return sortedPrefixes_.get(index);
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public Builder setSortedPrefixes(
           int index, com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -7219,6 +9265,9 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public Builder addSortedPrefixes(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -7228,6 +9277,9 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public Builder addAllSortedPrefixes(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
         ensureSortedPrefixesIsMutable();
@@ -7235,70 +9287,152 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated bytes sorted_prefixes = 1;</code>
+       */
       public Builder clearSortedPrefixes() {
-        sortedPrefixes_ = java.util.Collections.emptyList();;
+        sortedPrefixes_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:MultipleColumnPrefixFilter)
     }
-    
+
     static {
       defaultInstance = new MultipleColumnPrefixFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:MultipleColumnPrefixFilter)
   }
-  
+
   public interface PageFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required int64 pageSize = 1;
+
+    // required int64 page_size = 1;
+    /**
+     * <code>required int64 page_size = 1;</code>
+     */
     boolean hasPageSize();
+    /**
+     * <code>required int64 page_size = 1;</code>
+     */
     long getPageSize();
   }
+  /**
+   * Protobuf type {@code PageFilter}
+   */
   public static final class PageFilter extends
       com.google.protobuf.GeneratedMessage
       implements PageFilterOrBuilder {
     // Use PageFilter.newBuilder() to construct.
-    private PageFilter(Builder builder) {
+    private PageFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private PageFilter(boolean noInit) {}
-    
+    private PageFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final PageFilter defaultInstance;
     public static PageFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public PageFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PageFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              pageSize_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.PageFilter.class, ohmdb.client.generated.FilterProtos.PageFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<PageFilter> PARSER =
+        new com.google.protobuf.AbstractParser<PageFilter>() {
+      public PageFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PageFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PageFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required int64 pageSize = 1;
-    public static final int PAGESIZE_FIELD_NUMBER = 1;
+    // required int64 page_size = 1;
+    public static final int PAGE_SIZE_FIELD_NUMBER = 1;
     private long pageSize_;
+    /**
+     * <code>required int64 page_size = 1;</code>
+     */
     public boolean hasPageSize() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required int64 page_size = 1;</code>
+     */
     public long getPageSize() {
       return pageSize_;
     }
-    
+
     private void initFields() {
       pageSize_ = 0L;
     }
@@ -7306,7 +9440,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasPageSize()) {
         memoizedIsInitialized = 0;
         return false;
@@ -7314,7 +9448,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -7323,12 +9457,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7338,14 +9472,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -7355,7 +9489,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.PageFilter other = (ohmdb.client.generated.FilterProtos.PageFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasPageSize() == other.hasPageSize());
       if (hasPageSize()) {
@@ -7366,99 +9500,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasPageSize()) {
-        hash = (37 * hash) + PAGESIZE_FIELD_NUMBER;
+        hash = (37 * hash) + PAGE_SIZE_FIELD_NUMBER;
         hash = (53 * hash) + hashLong(getPageSize());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PageFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.PageFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code PageFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.PageFilterOrBuilder {
@@ -7466,18 +9594,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.PageFilter.class, ohmdb.client.generated.FilterProtos.PageFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.PageFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -7488,27 +9619,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         pageSize_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.PageFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_PageFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.PageFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.PageFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.PageFilter build() {
         ohmdb.client.generated.FilterProtos.PageFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -7516,17 +9647,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.PageFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.PageFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.PageFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.PageFilter result = new ohmdb.client.generated.FilterProtos.PageFilter(this);
         int from_bitField0_ = bitField0_;
@@ -7539,7 +9660,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.PageFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.PageFilter)other);
@@ -7548,7 +9669,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.PageFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.PageFilter.getDefaultInstance()) return this;
         if (other.hasPageSize()) {
@@ -7557,7 +9678,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasPageSize()) {
           
@@ -7565,119 +9686,195 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              pageSize_ = input.readInt64();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.PageFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.PageFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required int64 pageSize = 1;
+
+      // required int64 page_size = 1;
       private long pageSize_ ;
+      /**
+       * <code>required int64 page_size = 1;</code>
+       */
       public boolean hasPageSize() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required int64 page_size = 1;</code>
+       */
       public long getPageSize() {
         return pageSize_;
       }
+      /**
+       * <code>required int64 page_size = 1;</code>
+       */
       public Builder setPageSize(long value) {
         bitField0_ |= 0x00000001;
         pageSize_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required int64 page_size = 1;</code>
+       */
       public Builder clearPageSize() {
         bitField0_ = (bitField0_ & ~0x00000001);
         pageSize_ = 0L;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:PageFilter)
     }
-    
+
     static {
       defaultInstance = new PageFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:PageFilter)
   }
-  
+
   public interface PrefixFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // optional bytes prefix = 1;
+    /**
+     * <code>optional bytes prefix = 1;</code>
+     */
     boolean hasPrefix();
+    /**
+     * <code>optional bytes prefix = 1;</code>
+     */
     com.google.protobuf.ByteString getPrefix();
   }
+  /**
+   * Protobuf type {@code PrefixFilter}
+   */
   public static final class PrefixFilter extends
       com.google.protobuf.GeneratedMessage
       implements PrefixFilterOrBuilder {
     // Use PrefixFilter.newBuilder() to construct.
-    private PrefixFilter(Builder builder) {
+    private PrefixFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private PrefixFilter(boolean noInit) {}
-    
+    private PrefixFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final PrefixFilter defaultInstance;
     public static PrefixFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public PrefixFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PrefixFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              prefix_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.PrefixFilter.class, ohmdb.client.generated.FilterProtos.PrefixFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<PrefixFilter> PARSER =
+        new com.google.protobuf.AbstractParser<PrefixFilter>() {
+      public PrefixFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PrefixFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PrefixFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
     // optional bytes prefix = 1;
     public static final int PREFIX_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString prefix_;
+    /**
+     * <code>optional bytes prefix = 1;</code>
+     */
     public boolean hasPrefix() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>optional bytes prefix = 1;</code>
+     */
     public com.google.protobuf.ByteString getPrefix() {
       return prefix_;
     }
-    
+
     private void initFields() {
       prefix_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -7685,11 +9882,11 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -7698,12 +9895,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7713,14 +9910,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -7730,7 +9927,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.PrefixFilter other = (ohmdb.client.generated.FilterProtos.PrefixFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasPrefix() == other.hasPrefix());
       if (hasPrefix()) {
@@ -7741,9 +9938,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasPrefix()) {
@@ -7751,89 +9952,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getPrefix().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.PrefixFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.PrefixFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code PrefixFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.PrefixFilterOrBuilder {
@@ -7841,18 +10032,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.PrefixFilter.class, ohmdb.client.generated.FilterProtos.PrefixFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.PrefixFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -7863,27 +10057,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         prefix_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.PrefixFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_PrefixFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.PrefixFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.PrefixFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.PrefixFilter build() {
         ohmdb.client.generated.FilterProtos.PrefixFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -7891,17 +10085,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.PrefixFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.PrefixFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.PrefixFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.PrefixFilter result = new ohmdb.client.generated.FilterProtos.PrefixFilter(this);
         int from_bitField0_ = bitField0_;
@@ -7914,7 +10098,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.PrefixFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.PrefixFilter)other);
@@ -7923,7 +10107,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.PrefixFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.PrefixFilter.getDefaultInstance()) return this;
         if (other.hasPrefix()) {
@@ -7932,53 +10116,47 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              prefix_ = input.readBytes();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.PrefixFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.PrefixFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // optional bytes prefix = 1;
       private com.google.protobuf.ByteString prefix_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes prefix = 1;</code>
+       */
       public boolean hasPrefix() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>optional bytes prefix = 1;</code>
+       */
       public com.google.protobuf.ByteString getPrefix() {
         return prefix_;
       }
+      /**
+       * <code>optional bytes prefix = 1;</code>
+       */
       public Builder setPrefix(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -7988,74 +10166,170 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes prefix = 1;</code>
+       */
       public Builder clearPrefix() {
         bitField0_ = (bitField0_ & ~0x00000001);
         prefix_ = getDefaultInstance().getPrefix();
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:PrefixFilter)
     }
-    
+
     static {
       defaultInstance = new PrefixFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:PrefixFilter)
   }
-  
+
   public interface QualifierFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareFilter compareFilter = 1;
+
+    // required .CompareFilter compare_filter = 1;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     boolean hasCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code QualifierFilter}
+   */
   public static final class QualifierFilter extends
       com.google.protobuf.GeneratedMessage
       implements QualifierFilterOrBuilder {
     // Use QualifierFilter.newBuilder() to construct.
-    private QualifierFilter(Builder builder) {
+    private QualifierFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private QualifierFilter(boolean noInit) {}
-    
+    private QualifierFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final QualifierFilter defaultInstance;
     public static QualifierFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public QualifierFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QualifierFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = compareFilter_.toBuilder();
+              }
+              compareFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.CompareFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(compareFilter_);
+                compareFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.QualifierFilter.class, ohmdb.client.generated.FilterProtos.QualifierFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<QualifierFilter> PARSER =
+        new com.google.protobuf.AbstractParser<QualifierFilter>() {
+      public QualifierFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QualifierFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QualifierFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareFilter compareFilter = 1;
-    public static final int COMPAREFILTER_FIELD_NUMBER = 1;
+    // required .CompareFilter compare_filter = 1;
+    public static final int COMPARE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public boolean hasCompareFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
       return compareFilter_;
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
       return compareFilter_;
     }
-    
+
     private void initFields() {
       compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
     }
@@ -8063,7 +10337,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -8075,7 +10349,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -8084,12 +10358,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -8099,14 +10373,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -8116,7 +10390,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.QualifierFilter other = (ohmdb.client.generated.FilterProtos.QualifierFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareFilter() == other.hasCompareFilter());
       if (hasCompareFilter()) {
@@ -8127,99 +10401,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareFilter()) {
-        hash = (37 * hash) + COMPAREFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getCompareFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.QualifierFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.QualifierFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code QualifierFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.QualifierFilterOrBuilder {
@@ -8227,18 +10495,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.QualifierFilter.class, ohmdb.client.generated.FilterProtos.QualifierFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.QualifierFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -8250,7 +10521,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (compareFilterBuilder_ == null) {
@@ -8261,20 +10532,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.QualifierFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_QualifierFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.QualifierFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.QualifierFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.QualifierFilter build() {
         ohmdb.client.generated.FilterProtos.QualifierFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -8282,17 +10553,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.QualifierFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.QualifierFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.QualifierFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.QualifierFilter result = new ohmdb.client.generated.FilterProtos.QualifierFilter(this);
         int from_bitField0_ = bitField0_;
@@ -8309,7 +10570,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.QualifierFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.QualifierFilter)other);
@@ -8318,7 +10579,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.QualifierFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.QualifierFilter.getDefaultInstance()) return this;
         if (other.hasCompareFilter()) {
@@ -8327,7 +10588,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareFilter()) {
           
@@ -8339,52 +10600,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder();
-              if (hasCompareFilter()) {
-                subBuilder.mergeFrom(getCompareFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setCompareFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.QualifierFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.QualifierFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareFilter compareFilter = 1;
+
+      // required .CompareFilter compare_filter = 1;
       private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> compareFilterBuilder_;
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public boolean hasCompareFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
         if (compareFilterBuilder_ == null) {
           return compareFilter_;
@@ -8392,6 +10640,9 @@ public final class FilterProtos {
           return compareFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (value == null) {
@@ -8405,6 +10656,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(
           ohmdb.client.generated.FilterProtos.CompareFilter.Builder builderForValue) {
         if (compareFilterBuilder_ == null) {
@@ -8416,6 +10670,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder mergeCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -8432,6 +10689,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder clearCompareFilter() {
         if (compareFilterBuilder_ == null) {
           compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
@@ -8442,11 +10702,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter.Builder getCompareFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getCompareFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
         if (compareFilterBuilder_ != null) {
           return compareFilterBuilder_.getMessageOrBuilder();
@@ -8454,6 +10720,9 @@ public final class FilterProtos {
           return compareFilter_;
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> 
           getCompareFilterFieldBuilder() {
@@ -8467,64 +10736,143 @@ public final class FilterProtos {
         }
         return compareFilterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:QualifierFilter)
     }
-    
+
     static {
       defaultInstance = new QualifierFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:QualifierFilter)
   }
-  
+
   public interface RandomRowFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required float chance = 1;
+    /**
+     * <code>required float chance = 1;</code>
+     */
     boolean hasChance();
+    /**
+     * <code>required float chance = 1;</code>
+     */
     float getChance();
   }
+  /**
+   * Protobuf type {@code RandomRowFilter}
+   */
   public static final class RandomRowFilter extends
       com.google.protobuf.GeneratedMessage
       implements RandomRowFilterOrBuilder {
     // Use RandomRowFilter.newBuilder() to construct.
-    private RandomRowFilter(Builder builder) {
+    private RandomRowFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private RandomRowFilter(boolean noInit) {}
-    
+    private RandomRowFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final RandomRowFilter defaultInstance;
     public static RandomRowFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public RandomRowFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RandomRowFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 13: {
+              bitField0_ |= 0x00000001;
+              chance_ = input.readFloat();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.RandomRowFilter.class, ohmdb.client.generated.FilterProtos.RandomRowFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<RandomRowFilter> PARSER =
+        new com.google.protobuf.AbstractParser<RandomRowFilter>() {
+      public RandomRowFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RandomRowFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RandomRowFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
     // required float chance = 1;
     public static final int CHANCE_FIELD_NUMBER = 1;
     private float chance_;
+    /**
+     * <code>required float chance = 1;</code>
+     */
     public boolean hasChance() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required float chance = 1;</code>
+     */
     public float getChance() {
       return chance_;
     }
-    
+
     private void initFields() {
       chance_ = 0F;
     }
@@ -8532,7 +10880,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasChance()) {
         memoizedIsInitialized = 0;
         return false;
@@ -8540,7 +10888,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -8549,12 +10897,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -8564,14 +10912,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -8581,7 +10929,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.RandomRowFilter other = (ohmdb.client.generated.FilterProtos.RandomRowFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasChance() == other.hasChance());
       if (hasChance()) {
@@ -8591,9 +10939,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasChance()) {
@@ -8602,89 +10954,79 @@ public final class FilterProtos {
             getChance());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RandomRowFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.RandomRowFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code RandomRowFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.RandomRowFilterOrBuilder {
@@ -8692,18 +11034,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.RandomRowFilter.class, ohmdb.client.generated.FilterProtos.RandomRowFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.RandomRowFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -8714,27 +11059,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         chance_ = 0F;
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.RandomRowFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_RandomRowFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.RandomRowFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.RandomRowFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.RandomRowFilter build() {
         ohmdb.client.generated.FilterProtos.RandomRowFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -8742,17 +11087,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.RandomRowFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.RandomRowFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.RandomRowFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.RandomRowFilter result = new ohmdb.client.generated.FilterProtos.RandomRowFilter(this);
         int from_bitField0_ = bitField0_;
@@ -8765,7 +11100,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.RandomRowFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.RandomRowFilter)other);
@@ -8774,7 +11109,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.RandomRowFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.RandomRowFilter.getDefaultInstance()) return this;
         if (other.hasChance()) {
@@ -8783,7 +11118,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasChance()) {
           
@@ -8791,123 +11126,213 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 13: {
-              bitField0_ |= 0x00000001;
-              chance_ = input.readFloat();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.RandomRowFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.RandomRowFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required float chance = 1;
       private float chance_ ;
+      /**
+       * <code>required float chance = 1;</code>
+       */
       public boolean hasChance() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required float chance = 1;</code>
+       */
       public float getChance() {
         return chance_;
       }
+      /**
+       * <code>required float chance = 1;</code>
+       */
       public Builder setChance(float value) {
         bitField0_ |= 0x00000001;
         chance_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>required float chance = 1;</code>
+       */
       public Builder clearChance() {
         bitField0_ = (bitField0_ & ~0x00000001);
         chance_ = 0F;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:RandomRowFilter)
     }
-    
+
     static {
       defaultInstance = new RandomRowFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:RandomRowFilter)
   }
-  
+
   public interface RowFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareFilter compareFilter = 1;
+
+    // required .CompareFilter compare_filter = 1;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     boolean hasCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code RowFilter}
+   */
   public static final class RowFilter extends
       com.google.protobuf.GeneratedMessage
       implements RowFilterOrBuilder {
     // Use RowFilter.newBuilder() to construct.
-    private RowFilter(Builder builder) {
+    private RowFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private RowFilter(boolean noInit) {}
-    
+    private RowFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final RowFilter defaultInstance;
     public static RowFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public RowFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RowFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = compareFilter_.toBuilder();
+              }
+              compareFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.CompareFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(compareFilter_);
+                compareFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.RowFilter.class, ohmdb.client.generated.FilterProtos.RowFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<RowFilter> PARSER =
+        new com.google.protobuf.AbstractParser<RowFilter>() {
+      public RowFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RowFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RowFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareFilter compareFilter = 1;
-    public static final int COMPAREFILTER_FIELD_NUMBER = 1;
+    // required .CompareFilter compare_filter = 1;
+    public static final int COMPARE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public boolean hasCompareFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
       return compareFilter_;
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
       return compareFilter_;
     }
-    
+
     private void initFields() {
       compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
     }
@@ -8915,7 +11340,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -8927,7 +11352,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -8936,12 +11361,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -8951,14 +11376,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -8968,7 +11393,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.RowFilter other = (ohmdb.client.generated.FilterProtos.RowFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareFilter() == other.hasCompareFilter());
       if (hasCompareFilter()) {
@@ -8979,99 +11404,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareFilter()) {
-        hash = (37 * hash) + COMPAREFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getCompareFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.RowFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.RowFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code RowFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.RowFilterOrBuilder {
@@ -9079,18 +11498,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.RowFilter.class, ohmdb.client.generated.FilterProtos.RowFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.RowFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -9102,7 +11524,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (compareFilterBuilder_ == null) {
@@ -9113,20 +11535,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.RowFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_RowFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.RowFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.RowFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.RowFilter build() {
         ohmdb.client.generated.FilterProtos.RowFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -9134,17 +11556,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.RowFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.RowFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.RowFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.RowFilter result = new ohmdb.client.generated.FilterProtos.RowFilter(this);
         int from_bitField0_ = bitField0_;
@@ -9161,7 +11573,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.RowFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.RowFilter)other);
@@ -9170,7 +11582,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.RowFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.RowFilter.getDefaultInstance()) return this;
         if (other.hasCompareFilter()) {
@@ -9179,7 +11591,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareFilter()) {
           
@@ -9191,52 +11603,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder();
-              if (hasCompareFilter()) {
-                subBuilder.mergeFrom(getCompareFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setCompareFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.RowFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.RowFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareFilter compareFilter = 1;
+
+      // required .CompareFilter compare_filter = 1;
       private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> compareFilterBuilder_;
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public boolean hasCompareFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
         if (compareFilterBuilder_ == null) {
           return compareFilter_;
@@ -9244,6 +11643,9 @@ public final class FilterProtos {
           return compareFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (value == null) {
@@ -9257,6 +11659,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(
           ohmdb.client.generated.FilterProtos.CompareFilter.Builder builderForValue) {
         if (compareFilterBuilder_ == null) {
@@ -9268,6 +11673,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder mergeCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -9284,6 +11692,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder clearCompareFilter() {
         if (compareFilterBuilder_ == null) {
           compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
@@ -9294,11 +11705,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter.Builder getCompareFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getCompareFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
         if (compareFilterBuilder_ != null) {
           return compareFilterBuilder_.getMessageOrBuilder();
@@ -9306,6 +11723,9 @@ public final class FilterProtos {
           return compareFilter_;
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> 
           getCompareFilterFieldBuilder() {
@@ -9319,68 +11739,161 @@ public final class FilterProtos {
         }
         return compareFilterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:RowFilter)
     }
-    
+
     static {
       defaultInstance = new RowFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:RowFilter)
   }
-  
+
   public interface SingleColumnValueExcludeFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .SingleColumnValueFilter singleColumnValueFilter = 1;
+
+    // required .SingleColumnValueFilter single_column_value_filter = 1;
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     boolean hasSingleColumnValueFilter();
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.SingleColumnValueFilter getSingleColumnValueFilter();
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder getSingleColumnValueFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code SingleColumnValueExcludeFilter}
+   */
   public static final class SingleColumnValueExcludeFilter extends
       com.google.protobuf.GeneratedMessage
       implements SingleColumnValueExcludeFilterOrBuilder {
     // Use SingleColumnValueExcludeFilter.newBuilder() to construct.
-    private SingleColumnValueExcludeFilter(Builder builder) {
+    private SingleColumnValueExcludeFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private SingleColumnValueExcludeFilter(boolean noInit) {}
-    
+    private SingleColumnValueExcludeFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final SingleColumnValueExcludeFilter defaultInstance;
     public static SingleColumnValueExcludeFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public SingleColumnValueExcludeFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SingleColumnValueExcludeFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = singleColumnValueFilter_.toBuilder();
+              }
+              singleColumnValueFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(singleColumnValueFilter_);
+                singleColumnValueFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.class, ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<SingleColumnValueExcludeFilter> PARSER =
+        new com.google.protobuf.AbstractParser<SingleColumnValueExcludeFilter>() {
+      public SingleColumnValueExcludeFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SingleColumnValueExcludeFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SingleColumnValueExcludeFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .SingleColumnValueFilter singleColumnValueFilter = 1;
-    public static final int SINGLECOLUMNVALUEFILTER_FIELD_NUMBER = 1;
+    // required .SingleColumnValueFilter single_column_value_filter = 1;
+    public static final int SINGLE_COLUMN_VALUE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.SingleColumnValueFilter singleColumnValueFilter_;
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     public boolean hasSingleColumnValueFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter getSingleColumnValueFilter() {
       return singleColumnValueFilter_;
     }
+    /**
+     * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder getSingleColumnValueFilterOrBuilder() {
       return singleColumnValueFilter_;
     }
-    
+
     private void initFields() {
       singleColumnValueFilter_ = ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDefaultInstance();
     }
@@ -9388,7 +11901,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasSingleColumnValueFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -9400,7 +11913,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -9409,12 +11922,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -9424,14 +11937,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -9441,7 +11954,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter other = (ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasSingleColumnValueFilter() == other.hasSingleColumnValueFilter());
       if (hasSingleColumnValueFilter()) {
@@ -9452,99 +11965,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasSingleColumnValueFilter()) {
-        hash = (37 * hash) + SINGLECOLUMNVALUEFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + SINGLE_COLUMN_VALUE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getSingleColumnValueFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code SingleColumnValueExcludeFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilterOrBuilder {
@@ -9552,18 +12059,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.class, ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -9575,7 +12085,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (singleColumnValueFilterBuilder_ == null) {
@@ -9586,20 +12096,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueExcludeFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter build() {
         ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -9607,17 +12117,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter result = new ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter(this);
         int from_bitField0_ = bitField0_;
@@ -9634,7 +12134,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter)other);
@@ -9643,7 +12143,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.getDefaultInstance()) return this;
         if (other.hasSingleColumnValueFilter()) {
@@ -9652,7 +12152,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasSingleColumnValueFilter()) {
           
@@ -9664,52 +12164,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.newBuilder();
-              if (hasSingleColumnValueFilter()) {
-                subBuilder.mergeFrom(getSingleColumnValueFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setSingleColumnValueFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .SingleColumnValueFilter singleColumnValueFilter = 1;
+
+      // required .SingleColumnValueFilter single_column_value_filter = 1;
       private ohmdb.client.generated.FilterProtos.SingleColumnValueFilter singleColumnValueFilter_ = ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.SingleColumnValueFilter, ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder, ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder> singleColumnValueFilterBuilder_;
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public boolean hasSingleColumnValueFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter getSingleColumnValueFilter() {
         if (singleColumnValueFilterBuilder_ == null) {
           return singleColumnValueFilter_;
@@ -9717,6 +12204,9 @@ public final class FilterProtos {
           return singleColumnValueFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public Builder setSingleColumnValueFilter(ohmdb.client.generated.FilterProtos.SingleColumnValueFilter value) {
         if (singleColumnValueFilterBuilder_ == null) {
           if (value == null) {
@@ -9730,6 +12220,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public Builder setSingleColumnValueFilter(
           ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder builderForValue) {
         if (singleColumnValueFilterBuilder_ == null) {
@@ -9741,6 +12234,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public Builder mergeSingleColumnValueFilter(ohmdb.client.generated.FilterProtos.SingleColumnValueFilter value) {
         if (singleColumnValueFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -9757,6 +12253,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public Builder clearSingleColumnValueFilter() {
         if (singleColumnValueFilterBuilder_ == null) {
           singleColumnValueFilter_ = ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDefaultInstance();
@@ -9767,11 +12266,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder getSingleColumnValueFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getSingleColumnValueFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder getSingleColumnValueFilterOrBuilder() {
         if (singleColumnValueFilterBuilder_ != null) {
           return singleColumnValueFilterBuilder_.getMessageOrBuilder();
@@ -9779,6 +12284,9 @@ public final class FilterProtos {
           return singleColumnValueFilter_;
         }
       }
+      /**
+       * <code>required .SingleColumnValueFilter single_column_value_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.SingleColumnValueFilter, ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder, ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder> 
           getSingleColumnValueFilterFieldBuilder() {
@@ -9792,138 +12300,322 @@ public final class FilterProtos {
         }
         return singleColumnValueFilterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:SingleColumnValueExcludeFilter)
     }
-    
+
     static {
       defaultInstance = new SingleColumnValueExcludeFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:SingleColumnValueExcludeFilter)
   }
-  
+
   public interface SingleColumnValueFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional bytes columnFamily = 1;
+
+    // optional bytes column_family = 1;
+    /**
+     * <code>optional bytes column_family = 1;</code>
+     */
     boolean hasColumnFamily();
+    /**
+     * <code>optional bytes column_family = 1;</code>
+     */
     com.google.protobuf.ByteString getColumnFamily();
-    
-    // optional bytes columnQualifier = 2;
+
+    // optional bytes column_qualifier = 2;
+    /**
+     * <code>optional bytes column_qualifier = 2;</code>
+     */
     boolean hasColumnQualifier();
+    /**
+     * <code>optional bytes column_qualifier = 2;</code>
+     */
     com.google.protobuf.ByteString getColumnQualifier();
-    
-    // required .CompareType compareOp = 3;
+
+    // required .CompareType compare_op = 3;
+    /**
+     * <code>required .CompareType compare_op = 3;</code>
+     */
     boolean hasCompareOp();
+    /**
+     * <code>required .CompareType compare_op = 3;</code>
+     */
     ohmdb.client.generated.HBaseProtos.CompareType getCompareOp();
-    
+
     // required .Comparator comparator = 4;
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     boolean hasComparator();
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     ohmdb.client.generated.ComparatorProtos.Comparator getComparator();
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder();
-    
-    // optional bool filterIfMissing = 5;
+
+    // optional bool filter_if_missing = 5;
+    /**
+     * <code>optional bool filter_if_missing = 5;</code>
+     */
     boolean hasFilterIfMissing();
+    /**
+     * <code>optional bool filter_if_missing = 5;</code>
+     */
     boolean getFilterIfMissing();
-    
-    // optional bool latestVersionOnly = 6;
+
+    // optional bool latest_version_only = 6;
+    /**
+     * <code>optional bool latest_version_only = 6;</code>
+     */
     boolean hasLatestVersionOnly();
+    /**
+     * <code>optional bool latest_version_only = 6;</code>
+     */
     boolean getLatestVersionOnly();
   }
+  /**
+   * Protobuf type {@code SingleColumnValueFilter}
+   */
   public static final class SingleColumnValueFilter extends
       com.google.protobuf.GeneratedMessage
       implements SingleColumnValueFilterOrBuilder {
     // Use SingleColumnValueFilter.newBuilder() to construct.
-    private SingleColumnValueFilter(Builder builder) {
+    private SingleColumnValueFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private SingleColumnValueFilter(boolean noInit) {}
-    
+    private SingleColumnValueFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final SingleColumnValueFilter defaultInstance;
     public static SingleColumnValueFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public SingleColumnValueFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SingleColumnValueFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              columnFamily_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              columnQualifier_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+              ohmdb.client.generated.HBaseProtos.CompareType value = ohmdb.client.generated.HBaseProtos.CompareType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(3, rawValue);
+              } else {
+                bitField0_ |= 0x00000004;
+                compareOp_ = value;
+              }
+              break;
+            }
+            case 34: {
+              ohmdb.client.generated.ComparatorProtos.Comparator.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = comparator_.toBuilder();
+              }
+              comparator_ = input.readMessage(ohmdb.client.generated.ComparatorProtos.Comparator.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(comparator_);
+                comparator_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              filterIfMissing_ = input.readBool();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              latestVersionOnly_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.class, ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<SingleColumnValueFilter> PARSER =
+        new com.google.protobuf.AbstractParser<SingleColumnValueFilter>() {
+      public SingleColumnValueFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SingleColumnValueFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SingleColumnValueFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // optional bytes columnFamily = 1;
-    public static final int COLUMNFAMILY_FIELD_NUMBER = 1;
+    // optional bytes column_family = 1;
+    public static final int COLUMN_FAMILY_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString columnFamily_;
+    /**
+     * <code>optional bytes column_family = 1;</code>
+     */
     public boolean hasColumnFamily() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>optional bytes column_family = 1;</code>
+     */
     public com.google.protobuf.ByteString getColumnFamily() {
       return columnFamily_;
     }
-    
-    // optional bytes columnQualifier = 2;
-    public static final int COLUMNQUALIFIER_FIELD_NUMBER = 2;
+
+    // optional bytes column_qualifier = 2;
+    public static final int COLUMN_QUALIFIER_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString columnQualifier_;
+    /**
+     * <code>optional bytes column_qualifier = 2;</code>
+     */
     public boolean hasColumnQualifier() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
+    /**
+     * <code>optional bytes column_qualifier = 2;</code>
+     */
     public com.google.protobuf.ByteString getColumnQualifier() {
       return columnQualifier_;
     }
-    
-    // required .CompareType compareOp = 3;
-    public static final int COMPAREOP_FIELD_NUMBER = 3;
+
+    // required .CompareType compare_op = 3;
+    public static final int COMPARE_OP_FIELD_NUMBER = 3;
     private ohmdb.client.generated.HBaseProtos.CompareType compareOp_;
+    /**
+     * <code>required .CompareType compare_op = 3;</code>
+     */
     public boolean hasCompareOp() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
+    /**
+     * <code>required .CompareType compare_op = 3;</code>
+     */
     public ohmdb.client.generated.HBaseProtos.CompareType getCompareOp() {
       return compareOp_;
     }
-    
+
     // required .Comparator comparator = 4;
     public static final int COMPARATOR_FIELD_NUMBER = 4;
     private ohmdb.client.generated.ComparatorProtos.Comparator comparator_;
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     public boolean hasComparator() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     public ohmdb.client.generated.ComparatorProtos.Comparator getComparator() {
       return comparator_;
     }
+    /**
+     * <code>required .Comparator comparator = 4;</code>
+     */
     public ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder() {
       return comparator_;
     }
-    
-    // optional bool filterIfMissing = 5;
-    public static final int FILTERIFMISSING_FIELD_NUMBER = 5;
+
+    // optional bool filter_if_missing = 5;
+    public static final int FILTER_IF_MISSING_FIELD_NUMBER = 5;
     private boolean filterIfMissing_;
+    /**
+     * <code>optional bool filter_if_missing = 5;</code>
+     */
     public boolean hasFilterIfMissing() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
+    /**
+     * <code>optional bool filter_if_missing = 5;</code>
+     */
     public boolean getFilterIfMissing() {
       return filterIfMissing_;
     }
-    
-    // optional bool latestVersionOnly = 6;
-    public static final int LATESTVERSIONONLY_FIELD_NUMBER = 6;
+
+    // optional bool latest_version_only = 6;
+    public static final int LATEST_VERSION_ONLY_FIELD_NUMBER = 6;
     private boolean latestVersionOnly_;
+    /**
+     * <code>optional bool latest_version_only = 6;</code>
+     */
     public boolean hasLatestVersionOnly() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
+    /**
+     * <code>optional bool latest_version_only = 6;</code>
+     */
     public boolean getLatestVersionOnly() {
       return latestVersionOnly_;
     }
-    
+
     private void initFields() {
       columnFamily_ = com.google.protobuf.ByteString.EMPTY;
       columnQualifier_ = com.google.protobuf.ByteString.EMPTY;
@@ -9936,7 +12628,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareOp()) {
         memoizedIsInitialized = 0;
         return false;
@@ -9952,7 +12644,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -9976,12 +12668,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -10011,14 +12703,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -10028,7 +12720,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.SingleColumnValueFilter other = (ohmdb.client.generated.FilterProtos.SingleColumnValueFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasColumnFamily() == other.hasColumnFamily());
       if (hasColumnFamily()) {
@@ -10064,21 +12756,25 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasColumnFamily()) {
-        hash = (37 * hash) + COLUMNFAMILY_FIELD_NUMBER;
+        hash = (37 * hash) + COLUMN_FAMILY_FIELD_NUMBER;
         hash = (53 * hash) + getColumnFamily().hashCode();
       }
       if (hasColumnQualifier()) {
-        hash = (37 * hash) + COLUMNQUALIFIER_FIELD_NUMBER;
+        hash = (37 * hash) + COLUMN_QUALIFIER_FIELD_NUMBER;
         hash = (53 * hash) + getColumnQualifier().hashCode();
       }
       if (hasCompareOp()) {
-        hash = (37 * hash) + COMPAREOP_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_OP_FIELD_NUMBER;
         hash = (53 * hash) + hashEnum(getCompareOp());
       }
       if (hasComparator()) {
@@ -10086,97 +12782,87 @@ public final class FilterProtos {
         hash = (53 * hash) + getComparator().hashCode();
       }
       if (hasFilterIfMissing()) {
-        hash = (37 * hash) + FILTERIFMISSING_FIELD_NUMBER;
+        hash = (37 * hash) + FILTER_IF_MISSING_FIELD_NUMBER;
         hash = (53 * hash) + hashBoolean(getFilterIfMissing());
       }
       if (hasLatestVersionOnly()) {
-        hash = (37 * hash) + LATESTVERSIONONLY_FIELD_NUMBER;
+        hash = (37 * hash) + LATEST_VERSION_ONLY_FIELD_NUMBER;
         hash = (53 * hash) + hashBoolean(getLatestVersionOnly());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.SingleColumnValueFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code SingleColumnValueFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.SingleColumnValueFilterOrBuilder {
@@ -10184,18 +12870,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.class, ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -10207,7 +12896,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         columnFamily_ = com.google.protobuf.ByteString.EMPTY;
@@ -10228,20 +12917,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_SingleColumnValueFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter build() {
         ohmdb.client.generated.FilterProtos.SingleColumnValueFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -10249,17 +12938,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.SingleColumnValueFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.SingleColumnValueFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.SingleColumnValueFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.SingleColumnValueFilter result = new ohmdb.client.generated.FilterProtos.SingleColumnValueFilter(this);
         int from_bitField0_ = bitField0_;
@@ -10296,7 +12975,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.SingleColumnValueFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.SingleColumnValueFilter)other);
@@ -10305,7 +12984,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.SingleColumnValueFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.getDefaultInstance()) return this;
         if (other.hasColumnFamily()) {
@@ -10329,7 +13008,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareOp()) {
           
@@ -10345,84 +13024,43 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              columnFamily_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              columnQualifier_ = input.readBytes();
-              break;
-            }
-            case 24: {
-              int rawValue = input.readEnum();
-              ohmdb.client.generated.HBaseProtos.CompareType value = ohmdb.client.generated.HBaseProtos.CompareType.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(3, rawValue);
-              } else {
-                bitField0_ |= 0x00000004;
-                compareOp_ = value;
-              }
-              break;
-            }
-            case 34: {
-              ohmdb.client.generated.ComparatorProtos.Comparator.Builder subBuilder = ohmdb.client.generated.ComparatorProtos.Comparator.newBuilder();
-              if (hasComparator()) {
-                subBuilder.mergeFrom(getComparator());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setComparator(subBuilder.buildPartial());
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              filterIfMissing_ = input.readBool();
-              break;
-            }
-            case 48: {
-              bitField0_ |= 0x00000020;
-              latestVersionOnly_ = input.readBool();
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.SingleColumnValueFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.SingleColumnValueFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // optional bytes columnFamily = 1;
+
+      // optional bytes column_family = 1;
       private com.google.protobuf.ByteString columnFamily_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes column_family = 1;</code>
+       */
       public boolean hasColumnFamily() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>optional bytes column_family = 1;</code>
+       */
       public com.google.protobuf.ByteString getColumnFamily() {
         return columnFamily_;
       }
+      /**
+       * <code>optional bytes column_family = 1;</code>
+       */
       public Builder setColumnFamily(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -10432,21 +13070,33 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes column_family = 1;</code>
+       */
       public Builder clearColumnFamily() {
         bitField0_ = (bitField0_ & ~0x00000001);
         columnFamily_ = getDefaultInstance().getColumnFamily();
         onChanged();
         return this;
       }
-      
-      // optional bytes columnQualifier = 2;
+
+      // optional bytes column_qualifier = 2;
       private com.google.protobuf.ByteString columnQualifier_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes column_qualifier = 2;</code>
+       */
       public boolean hasColumnQualifier() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
+      /**
+       * <code>optional bytes column_qualifier = 2;</code>
+       */
       public com.google.protobuf.ByteString getColumnQualifier() {
         return columnQualifier_;
       }
+      /**
+       * <code>optional bytes column_qualifier = 2;</code>
+       */
       public Builder setColumnQualifier(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
@@ -10456,21 +13106,33 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bytes column_qualifier = 2;</code>
+       */
       public Builder clearColumnQualifier() {
         bitField0_ = (bitField0_ & ~0x00000002);
         columnQualifier_ = getDefaultInstance().getColumnQualifier();
         onChanged();
         return this;
       }
-      
-      // required .CompareType compareOp = 3;
+
+      // required .CompareType compare_op = 3;
       private ohmdb.client.generated.HBaseProtos.CompareType compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
+      /**
+       * <code>required .CompareType compare_op = 3;</code>
+       */
       public boolean hasCompareOp() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+      /**
+       * <code>required .CompareType compare_op = 3;</code>
+       */
       public ohmdb.client.generated.HBaseProtos.CompareType getCompareOp() {
         return compareOp_;
       }
+      /**
+       * <code>required .CompareType compare_op = 3;</code>
+       */
       public Builder setCompareOp(ohmdb.client.generated.HBaseProtos.CompareType value) {
         if (value == null) {
           throw new NullPointerException();
@@ -10480,20 +13142,29 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>required .CompareType compare_op = 3;</code>
+       */
       public Builder clearCompareOp() {
         bitField0_ = (bitField0_ & ~0x00000004);
         compareOp_ = ohmdb.client.generated.HBaseProtos.CompareType.LESS;
         onChanged();
         return this;
       }
-      
+
       // required .Comparator comparator = 4;
       private ohmdb.client.generated.ComparatorProtos.Comparator comparator_ = ohmdb.client.generated.ComparatorProtos.Comparator.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.ComparatorProtos.Comparator, ohmdb.client.generated.ComparatorProtos.Comparator.Builder, ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder> comparatorBuilder_;
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public boolean hasComparator() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.Comparator getComparator() {
         if (comparatorBuilder_ == null) {
           return comparator_;
@@ -10501,6 +13172,9 @@ public final class FilterProtos {
           return comparatorBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public Builder setComparator(ohmdb.client.generated.ComparatorProtos.Comparator value) {
         if (comparatorBuilder_ == null) {
           if (value == null) {
@@ -10514,6 +13188,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000008;
         return this;
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public Builder setComparator(
           ohmdb.client.generated.ComparatorProtos.Comparator.Builder builderForValue) {
         if (comparatorBuilder_ == null) {
@@ -10525,6 +13202,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000008;
         return this;
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public Builder mergeComparator(ohmdb.client.generated.ComparatorProtos.Comparator value) {
         if (comparatorBuilder_ == null) {
           if (((bitField0_ & 0x00000008) == 0x00000008) &&
@@ -10541,6 +13221,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000008;
         return this;
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public Builder clearComparator() {
         if (comparatorBuilder_ == null) {
           comparator_ = ohmdb.client.generated.ComparatorProtos.Comparator.getDefaultInstance();
@@ -10551,11 +13234,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.Comparator.Builder getComparatorBuilder() {
         bitField0_ |= 0x00000008;
         onChanged();
         return getComparatorFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       public ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder getComparatorOrBuilder() {
         if (comparatorBuilder_ != null) {
           return comparatorBuilder_.getMessageOrBuilder();
@@ -10563,6 +13252,9 @@ public final class FilterProtos {
           return comparator_;
         }
       }
+      /**
+       * <code>required .Comparator comparator = 4;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.ComparatorProtos.Comparator, ohmdb.client.generated.ComparatorProtos.Comparator.Builder, ohmdb.client.generated.ComparatorProtos.ComparatorOrBuilder> 
           getComparatorFieldBuilder() {
@@ -10576,118 +13268,235 @@ public final class FilterProtos {
         }
         return comparatorBuilder_;
       }
-      
-      // optional bool filterIfMissing = 5;
+
+      // optional bool filter_if_missing = 5;
       private boolean filterIfMissing_ ;
+      /**
+       * <code>optional bool filter_if_missing = 5;</code>
+       */
       public boolean hasFilterIfMissing() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
+      /**
+       * <code>optional bool filter_if_missing = 5;</code>
+       */
       public boolean getFilterIfMissing() {
         return filterIfMissing_;
       }
+      /**
+       * <code>optional bool filter_if_missing = 5;</code>
+       */
       public Builder setFilterIfMissing(boolean value) {
         bitField0_ |= 0x00000010;
         filterIfMissing_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bool filter_if_missing = 5;</code>
+       */
       public Builder clearFilterIfMissing() {
         bitField0_ = (bitField0_ & ~0x00000010);
         filterIfMissing_ = false;
         onChanged();
         return this;
       }
-      
-      // optional bool latestVersionOnly = 6;
+
+      // optional bool latest_version_only = 6;
       private boolean latestVersionOnly_ ;
+      /**
+       * <code>optional bool latest_version_only = 6;</code>
+       */
       public boolean hasLatestVersionOnly() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
+      /**
+       * <code>optional bool latest_version_only = 6;</code>
+       */
       public boolean getLatestVersionOnly() {
         return latestVersionOnly_;
       }
+      /**
+       * <code>optional bool latest_version_only = 6;</code>
+       */
       public Builder setLatestVersionOnly(boolean value) {
         bitField0_ |= 0x00000020;
         latestVersionOnly_ = value;
         onChanged();
         return this;
       }
+      /**
+       * <code>optional bool latest_version_only = 6;</code>
+       */
       public Builder clearLatestVersionOnly() {
         bitField0_ = (bitField0_ & ~0x00000020);
         latestVersionOnly_ = false;
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:SingleColumnValueFilter)
     }
-    
+
     static {
       defaultInstance = new SingleColumnValueFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:SingleColumnValueFilter)
   }
-  
+
   public interface SkipFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required .Filter filter = 1;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     boolean hasFilter();
-    ohmdb.client.generated.HBaseProtos.Filter getFilter();
-    ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.Filter getFilter();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code SkipFilter}
+   */
   public static final class SkipFilter extends
       com.google.protobuf.GeneratedMessage
       implements SkipFilterOrBuilder {
     // Use SkipFilter.newBuilder() to construct.
-    private SkipFilter(Builder builder) {
+    private SkipFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private SkipFilter(boolean noInit) {}
-    
+    private SkipFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final SkipFilter defaultInstance;
     public static SkipFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public SkipFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SkipFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.Filter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = filter_.toBuilder();
+              }
+              filter_ = input.readMessage(ohmdb.client.generated.FilterProtos.Filter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(filter_);
+                filter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.SkipFilter.class, ohmdb.client.generated.FilterProtos.SkipFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<SkipFilter> PARSER =
+        new com.google.protobuf.AbstractParser<SkipFilter>() {
+      public SkipFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SkipFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SkipFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
     // required .Filter filter = 1;
     public static final int FILTER_FIELD_NUMBER = 1;
-    private ohmdb.client.generated.HBaseProtos.Filter filter_;
+    private ohmdb.client.generated.FilterProtos.Filter filter_;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     public boolean hasFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.Filter getFilter() {
       return filter_;
     }
-    public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
       return filter_;
     }
-    
+
     private void initFields() {
-      filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -10699,7 +13508,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -10708,12 +13517,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -10723,14 +13532,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -10740,7 +13549,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.SkipFilter other = (ohmdb.client.generated.FilterProtos.SkipFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasFilter() == other.hasFilter());
       if (hasFilter()) {
@@ -10751,9 +13560,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasFilter()) {
@@ -10761,89 +13574,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.SkipFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.SkipFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code SkipFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.SkipFilterOrBuilder {
@@ -10851,18 +13654,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.SkipFilter.class, ohmdb.client.generated.FilterProtos.SkipFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.SkipFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -10874,31 +13680,31 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
         } else {
           filterBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.SkipFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_SkipFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SkipFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.SkipFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.SkipFilter build() {
         ohmdb.client.generated.FilterProtos.SkipFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -10906,17 +13712,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.SkipFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.SkipFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.SkipFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.SkipFilter result = new ohmdb.client.generated.FilterProtos.SkipFilter(this);
         int from_bitField0_ = bitField0_;
@@ -10933,7 +13729,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.SkipFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.SkipFilter)other);
@@ -10942,7 +13738,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.SkipFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.SkipFilter.getDefaultInstance()) return this;
         if (other.hasFilter()) {
@@ -10951,7 +13747,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasFilter()) {
           
@@ -10963,60 +13759,50 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.HBaseProtos.Filter.Builder subBuilder = ohmdb.client.generated.HBaseProtos.Filter.newBuilder();
-              if (hasFilter()) {
-                subBuilder.mergeFrom(getFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.SkipFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.SkipFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required .Filter filter = 1;
-      private ohmdb.client.generated.HBaseProtos.Filter filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      private ohmdb.client.generated.FilterProtos.Filter filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> filterBuilder_;
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> filterBuilder_;
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public boolean hasFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter getFilter() {
         if (filterBuilder_ == null) {
           return filter_;
         } else {
           return filterBuilder_.getMessage();
         }
       }
-      public Builder setFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder setFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -11029,8 +13815,11 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder setFilter(
-          ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filterBuilder_ == null) {
           filter_ = builderForValue.build();
           onChanged();
@@ -11040,12 +13829,15 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      public Builder mergeFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder mergeFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              filter_ != ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance()) {
+              filter_ != ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance()) {
             filter_ =
-              ohmdb.client.generated.HBaseProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
+              ohmdb.client.generated.FilterProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
           } else {
             filter_ = value;
           }
@@ -11056,9 +13848,12 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder clearFilter() {
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
           onChanged();
         } else {
           filterBuilder_.clear();
@@ -11066,24 +13861,33 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder getFilterBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder getFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getFilterFieldBuilder().getBuilder();
       }
-      public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
         if (filterBuilder_ != null) {
           return filterBuilder_.getMessageOrBuilder();
         } else {
           return filter_;
         }
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
           getFilterFieldBuilder() {
         if (filterBuilder_ == null) {
           filterBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder>(
+              ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder>(
                   filter_,
                   getParentForChildren(),
                   isClean());
@@ -11091,81 +13895,185 @@ public final class FilterProtos {
         }
         return filterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:SkipFilter)
     }
-    
+
     static {
       defaultInstance = new SkipFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:SkipFilter)
   }
-  
+
   public interface TimestampsFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // repeated int64 timestamps = 1 [packed = true];
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     java.util.List<java.lang.Long> getTimestampsList();
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     int getTimestampsCount();
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     long getTimestamps(int index);
   }
+  /**
+   * Protobuf type {@code TimestampsFilter}
+   */
   public static final class TimestampsFilter extends
       com.google.protobuf.GeneratedMessage
       implements TimestampsFilterOrBuilder {
     // Use TimestampsFilter.newBuilder() to construct.
-    private TimestampsFilter(Builder builder) {
+    private TimestampsFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private TimestampsFilter(boolean noInit) {}
-    
+    private TimestampsFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final TimestampsFilter defaultInstance;
     public static TimestampsFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public TimestampsFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TimestampsFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                timestamps_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              timestamps_.add(input.readInt64());
+              break;
+            }
+            case 10: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
+                timestamps_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                timestamps_.add(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          timestamps_ = java.util.Collections.unmodifiableList(timestamps_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.TimestampsFilter.class, ohmdb.client.generated.FilterProtos.TimestampsFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<TimestampsFilter> PARSER =
+        new com.google.protobuf.AbstractParser<TimestampsFilter>() {
+      public TimestampsFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TimestampsFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TimestampsFilter> getParserForType() {
+      return PARSER;
+    }
+
     // repeated int64 timestamps = 1 [packed = true];
     public static final int TIMESTAMPS_FIELD_NUMBER = 1;
     private java.util.List<java.lang.Long> timestamps_;
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     public java.util.List<java.lang.Long>
         getTimestampsList() {
       return timestamps_;
     }
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     public int getTimestampsCount() {
       return timestamps_.size();
     }
+    /**
+     * <code>repeated int64 timestamps = 1 [packed = true];</code>
+     */
     public long getTimestamps(int index) {
       return timestamps_.get(index);
     }
     private int timestampsMemoizedSerializedSize = -1;
-    
+
     private void initFields() {
-      timestamps_ = java.util.Collections.emptyList();;
+      timestamps_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -11178,12 +14086,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       {
         int dataSize = 0;
@@ -11203,14 +14111,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -11220,7 +14128,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.TimestampsFilter other = (ohmdb.client.generated.FilterProtos.TimestampsFilter) obj;
-      
+
       boolean result = true;
       result = result && getTimestampsList()
           .equals(other.getTimestampsList());
@@ -11228,9 +14136,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (getTimestampsCount() > 0) {
@@ -11238,89 +14150,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getTimestampsList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.TimestampsFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.TimestampsFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code TimestampsFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.TimestampsFilterOrBuilder {
@@ -11328,18 +14230,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.TimestampsFilter.class, ohmdb.client.generated.FilterProtos.TimestampsFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.TimestampsFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -11350,27 +14255,27 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
-        timestamps_ = java.util.Collections.emptyList();;
+        timestamps_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.TimestampsFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_TimestampsFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.TimestampsFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.TimestampsFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.TimestampsFilter build() {
         ohmdb.client.generated.FilterProtos.TimestampsFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -11378,17 +14283,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.TimestampsFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.TimestampsFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.TimestampsFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.TimestampsFilter result = new ohmdb.client.generated.FilterProtos.TimestampsFilter(this);
         int from_bitField0_ = bitField0_;
@@ -11400,7 +14295,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.TimestampsFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.TimestampsFilter)other);
@@ -11409,7 +14304,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.TimestampsFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.TimestampsFilter.getDefaultInstance()) return this;
         if (!other.timestamps_.isEmpty()) {
@@ -11425,72 +14320,60 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 8: {
-              ensureTimestampsIsMutable();
-              timestamps_.add(input.readInt64());
-              break;
-            }
-            case 10: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              while (input.getBytesUntilLimit() > 0) {
-                addTimestamps(input.readInt64());
-              }
-              input.popLimit(limit);
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.TimestampsFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.TimestampsFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // repeated int64 timestamps = 1 [packed = true];
-      private java.util.List<java.lang.Long> timestamps_ = java.util.Collections.emptyList();;
+      private java.util.List<java.lang.Long> timestamps_ = java.util.Collections.emptyList();
       private void ensureTimestampsIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
           timestamps_ = new java.util.ArrayList<java.lang.Long>(timestamps_);
           bitField0_ |= 0x00000001;
          }
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public java.util.List<java.lang.Long>
           getTimestampsList() {
         return java.util.Collections.unmodifiableList(timestamps_);
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public int getTimestampsCount() {
         return timestamps_.size();
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public long getTimestamps(int index) {
         return timestamps_.get(index);
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public Builder setTimestamps(
           int index, long value) {
         ensureTimestampsIsMutable();
@@ -11498,12 +14381,18 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public Builder addTimestamps(long value) {
         ensureTimestampsIsMutable();
         timestamps_.add(value);
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public Builder addAllTimestamps(
           java.lang.Iterable<? extends java.lang.Long> values) {
         ensureTimestampsIsMutable();
@@ -11511,74 +14400,170 @@ public final class FilterProtos {
         onChanged();
         return this;
       }
+      /**
+       * <code>repeated int64 timestamps = 1 [packed = true];</code>
+       */
       public Builder clearTimestamps() {
-        timestamps_ = java.util.Collections.emptyList();;
+        timestamps_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:TimestampsFilter)
     }
-    
+
     static {
       defaultInstance = new TimestampsFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:TimestampsFilter)
   }
-  
+
   public interface ValueFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .CompareFilter compareFilter = 1;
+
+    // required .CompareFilter compare_filter = 1;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     boolean hasCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter();
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code ValueFilter}
+   */
   public static final class ValueFilter extends
       com.google.protobuf.GeneratedMessage
       implements ValueFilterOrBuilder {
     // Use ValueFilter.newBuilder() to construct.
-    private ValueFilter(Builder builder) {
+    private ValueFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private ValueFilter(boolean noInit) {}
-    
+    private ValueFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final ValueFilter defaultInstance;
     public static ValueFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public ValueFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ValueFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = compareFilter_.toBuilder();
+              }
+              compareFilter_ = input.readMessage(ohmdb.client.generated.FilterProtos.CompareFilter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(compareFilter_);
+                compareFilter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.ValueFilter.class, ohmdb.client.generated.FilterProtos.ValueFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<ValueFilter> PARSER =
+        new com.google.protobuf.AbstractParser<ValueFilter>() {
+      public ValueFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ValueFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ValueFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
-    // required .CompareFilter compareFilter = 1;
-    public static final int COMPAREFILTER_FIELD_NUMBER = 1;
+    // required .CompareFilter compare_filter = 1;
+    public static final int COMPARE_FILTER_FIELD_NUMBER = 1;
     private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_;
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public boolean hasCompareFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
       return compareFilter_;
     }
+    /**
+     * <code>required .CompareFilter compare_filter = 1;</code>
+     */
     public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
       return compareFilter_;
     }
-    
+
     private void initFields() {
       compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
     }
@@ -11586,7 +14571,7 @@ public final class FilterProtos {
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasCompareFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -11598,7 +14583,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -11607,12 +14592,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -11622,14 +14607,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -11639,7 +14624,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.ValueFilter other = (ohmdb.client.generated.FilterProtos.ValueFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasCompareFilter() == other.hasCompareFilter());
       if (hasCompareFilter()) {
@@ -11650,99 +14635,93 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasCompareFilter()) {
-        hash = (37 * hash) + COMPAREFILTER_FIELD_NUMBER;
+        hash = (37 * hash) + COMPARE_FILTER_FIELD_NUMBER;
         hash = (53 * hash) + getCompareFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.ValueFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.ValueFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code ValueFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.ValueFilterOrBuilder {
@@ -11750,18 +14729,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.ValueFilter.class, ohmdb.client.generated.FilterProtos.ValueFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.ValueFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -11773,7 +14755,7 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (compareFilterBuilder_ == null) {
@@ -11784,20 +14766,20 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.ValueFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_ValueFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ValueFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.ValueFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.ValueFilter build() {
         ohmdb.client.generated.FilterProtos.ValueFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -11805,17 +14787,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.ValueFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.ValueFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.ValueFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.ValueFilter result = new ohmdb.client.generated.FilterProtos.ValueFilter(this);
         int from_bitField0_ = bitField0_;
@@ -11832,7 +14804,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.ValueFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.ValueFilter)other);
@@ -11841,7 +14813,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.ValueFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.ValueFilter.getDefaultInstance()) return this;
         if (other.hasCompareFilter()) {
@@ -11850,7 +14822,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasCompareFilter()) {
           
@@ -11862,52 +14834,39 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder subBuilder = ohmdb.client.generated.FilterProtos.CompareFilter.newBuilder();
-              if (hasCompareFilter()) {
-                subBuilder.mergeFrom(getCompareFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setCompareFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.ValueFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.ValueFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // required .CompareFilter compareFilter = 1;
+
+      // required .CompareFilter compare_filter = 1;
       private ohmdb.client.generated.FilterProtos.CompareFilter compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> compareFilterBuilder_;
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public boolean hasCompareFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter getCompareFilter() {
         if (compareFilterBuilder_ == null) {
           return compareFilter_;
@@ -11915,6 +14874,9 @@ public final class FilterProtos {
           return compareFilterBuilder_.getMessage();
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (value == null) {
@@ -11928,6 +14890,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder setCompareFilter(
           ohmdb.client.generated.FilterProtos.CompareFilter.Builder builderForValue) {
         if (compareFilterBuilder_ == null) {
@@ -11939,6 +14904,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder mergeCompareFilter(ohmdb.client.generated.FilterProtos.CompareFilter value) {
         if (compareFilterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
@@ -11955,6 +14923,9 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public Builder clearCompareFilter() {
         if (compareFilterBuilder_ == null) {
           compareFilter_ = ohmdb.client.generated.FilterProtos.CompareFilter.getDefaultInstance();
@@ -11965,11 +14936,17 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilter.Builder getCompareFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getCompareFilterFieldBuilder().getBuilder();
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       public ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder getCompareFilterOrBuilder() {
         if (compareFilterBuilder_ != null) {
           return compareFilterBuilder_.getMessageOrBuilder();
@@ -11977,6 +14954,9 @@ public final class FilterProtos {
           return compareFilter_;
         }
       }
+      /**
+       * <code>required .CompareFilter compare_filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
           ohmdb.client.generated.FilterProtos.CompareFilter, ohmdb.client.generated.FilterProtos.CompareFilter.Builder, ohmdb.client.generated.FilterProtos.CompareFilterOrBuilder> 
           getCompareFilterFieldBuilder() {
@@ -11990,76 +14970,169 @@ public final class FilterProtos {
         }
         return compareFilterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:ValueFilter)
     }
-    
+
     static {
       defaultInstance = new ValueFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:ValueFilter)
   }
-  
+
   public interface WhileMatchFilterOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
-    
+
     // required .Filter filter = 1;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     boolean hasFilter();
-    ohmdb.client.generated.HBaseProtos.Filter getFilter();
-    ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.Filter getFilter();
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder();
   }
+  /**
+   * Protobuf type {@code WhileMatchFilter}
+   */
   public static final class WhileMatchFilter extends
       com.google.protobuf.GeneratedMessage
       implements WhileMatchFilterOrBuilder {
     // Use WhileMatchFilter.newBuilder() to construct.
-    private WhileMatchFilter(Builder builder) {
+    private WhileMatchFilter(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private WhileMatchFilter(boolean noInit) {}
-    
+    private WhileMatchFilter(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final WhileMatchFilter defaultInstance;
     public static WhileMatchFilter getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public WhileMatchFilter getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private WhileMatchFilter(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              ohmdb.client.generated.FilterProtos.Filter.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                subBuilder = filter_.toBuilder();
+              }
+              filter_ = input.readMessage(ohmdb.client.generated.FilterProtos.Filter.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(filter_);
+                filter_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000001;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_fieldAccessorTable;
+      return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              ohmdb.client.generated.FilterProtos.WhileMatchFilter.class, ohmdb.client.generated.FilterProtos.WhileMatchFilter.Builder.class);
     }
-    
+
+    public static com.google.protobuf.Parser<WhileMatchFilter> PARSER =
+        new com.google.protobuf.AbstractParser<WhileMatchFilter>() {
+      public WhileMatchFilter parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new WhileMatchFilter(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<WhileMatchFilter> getParserForType() {
+      return PARSER;
+    }
+
     private int bitField0_;
     // required .Filter filter = 1;
     public static final int FILTER_FIELD_NUMBER = 1;
-    private ohmdb.client.generated.HBaseProtos.Filter filter_;
+    private ohmdb.client.generated.FilterProtos.Filter filter_;
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
     public boolean hasFilter() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-    public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.Filter getFilter() {
       return filter_;
     }
-    public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+    /**
+     * <code>required .Filter filter = 1;</code>
+     */
+    public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
       return filter_;
     }
-    
+
     private void initFields() {
-      filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
-      
+
       if (!hasFilter()) {
         memoizedIsInitialized = 0;
         return false;
@@ -12071,7 +15144,7 @@ public final class FilterProtos {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -12080,12 +15153,12 @@ public final class FilterProtos {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -12095,14 +15168,14 @@ public final class FilterProtos {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -12112,7 +15185,7 @@ public final class FilterProtos {
         return super.equals(obj);
       }
       ohmdb.client.generated.FilterProtos.WhileMatchFilter other = (ohmdb.client.generated.FilterProtos.WhileMatchFilter) obj;
-      
+
       boolean result = true;
       result = result && (hasFilter() == other.hasFilter());
       if (hasFilter()) {
@@ -12123,9 +15196,13 @@ public final class FilterProtos {
           getUnknownFields().equals(other.getUnknownFields());
       return result;
     }
-    
+
+    private int memoizedHashCode = 0;
     @java.lang.Override
     public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
       int hash = 41;
       hash = (19 * hash) + getDescriptorForType().hashCode();
       if (hasFilter()) {
@@ -12133,89 +15210,79 @@ public final class FilterProtos {
         hash = (53 * hash) + getFilter().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
       return hash;
     }
-    
+
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static ohmdb.client.generated.FilterProtos.WhileMatchFilter parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(ohmdb.client.generated.FilterProtos.WhileMatchFilter prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code WhileMatchFilter}
+     */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
        implements ohmdb.client.generated.FilterProtos.WhileMatchFilterOrBuilder {
@@ -12223,18 +15290,21 @@ public final class FilterProtos {
           getDescriptor() {
         return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_fieldAccessorTable;
+        return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                ohmdb.client.generated.FilterProtos.WhileMatchFilter.class, ohmdb.client.generated.FilterProtos.WhileMatchFilter.Builder.class);
       }
-      
+
       // Construct using ohmdb.client.generated.FilterProtos.WhileMatchFilter.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -12246,31 +15316,31 @@ public final class FilterProtos {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
         } else {
           filterBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ohmdb.client.generated.FilterProtos.WhileMatchFilter.getDescriptor();
+        return ohmdb.client.generated.FilterProtos.internal_static_WhileMatchFilter_descriptor;
       }
-      
+
       public ohmdb.client.generated.FilterProtos.WhileMatchFilter getDefaultInstanceForType() {
         return ohmdb.client.generated.FilterProtos.WhileMatchFilter.getDefaultInstance();
       }
-      
+
       public ohmdb.client.generated.FilterProtos.WhileMatchFilter build() {
         ohmdb.client.generated.FilterProtos.WhileMatchFilter result = buildPartial();
         if (!result.isInitialized()) {
@@ -12278,17 +15348,7 @@ public final class FilterProtos {
         }
         return result;
       }
-      
-      private ohmdb.client.generated.FilterProtos.WhileMatchFilter buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        ohmdb.client.generated.FilterProtos.WhileMatchFilter result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public ohmdb.client.generated.FilterProtos.WhileMatchFilter buildPartial() {
         ohmdb.client.generated.FilterProtos.WhileMatchFilter result = new ohmdb.client.generated.FilterProtos.WhileMatchFilter(this);
         int from_bitField0_ = bitField0_;
@@ -12305,7 +15365,7 @@ public final class FilterProtos {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof ohmdb.client.generated.FilterProtos.WhileMatchFilter) {
           return mergeFrom((ohmdb.client.generated.FilterProtos.WhileMatchFilter)other);
@@ -12314,7 +15374,7 @@ public final class FilterProtos {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(ohmdb.client.generated.FilterProtos.WhileMatchFilter other) {
         if (other == ohmdb.client.generated.FilterProtos.WhileMatchFilter.getDefaultInstance()) return this;
         if (other.hasFilter()) {
@@ -12323,7 +15383,7 @@ public final class FilterProtos {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         if (!hasFilter()) {
           
@@ -12335,60 +15395,50 @@ public final class FilterProtos {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              ohmdb.client.generated.HBaseProtos.Filter.Builder subBuilder = ohmdb.client.generated.HBaseProtos.Filter.newBuilder();
-              if (hasFilter()) {
-                subBuilder.mergeFrom(getFilter());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setFilter(subBuilder.buildPartial());
-              break;
-            }
+        ohmdb.client.generated.FilterProtos.WhileMatchFilter parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (ohmdb.client.generated.FilterProtos.WhileMatchFilter) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
+
       // required .Filter filter = 1;
-      private ohmdb.client.generated.HBaseProtos.Filter filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+      private ohmdb.client.generated.FilterProtos.Filter filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> filterBuilder_;
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> filterBuilder_;
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public boolean hasFilter() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-      public ohmdb.client.generated.HBaseProtos.Filter getFilter() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter getFilter() {
         if (filterBuilder_ == null) {
           return filter_;
         } else {
           return filterBuilder_.getMessage();
         }
       }
-      public Builder setFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder setFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -12401,8 +15451,11 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder setFilter(
-          ohmdb.client.generated.HBaseProtos.Filter.Builder builderForValue) {
+          ohmdb.client.generated.FilterProtos.Filter.Builder builderForValue) {
         if (filterBuilder_ == null) {
           filter_ = builderForValue.build();
           onChanged();
@@ -12412,12 +15465,15 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
-      public Builder mergeFilter(ohmdb.client.generated.HBaseProtos.Filter value) {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public Builder mergeFilter(ohmdb.client.generated.FilterProtos.Filter value) {
         if (filterBuilder_ == null) {
           if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              filter_ != ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance()) {
+              filter_ != ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance()) {
             filter_ =
-              ohmdb.client.generated.HBaseProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
+              ohmdb.client.generated.FilterProtos.Filter.newBuilder(filter_).mergeFrom(value).buildPartial();
           } else {
             filter_ = value;
           }
@@ -12428,9 +15484,12 @@ public final class FilterProtos {
         bitField0_ |= 0x00000001;
         return this;
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       public Builder clearFilter() {
         if (filterBuilder_ == null) {
-          filter_ = ohmdb.client.generated.HBaseProtos.Filter.getDefaultInstance();
+          filter_ = ohmdb.client.generated.FilterProtos.Filter.getDefaultInstance();
           onChanged();
         } else {
           filterBuilder_.clear();
@@ -12438,24 +15497,33 @@ public final class FilterProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      public ohmdb.client.generated.HBaseProtos.Filter.Builder getFilterBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.Filter.Builder getFilterBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getFilterFieldBuilder().getBuilder();
       }
-      public ohmdb.client.generated.HBaseProtos.FilterOrBuilder getFilterOrBuilder() {
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
+      public ohmdb.client.generated.FilterProtos.FilterOrBuilder getFilterOrBuilder() {
         if (filterBuilder_ != null) {
           return filterBuilder_.getMessageOrBuilder();
         } else {
           return filter_;
         }
       }
+      /**
+       * <code>required .Filter filter = 1;</code>
+       */
       private com.google.protobuf.SingleFieldBuilder<
-          ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder> 
+          ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder> 
           getFilterFieldBuilder() {
         if (filterBuilder_ == null) {
           filterBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              ohmdb.client.generated.HBaseProtos.Filter, ohmdb.client.generated.HBaseProtos.Filter.Builder, ohmdb.client.generated.HBaseProtos.FilterOrBuilder>(
+              ohmdb.client.generated.FilterProtos.Filter, ohmdb.client.generated.FilterProtos.Filter.Builder, ohmdb.client.generated.FilterProtos.FilterOrBuilder>(
                   filter_,
                   getParentForChildren(),
                   isClean());
@@ -12463,18 +15531,23 @@ public final class FilterProtos {
         }
         return filterBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:WhileMatchFilter)
     }
-    
+
     static {
       defaultInstance = new WhileMatchFilter(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:WhileMatchFilter)
   }
-  
+
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_Filter_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Filter_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_ColumnCountGetFilter_descriptor;
   private static
@@ -12605,7 +15678,7 @@ public final class FilterProtos {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_WhileMatchFilter_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -12614,265 +15687,221 @@ public final class FilterProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014Filter.proto\032\013hbase.proto\032\020Comparator." +
-      "proto\"%\n\024ColumnCountGetFilter\022\r\n\005limit\030\001" +
-      " \002(\005\"M\n\026ColumnPaginationFilter\022\r\n\005limit\030" +
-      "\001 \002(\005\022\016\n\006offset\030\002 \001(\005\022\024\n\014columnOffset\030\003 " +
-      "\001(\014\"$\n\022ColumnPrefixFilter\022\016\n\006prefix\030\001 \002(" +
-      "\014\"q\n\021ColumnRangeFilter\022\021\n\tminColumn\030\001 \001(" +
-      "\014\022\032\n\022minColumnInclusive\030\002 \001(\010\022\021\n\tmaxColu" +
-      "mn\030\003 \001(\014\022\032\n\022maxColumnInclusive\030\004 \001(\010\"Q\n\r" +
-      "CompareFilter\022\037\n\tcompareOp\030\001 \002(\0162\014.Compa" +
-      "reType\022\037\n\ncomparator\030\002 \001(\0132\013.Comparator\"",
-      "\212\001\n\025DependentColumnFilter\022%\n\rcompareFilt" +
-      "er\030\001 \002(\0132\016.CompareFilter\022\024\n\014columnFamily" +
-      "\030\002 \001(\014\022\027\n\017columnQualifier\030\003 \001(\014\022\033\n\023dropD" +
-      "ependentColumn\030\004 \001(\010\"5\n\014FamilyFilter\022%\n\r" +
-      "compareFilter\030\001 \002(\0132\016.CompareFilter\"\200\001\n\n" +
-      "FilterList\022&\n\010operator\030\001 \002(\0162\024.FilterLis" +
-      "t.Operator\022\030\n\007filters\030\002 \003(\0132\007.Filter\"0\n\010" +
-      "Operator\022\021\n\rMUST_PASS_ALL\020\001\022\021\n\rMUST_PASS" +
-      "_ONE\020\002\"(\n\rFilterWrapper\022\027\n\006filter\030\001 \002(\0132" +
-      "\007.Filter\"\024\n\022FirstKeyOnlyFilter\";\n%FirstK",
-      "eyValueMatchingQualifiersFilter\022\022\n\nquali" +
-      "fiers\030\001 \003(\014\"8\n\016FuzzyRowFilter\022&\n\rfuzzyKe" +
-      "ysData\030\001 \003(\0132\017.BytesBytesPair\")\n\023Inclusi" +
-      "veStopFilter\022\022\n\nstopRowKey\030\001 \001(\014\"!\n\rKeyO" +
-      "nlyFilter\022\020\n\010lenAsVal\030\001 \002(\010\"4\n\032MultipleC" +
-      "olumnPrefixFilter\022\026\n\016sortedPrefixes\030\001 \003(" +
-      "\014\"\036\n\nPageFilter\022\020\n\010pageSize\030\001 \002(\003\"\036\n\014Pre" +
-      "fixFilter\022\016\n\006prefix\030\001 \001(\014\"8\n\017QualifierFi" +
-      "lter\022%\n\rcompareFilter\030\001 \002(\0132\016.CompareFil" +
-      "ter\"!\n\017RandomRowFilter\022\016\n\006chance\030\001 \002(\002\"2",
-      "\n\tRowFilter\022%\n\rcompareFilter\030\001 \002(\0132\016.Com" +
-      "pareFilter\"[\n\036SingleColumnValueExcludeFi" +
-      "lter\0229\n\027singleColumnValueFilter\030\001 \002(\0132\030." +
-      "SingleColumnValueFilter\"\276\001\n\027SingleColumn" +
-      "ValueFilter\022\024\n\014columnFamily\030\001 \001(\014\022\027\n\017col" +
-      "umnQualifier\030\002 \001(\014\022\037\n\tcompareOp\030\003 \002(\0162\014." +
-      "CompareType\022\037\n\ncomparator\030\004 \002(\0132\013.Compar" +
-      "ator\022\027\n\017filterIfMissing\030\005 \001(\010\022\031\n\021latestV" +
-      "ersionOnly\030\006 \001(\010\"%\n\nSkipFilter\022\027\n\006filter" +
-      "\030\001 \002(\0132\007.Filter\"*\n\020TimestampsFilter\022\026\n\nt",
-      "imestamps\030\001 \003(\003B\002\020\001\"4\n\013ValueFilter\022%\n\rco" +
-      "mpareFilter\030\001 \002(\0132\016.CompareFilter\"+\n\020Whi" +
-      "leMatchFilter\022\027\n\006filter\030\001 \002(\0132\007.FilterB." +
-      "\n\026ohmdb.client.generatedB\014FilterProtosH\001" +
-      "\210\001\001\240\001\001"
+      "\n\014Filter.proto\032\013HBase.proto\032\020Comparator." +
+      "proto\"1\n\006Filter\022\014\n\004name\030\001 \002(\t\022\031\n\021seriali" +
+      "zed_filter\030\002 \001(\014\"%\n\024ColumnCountGetFilter" +
+      "\022\r\n\005limit\030\001 \002(\005\"N\n\026ColumnPaginationFilte" +
+      "r\022\r\n\005limit\030\001 \002(\005\022\016\n\006offset\030\002 \001(\005\022\025\n\rcolu" +
+      "mn_offset\030\003 \001(\014\"$\n\022ColumnPrefixFilter\022\016\n" +
+      "\006prefix\030\001 \002(\014\"w\n\021ColumnRangeFilter\022\022\n\nmi" +
+      "n_column\030\001 \001(\014\022\034\n\024min_column_inclusive\030\002" +
+      " \001(\010\022\022\n\nmax_column\030\003 \001(\014\022\034\n\024max_column_i" +
+      "nclusive\030\004 \001(\010\"R\n\rCompareFilter\022 \n\ncompa",
+      "re_op\030\001 \002(\0162\014.CompareType\022\037\n\ncomparator\030" +
+      "\002 \001(\0132\013.Comparator\"\217\001\n\025DependentColumnFi" +
+      "lter\022&\n\016compare_filter\030\001 \002(\0132\016.CompareFi" +
+      "lter\022\025\n\rcolumn_family\030\002 \001(\014\022\030\n\020column_qu" +
+      "alifier\030\003 \001(\014\022\035\n\025drop_dependent_column\030\004" +
+      " \001(\010\"6\n\014FamilyFilter\022&\n\016compare_filter\030\001" +
+      " \002(\0132\016.CompareFilter\"\200\001\n\nFilterList\022&\n\010o" +
+      "perator\030\001 \002(\0162\024.FilterList.Operator\022\030\n\007f" +
+      "ilters\030\002 \003(\0132\007.Filter\"0\n\010Operator\022\021\n\rMUS" +
+      "T_PASS_ALL\020\001\022\021\n\rMUST_PASS_ONE\020\002\"(\n\rFilte",
+      "rWrapper\022\027\n\006filter\030\001 \002(\0132\007.Filter\"\024\n\022Fir" +
+      "stKeyOnlyFilter\";\n%FirstKeyValueMatching" +
+      "QualifiersFilter\022\022\n\nqualifiers\030\001 \003(\014\":\n\016" +
+      "FuzzyRowFilter\022(\n\017fuzzy_keys_data\030\001 \003(\0132" +
+      "\017.BytesBytesPair\"+\n\023InclusiveStopFilter\022" +
+      "\024\n\014stop_row_key\030\001 \001(\014\"#\n\rKeyOnlyFilter\022\022" +
+      "\n\nlen_as_val\030\001 \002(\010\"5\n\032MultipleColumnPref" +
+      "ixFilter\022\027\n\017sorted_prefixes\030\001 \003(\014\"\037\n\nPag" +
+      "eFilter\022\021\n\tpage_size\030\001 \002(\003\"\036\n\014PrefixFilt" +
+      "er\022\016\n\006prefix\030\001 \001(\014\"9\n\017QualifierFilter\022&\n",
+      "\016compare_filter\030\001 \002(\0132\016.CompareFilter\"!\n" +
+      "\017RandomRowFilter\022\016\n\006chance\030\001 \002(\002\"3\n\tRowF" +
+      "ilter\022&\n\016compare_filter\030\001 \002(\0132\016.CompareF" +
+      "ilter\"^\n\036SingleColumnValueExcludeFilter\022" +
+      "<\n\032single_column_value_filter\030\001 \002(\0132\030.Si" +
+      "ngleColumnValueFilter\"\305\001\n\027SingleColumnVa" +
+      "lueFilter\022\025\n\rcolumn_family\030\001 \001(\014\022\030\n\020colu" +
+      "mn_qualifier\030\002 \001(\014\022 \n\ncompare_op\030\003 \002(\0162\014" +
+      ".CompareType\022\037\n\ncomparator\030\004 \002(\0132\013.Compa" +
+      "rator\022\031\n\021filter_if_missing\030\005 \001(\010\022\033\n\023late",
+      "st_version_only\030\006 \001(\010\"%\n\nSkipFilter\022\027\n\006f" +
+      "ilter\030\001 \002(\0132\007.Filter\"*\n\020TimestampsFilter" +
+      "\022\026\n\ntimestamps\030\001 \003(\003B\002\020\001\"5\n\013ValueFilter\022" +
+      "&\n\016compare_filter\030\001 \002(\0132\016.CompareFilter\"" +
+      "+\n\020WhileMatchFilter\022\027\n\006filter\030\001 \002(\0132\007.Fi" +
+      "lterB.\n\026ohmdb.client.generatedB\014FilterPr" +
+      "otosH\001\210\001\001\240\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_ColumnCountGetFilter_descriptor =
+          internal_static_Filter_descriptor =
             getDescriptor().getMessageTypes().get(0);
+          internal_static_Filter_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_Filter_descriptor,
+              new java.lang.String[] { "Name", "SerializedFilter", });
+          internal_static_ColumnCountGetFilter_descriptor =
+            getDescriptor().getMessageTypes().get(1);
           internal_static_ColumnCountGetFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ColumnCountGetFilter_descriptor,
-              new java.lang.String[] { "Limit", },
-              ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.class,
-              ohmdb.client.generated.FilterProtos.ColumnCountGetFilter.Builder.class);
+              new java.lang.String[] { "Limit", });
           internal_static_ColumnPaginationFilter_descriptor =
-            getDescriptor().getMessageTypes().get(1);
+            getDescriptor().getMessageTypes().get(2);
           internal_static_ColumnPaginationFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ColumnPaginationFilter_descriptor,
-              new java.lang.String[] { "Limit", "Offset", "ColumnOffset", },
-              ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.class,
-              ohmdb.client.generated.FilterProtos.ColumnPaginationFilter.Builder.class);
+              new java.lang.String[] { "Limit", "Offset", "ColumnOffset", });
           internal_static_ColumnPrefixFilter_descriptor =
-            getDescriptor().getMessageTypes().get(2);
+            getDescriptor().getMessageTypes().get(3);
           internal_static_ColumnPrefixFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ColumnPrefixFilter_descriptor,
-              new java.lang.String[] { "Prefix", },
-              ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.class,
-              ohmdb.client.generated.FilterProtos.ColumnPrefixFilter.Builder.class);
+              new java.lang.String[] { "Prefix", });
           internal_static_ColumnRangeFilter_descriptor =
-            getDescriptor().getMessageTypes().get(3);
+            getDescriptor().getMessageTypes().get(4);
           internal_static_ColumnRangeFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ColumnRangeFilter_descriptor,
-              new java.lang.String[] { "MinColumn", "MinColumnInclusive", "MaxColumn", "MaxColumnInclusive", },
-              ohmdb.client.generated.FilterProtos.ColumnRangeFilter.class,
-              ohmdb.client.generated.FilterProtos.ColumnRangeFilter.Builder.class);
+              new java.lang.String[] { "MinColumn", "MinColumnInclusive", "MaxColumn", "MaxColumnInclusive", });
           internal_static_CompareFilter_descriptor =
-            getDescriptor().getMessageTypes().get(4);
+            getDescriptor().getMessageTypes().get(5);
           internal_static_CompareFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_CompareFilter_descriptor,
-              new java.lang.String[] { "CompareOp", "Comparator", },
-              ohmdb.client.generated.FilterProtos.CompareFilter.class,
-              ohmdb.client.generated.FilterProtos.CompareFilter.Builder.class);
+              new java.lang.String[] { "CompareOp", "Comparator", });
           internal_static_DependentColumnFilter_descriptor =
-            getDescriptor().getMessageTypes().get(5);
+            getDescriptor().getMessageTypes().get(6);
           internal_static_DependentColumnFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_DependentColumnFilter_descriptor,
-              new java.lang.String[] { "CompareFilter", "ColumnFamily", "ColumnQualifier", "DropDependentColumn", },
-              ohmdb.client.generated.FilterProtos.DependentColumnFilter.class,
-              ohmdb.client.generated.FilterProtos.DependentColumnFilter.Builder.class);
+              new java.lang.String[] { "CompareFilter", "ColumnFamily", "ColumnQualifier", "DropDependentColumn", });
           internal_static_FamilyFilter_descriptor =
-            getDescriptor().getMessageTypes().get(6);
+            getDescriptor().getMessageTypes().get(7);
           internal_static_FamilyFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FamilyFilter_descriptor,
-              new java.lang.String[] { "CompareFilter", },
-              ohmdb.client.generated.FilterProtos.FamilyFilter.class,
-              ohmdb.client.generated.FilterProtos.FamilyFilter.Builder.class);
+              new java.lang.String[] { "CompareFilter", });
           internal_static_FilterList_descriptor =
-            getDescriptor().getMessageTypes().get(7);
+            getDescriptor().getMessageTypes().get(8);
           internal_static_FilterList_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FilterList_descriptor,
-              new java.lang.String[] { "Operator", "Filters", },
-              ohmdb.client.generated.FilterProtos.FilterList.class,
-              ohmdb.client.generated.FilterProtos.FilterList.Builder.class);
+              new java.lang.String[] { "Operator", "Filters", });
           internal_static_FilterWrapper_descriptor =
-            getDescriptor().getMessageTypes().get(8);
+            getDescriptor().getMessageTypes().get(9);
           internal_static_FilterWrapper_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FilterWrapper_descriptor,
-              new java.lang.String[] { "Filter", },
-              ohmdb.client.generated.FilterProtos.FilterWrapper.class,
-              ohmdb.client.generated.FilterProtos.FilterWrapper.Builder.class);
+              new java.lang.String[] { "Filter", });
           internal_static_FirstKeyOnlyFilter_descriptor =
-            getDescriptor().getMessageTypes().get(9);
+            getDescriptor().getMessageTypes().get(10);
           internal_static_FirstKeyOnlyFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FirstKeyOnlyFilter_descriptor,
-              new java.lang.String[] { },
-              ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.class,
-              ohmdb.client.generated.FilterProtos.FirstKeyOnlyFilter.Builder.class);
+              new java.lang.String[] { });
           internal_static_FirstKeyValueMatchingQualifiersFilter_descriptor =
-            getDescriptor().getMessageTypes().get(10);
+            getDescriptor().getMessageTypes().get(11);
           internal_static_FirstKeyValueMatchingQualifiersFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FirstKeyValueMatchingQualifiersFilter_descriptor,
-              new java.lang.String[] { "Qualifiers", },
-              ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.class,
-              ohmdb.client.generated.FilterProtos.FirstKeyValueMatchingQualifiersFilter.Builder.class);
+              new java.lang.String[] { "Qualifiers", });
           internal_static_FuzzyRowFilter_descriptor =
-            getDescriptor().getMessageTypes().get(11);
+            getDescriptor().getMessageTypes().get(12);
           internal_static_FuzzyRowFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_FuzzyRowFilter_descriptor,
-              new java.lang.String[] { "FuzzyKeysData", },
-              ohmdb.client.generated.FilterProtos.FuzzyRowFilter.class,
-              ohmdb.client.generated.FilterProtos.FuzzyRowFilter.Builder.class);
+              new java.lang.String[] { "FuzzyKeysData", });
           internal_static_InclusiveStopFilter_descriptor =
-            getDescriptor().getMessageTypes().get(12);
+            getDescriptor().getMessageTypes().get(13);
           internal_static_InclusiveStopFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_InclusiveStopFilter_descriptor,
-              new java.lang.String[] { "StopRowKey", },
-              ohmdb.client.generated.FilterProtos.InclusiveStopFilter.class,
-              ohmdb.client.generated.FilterProtos.InclusiveStopFilter.Builder.class);
+              new java.lang.String[] { "StopRowKey", });
           internal_static_KeyOnlyFilter_descriptor =
-            getDescriptor().getMessageTypes().get(13);
+            getDescriptor().getMessageTypes().get(14);
           internal_static_KeyOnlyFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_KeyOnlyFilter_descriptor,
-              new java.lang.String[] { "LenAsVal", },
-              ohmdb.client.generated.FilterProtos.KeyOnlyFilter.class,
-              ohmdb.client.generated.FilterProtos.KeyOnlyFilter.Builder.class);
+              new java.lang.String[] { "LenAsVal", });
           internal_static_MultipleColumnPrefixFilter_descriptor =
-            getDescriptor().getMessageTypes().get(14);
+            getDescriptor().getMessageTypes().get(15);
           internal_static_MultipleColumnPrefixFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_MultipleColumnPrefixFilter_descriptor,
-              new java.lang.String[] { "SortedPrefixes", },
-              ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.class,
-              ohmdb.client.generated.FilterProtos.MultipleColumnPrefixFilter.Builder.class);
+              new java.lang.String[] { "SortedPrefixes", });
           internal_static_PageFilter_descriptor =
-            getDescriptor().getMessageTypes().get(15);
+            getDescriptor().getMessageTypes().get(16);
           internal_static_PageFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_PageFilter_descriptor,
-              new java.lang.String[] { "PageSize", },
-              ohmdb.client.generated.FilterProtos.PageFilter.class,
-              ohmdb.client.generated.FilterProtos.PageFilter.Builder.class);
+              new java.lang.String[] { "PageSize", });
           internal_static_PrefixFilter_descriptor =
-            getDescriptor().getMessageTypes().get(16);
+            getDescriptor().getMessageTypes().get(17);
           internal_static_PrefixFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_PrefixFilter_descriptor,
-              new java.lang.String[] { "Prefix", },
-              ohmdb.client.generated.FilterProtos.PrefixFilter.class,
-              ohmdb.client.generated.FilterProtos.PrefixFilter.Builder.class);
+              new java.lang.String[] { "Prefix", });
           internal_static_QualifierFilter_descriptor =
-            getDescriptor().getMessageTypes().get(17);
+            getDescriptor().getMessageTypes().get(18);
           internal_static_QualifierFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_QualifierFilter_descriptor,
-              new java.lang.String[] { "CompareFilter", },
-              ohmdb.client.generated.FilterProtos.QualifierFilter.class,
-              ohmdb.client.generated.FilterProtos.QualifierFilter.Builder.class);
+              new java.lang.String[] { "CompareFilter", });
           internal_static_RandomRowFilter_descriptor =
-            getDescriptor().getMessageTypes().get(18);
+            getDescriptor().getMessageTypes().get(19);
           internal_static_RandomRowFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RandomRowFilter_descriptor,
-              new java.lang.String[] { "Chance", },
-              ohmdb.client.generated.FilterProtos.RandomRowFilter.class,
-              ohmdb.client.generated.FilterProtos.RandomRowFilter.Builder.class);
+              new java.lang.String[] { "Chance", });
           internal_static_RowFilter_descriptor =
-            getDescriptor().getMessageTypes().get(19);
+            getDescriptor().getMessageTypes().get(20);
           internal_static_RowFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RowFilter_descriptor,
-              new java.lang.String[] { "CompareFilter", },
-              ohmdb.client.generated.FilterProtos.RowFilter.class,
-              ohmdb.client.generated.FilterProtos.RowFilter.Builder.class);
+              new java.lang.String[] { "CompareFilter", });
           internal_static_SingleColumnValueExcludeFilter_descriptor =
-            getDescriptor().getMessageTypes().get(20);
+            getDescriptor().getMessageTypes().get(21);
           internal_static_SingleColumnValueExcludeFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_SingleColumnValueExcludeFilter_descriptor,
-              new java.lang.String[] { "SingleColumnValueFilter", },
-              ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.class,
-              ohmdb.client.generated.FilterProtos.SingleColumnValueExcludeFilter.Builder.class);
+              new java.lang.String[] { "SingleColumnValueFilter", });
           internal_static_SingleColumnValueFilter_descriptor =
-            getDescriptor().getMessageTypes().get(21);
+            getDescriptor().getMessageTypes().get(22);
           internal_static_SingleColumnValueFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_SingleColumnValueFilter_descriptor,
-              new java.lang.String[] { "ColumnFamily", "ColumnQualifier", "CompareOp", "Comparator", "FilterIfMissing", "LatestVersionOnly", },
-              ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.class,
-              ohmdb.client.generated.FilterProtos.SingleColumnValueFilter.Builder.class);
+              new java.lang.String[] { "ColumnFamily", "ColumnQualifier", "CompareOp", "Comparator", "FilterIfMissing", "LatestVersionOnly", });
           internal_static_SkipFilter_descriptor =
-            getDescriptor().getMessageTypes().get(22);
+            getDescriptor().getMessageTypes().get(23);
           internal_static_SkipFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_SkipFilter_descriptor,
-              new java.lang.String[] { "Filter", },
-              ohmdb.client.generated.FilterProtos.SkipFilter.class,
-              ohmdb.client.generated.FilterProtos.SkipFilter.Builder.class);
+              new java.lang.String[] { "Filter", });
           internal_static_TimestampsFilter_descriptor =
-            getDescriptor().getMessageTypes().get(23);
+            getDescriptor().getMessageTypes().get(24);
           internal_static_TimestampsFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_TimestampsFilter_descriptor,
-              new java.lang.String[] { "Timestamps", },
-              ohmdb.client.generated.FilterProtos.TimestampsFilter.class,
-              ohmdb.client.generated.FilterProtos.TimestampsFilter.Builder.class);
+              new java.lang.String[] { "Timestamps", });
           internal_static_ValueFilter_descriptor =
-            getDescriptor().getMessageTypes().get(24);
+            getDescriptor().getMessageTypes().get(25);
           internal_static_ValueFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ValueFilter_descriptor,
-              new java.lang.String[] { "CompareFilter", },
-              ohmdb.client.generated.FilterProtos.ValueFilter.class,
-              ohmdb.client.generated.FilterProtos.ValueFilter.Builder.class);
+              new java.lang.String[] { "CompareFilter", });
           internal_static_WhileMatchFilter_descriptor =
-            getDescriptor().getMessageTypes().get(25);
+            getDescriptor().getMessageTypes().get(26);
           internal_static_WhileMatchFilter_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_WhileMatchFilter_descriptor,
-              new java.lang.String[] { "Filter", },
-              ohmdb.client.generated.FilterProtos.WhileMatchFilter.class,
-              ohmdb.client.generated.FilterProtos.WhileMatchFilter.Builder.class);
+              new java.lang.String[] { "Filter", });
           return null;
         }
       };
@@ -12883,6 +15912,6 @@ public final class FilterProtos {
           ohmdb.client.generated.ComparatorProtos.getDescriptor(),
         }, assigner);
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
