@@ -897,7 +897,7 @@ public class HRegion implements HeapSize { // , Writable{
 
     /**
      * Close down this HRegion.  Flush the cache, shut down each HStore, don't
-     * service any more calls.
+     * module any more calls.
      *
      * <p>This method could take some time to execute, so don't call it from a
      * time-sensitive thread.
@@ -922,7 +922,7 @@ public class HRegion implements HeapSize { // , Writable{
 
     /**
      * Close down this HRegion.  Flush the cache unless abort parameter is true,
-     * Shut down each HStore, don't service any more calls.
+     * Shut down each HStore, don't module any more calls.
      *
      * This method could take some time to execute, so don't call it from a
      * time-sensitive thread.
@@ -4640,7 +4640,7 @@ public class HRegion implements HeapSize { // , Writable{
      * <p>
      * Only a single instance may be registered per region for a given {@link Service} subclass (the
      * instances are keyed on {@link com.google.protobuf.Descriptors.ServiceDescriptor#getFullName()}.
-     * After the first registration, subsequent calls with the same service name will fail with
+     * After the first registration, subsequent calls with the same module name will fail with
      * a return value of {@code false}.
      * </p>
      * @param instance the {@code Service} subclass instance to expose as a coprocessor endpoint
@@ -4649,11 +4649,11 @@ public class HRegion implements HeapSize { // , Writable{
      */
     public boolean registerService(Service instance) {
     /*
-     * No stacking of instances is allowed for a single service name
+     * No stacking of instances is allowed for a single module name
      */
         Descriptors.ServiceDescriptor serviceDesc = instance.getDescriptorForType();
         if (coprocessorServiceHandlers.containsKey(serviceDesc.getFullName())) {
-            LOG.error("Coprocessor service "+serviceDesc.getFullName()+
+            LOG.error("Coprocessor module "+serviceDesc.getFullName()+
                     " already registered, rejecting request from "+instance
             );
             return false;
@@ -4661,8 +4661,8 @@ public class HRegion implements HeapSize { // , Writable{
 
         coprocessorServiceHandlers.put(serviceDesc.getFullName(), instance);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Registered coprocessor service: region="+
-                    Bytes.toStringBinary(getRegionName())+" service="+serviceDesc.getFullName());
+            LOG.debug("Registered coprocessor module: region="+
+                    Bytes.toStringBinary(getRegionName())+" module="+serviceDesc.getFullName());
         }
         return true;
     }
@@ -4673,11 +4673,11 @@ public class HRegion implements HeapSize { // , Writable{
      * {@link HRegion#registerService(com.google.protobuf.Service)}
      * method before they are available.
      *
-     * @param controller an {@code RpcContoller} implementation to pass to the invoked service
-     * @param call a {@code CoprocessorServiceCall} instance identifying the service, method,
+     * @param controller an {@code RpcContoller} implementation to pass to the invoked module
+     * @param call a {@code CoprocessorServiceCall} instance identifying the module, method,
      *     and parameters for the method invocation
      * @return a protocol buffer {@code Message} instance containing the method's result
-     * @throws IOException if no registered service handler is found or an error
+     * @throws IOException if no registered module handler is found or an error
      *     occurs during the invocation
      * @see org.apache.hadoop.hbase.regionserver.HRegion#registerService(com.google.protobuf.Service)
      */
@@ -4687,7 +4687,7 @@ public class HRegion implements HeapSize { // , Writable{
         String methodName = call.getMethodName();
         if (!coprocessorServiceHandlers.containsKey(serviceName)) {
             throw new UnknownProtocolException(null,
-                    "No registered coprocessor service found for name "+serviceName+
+                    "No registered coprocessor module found for name "+serviceName+
                             " in region "+Bytes.toStringBinary(getRegionName()));
         }
 
@@ -4696,7 +4696,7 @@ public class HRegion implements HeapSize { // , Writable{
         Descriptors.MethodDescriptor methodDesc = serviceDesc.findMethodByName(methodName);
         if (methodDesc == null) {
             throw new UnknownProtocolException(service.getClass(),
-                    "Unknown method "+methodName+" called on service "+serviceName+
+                    "Unknown method "+methodName+" called on module "+serviceName+
                             " in region "+Bytes.toStringBinary(getRegionName()));
         }
 
