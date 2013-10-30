@@ -18,7 +18,7 @@ package ohmdb.log;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
-import ohmdb.interfaces.ReplicationService;
+import ohmdb.interfaces.ReplicationModule;
 import ohmdb.generated.Log;
 import ohmdb.replication.InRamLog;
 import ohmdb.replication.RaftInfoPersistence;
@@ -224,8 +224,8 @@ public class OLogShim extends OLog implements Syncable, HLog {
         return 0;
     }
 
-    private Channel<ReplicationService.ReplicatorInstanceStateChange> stateChangeChannel = new MemoryChannel<>();
-    private Channel<ReplicationService.IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
+    private Channel<ReplicationModule.ReplicatorInstanceStateChange> stateChangeChannel = new MemoryChannel<>();
+    private Channel<ReplicationModule.IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
 
     private ReplicatorInstance getReplicator(HRegionInfo info) {
         if (replicatorLookup.containsKey(info.getRegionNameAsString())) {

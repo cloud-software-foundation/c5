@@ -30,7 +30,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import ohmdb.interfaces.DiscoveryService;
+import ohmdb.interfaces.DiscoveryModule;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -44,12 +44,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static ohmdb.discovery.Beacon.Availability;
-import static ohmdb.interfaces.DiscoveryService.NodeInfo;
+import static ohmdb.interfaces.DiscoveryModule.NodeInfo;
 
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    final DiscoveryService beaconService = null;
+    final DiscoveryModule beaconService = null;
     private final String clusterName;
     private final int discoveryPort;
     private final int servicePort;
@@ -95,7 +95,7 @@ public class Main {
 
 //        Thread.sleep(10000);
 
-//        System.out.println("making state request to beacon service");
+//        System.out.println("making state request to beacon module");
         // now try to RPC myself a tad:
         final Fiber fiber = new ThreadFiber();
         fiber.start();
@@ -108,7 +108,7 @@ public class Main {
                     ImmutableMap<Long,NodeInfo> state = fut.get();
 
                     System.out.println("State info:");
-                    for(DiscoveryService.NodeInfo info : state.values()) {
+                    for(DiscoveryModule.NodeInfo info : state.values()) {
                         System.out.println(info);
                     }
 
@@ -151,7 +151,7 @@ public class Main {
         // we dont even need to do anything else!
 
 
-        System.out.println("Listening on service port: " + servicePort);
+        System.out.println("Listening on module port: " + servicePort);
         // now send messages to all my peers except myself of course, duh.
         for ( NodeInfo peer: peers.values()) {
             if (peer.availability.getNodeId() == nodeId) {
