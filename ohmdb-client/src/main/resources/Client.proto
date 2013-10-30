@@ -36,7 +36,7 @@
  * limitations under the License.
  */
 
-// This file contains protocol buffers that are used for Client service.
+// This file contains protocol buffers that are used for Client module.
 
 option java_package = "ohmdb.client.generated";
 option java_outer_classname = "ClientProtos";
