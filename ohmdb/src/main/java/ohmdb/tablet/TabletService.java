@@ -16,6 +16,7 @@
  */
 package ohmdb.tablet;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AbstractService;
 import ohmdb.interfaces.TabletModule;
 import ohmdb.messages.ControlMessages;
@@ -23,6 +24,8 @@ import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
+
+import static ohmdb.messages.ControlMessages.ModuleType;
 
 /**
  *
@@ -56,8 +59,8 @@ public class TabletService extends AbstractService implements TabletModule {
     }
 
     @Override
-    public ControlMessages.ModuleType getModuleType() {
-        return ControlMessages.ModuleType.Tablet;
+    public ModuleType getModuleType() {
+        return ModuleType.Tablet;
     }
 
     @Override
