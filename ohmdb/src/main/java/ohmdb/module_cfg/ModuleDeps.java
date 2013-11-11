@@ -16,19 +16,25 @@
  */
 package ohmdb.module_cfg;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import ohmdb.discovery.BeaconService;
+import ohmdb.interfaces.DependsOn;
 import ohmdb.interfaces.DiscoveryModule;
+import ohmdb.interfaces.ModuleTypeBinding;
 import ohmdb.interfaces.OhmModule;
 import ohmdb.interfaces.ReplicationModule;
 import ohmdb.interfaces.TabletModule;
 import ohmdb.replication.ReplicatorService;
 import ohmdb.tablet.TabletService;
 import ohmdb.util.Graph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -39,6 +45,63 @@ import static ohmdb.messages.ControlMessages.ModuleType;
  *
  */
 public class ModuleDeps {
+private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
+
+
+    public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(String... startThese) throws ClassNotFoundException {
+        Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
+        Map<ModuleType, Class<?>> typeClassMap = new HashMap<>();
+
+        Queue<Class<?>> q = new LinkedList<>();
+        for (String name : startThese) {
+            Class<?> c = Class.forName(name);
+            q.add(c);
+        }
+
+        Class<?> parent;
+        while ((parent = q.poll()) != null) {
+            ModuleTypeBinding mt = parent.getAnnotation(ModuleTypeBinding.class);
+
+            if (mt == null) {
+                LOG.warn("Module interface {} has no type annotation - skipping", parent);
+                continue;
+            }
+
+            typeClassMap.put(mt.value(), parent);
+
+            ModuleType type = mt.value();
+            Graph.Node<ModuleType> node = allNodes.get(type);
+            if (node == null) {
+                node = new Graph.Node<>(type);
+                allNodes.put(type, node);
+            }
+
+            DependsOn deps = parent.getAnnotation(DependsOn.class);
+            if (deps == null) continue;
+
+            for (Class<?> dep : deps.value()) {
+                // a direct dependency:
+                ModuleTypeBinding depMT = dep.getAnnotation(ModuleTypeBinding.class);
+                if (depMT == null) {
+                    LOG.warn("Module {} depends on {} which has no type", parent, dep);
+                    continue; // this really shouldnt happen.
+                }
+
+                Graph.Node<ModuleType> depNode = allNodes.get(depMT.value());
+                if (depNode == null) {
+                    depNode = new Graph.Node<>(depMT.value());
+                    allNodes.put(depMT.value(), depNode);
+                }
+                node.dependencies.add(depNode);
+                // add to the queue:
+                q.add(dep);
+            }
+        }
+
+        Joiner joiner = Joiner.on("\n");
+        System.out.println(joiner.join(typeClassMap.entrySet()));
+        return Graph.doTarjan(allNodes.values());
+    }
 
     public static void doTarjan(ImmutableList<ModuleType> seed) {
 
@@ -85,17 +148,15 @@ public class ModuleDeps {
     public static ImmutableList<ModuleType> getDependency(ModuleType moduleType) {
         switch (moduleType) {
             case Discovery:
-                return ImmutableList.of(ModuleType.Services);
+                return ImmutableList.of();
             case Replication:
                 return ImmutableList.of(ModuleType.Discovery);
             case Tablet:
                 return ImmutableList.of(ModuleType.Replication);
-            case Client:
+            case RegionServer:
                 return ImmutableList.of(ModuleType.Tablet, ModuleType.Management);
             case Management:
                 return ImmutableList.of(ModuleType.Tablet, ModuleType.Replication);
-            case Services:
-                return ImmutableList.of();
             default:
                 throw new RuntimeException("Someone forgot to extend this switch statement");
 
