@@ -17,12 +17,15 @@
 package ohmdb.interfaces;
 
 
+import ohmdb.messages.ControlMessages;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 
 /**
  * Manager of tablets (aka regions)
  */
+@DependsOn(ReplicationModule.class)
+@ModuleTypeBinding(ControlMessages.ModuleType.Tablet)
 public interface TabletModule extends OhmModule {
     public Channel<TabletStateChange> getTabletStateChanges();
 
