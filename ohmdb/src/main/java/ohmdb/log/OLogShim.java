@@ -16,10 +16,9 @@
  */
 package ohmdb.log;
 
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
-import ohmdb.interfaces.ReplicationModule;
 import ohmdb.generated.Log;
+import ohmdb.interfaces.ReplicationModule;
 import ohmdb.replication.InRamLog;
 import ohmdb.replication.RaftInfoPersistence;
 import ohmdb.replication.RaftInformationInterface;
@@ -49,30 +48,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A distributed WriteAheadLog using RAFT
  */
-public class OLogShim extends OLog implements Syncable, HLog {
+public class OLogShim implements Syncable, HLog {
     private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
     final Map<Long, ReplicatorInstance> replicators = new HashMap<>();
     final RequestChannel<RpcRequest, RpcWireReply> rpcChannel = new MemoryRequestChannel<>();
-    final Map<Long, Mooring> moorings = new HashMap<>();
+    final Map<String, Mooring> moorings = new HashMap<>();
     final Map<String, Long> replicatorLookup = new HashMap<>();
     final List<Long> peerIds = new ArrayList<>();
     private final AtomicLong logSeqNum = new AtomicLong(0);
     private final UUID uuid;
     private final PoolFiberFactory fiberPool;
+    private final ReplicatorInstance replicatorInstance;
+    private final String tabletId;
 
-
-    public OLogShim(String basePath) throws IOException {
-        super(basePath);
+    public OLogShim(ReplicatorInstance replicatorInstance) throws IOException {
         this.uuid = UUID.randomUUID();
         this.fiberPool = new PoolFiberFactory(Executors.newCachedThreadPool());
-
+        this.replicatorInstance = replicatorInstance;
+        this.tabletId = replicatorInstance.getQuorumId();
     }
 
     //TODO fix so we don't always insert a huge amount of data
@@ -103,11 +102,12 @@ public class OLogShim extends OLog implements Syncable, HLog {
 
     @Override
     public void registerWALActionsListener(WALActionsListener listener) {
-        LOG.error("reg");
+        LOG.error("unsupported registerWALActionsListener, NOOP (probably causing bugs!)");
     }
 
     @Override
     public boolean unregisterWALActionsListener(WALActionsListener listener) {
+        LOG.error("unsupported unregisterWALActionsListener, returning false (probably causing bugs!)");
         return false;
     }
 
@@ -118,11 +118,12 @@ public class OLogShim extends OLog implements Syncable, HLog {
 
     @Override
     public byte[][] rollWriter() throws IOException {
-        try {
-            roll();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new IOException(e);
-        }
+        // TODO this is not passed thru to underlying OLog implementation.
+//        try {
+//            roll();
+//        } catch (ExecutionException | InterruptedException e) {
+//            throw new IOException(e);
+//        }
         return null;
     }
 
@@ -132,13 +133,23 @@ public class OLogShim extends OLog implements Syncable, HLog {
         return rollWriter();
     }
 
+    @Override
+    public void close() throws IOException {
+       // TODO take this as a clue to turn off the ReplicationInstance we depend on.
+
+    }
+
     public void closeAndDelete() throws IOException {
+        // TODO still need more info to make this reasonably successful.
         close();
-        boolean success = this.logPath.toFile().delete();
-        if (!success) {
-            throw new IOException("Unable to close and delete: "
-                    + this.logPath.toFile().toString());
-        }
+        // TODO can't delete at this level really.  Maybe we need to mark
+        // that this quorumId is no longer useful?
+//        boolean success = this.logPath.toFile().delete();
+//        if (!success) {
+//            throw new IOException("Unable to close and delete: "
+//                    + this.logPath.toFile().toString());
+//        }
+
     }
 
     @Override
@@ -158,8 +169,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
 
     @Override
     public void sync() throws IOException {
-        SettableFuture<Boolean> f = SettableFuture.create();
-        this.sync(f);
+        // TODO make this wait for the most recently written log-id to be made visible.
     }
 
     @Override
@@ -168,6 +178,8 @@ public class OLogShim extends OLog implements Syncable, HLog {
     }
 
     @Override
+    // TODO this is a problematic call because RAFT is in charge of the log-ids. We must
+    // TODO  depreciate this call, and bubble the consequences thruout the system.
     public void setSequenceNumber(long newValue) {
         for (long id = this.logSeqNum.get(); id < newValue &&
                 !this.logSeqNum.compareAndSet(id, newValue); id = this.logSeqNum.get()) {
@@ -202,7 +214,7 @@ public class OLogShim extends OLog implements Syncable, HLog {
 
     @Override
     public long appendNoSync(HRegionInfo info, TableName tableName, WALEdit edits, List<UUID> clusterIds, long now, HTableDescriptor htd) throws IOException {
-        ReplicatorInstance replicator = getReplicator(info);
+        //ReplicatorInstance replicator = getReplicator(info);
 
         for (KeyValue edit : edits.getKeyValues()) {
             Log.Entry entry = Log
@@ -216,7 +228,8 @@ public class OLogShim extends OLog implements Syncable, HLog {
                     .setValue(ByteString.copyFrom(edit.getValue()))
                     .build();
             try {
-                replicator.logData(entry.toByteArray());
+                // our replicator knows what quorumId/tabletId we are.
+                replicatorInstance.logData(entry.toByteArray());
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
@@ -253,13 +266,14 @@ public class OLogShim extends OLog implements Syncable, HLog {
         return replicator;
     }
 
-    private Mooring getMooring(long peerId) {
-        if (this.moorings.containsKey(peerId)) {
-            return this.moorings.get(peerId);
+    private Mooring getMooring(String quorumId) {
+        if (this.moorings.containsKey(quorumId)) {
+            return this.moorings.get(quorumId);
         }
-        Mooring mooring = new Mooring(this, peerId);
-        this.moorings.put(peerId, mooring);
-        return mooring;
+//        Mooring mooring = new Mooring(this, quorumId);
+//        this.moorings.put(quorumId, mooring);
+//        return mooring;
+        return null;
     }
 
     public long append(HRegionInfo info,
@@ -273,8 +287,9 @@ public class OLogShim extends OLog implements Syncable, HLog {
         return ++now;
     }
 
+    // TODO XXX passthru no longer valid, this call does the wrong thing now.
     public long getFilenum() {
-        return this.fileNum;
+        return 0;
     }
 
     public static class Info implements RaftInformationInterface {
