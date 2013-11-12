@@ -31,6 +31,8 @@ import java.util.List;
 @ModuleTypeBinding(ControlMessages.ModuleType.Tablet)
 public interface TabletModule extends OhmModule {
 
+    public HRegion getTablet(String tabletName);
+
     // TODO this interface is not strong enough. Need HRegionInfo etc.
     public void startTablet(List<Long> peers, String tabletName);
 

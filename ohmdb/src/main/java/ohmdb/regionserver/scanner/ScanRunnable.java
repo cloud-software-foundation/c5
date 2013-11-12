@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ohmdb.OhmStatic.getOnlineRegion;
-
 public class ScanRunnable implements Callback<Integer> {
     private final long scannerId;
     private final ClientProtos.Call call;
@@ -26,13 +24,12 @@ public class ScanRunnable implements Callback<Integer> {
 
     public ScanRunnable(final ChannelHandlerContext ctx,
                         final ClientProtos.Call call,
-                        final long scannerId) throws IOException {
+                        final long scannerId, HRegion region) throws IOException {
         super();
         Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
         this.ctx = ctx;
         this.call = call;
         this.scannerId = scannerId;
-        HRegion region = getOnlineRegion("1");
         this.scanner = region.getScanner(scan);
         this.close = false;
     }
