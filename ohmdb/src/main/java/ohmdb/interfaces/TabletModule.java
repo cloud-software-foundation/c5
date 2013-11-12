@@ -18,8 +18,11 @@ package ohmdb.interfaces;
 
 
 import ohmdb.messages.ControlMessages;
+import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
+
+import java.util.List;
 
 /**
  * Manager of tablets (aka regions)
@@ -27,24 +30,31 @@ import org.jetlang.channels.Channel;
 @DependsOn(ReplicationModule.class)
 @ModuleTypeBinding(ControlMessages.ModuleType.Tablet)
 public interface TabletModule extends OhmModule {
+
+    // TODO this interface is not strong enough. Need HRegionInfo etc.
+    public void startTablet(List<Long> peers, String tabletName);
+
     public Channel<TabletStateChange> getTabletStateChanges();
 
     public static class TabletStateChange {
-        public final HRegion tablet;
+        public final HRegionInfo tabletInfo;
+        public final HRegion optRegion;
         public final int state;
         public final Throwable optError;
 
         @Override
         public String toString() {
             return "TabletStateChange{" +
-                    "tablet=" + tablet +
+                    "tabletInfo=" + tabletInfo +
+                    ", optRegion=" + optRegion +
                     ", state=" + state +
                     ", optError=" + optError +
                     '}';
         }
 
-        public TabletStateChange(HRegion tablet, int state, Throwable optError) {
-            this.tablet = tablet;
+        public TabletStateChange(HRegionInfo tabletInfo, HRegion optRegion, int state, Throwable optError) {
+            this.tabletInfo = tabletInfo;
+            this.optRegion = optRegion;
             this.state = state;
             this.optError = optError;
         }

@@ -49,5 +49,7 @@ message RegistryLine {
     required bytes startKey = 2;
     required bytes endKey = 3;
     required uint64 regionId = 4;
-    required bytes cf = 5;
+    repeated bytes cf = 5;
+
+    repeated uint64 peers = 6;
 }
