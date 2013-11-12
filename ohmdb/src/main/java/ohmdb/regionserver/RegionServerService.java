@@ -17,21 +17,49 @@
 package ohmdb.regionserver;
 
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import ohmdb.client.generated.ClientProtos;
+import ohmdb.interfaces.OhmModule;
 import ohmdb.interfaces.OhmServer;
 import ohmdb.interfaces.RegionServerModule;
+import ohmdb.interfaces.TabletModule;
 import ohmdb.messages.ControlMessages;
+import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class RegionServerService extends AbstractService implements RegionServerModule {
+    private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
+
     private final PoolFiberFactory fiberFactory;
+    private final Fiber fiber;
     private final NioEventLoopGroup acceptGroup;
     private final NioEventLoopGroup workerGroup;
     private final int port;
     private final OhmServer server;
+    private final ServerBootstrap bootstrap = new ServerBootstrap();
+
+    TabletModule tabletModule;
 
     public RegionServerService(PoolFiberFactory fiberFactory,
                                NioEventLoopGroup acceptGroup,
@@ -43,12 +71,67 @@ public class RegionServerService extends AbstractService implements RegionServer
         this.workerGroup = workerGroup;
         this.port = port;
         this.server = server;
+
+        this.fiber = fiberFactory.create();
     }
 
     @Override
     protected void doStart() {
+        fiber.start();
 
-        // TODO stuff.
+        fiber.execute(new Runnable() {
+            @Override
+            public void run() {
+                // we need the tablet module:
+                ListenableFuture<OhmModule> f = server.getModule(ControlMessages.ModuleType.Tablet);
+                Futures.addCallback(f, new FutureCallback<OhmModule>() {
+                    @Override
+                    public void onSuccess(OhmModule result) {
+                        tabletModule = (TabletModule) result;
+
+                        bootstrap.group(acceptGroup, workerGroup)
+                                .option(ChannelOption.SO_REUSEADDR, true)
+                                .childOption(ChannelOption.TCP_NODELAY, true)
+                                .channel(NioServerSocketChannel.class)
+                                .childHandler(
+                                        new ChannelInitializer<SocketChannel>() {
+                                            @Override
+                                            protected void initChannel(SocketChannel ch) throws Exception {
+                                                ChannelPipeline p = ch.pipeline();
+
+                                                p.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
+                                                p.addLast("protobufDecoder",
+                                                        new ProtobufDecoder(ClientProtos.Call.getDefaultInstance()));
+
+                                                p.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
+                                                p.addLast("protobufEncoder", new ProtobufEncoder());
+
+                                                p.addLast("handler", new OhmServerHandler(RegionServerService.this));
+                                            }
+                                        }
+                                );
+
+                        bootstrap.bind(port).addListener(new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture future) throws Exception {
+                                if (future.isSuccess()) {
+                                    notifyStarted();
+                                } else {
+                                    LOG.error("Unable to find Region Server to {} {}", port, future.cause());
+                                    notifyFailed(future.cause());
+                                }
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        notifyFailed(t);
+                    }
+                }, fiber);
+            }
+        });
     }
 
     @Override
@@ -69,5 +152,10 @@ public class RegionServerService extends AbstractService implements RegionServer
     @Override
     public int port() {
         return port;
+    }
+
+    public HRegion getOnlineRegion(String regionName) {
+        // TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
+        return tabletModule.getTablet(regionName);
     }
 }

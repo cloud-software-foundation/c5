@@ -21,6 +21,8 @@ import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import ohmdb.client.OhmConstants;
+import ohmdb.generated.Log;
 import ohmdb.interfaces.DiscoveryModule;
 import ohmdb.interfaces.OhmModule;
 import ohmdb.interfaces.OhmServer;
@@ -35,6 +37,8 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -43,8 +47,11 @@ import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +82,12 @@ public class TabletService extends AbstractService implements TabletModule {
         this.server = server;
         this.conf = HBaseConfiguration.create();
 
+    }
+
+    @Override
+    public HRegion getTablet(String tabletName) {
+        // TODO ugly hack fix eventually
+        return onlineRegions.values().iterator().next();
     }
 
     @Override
@@ -114,6 +127,8 @@ public class TabletService extends AbstractService implements TabletModule {
                                     if (startCount == 0) {
                                         startBootstrap(registryFile);
                                     }
+
+                                    logReplay(path);
 
                                     notifyStarted();
                                 } catch (Exception e) {
@@ -225,6 +240,57 @@ public class TabletService extends AbstractService implements TabletModule {
         }, fiber);
     }
 
+    private void logReplay(final Path path) throws IOException {
+        java.nio.file.Path archiveLogPath = Paths.get(path.toString(),
+                OhmConstants.ARCHIVE_DIR);
+        File[] archiveLogs = archiveLogPath.toFile().listFiles();
+
+        if (archiveLogs == null) {
+            return;
+        }
+
+        for (File log : archiveLogs) {
+            FileInputStream rif = new FileInputStream(log);
+            processLogFile(rif);
+            for (HRegion r : onlineRegions.values()) {
+                r.flushcache();
+            }
+        }
+        for (HRegion r : onlineRegions.values()) {
+            r.compactStores();
+        }
+
+        for (HRegion r : onlineRegions.values()) {
+            r.waitForFlushesAndCompactions();
+        }
+
+        //TODO WE SHOULDN"T BE ONLINE TIL THIS HAPPENS
+    }
+
+    private void processLogFile(FileInputStream rif) throws IOException {
+        Log.OLogEntry entry;
+        Log.Entry edit;
+        do {
+            entry = Log.OLogEntry.parseDelimitedFrom(rif);
+            // if ! at EOF                      z
+            if (entry != null) {
+                edit = Log.Entry.parseFrom(entry.getValue());
+                HRegion recoveryRegion = onlineRegions.get(edit.getRegionInfo());
+
+                if (recoveryRegion.getLastFlushTime() >= edit.getTs()) {
+                    Put put = new Put(edit.getKey().toByteArray());
+                    put.add(edit.getFamily().toByteArray(),
+                            edit.getColumn().toByteArray(),
+                            edit.getTs(),
+                            edit.getValue().toByteArray());
+                    put.setDurability(Durability.SKIP_WAL);
+                    recoveryRegion.put(put);
+                }
+            }
+        } while (entry != null);
+    }
+
+
     @Override
     protected void doStop() {
         // TODO close regions.
@@ -235,6 +301,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
 
     private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
+
 
     @Override
     public void startTablet(List<Long> peers, String tabletName) {
