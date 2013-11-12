@@ -16,15 +16,29 @@
  */
 package ohmdb.tablet;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import ohmdb.OnlineRegions;
+import ohmdb.interfaces.OhmModule;
+import ohmdb.interfaces.OhmServer;
+import ohmdb.interfaces.ReplicationModule;
 import ohmdb.interfaces.TabletModule;
-import ohmdb.messages.ControlMessages;
+import ohmdb.regionserver.RegistryFile;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 
+import java.nio.file.Path;
+
+import static ohmdb.OhmStatic.bootStrapRegions;
+import static ohmdb.OhmStatic.existingRegister;
+import static ohmdb.OhmStatic.recoverOhmServer;
+import static ohmdb.log.OLog.moveAwayOldLogs;
 import static ohmdb.messages.ControlMessages.ModuleType;
 
 /**
@@ -33,20 +47,76 @@ import static ohmdb.messages.ControlMessages.ModuleType;
 public class TabletService extends AbstractService implements TabletModule {
     private final PoolFiberFactory fiberFactory;
     private final Fiber fiber;
+    private final OhmServer server;
+    // TODO bring this into this class, and not have an external class.
+    private final OnlineRegions onlineRegions = OnlineRegions.INSTANCE;
+    private ReplicationModule replicationModule;
 
-    public TabletService(PoolFiberFactory fiberFactory) {
+    public TabletService(PoolFiberFactory fiberFactory, OhmServer server) {
         this.fiberFactory = fiberFactory;
         this.fiber = fiberFactory.create();
+        this.server = server;
+
     }
+
+
 
     @Override
     protected void doStart() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.fiber.start();
+
+        // we need a handle on the replicator service now:
+        ListenableFuture<OhmModule> replicatorService = server.getModule(ModuleType.Replication);
+        Futures.addCallback(replicatorService, new FutureCallback<OhmModule>() {
+            @Override
+            public void onSuccess(OhmModule result) {
+                replicationModule = (ReplicationModule) result;
+                // run something on the fiber to get bootstrapped:
+                fiber.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+
+
+                            Configuration conf = HBaseConfiguration.create();
+
+                            Path path = server.getConfigDirectory().baseConfigPath;
+
+
+                            RegistryFile registryFile;
+
+                            registryFile = new RegistryFile(path);
+
+                            // TODO these functions should be part of the tablet service.
+                            if (existingRegister(registryFile)) {
+                                recoverOhmServer(conf, path, registryFile);
+                            } else {
+                                bootStrapRegions(conf, path, registryFile);
+                            }
+
+
+
+                            notifyStarted();
+                        } catch (Exception e) {
+                            notifyFailed(e);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                notifyFailed(t);
+            }
+        });
+
+
     }
 
     @Override
     protected void doStop() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.fiber.dispose();
+        notifyStopped();
     }
 
 
@@ -65,11 +135,11 @@ public class TabletService extends AbstractService implements TabletModule {
 
     @Override
     public boolean hasPort() {
-        return true;
+        return false;
     }
 
     @Override
     public int port() {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        return 0;
     }
 }
