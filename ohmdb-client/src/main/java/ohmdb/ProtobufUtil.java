@@ -177,7 +177,7 @@ public class ProtobufUtil {
         ClientProtos.MutationProto.Builder builder = getMutationBuilderAndSetCommonFields(type, mutation);
         ClientProtos.MutationProto.ColumnValue.Builder columnBuilder = ClientProtos.MutationProto.ColumnValue.newBuilder();
         ClientProtos.MutationProto.ColumnValue.QualifierValue.Builder valueBuilder = ClientProtos.MutationProto.ColumnValue.QualifierValue.newBuilder();
-        for (Map.Entry<byte[], List<? extends Cell>> family : mutation.getFamilyMap().entrySet()) {
+        for (Map.Entry<byte[], List<KeyValue>> family : mutation.getFamilyMap().entrySet()) {
             columnBuilder.setFamily(ByteString.copyFrom(family.getKey()));
             columnBuilder.clearQualifierValue();
             for (Cell cell : family.getValue()) {

@@ -40,12 +40,12 @@ package ohmdb;
 import com.google.protobuf.ByteString;
 import ohmdb.client.generated.ClientProtos;
 import ohmdb.client.generated.HBaseProtos;
+import org.apache.hadoop.hbase.DoNotRetryIOException;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.RowMutations;
-import org.apache.hadoop.hbase.exceptions.DoNotRetryIOException;
 
 import java.io.IOException;
 import java.util.Collection;
