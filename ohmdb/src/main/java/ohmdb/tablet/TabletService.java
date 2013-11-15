@@ -17,6 +17,7 @@
 package ohmdb.tablet;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -42,6 +43,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.core.Callback;
+import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
@@ -57,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static ohmdb.messages.ControlMessages.ModuleType;
 
@@ -92,9 +96,9 @@ public class TabletService extends AbstractService implements TabletModule {
 
     @Override
     protected void doStart() {
-        this.fiber.start();
+        fiber.start();
 
-        this.fiber.execute(new Runnable() {
+        fiber.execute(new Runnable() {
             @Override
             public void run() {
 
@@ -148,25 +152,70 @@ public class TabletService extends AbstractService implements TabletModule {
 
     }
 
+    Disposable newNodeWatcher = null;
+
+
     @FiberOnly
-    private void startBootstrap(RegistryFile registryFile) throws IOException {
+    private void startBootstrap(final RegistryFile registryFile) throws IOException {
+        LOG.info("Waiting to find at least 3 nodes to bootstrap with");
+
+        final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
+            @Override
+            public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
+                maybeStartBootstrap(registryFile, result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.warn("failed to get discovery state", t);
+            }
+        };
+
+        newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, new Callback<DiscoveryModule.NewNodeVisible>() {
+            @Override
+            public void onMessage(DiscoveryModule.NewNodeVisible message) {
+                ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+                Futures.addCallback(f, callback, fiber);
+            }
+        });
+
+        ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+        Futures.addCallback(f, callback, fiber);
+    }
+
+    private void maybeStartBootstrap(RegistryFile registryFile, ImmutableMap<Long, DiscoveryModule.NodeInfo> nodes) {
+        List<Long> peers = new ArrayList<>(nodes.keySet());
+
+        LOG.debug("Found a bunch of peers: {}", peers);
+        if (peers.size() < 3)
+            return;
+
+        // bootstrap the frickin thing.
         LOG.debug("Bootstrapping empty region");
         // simple bootstrap, only bootstrap my own ID:
         byte[] startKey = {0};
         byte[] endKey = {};
         TableName tableName = TableName.valueOf("tableName");
         HRegionInfo hRegionInfo = new HRegionInfo(tableName,
-                startKey, endKey);
+                startKey, endKey, false, 0);
         HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
         tableDescriptor.addFamily(new HColumnDescriptor("cf"));
 
-        List<Long> peers = new ArrayList<>();
-        peers.add(server.getNodeId());
-
-        registryFile.addEntry(hRegionInfo, new HColumnDescriptor("cf"), peers);
+        try {
+            registryFile.addEntry(hRegionInfo, new HColumnDescriptor("cf"), peers);
+        } catch (IOException e) {
+            LOG.error("Cant append to registryFile, not bootstrapping!!!", e);
+            return;
+        }
 
         openRegion0(hRegionInfo, tableDescriptor, ImmutableList.copyOf(peers));
+
+        if (newNodeWatcher != null) {
+            newNodeWatcher.dispose();
+            newNodeWatcher = null;
+        }
     }
+
 
     @FiberOnly
     private int startRegions(RegistryFile registryFile) throws IOException {
@@ -199,6 +248,9 @@ public class TabletService extends AbstractService implements TabletModule {
             @Override
             public void onSuccess(ReplicationModule.Replicator result) {
                 try {
+                    // TODO subscribe to the replicator's broadcasts.
+
+                    result.start();
                     OLogShim shim = new OLogShim(result);
 
                     // default place for a region is....
