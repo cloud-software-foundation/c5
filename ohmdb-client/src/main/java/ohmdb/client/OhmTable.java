@@ -53,15 +53,20 @@ public class OhmTable extends OhmShim implements AutoCloseable {
             = ClientScannerManager.INSTANCE;
     private RequestHandler handler;
     private AtomicLong commandId = new AtomicLong(0);
-    private Channel channel = ohmConnectionManager.getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
+    private Channel channel;
 
+    public OhmTable(ByteString tableName) throws IOException, InterruptedException {
+        this(tableName, OhmConstants.TEST_PORT);
+    }
     /**
      * OhmTable is the main entry points for clients of OhmDB
      *
      * @param tableName The name of the table to connect to.
      */
-    public OhmTable(ByteString tableName) throws IOException, InterruptedException {
+    public OhmTable(ByteString tableName, int port) throws IOException, InterruptedException {
         super(tableName);
+
+        channel = ohmConnectionManager.getOrCreateChannel("localhost", port);
 
         handler = channel
                 .pipeline()
