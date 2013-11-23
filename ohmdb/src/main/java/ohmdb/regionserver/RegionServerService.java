@@ -38,7 +38,7 @@ import ohmdb.interfaces.OhmModule;
 import ohmdb.interfaces.OhmServer;
 import ohmdb.interfaces.RegionServerModule;
 import ohmdb.interfaces.TabletModule;
-import ohmdb.messages.ControlMessages;
+import ohmdb.messages.generated.ControlMessages;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
