@@ -16,7 +16,7 @@
  */
 package ohmdb.interfaces;
 
-import ohmdb.messages.ControlMessages;
+import ohmdb.messages.generated.ControlMessages;
 
 /**
  *

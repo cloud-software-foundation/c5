@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static ohmdb.messages.ControlMessages.ModuleType;
+import static ohmdb.messages.generated.ControlMessages.ModuleType;
 
 /**
  *

@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static ohmdb.messages.ControlMessages.ModuleType;
+import static ohmdb.messages.generated.ControlMessages.ModuleType;
 
 /**
  *
