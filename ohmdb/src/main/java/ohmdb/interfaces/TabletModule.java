@@ -17,7 +17,7 @@
 package ohmdb.interfaces;
 
 
-import ohmdb.messages.ControlMessages;
+import ohmdb.messages.generated.ControlMessages;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;

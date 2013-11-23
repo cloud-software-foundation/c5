@@ -43,7 +43,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static ohmdb.discovery.Beacon.Availability;
+import static ohmdb.discovery.generated.Beacon.Availability;
 import static ohmdb.interfaces.DiscoveryModule.NodeInfo;
 
 
