@@ -136,7 +136,7 @@ public class RegionServerService extends AbstractService implements RegionServer
 
     @Override
     protected void doStop() {
-
+        notifyStopped();
     }
 
     @Override
