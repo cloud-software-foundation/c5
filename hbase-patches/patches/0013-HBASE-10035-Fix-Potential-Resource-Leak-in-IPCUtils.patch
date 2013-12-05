@@ -1,0 +1,39 @@
+From 322a270a8364d70f0a832ef5640669e74c4ca992 Mon Sep 17 00:00:00 2001
+From: Elliott Neil Clark <eclark@apache.org>
+Date: Tue, 26 Nov 2013 22:24:22 +0000
+Subject: [PATCH 13/35] HBASE-10035 Fix Potential Resource Leak in IPCUtils
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545867 13f79535-47bb-0310-9956-ffa450edef68
+---
+ hbase-client/src/main/java/org/apache/hadoop/hbase/ipc/IPCUtil.java | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/ipc/IPCUtil.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/ipc/IPCUtil.java
+index ab5f16c..003c2b7 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/ipc/IPCUtil.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/ipc/IPCUtil.java
+@@ -170,10 +170,11 @@ class IPCUtil {
+       CompressionInputStream cis =
+         compressor.createInputStream(new ByteArrayInputStream(cellBlock, offset, length),
+         poolDecompressor);
++      ByteBufferOutputStream bbos = null;
+       try {
+         // TODO: This is ugly.  The buffer will be resized on us if we guess wrong.
+         // TODO: Reuse buffers.
+-        ByteBufferOutputStream bbos = new ByteBufferOutputStream((length - offset) *
++        bbos = new ByteBufferOutputStream((length - offset) *
+           this.cellBlockDecompressionMultiplier);
+         IOUtils.copy(cis, bbos);
+         bbos.close();
+@@ -181,6 +182,8 @@ class IPCUtil {
+         is = new ByteArrayInputStream(bb.array(), 0, bb.limit());
+       } finally {
+         if (is != null) is.close();
++        if (bbos != null) bbos.close();
++
+         CodecPool.returnDecompressor(poolDecompressor);
+       }
+     } else {
+-- 
+1.8.3.4 (Apple Git-47)
+

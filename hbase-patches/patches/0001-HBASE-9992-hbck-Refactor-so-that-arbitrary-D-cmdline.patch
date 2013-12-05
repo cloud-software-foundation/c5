@@ -1,0 +1,89 @@
+From 8138e05d97e33db7055aff89817bc42ea40884fe Mon Sep 17 00:00:00 2001
+From: Michael Stack <stack@apache.org>
+Date: Sat, 23 Nov 2013 19:38:25 +0000
+Subject: [PATCH 01/35] HBASE-9992 [hbck] Refactor so that arbitrary -D cmdline
+ options are included
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1544869 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../org/apache/hadoop/hbase/util/HBaseFsck.java    | 40 +++++++++-------------
+ 1 file changed, 17 insertions(+), 23 deletions(-)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/util/HBaseFsck.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/util/HBaseFsck.java
+index 48af856..c4632e8 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/util/HBaseFsck.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/util/HBaseFsck.java
+@@ -164,7 +164,7 @@ import com.google.protobuf.ServiceException;
+  */
+ @InterfaceAudience.Public
+ @InterfaceStability.Evolving
+-public class HBaseFsck extends Configured implements Tool {
++public class HBaseFsck extends Configured {
+   public static final long DEFAULT_TIME_LAG = 60000; // default value of 1 minute
+   public static final long DEFAULT_SLEEP_BEFORE_RERUN = 10000;
+   private static final int MAX_NUM_THREADS = 50; // #threads to contact regions
+@@ -267,7 +267,8 @@ public class HBaseFsck extends Configured implements Tool {
+     super(conf);
+     errors = getErrorReporter(conf);
+ 
+-    initialPoolNumThreads();
++    int numThreads = conf.getInt("hbasefsck.numthreads", MAX_NUM_THREADS);
++    executor = new ScheduledThreadPoolExecutor(numThreads, Threads.newDaemonThreadFactory("hbasefsck"));
+   }
+ 
+   /**
+@@ -299,18 +300,6 @@ public class HBaseFsck extends Configured implements Tool {
+   }
+ 
+   /**
+-   * Initial numThreads for {@link #executor}
+-   */
+-  private void initialPoolNumThreads() {
+-    if (executor != null) {
+-      executor.shutdown();
+-    }
+-  
+-    int numThreads = getConf().getInt("hbasefsck.numthreads", MAX_NUM_THREADS);
+-    executor = new ScheduledThreadPoolExecutor(numThreads, Threads.newDaemonThreadFactory("hbasefsck"));
+-  }
+-
+-  /**
+    * Get deployed regions according to the region servers.
+    */
+   private void loadDeployedRegions() throws IOException, InterruptedException {
+@@ -3600,18 +3589,23 @@ public class HBaseFsck extends Configured implements Tool {
+     URI defaultFs = hbasedir.getFileSystem(conf).getUri();
+     FSUtils.setFsDefault(conf, new Path(defaultFs));
+ 
+-    int ret = ToolRunner.run(new HBaseFsck(conf), args);
++    int ret = ToolRunner.run(new HBaseFsckTool(conf), args);
+     System.exit(ret);
+   }
+ 
+-  @Override
+-  public int run(String[] args) throws Exception {
+-    // reset the numThreads due to user may set it via generic options
+-    initialPoolNumThreads();
+-
+-    exec(executor, args);
+-    return getRetCode();
+-  }
++  /**
++   * This is a Tool wrapper that gathers -Dxxx=yyy configuration settings from the command line.
++   */
++  static class HBaseFsckTool extends Configured implements Tool {
++    HBaseFsckTool(Configuration conf) { super(conf); }
++    @Override
++    public int run(String[] args) throws Exception {
++      HBaseFsck hbck = new HBaseFsck(getConf());
++      hbck.exec(hbck.executor, args);
++      return hbck.getRetCode();
++    }
++  };
++  
+ 
+   public HBaseFsck exec(ExecutorService exec, String[] args) throws KeeperException, IOException,
+     ServiceException, InterruptedException {
+-- 
+1.8.3.4 (Apple Git-47)
+

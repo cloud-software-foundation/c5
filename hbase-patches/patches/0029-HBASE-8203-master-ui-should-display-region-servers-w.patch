@@ -1,0 +1,30 @@
+From 0e5edee42e06b93102e20680fd280074b9312c24 Mon Sep 17 00:00:00 2001
+From: Rajeshbabu Chintaguntla <rajeshbabu@apache.org>
+Date: Sat, 30 Nov 2013 20:11:42 +0000
+Subject: [PATCH 29/35] HBASE-8203 master ui should display region servers with
+ host, port plus startcode
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546769 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../org/apache/hadoop/hbase/tmpl/master/RegionServerListTmpl.jamon    | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hbase-server/src/main/jamon/org/apache/hadoop/hbase/tmpl/master/RegionServerListTmpl.jamon b/hbase-server/src/main/jamon/org/apache/hadoop/hbase/tmpl/master/RegionServerListTmpl.jamon
+index 8c739b1..3a0fff0 100644
+--- a/hbase-server/src/main/jamon/org/apache/hadoop/hbase/tmpl/master/RegionServerListTmpl.jamon
++++ b/hbase-server/src/main/jamon/org/apache/hadoop/hbase/tmpl/master/RegionServerListTmpl.jamon
+@@ -287,9 +287,9 @@ if  (sl.getTotalCompactingKVs() > 0) {
+         </%java>
+ 
+         <%if (infoPort > 0) %>
+-            <a href="<% url %>"><% serverName.getHostname() %></a>
++            <a href="<% url %>"><% serverName.getServerName() %></a>
+         <%else>
+-            <% serverName.getHostname() %>
++            <% serverName.getServerName() %>
+         </%if>
+ </%def>
+ 
+-- 
+1.8.3.4 (Apple Git-47)
+

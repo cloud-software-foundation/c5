@@ -1,0 +1,38 @@
+From 10802e19502637913e73841f4dbcfbbcef608433 Mon Sep 17 00:00:00 2001
+From: Nick Dimiduk <ndimiduk@apache.org>
+Date: Tue, 3 Dec 2013 16:38:02 +0000
+Subject: [PATCH 32/35] Optional setBatch for CopyTable to copy large rows in
+ batches
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1547466 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../java/org/apache/hadoop/hbase/mapreduce/TableInputFormat.java    | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableInputFormat.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableInputFormat.java
+index d6442a4..0085834 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableInputFormat.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableInputFormat.java
+@@ -68,6 +68,8 @@ implements Configurable {
+   public static final String SCAN_CACHEBLOCKS = "hbase.mapreduce.scan.cacheblocks";
+   /** The number of rows for caching that will be passed to scanners. */
+   public static final String SCAN_CACHEDROWS = "hbase.mapreduce.scan.cachedrows";
++  /** Set the maximum number of values to return for each call to next(). */
++  public static final String SCAN_BATCHSIZE = "hbase.mapreduce.scan.batchsize";
+ 
+   /** The configuration. */
+   private Configuration conf = null;
+@@ -147,6 +149,10 @@ implements Configurable {
+           scan.setCaching(Integer.parseInt(conf.get(SCAN_CACHEDROWS)));
+         }
+ 
++        if (conf.get(SCAN_BATCHSIZE) != null) {
++          scan.setBatch(Integer.parseInt(conf.get(SCAN_BATCHSIZE)));
++        }
++
+         // false by default, full table scans generate too much BC churn
+         scan.setCacheBlocks((conf.getBoolean(SCAN_CACHEBLOCKS, false)));
+       } catch (Exception e) {
+-- 
+1.8.3.4 (Apple Git-47)
+

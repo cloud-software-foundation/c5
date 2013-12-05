@@ -1,0 +1,517 @@
+From 23b905d8bb03e247073b0218a391a1325687793b Mon Sep 17 00:00:00 2001
+From: Enis Soztutar <enis@apache.org>
+Date: Thu, 28 Nov 2013 00:02:58 +0000
+Subject: [PATCH 22/35] HBASE-10020 Add maven compile-protobuf profile
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546241 13f79535-47bb-0310-9956-ffa450edef68
+---
+ hbase-protocol/README.txt                          |  35 +-
+ hbase-protocol/pom.xml                             | 120 +--
+ hbase-server/pom.xml                               |  70 ++
+ .../protobuf/generated/ColumnSchemaMessage.java    |   8 +-
+ .../rest/protobuf/generated/ScannerMessage.java    |   2 +-
+ .../generated/StorageClusterStatusMessage.java     |   2 +-
+ .../rest/protobuf/generated/TableInfoMessage.java  |   6 +-
+ .../protobuf/generated/TableSchemaMessage.java     |   6 +-
+ .../rest/protobuf/generated/VersionMessage.java    |  10 +-
+ .../coprocessor/protobuf/generated/PingProtos.java |   6 +-
+ .../hbase/ipc/protobuf/generated/TestProtos.java   |   4 +-
+ 17 files changed, 1151 insertions(+), 669 deletions(-)
+
+diff --git a/hbase-protocol/README.txt b/hbase-protocol/README.txt
+index b8e21ae..b67f0c3 100644
+--- a/hbase-protocol/README.txt
++++ b/hbase-protocol/README.txt
+@@ -7,28 +7,21 @@ the protobuf protoc tool is in your $PATH (You may need to download it and build
+ it first; its part of the protobuf package obtainable from here:
+ http://code.google.com/p/protobuf/downloads/list).
+
+-Then run the following (You should be able to just copy and paste the below into a
+-terminal and hit return -- the protoc compiler runs fast):
+-
+-  UNIX_PROTO_DIR=src/main/protobuf
+-  JAVA_DIR=src/main/java/
+-  mkdir -p $JAVA_DIR 2> /dev/null
+-  if which cygpath 2> /dev/null; then
+-    PROTO_DIR=`cygpath --windows $UNIX_PROTO_DIR`
+-    JAVA_DIR=`cygpath --windows $JAVA_DIR`
+-  else
+-    PROTO_DIR=$UNIX_PROTO_DIR
+-  fi
+-  # uncomment the next line if you want to remove before generating
+-  # rm -fr $JAVA_DIR/org/apache/hadoop/hbase/protobuf/generated
+-  for PROTO_FILE in $UNIX_PROTO_DIR/*.proto
+-  do
+-    protoc -I$PROTO_DIR --java_out=$JAVA_DIR $PROTO_FILE
+-  done
++HBase uses hadoop-maven-plugins:protoc goal to invoke the protoc command. You can
++compile the protoc definitions by invoking maven with profile compile-protobuf or
++passing in compile-protobuf property.
++
++mvn compile -Dcompile-protobuf
++or
++mvn compile -Pcompile-protobuf
++
++You may also want to define protoc.path for the protoc binary
++
++mvn compile -Dcompile-protobuf -Dprotoc.path=/opt/local/bin/protoc
++
++If you have added a new proto file, you should add it to the pom.xml file first.
++Other modules also support the maven profile.
+
+ After you've done the above, check it in and then check it in (or post a patch
+ on a JIRA with your definition file changes and the generated files).
+
+-Optionally, you can uncomment the hadoop-maven-plugins plugin in hbase-protocol/pom.xml.
+-This plugin will generate for the classes during the build. Once again, you will need protocol buffers
+-to be installed on your build machine (https://developers.google.com/protocol-buffers)
+diff --git a/hbase-protocol/pom.xml b/hbase-protocol/pom.xml
+index 2a199f4..acfaa70 100644
+--- a/hbase-protocol/pom.xml
++++ b/hbase-protocol/pom.xml
+@@ -69,63 +69,6 @@
+                 </execution>
+             </executions>
+         </plugin>
+-<!--
+-        <plugin>
+-          <groupId>org.apache.hadoop</groupId>
+-          <artifactId>hadoop-maven-plugins</artifactId>
+-          <version>2.0.5-alpha</version>
+-          <executions>
+-            <execution>
+-              <id>compile-protoc</id>
+-              <phase>generate-sources</phase>
+-              <goals>
+-                <goal>protoc</goal>
+-              </goals>
+-              <configuration>
+-                <protocVersion>${protobuf.version}</protocVersion>
+-                <protocCommand>${protoc.path}</protocCommand>
+-                <imports>
+-                  <param>${basedir}/src/main/protobuf</param>
+-                </imports>
+-                <source>
+-                  <directory>${basedir}/src/main/protobuf</directory>
+-                  <includes>
+-                    <include>AccessControl.proto</include>
+-                    <include>Admin.proto</include>
+-                    <include>Aggregate.proto</include>
+-                    <include>Authentication.proto</include>
+-                    <include>Cell.proto</include>
+-                    <include>Client.proto</include>
+-                    <include>ClusterId.proto</include>
+-                    <include>ClusterStatus.proto</include>
+-                    <include>Comparator.proto</include>
+-                    <include>ErrorHandling.proto</include>
+-                    <include>Filter.proto</include>
+-                    <include>FS.proto</include>
+-                    <include>HBase.proto</include>
+-                    <include>HFile.proto</include>
+-                    <include>LoadBalancer.proto</include>
+-                    <include>MapReduce.proto</include>
+-                    <include>MasterAdmin.proto</include>
+-                    <include>MasterMonitor.proto</include>
+-                    <include>Master.proto</include>
+-                    <include>MultiRowMutationProcessorMessages.proto</include>
+-                    <include>MultiRowMutation.proto</include>
+-                    <include>RegionServerStatus.proto</include>
+-                    <include>RowProcessor.proto</include>
+-                    <include>RPC.proto</include>
+-                    <include>SecureBulkLoad.proto</include>
+-                    <include>Tracing.proto</include>
+-                    <include>WAL.proto</include>
+-                    <include>ZooKeeper.proto</include>
+-                  </includes>
+-                </source>
+-                <output>${project.build.directory}/generated-sources/java</output>
+-              </configuration>
+-            </execution>
+-          </executions>
+-        </plugin>
+--->
+        </plugins>
+       <pluginManagement>
+         <plugins>
+@@ -180,6 +123,67 @@
+                 <surefire.skipFirstPart>true</surefire.skipFirstPart>
+             </properties>
+         </profile>
++        <profile>
++          <id>compile-protobuf</id>
++          <activation>
++            <property>
++              <name>compile-protobuf</name>
++            </property>
++          </activation>
++          <build>
++            <plugins>
++              <plugin>
++                <groupId>org.apache.hadoop</groupId>
++                <artifactId>hadoop-maven-plugins</artifactId>
++                <executions>
++                  <execution>
++                    <id>compile-protoc</id>
++                    <phase>generate-sources</phase>
++                    <goals>
++                      <goal>protoc</goal>
++                    </goals>
++                    <configuration>
++                      <imports>
++                        <param>${basedir}/src/main/protobuf</param>
++                      </imports>
++                      <source>
++                        <directory>${basedir}/src/main/protobuf</directory>
++                        <includes>
++                          <include>AccessControl.proto</include>
++                          <include>Admin.proto</include>
++                          <include>Aggregate.proto</include>
++                          <include>Authentication.proto</include>
++                          <include>Cell.proto</include>
++                          <include>Client.proto</include>
++                          <include>ClusterId.proto</include>
++                          <include>ClusterStatus.proto</include>
++                          <include>Comparator.proto</include>
++                          <include>ErrorHandling.proto</include>
++                          <include>Filter.proto</include>
++                          <include>FS.proto</include>
++                          <include>HBase.proto</include>
++                          <include>HFile.proto</include>
++                          <include>LoadBalancer.proto</include>
++                          <include>MapReduce.proto</include>
++                          <include>Master.proto</include>
++                          <include>MultiRowMutation.proto</include>
++                          <include>RegionServerStatus.proto</include>
++                          <include>RowProcessor.proto</include>
++                          <include>RPC.proto</include>
++                          <include>SecureBulkLoad.proto</include>
++                          <include>Tracing.proto</include>
++                          <include>WAL.proto</include>
++                          <include>ZooKeeper.proto</include>
++                        </includes>
++                      </source>
++                      <!--<output>${project.build.directory}/generated-sources/java</output>-->
++                     <output>${basedir}/src/main/java/</output>
++                    </configuration>
++                  </execution>
++                </executions>
++              </plugin>
++            </plugins>
++          </build>
++        </profile>
+     </profiles>
+-
+ </project>
+diff --git a/hbase-server/pom.xml b/hbase-server/pom.xml
+index a17fded..f995c51 100644
+--- a/hbase-server/pom.xml
++++ b/hbase-server/pom.xml
+@@ -685,5 +685,75 @@
+         </plugins>
+       </build>
+     </profile>
++    <profile>
++      <id>compile-protobuf</id>
++      <activation>
++        <property>
++          <name>compile-protobuf</name>
++        </property>
++      </activation>
++      <build>
++        <plugins>
++          <plugin>
++            <groupId>org.apache.hadoop</groupId>
++            <artifactId>hadoop-maven-plugins</artifactId>
++            <executions>
++              <execution>
++                <id>compile-protoc</id>
++                <phase>generate-sources</phase>
++                <goals>
++                  <goal>protoc</goal>
++                </goals>
++                <configuration>
++                  <imports>
++                    <param>${basedir}/src/main/resources/org/apache/hadoop/hbase/rest/protobuf</param>
++                  </imports>
++                  <source>
++                    <!-- These should be under src/main/protobuf -->
++                    <directory>${basedir}/src/main/resources/org/apache/hadoop/hbase/rest/protobuf</directory>
++                    <includes>
++                      <include>CellMessage.proto</include>
++                      <include>CellSetMessage.proto</include>
++                      <include>ColumnSchemaMessage.proto</include>
++                      <include>ScannerMessage.proto</include>
++                      <include>StorageClusterStatusMessage.proto</include>
++                      <include>TableInfoMessage.proto</include>
++                      <include>TableListMessage.proto</include>
++                      <include>TableSchemaMessage.proto</include>
++                      <include>VersionMessage.proto</include>
++                    </includes>
++                  </source>
++                 <output>${basedir}/src/main/java/</output>
++                </configuration>
++              </execution>
++              <execution>
++                <id>compile-test-protoc</id>
++                <phase>generate-test-sources</phase>
++                <goals>
++                  <goal>protoc</goal>
++                </goals>
++                <configuration>
++                  <imports>
++                    <param>${basedir}/src/test/protobuf</param>
++                  </imports>
++                  <source>
++                    <directory>${basedir}/src/test/protobuf</directory>
++                    <includes>
++                      <include>ColumnAggregationProtocol.proto</include>
++                      <include>IncrementCounterProcessor.proto</include>
++                      <include>PingProtocol.proto</include>
++                      <include>test.proto</include>
++                      <include>test_delayed_rpc.proto</include>
++                      <include>test_rpc_service.proto</include>
++                    </includes>
++                  </source>
++                 <output>${basedir}/src/test/java/</output>
++                </configuration>
++              </execution>
++            </executions>
++          </plugin>
++        </plugins>
++      </build>
++    </profile>
+   </profiles>
+ </project>
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ColumnSchemaMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ColumnSchemaMessage.java
+index b045cdd..f5f6a95 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ColumnSchemaMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ColumnSchemaMessage.java
+@@ -728,7 +728,7 @@ public final class ColumnSchemaMessage {
+             getNameBytes() {
+           java.lang.Object ref = name_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             name_ = b;
+@@ -802,7 +802,7 @@ public final class ColumnSchemaMessage {
+             getValueBytes() {
+           java.lang.Object ref = value_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             value_ = b;
+@@ -1394,7 +1394,7 @@ public final class ColumnSchemaMessage {
+           getNameBytes() {
+         java.lang.Object ref = name_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           name_ = b;
+@@ -1790,7 +1790,7 @@ public final class ColumnSchemaMessage {
+           getCompressionBytes() {
+         java.lang.Object ref = compression_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           compression_ = b;
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ScannerMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ScannerMessage.java
+index 493463a..37132ab 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ScannerMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/ScannerMessage.java
+@@ -1113,7 +1113,7 @@ public final class ScannerMessage {
+           getFilterBytes() {
+         java.lang.Object ref = filter_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           filter_ = b;
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/StorageClusterStatusMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/StorageClusterStatusMessage.java
+index 897a234..05ff7a3 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/StorageClusterStatusMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/StorageClusterStatusMessage.java
+@@ -2405,7 +2405,7 @@ public final class StorageClusterStatusMessage {
+             getNameBytes() {
+           java.lang.Object ref = name_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             name_ = b;
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableInfoMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableInfoMessage.java
+index e37bb56..421c0ec 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableInfoMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableInfoMessage.java
+@@ -806,7 +806,7 @@ public final class TableInfoMessage {
+             getNameBytes() {
+           java.lang.Object ref = name_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             name_ = b;
+@@ -985,7 +985,7 @@ public final class TableInfoMessage {
+             getLocationBytes() {
+           java.lang.Object ref = location_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             location_ = b;
+@@ -1449,7 +1449,7 @@ public final class TableInfoMessage {
+           getNameBytes() {
+         java.lang.Object ref = name_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           name_ = b;
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableSchemaMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableSchemaMessage.java
+index ecad722..88f9cd3 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableSchemaMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/TableSchemaMessage.java
+@@ -744,7 +744,7 @@ public final class TableSchemaMessage {
+             getNameBytes() {
+           java.lang.Object ref = name_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             name_ = b;
+@@ -818,7 +818,7 @@ public final class TableSchemaMessage {
+             getValueBytes() {
+           java.lang.Object ref = value_;
+           if (ref instanceof String) {
+-            com.google.protobuf.ByteString b =
++            com.google.protobuf.ByteString b =
+                 com.google.protobuf.ByteString.copyFromUtf8(
+                     (java.lang.String) ref);
+             value_ = b;
+@@ -1446,7 +1446,7 @@ public final class TableSchemaMessage {
+           getNameBytes() {
+         java.lang.Object ref = name_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           name_ = b;
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/VersionMessage.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/VersionMessage.java
+index a725f32..590b0d3 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/VersionMessage.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/protobuf/generated/VersionMessage.java
+@@ -751,7 +751,7 @@ public final class VersionMessage {
+           getRestVersionBytes() {
+         java.lang.Object ref = restVersion_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           restVersion_ = b;
+@@ -825,7 +825,7 @@ public final class VersionMessage {
+           getJvmVersionBytes() {
+         java.lang.Object ref = jvmVersion_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           jvmVersion_ = b;
+@@ -899,7 +899,7 @@ public final class VersionMessage {
+           getOsVersionBytes() {
+         java.lang.Object ref = osVersion_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           osVersion_ = b;
+@@ -973,7 +973,7 @@ public final class VersionMessage {
+           getServerVersionBytes() {
+         java.lang.Object ref = serverVersion_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           serverVersion_ = b;
+@@ -1047,7 +1047,7 @@ public final class VersionMessage {
+           getJerseyVersionBytes() {
+         java.lang.Object ref = jerseyVersion_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           jerseyVersion_ = b;
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/coprocessor/protobuf/generated/PingProtos.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/coprocessor/protobuf/generated/PingProtos.java
+index 79cc5ce..57903cd 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/coprocessor/protobuf/generated/PingProtos.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/coprocessor/protobuf/generated/PingProtos.java
+@@ -807,7 +807,7 @@ public final class PingProtos {
+           getPongBytes() {
+         java.lang.Object ref = pong_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           pong_ = b;
+@@ -2980,7 +2980,7 @@ public final class PingProtos {
+           getNameBytes() {
+         java.lang.Object ref = name_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           name_ = b;
+@@ -3489,7 +3489,7 @@ public final class PingProtos {
+           getResponseBytes() {
+         java.lang.Object ref = response_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           response_ = b;
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/ipc/protobuf/generated/TestProtos.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/ipc/protobuf/generated/TestProtos.java
+index 4e94e61..3da0254 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/ipc/protobuf/generated/TestProtos.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/ipc/protobuf/generated/TestProtos.java
+@@ -1145,7 +1145,7 @@ public final class TestProtos {
+           getMessageBytes() {
+         java.lang.Object ref = message_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           message_ = b;
+@@ -1662,7 +1662,7 @@ public final class TestProtos {
+           getMessageBytes() {
+         java.lang.Object ref = message_;
+         if (ref instanceof String) {
+-          com.google.protobuf.ByteString b =
++          com.google.protobuf.ByteString b =
+               com.google.protobuf.ByteString.copyFromUtf8(
+                   (java.lang.String) ref);
+           message_ = b;
+--
+1.8.3.4 (Apple Git-47)
+

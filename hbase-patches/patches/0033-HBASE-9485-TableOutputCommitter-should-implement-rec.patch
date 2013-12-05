@@ -1,0 +1,31 @@
+From eda6eeb8bdb4b23afa4bff936e25fdd3754779a4 Mon Sep 17 00:00:00 2001
+From: Zhihong Yu <tedyu@apache.org>
+Date: Wed, 4 Dec 2013 14:26:43 +0000
+Subject: [PATCH 33/35] HBASE-9485 TableOutputCommitter should implement
+ recovery if we don't want jobs to start from 0 on RM restart
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1547802 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../org/apache/hadoop/hbase/mapreduce/TableOutputCommitter.java   | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableOutputCommitter.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableOutputCommitter.java
+index 8039861..6c0c7a6 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableOutputCommitter.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/mapreduce/TableOutputCommitter.java
+@@ -58,4 +58,12 @@ public class TableOutputCommitter extends OutputCommitter {
+   public void setupTask(TaskAttemptContext arg0) throws IOException {
+   }
+ 
++  public boolean isRecoverySupported() {
++    return true;
++  }
++
++  public void recoverTask(TaskAttemptContext taskContext)
++  throws IOException
++  {
++  }
+ }
+-- 
+1.8.3.4 (Apple Git-47)
+

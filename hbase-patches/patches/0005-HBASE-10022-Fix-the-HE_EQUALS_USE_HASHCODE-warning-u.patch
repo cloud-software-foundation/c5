@@ -1,0 +1,30 @@
+From ac53a7b6793f6594086c01a30d70cf3f7318c950 Mon Sep 17 00:00:00 2001
+From: Nicolas Liochon <nkeywal@apache.org>
+Date: Mon, 25 Nov 2013 13:13:22 +0000
+Subject: [PATCH 05/35] HBASE-10022 Fix the HE_EQUALS_USE_HASHCODE warning
+ under hbase-hadoop1-compat (Liang Xie)
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545251 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../apache/hadoop/hbase/regionserver/MetricsRegionSourceImpl.java    | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hbase-hadoop1-compat/src/main/java/org/apache/hadoop/hbase/regionserver/MetricsRegionSourceImpl.java b/hbase-hadoop1-compat/src/main/java/org/apache/hadoop/hbase/regionserver/MetricsRegionSourceImpl.java
+index 47214a3..87a2b3c 100644
+--- a/hbase-hadoop1-compat/src/main/java/org/apache/hadoop/hbase/regionserver/MetricsRegionSourceImpl.java
++++ b/hbase-hadoop1-compat/src/main/java/org/apache/hadoop/hbase/regionserver/MetricsRegionSourceImpl.java
+@@ -158,6 +158,11 @@ public class MetricsRegionSourceImpl implements MetricsRegionSource {
+     return compareTo((MetricsRegionSourceImpl)obj) == 0;
+   }
+ 
++  @Override
++  public int hashCode() {
++    return this.regionWrapper.getRegionName().hashCode();
++  }
++
+   void snapshot(MetricsRecordBuilder mrb, boolean ignored) {
+     if (closed) return;
+ 
+-- 
+1.8.3.4 (Apple Git-47)
+

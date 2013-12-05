@@ -1,0 +1,12 @@
+We copied hbase sources at sha1 revision df641a4daf7f7c42e8193716233f562ee052e464
+
+This directory contains patches from the HBase project since that
+time.  Not all of them will be applicable to our project and those
+will be moved into the 'skipped' subdirectory.
+
+As new changes happen to HBase, we can generate additional patches using:
+git format-patch --dirstat --stat --summary -M --start-number <number>  START..END
+
+And copied into this directory.
+
+Commits should reference the patches for ease of tracking.

@@ -1,0 +1,44 @@
+From 18b24e8e3a38b8b7cdf92301351829e1e8e23e19 Mon Sep 17 00:00:00 2001
+From: Elliott Neil Clark <eclark@apache.org>
+Date: Tue, 26 Nov 2013 22:30:49 +0000
+Subject: [PATCH 15/35] HBASE-10037 Fix potential Resource Leak in
+ EncodedDataBlock
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545874 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../hadoop/hbase/io/encoding/EncodedDataBlock.java      | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/hbase-common/src/main/java/org/apache/hadoop/hbase/io/encoding/EncodedDataBlock.java b/hbase-common/src/main/java/org/apache/hadoop/hbase/io/encoding/EncodedDataBlock.java
+index 2385f9a..e41aa9a 100644
+--- a/hbase-common/src/main/java/org/apache/hadoop/hbase/io/encoding/EncodedDataBlock.java
++++ b/hbase-common/src/main/java/org/apache/hadoop/hbase/io/encoding/EncodedDataBlock.java
+@@ -152,14 +152,19 @@ public class EncodedDataBlock {
+     if (compressor != null) {
+       compressor.reset();
+     }
+-    OutputStream compressingStream = algo.createCompressionStream(
+-        compressedStream, compressor, 0);
++    OutputStream compressingStream = null;
+ 
+-    compressingStream.write(inputBuffer, offset, length);
+-    compressingStream.flush();
+-    compressingStream.close();
++    try {
++      compressingStream = algo.createCompressionStream(
++          compressedStream, compressor, 0);
++
++      compressingStream.write(inputBuffer, offset, length);
++      compressingStream.flush();
+ 
+-    return compressedStream.size();
++      return compressedStream.size();
++    } finally {
++      if (compressingStream != null) compressingStream.close();
++    }
+   }
+ 
+   /**
+-- 
+1.8.3.4 (Apple Git-47)
+
