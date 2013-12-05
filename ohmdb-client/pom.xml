@@ -59,7 +59,7 @@
     </build>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
             <version>${hbase.version}</version>
@@ -81,7 +81,7 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>ohmdb</groupId>
@@ -89,6 +89,10 @@
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ohmdb</groupId>
+            <artifactId>hbase-server</artifactId>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -116,11 +120,9 @@
             <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.hbase</groupId>
+            <groupId>ohmdb</groupId>
             <artifactId>hbase-client</artifactId>
-            <version>${hbase.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>
