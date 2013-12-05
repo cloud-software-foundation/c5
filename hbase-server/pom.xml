@@ -21,10 +21,10 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>hbase</artifactId>
-    <groupId>org.apache.hbase</groupId>
-    <version>0.96.1-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+      <groupId>ohmdb</groupId>
+      <artifactId>parent</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <relativePath>..</relativePath>
   </parent>
   <artifactId>hbase-server</artifactId>
   <name>HBase - Server</name>
@@ -277,24 +277,24 @@
   <dependencies>
     <!-- Intra-project dependencies -->
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-protocol</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-prefix-tree</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-common</artifactId>
       <type>test-jar</type>
     </dependency>
@@ -307,22 +307,22 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>

@@ -21,9 +21,9 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>hbase</artifactId>
-    <groupId>org.apache.hbase</groupId>
-    <version>0.96.1-SNAPSHOT</version>
+      <groupId>ohmdb</groupId>
+      <artifactId>parent</artifactId>
+    <version>0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -75,15 +75,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
+      <groupId>ohmdb</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
     </dependency>
