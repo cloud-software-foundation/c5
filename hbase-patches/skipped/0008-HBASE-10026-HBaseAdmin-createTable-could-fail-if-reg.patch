@@ -1,0 +1,27 @@
+From 1e006bc1d58288a79b770cb71d3b61af793f3c1e Mon Sep 17 00:00:00 2001
+From: Jimmy Xiang <jxiang@apache.org>
+Date: Tue, 26 Nov 2013 17:13:12 +0000
+Subject: [PATCH 08/35] HBASE-10026 HBaseAdmin#createTable could fail if region
+ splits too fast
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545738 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java        | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
+index 2db3202..cba8509 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
+@@ -516,7 +516,7 @@ public class HBaseAdmin implements Abortable, Closeable {
+           }
+         };
+         MetaScanner.metaScan(conf, connection, visitor, desc.getTableName());
+-        if (actualRegCount.get() != numRegs) {
++        if (actualRegCount.get() < numRegs) {
+           if (tries == this.numRetries * this.retryLongerMultiplier - 1) {
+             throw new RegionOfflineException("Only " + actualRegCount.get() +
+               " of " + numRegs + " regions are online; retries exhausted.");
+-- 
+1.8.3.4 (Apple Git-47)
+

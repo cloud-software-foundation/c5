@@ -1,0 +1,89 @@
+From c2c8e5ffbf8bbe583335242045dd28a5af50d4b0 Mon Sep 17 00:00:00 2001
+From: Jonathan Hsieh <jmhsieh@apache.org>
+Date: Thu, 5 Dec 2013 06:16:27 +0000
+Subject: [PATCH 34/35] HBASE-10079 Race in TableName cache
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1548018 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../main/java/org/apache/hadoop/hbase/TableName.java   | 18 +++++++++---------
+ .../main/java/org/apache/hadoop/hbase/util/Bytes.java  | 13 ++++++-------
+ 2 files changed, 15 insertions(+), 16 deletions(-)
+
+diff --git a/hbase-common/src/main/java/org/apache/hadoop/hbase/TableName.java b/hbase-common/src/main/java/org/apache/hadoop/hbase/TableName.java
+index e02afca..4faccef 100644
+--- a/hbase-common/src/main/java/org/apache/hadoop/hbase/TableName.java
++++ b/hbase-common/src/main/java/org/apache/hadoop/hbase/TableName.java
+@@ -248,7 +248,7 @@ public final class TableName implements Comparable<TableName> {
+    */
+   private TableName(ByteBuffer namespace, ByteBuffer qualifier) throws IllegalArgumentException {
+     this.qualifier = new byte[qualifier.remaining()];
+-    qualifier.get(this.qualifier);
++    qualifier.duplicate().get(this.qualifier);
+     this.qualifierAsString = Bytes.toString(this.qualifier);
+ 
+     if (qualifierAsString.equals(OLD_ROOT_STR)) {
+@@ -275,7 +275,7 @@ public final class TableName implements Comparable<TableName> {
+         this.systemTable = true;
+       } else {
+         this.namespace = new byte[namespace.remaining()];
+-        namespace.get(this.namespace);
++        namespace.duplicate().get(this.namespace);
+         this.namespaceAsString = Bytes.toString(this.namespace);
+         this.systemTable = false;
+       }
+@@ -325,15 +325,15 @@ public final class TableName implements Comparable<TableName> {
+     TableName newTable = new TableName(bns, qns);
+     if (tableCache.add(newTable)) {  // Adds the specified element if it is not already present
+       return newTable;
+-    } else {
+-      // Someone else added it. Let's find it.
+-      for (TableName tn : tableCache) {
+-        if (Bytes.equals(tn.getQualifier(), qns) && Bytes.equals(tn.getNamespace(), bns)) {
+-          return tn;
+-        }
+-      }
+     }
+ 
++    // Someone else added it. Let's find it.
++    for (TableName tn : tableCache) {
++      if (Bytes.equals(tn.getQualifier(), qns) && Bytes.equals(tn.getNamespace(), bns)) {
++        return tn;
++      }
++    }
++    // this should never happen.
+     throw new IllegalStateException(newTable + " was supposed to be in the cache");
+   }
+ 
+diff --git a/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java b/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
+index 78023df..a18fca8 100644
+--- a/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
++++ b/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
+@@ -1281,19 +1281,18 @@ public class Bytes {
+    * @param b right operand
+    * @return True if equal
+    */
+-  public static boolean equals(byte[] a, ByteBuffer b) {
+-    if (a == null) return b == null;
+-    if (b == null) return false;
+-    if (a.length != b.remaining()) return false;
++  public static boolean equals(byte[] a, ByteBuffer buf) {
++    if (a == null) return buf == null;
++    if (buf == null) return false;
++    if (a.length != buf.remaining()) return false;
+ 
+-    b.mark();
++    // Thou shalt not modify the original byte buffer in what should be read only operations.
++    ByteBuffer b = buf.duplicate();
+     for (byte anA : a) {
+       if (anA != b.get()) {
+-        b.reset();
+         return false;
+       }
+     }
+-    b.reset();
+     return true;
+   }
+ 
+-- 
+1.8.3.4 (Apple Git-47)
+

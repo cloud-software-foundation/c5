@@ -1,0 +1,26 @@
+From f7ade5d7cb1756646f9dc4342177444fb9b1af82 Mon Sep 17 00:00:00 2001
+From: Jonathan Hsieh <jmhsieh@apache.org>
+Date: Thu, 5 Dec 2013 18:20:44 +0000
+Subject: [PATCH 35/35] HBASE-10079 ADDENDUM javadoc fix
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1548229 13f79535-47bb-0310-9956-ffa450edef68
+---
+ hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java b/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
+index a18fca8..9680fa1 100644
+--- a/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
++++ b/hbase-common/src/main/java/org/apache/hadoop/hbase/util/Bytes.java
+@@ -1278,7 +1278,7 @@ public class Bytes {
+ 
+   /**
+    * @param a left operand
+-   * @param b right operand
++   * @param buf right operand
+    * @return True if equal
+    */
+   public static boolean equals(byte[] a, ByteBuffer buf) {
+-- 
+1.8.3.4 (Apple Git-47)
+

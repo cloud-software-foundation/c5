@@ -1,0 +1,37 @@
+From deda0a715123c4a1485596f01e851b3cfbb76cea Mon Sep 17 00:00:00 2001
+From: Elliott Neil Clark <eclark@apache.org>
+Date: Tue, 26 Nov 2013 22:28:47 +0000
+Subject: [PATCH 14/35] HBASE-10036 Fix Potential Resource Leak in MetaReader
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545870 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../src/main/java/org/apache/hadoop/hbase/catalog/MetaReader.java    | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/catalog/MetaReader.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/catalog/MetaReader.java
+index e2f1fae..fd559c4 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/catalog/MetaReader.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/catalog/MetaReader.java
+@@ -533,8 +533,9 @@ public class MetaReader {
+     }
+     scan.addFamily(HConstants.CATALOG_FAMILY);
+     HTable metaTable = getMetaHTable(catalogTracker);
+-    ResultScanner scanner = metaTable.getScanner(scan);
++    ResultScanner scanner = null;
+     try {
++      scanner = metaTable.getScanner(scan);
+       Result data;
+       while((data = scanner.next()) != null) {
+         if (data.isEmpty()) continue;
+@@ -542,7 +543,7 @@ public class MetaReader {
+         if (!visitor.visit(data)) break;
+       }
+     } finally {
+-      scanner.close();
++      if (scanner != null) scanner.close();
+       metaTable.close();
+     }
+     return;
+-- 
+1.8.3.4 (Apple Git-47)
+

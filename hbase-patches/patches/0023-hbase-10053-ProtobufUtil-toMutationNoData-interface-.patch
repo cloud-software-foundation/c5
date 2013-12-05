@@ -1,0 +1,52 @@
+From 7297c6030836dcfa8a442eb34871e3e6cb85ea68 Mon Sep 17 00:00:00 2001
+From: Jeffrey Zhong <jeffreyz@apache.org>
+Date: Thu, 28 Nov 2013 01:02:06 +0000
+Subject: [PATCH 23/35] hbase-10053: ProtobufUtil#toMutationNoData interface
+ change causes downstream project build break
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546249 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../org/apache/hadoop/hbase/protobuf/ProtobufUtil.java  | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
+index f285dde..ba08a7b 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
+@@ -1065,10 +1065,11 @@ public final class ProtobufUtil {
+   }
+ 
+   /**
+-   * Create a protocol buffer MutationProto based on a client Mutation.  Does NOT include data.
++   * Create a protocol buffer MutationProto based on a client Mutation. Does NOT include data.
+    * Understanding is that the Cell will be transported other than via protobuf.
+    * @param type
+    * @param mutation
++   * @param builder
+    * @return a protobuf'd Mutation
+    * @throws IOException
+    */
+@@ -1081,6 +1082,20 @@ public final class ProtobufUtil {
+   }
+ 
+   /**
++   * Create a protocol buffer MutationProto based on a client Mutation.  Does NOT include data.
++   * Understanding is that the Cell will be transported other than via protobuf.
++   * @param type
++   * @param mutation
++   * @return a protobuf'd Mutation
++   * @throws IOException
++   */
++  public static MutationProto toMutationNoData(final MutationType type, final Mutation mutation)
++  throws IOException {
++    MutationProto.Builder builder =  MutationProto.newBuilder();
++    return toMutationNoData(type, mutation, builder);
++  }
++
++  /**
+    * Code shared by {@link #toMutation(MutationType, Mutation)} and
+    * {@link #toMutationNoData(MutationType, Mutation)}
+    * @param type
+-- 
+1.8.3.4 (Apple Git-47)
+

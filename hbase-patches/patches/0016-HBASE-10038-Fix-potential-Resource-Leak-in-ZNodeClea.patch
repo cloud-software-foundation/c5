@@ -1,0 +1,36 @@
+From 45ad2c49bc317bd932864481d793078ff3f637fe Mon Sep 17 00:00:00 2001
+From: Elliott Neil Clark <eclark@apache.org>
+Date: Tue, 26 Nov 2013 22:34:05 +0000
+Subject: [PATCH 16/35] HBASE-10038 Fix potential Resource Leak in ZNodeCleaner
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545877 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../src/main/java/org/apache/hadoop/hbase/ZNodeClearer.java  | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/ZNodeClearer.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/ZNodeClearer.java
+index 52c4329..79929ef 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/ZNodeClearer.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/ZNodeClearer.java
+@@ -94,10 +94,14 @@ public class ZNodeClearer {
+       throw new FileNotFoundException("No filename; set environment variable HBASE_ZNODE_FILE");
+     }
+     FileReader znodeFile = new FileReader(fileName);
+-    BufferedReader br = new BufferedReader(znodeFile);
+-    String file_content = br.readLine();
+-    br.close();
+-    return file_content;
++    BufferedReader br = null;
++    try {
++      br = new BufferedReader(znodeFile);
++      String file_content = br.readLine();
++      return file_content;
++    } finally {
++      if (br != null) br.close();
++    }
+   }
+ 
+   /**
+-- 
+1.8.3.4 (Apple Git-47)
+

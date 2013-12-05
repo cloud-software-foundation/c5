@@ -1,0 +1,227 @@
+From 7279183fc6403c98829bd9946e1a51237a1570c2 Mon Sep 17 00:00:00 2001
+From: Matteo Bertozzi <mbertozzi@apache.org>
+Date: Mon, 25 Nov 2013 18:10:09 +0000
+Subject: [PATCH 06/35] HBASE-8465 Auto-drop rollback snapshot for snapshot
+ restore
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545361 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../org/apache/hadoop/hbase/client/HBaseAdmin.java | 124 ++++++++++++++++++---
+ hbase-common/src/main/resources/hbase-default.xml  |  14 +++
+ .../client/TestRestoreSnapshotFromClient.java      |   5 +
+ 3 files changed, 126 insertions(+), 17 deletions(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
+index a10dab0..2db3202 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HBaseAdmin.java
+@@ -51,6 +51,7 @@ import org.apache.hadoop.hbase.NotServingRegionException;
+ import org.apache.hadoop.hbase.RegionException;
+ import org.apache.hadoop.hbase.ServerName;
+ import org.apache.hadoop.hbase.TableExistsException;
++import org.apache.hadoop.hbase.TableNotDisabledException;
+ import org.apache.hadoop.hbase.TableNotEnabledException;
+ import org.apache.hadoop.hbase.TableNotFoundException;
+ import org.apache.hadoop.hbase.UnknownRegionException;
+@@ -2773,8 +2774,11 @@ public class HBaseAdmin implements Abortable, Closeable {
+ 
+   /**
+    * Restore the specified snapshot on the original table. (The table must be disabled)
+-   * Before restoring the table, a new snapshot with the current table state is created.
+-   * In case of failure, the table will be rolled back to its original state.
++   * If the "hbase.snapshot.restore.take.failsafe.snapshot" configuration property
++   * is set to true, a snapshot of the current table is taken
++   * before executing the restore operation.
++   * In case of restore failure, the failsafe snapshot will be restored.
++   * If the restore completes without problem the failsafe snapshot is deleted.
+    *
+    * @param snapshotName name of the snapshot to restore
+    * @throws IOException if a remote or network exception occurs
+@@ -2788,8 +2792,11 @@ public class HBaseAdmin implements Abortable, Closeable {
+ 
+   /**
+    * Restore the specified snapshot on the original table. (The table must be disabled)
+-   * Before restoring the table, a new snapshot with the current table state is created.
+-   * In case of failure, the table will be rolled back to the its original state.
++   * If the "hbase.snapshot.restore.take.failsafe.snapshot" configuration property
++   * is set to true, a snapshot of the current table is taken
++   * before executing the restore operation.
++   * In case of restore failure, the failsafe snapshot will be restored.
++   * If the restore completes without problem the failsafe snapshot is deleted.
+    *
+    * @param snapshotName name of the snapshot to restore
+    * @throws IOException if a remote or network exception occurs
+@@ -2798,8 +2805,50 @@ public class HBaseAdmin implements Abortable, Closeable {
+    */
+   public void restoreSnapshot(final String snapshotName)
+       throws IOException, RestoreSnapshotException {
+-    String rollbackSnapshot = snapshotName + "-" + EnvironmentEdgeManager.currentTimeMillis();
++    boolean takeFailSafeSnapshot =
++      conf.getBoolean("hbase.snapshot.restore.take.failsafe.snapshot", false);
++    restoreSnapshot(snapshotName, takeFailSafeSnapshot);
++  }
+ 
++  /**
++   * Restore the specified snapshot on the original table. (The table must be disabled)
++   * If 'takeFailSafeSnapshot' is set to true, a snapshot of the current table is taken
++   * before executing the restore operation.
++   * In case of restore failure, the failsafe snapshot will be restored.
++   * If the restore completes without problem the failsafe snapshot is deleted.
++   *
++   * The failsafe snapshot name is configurable by using the property
++   * "hbase.snapshot.restore.failsafe.name".
++   *
++   * @param snapshotName name of the snapshot to restore
++   * @param takeFailSafeSnapshot true if the failsafe snapshot should be taken
++   * @throws IOException if a remote or network exception occurs
++   * @throws RestoreSnapshotException if snapshot failed to be restored
++   * @throws IllegalArgumentException if the restore request is formatted incorrectly
++   */
++  public void restoreSnapshot(final byte[] snapshotName, final boolean takeFailSafeSnapshot)
++      throws IOException, RestoreSnapshotException {
++    restoreSnapshot(Bytes.toString(snapshotName), takeFailSafeSnapshot);
++  }
++
++  /**
++   * Restore the specified snapshot on the original table. (The table must be disabled)
++   * If 'takeFailSafeSnapshot' is set to true, a snapshot of the current table is taken
++   * before executing the restore operation.
++   * In case of restore failure, the failsafe snapshot will be restored.
++   * If the restore completes without problem the failsafe snapshot is deleted.
++   *
++   * The failsafe snapshot name is configurable by using the property
++   * "hbase.snapshot.restore.failsafe.name".
++   *
++   * @param snapshotName name of the snapshot to restore
++   * @param takeFailSafeSnapshot true if the failsafe snapshot should be taken
++   * @throws IOException if a remote or network exception occurs
++   * @throws RestoreSnapshotException if snapshot failed to be restored
++   * @throws IllegalArgumentException if the restore request is formatted incorrectly
++   */
++  public void restoreSnapshot(final String snapshotName, boolean takeFailSafeSnapshot)
++      throws IOException, RestoreSnapshotException {
+     TableName tableName = null;
+     for (SnapshotDescription snapshotInfo: listSnapshots()) {
+       if (snapshotInfo.getName().equals(snapshotName)) {
+@@ -2813,24 +2862,65 @@ public class HBaseAdmin implements Abortable, Closeable {
+         "Unable to find the table name for snapshot=" + snapshotName);
+     }
+ 
++    // The table does not exists, switch to clone.
++    if (!tableExists(tableName)) {
++      try {
++        cloneSnapshot(snapshotName, tableName);
++      } catch (InterruptedException e) {
++        throw new InterruptedIOException("Interrupted when restoring a nonexistent table: " +
++          e.getMessage());
++      }
++      return;
++    }
++
++    // Check if the table is disabled
++    if (!isTableDisabled(tableName)) {
++      throw new TableNotDisabledException(tableName);
++    }
++
+     // Take a snapshot of the current state
+-    snapshot(rollbackSnapshot, tableName);
++    String failSafeSnapshotSnapshotName = null;
++    if (takeFailSafeSnapshot) {
++      failSafeSnapshotSnapshotName = conf.get("hbase.snapshot.restore.failsafe.name",
++        "hbase-failsafe-{snapshot.name}-{restore.timestamp}");
++      failSafeSnapshotSnapshotName = failSafeSnapshotSnapshotName
++        .replace("{snapshot.name}", snapshotName)
++        .replace("{table.name}", tableName.toString().replace(TableName.NAMESPACE_DELIM, '.'))
++        .replace("{restore.timestamp}", String.valueOf(EnvironmentEdgeManager.currentTimeMillis()));
++      LOG.info("Taking restore-failsafe snapshot: " + failSafeSnapshotSnapshotName);
++      snapshot(failSafeSnapshotSnapshotName, tableName);
++    }
+ 
+-    // Restore snapshot
+     try {
++      // Restore snapshot
+       internalRestoreSnapshot(snapshotName, tableName);
+     } catch (IOException e) {
+-      // Try to rollback
++      // Somthing went wrong during the restore...
++      // if the pre-restore snapshot is available try to rollback
++      if (takeFailSafeSnapshot) {
++        try {
++          internalRestoreSnapshot(failSafeSnapshotSnapshotName, tableName);
++          String msg = "Restore snapshot=" + snapshotName +
++            " failed. Rollback to snapshot=" + failSafeSnapshotSnapshotName + " succeeded.";
++          LOG.error(msg, e);
++          throw new RestoreSnapshotException(msg, e);
++        } catch (IOException ex) {
++          String msg = "Failed to restore and rollback to snapshot=" + failSafeSnapshotSnapshotName;
++          LOG.error(msg, ex);
++          throw new RestoreSnapshotException(msg, e);
++        }
++      } else {
++        throw new RestoreSnapshotException("Failed to restore snapshot=" + snapshotName, e);
++      }
++    }
++
++    // If the restore is succeeded, delete the pre-restore snapshot
++    if (takeFailSafeSnapshot) {
+       try {
+-        String msg = "Restore snapshot=" + snapshotName +
+-          " failed. Rollback to snapshot=" + rollbackSnapshot + " succeeded.";
+-        LOG.error(msg, e);
+-        internalRestoreSnapshot(rollbackSnapshot, tableName);
+-        throw new RestoreSnapshotException(msg, e);
+-      } catch (IOException ex) {
+-        String msg = "Failed to restore and rollback to snapshot=" + rollbackSnapshot;
+-        LOG.error(msg, ex);
+-        throw new RestoreSnapshotException(msg, ex);
++        LOG.info("Deleting restore-failsafe snapshot: " + failSafeSnapshotSnapshotName);
++        deleteSnapshot(failSafeSnapshotSnapshotName);
++      } catch (IOException e) {
++        LOG.error("Unable to remove the failsafe snapshot: " + failSafeSnapshotSnapshotName, e);
+       }
+     }
+   }
+diff --git a/hbase-common/src/main/resources/hbase-default.xml b/hbase-common/src/main/resources/hbase-default.xml
+index 4fa2371..377a9d7 100644
+--- a/hbase-common/src/main/resources/hbase-default.xml
++++ b/hbase-common/src/main/resources/hbase-default.xml
+@@ -954,6 +954,20 @@ possible configurations would overwhelm and obscure the important.
+     <description>Set to true to allow snapshots to be taken / restored / cloned.</description>
+   </property>
+   <property>
++    <name>hbase.snapshot.restore.take.failsafe.snapshot</name>
++    <value>true</value>
++    <description>Set to true to take a snapshot before the restore operation.
++      The snapshot taken will be used in case of failure, to restore the previous state.
++      At the end of the restore operation this snapshot will be deleted</description>
++  </property>
++  <property>
++    <name>hbase.snapshot.restore.failsafe.name</name>
++    <value>hbase-failsafe-{snapshot.name}-{restore.timestamp}</value>
++    <description>Name of the failsafe snapshot taken by the restore operation.
++      You can use the {snapshot.name}, {table.name} and {restore.timestamp} variables
++      to create a name based on what you are restoring.</description>
++  </property>
++  <property>
+     <name>hbase.server.compactchecker.interval.multiplier</name>
+     <value>1000</value>
+     <description>The number that determines how often we scan to see if compaction is necessary.
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
+index e5a9da8..d1c708f 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
+@@ -163,6 +163,11 @@ public class TestRestoreSnapshotFromClient {
+     admin.restoreSnapshot(snapshotName1);
+     admin.enableTable(tableName);
+     SnapshotTestingUtils.verifyRowCount(TEST_UTIL, tableName, snapshot1Rows);
++
++    // Restore from snapshot-1
++    TEST_UTIL.deleteTable(tableName);
++    admin.restoreSnapshot(snapshotName1);
++    SnapshotTestingUtils.verifyRowCount(TEST_UTIL, tableName, snapshot1Rows);
+   }
+ 
+   @Test
+-- 
+1.8.3.4 (Apple Git-47)
+

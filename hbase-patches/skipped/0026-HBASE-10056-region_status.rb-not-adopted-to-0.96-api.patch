@@ -1,0 +1,52 @@
+From 16d330a9a9b8308f954ad4e410d7fad922e1759f Mon Sep 17 00:00:00 2001
+From: Michael Stack <stack@apache.org>
+Date: Thu, 28 Nov 2013 17:59:43 +0000
+Subject: [PATCH 26/35] HBASE-10056 region_status.rb not adopted to 0.96 api
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546414 13f79535-47bb-0310-9956-ffa450edef68
+---
+ bin/region_status.rb | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/bin/region_status.rb b/bin/region_status.rb
+index 78b4e48..df35ec6 100644
+--- a/bin/region_status.rb
++++ b/bin/region_status.rb
+@@ -55,6 +55,8 @@ import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter
+ import org.apache.hadoop.hbase.util.Bytes
+ import org.apache.hadoop.hbase.HRegionInfo
+ import org.apache.hadoop.hbase.client.MetaScanner
++import org.apache.hadoop.hbase.HTableDescriptor
++import org.apache.hadoop.hbase.client.HConnectionManager
+ 
+ # disable debug logging on this script for clarity
+ log_level = org.apache.log4j.Level::ERROR
+@@ -98,7 +100,7 @@ table = nil
+ iter = nil
+ while true
+   begin
+-    table = HTable.new config, '.META.'.to_java_bytes
++    table = HTable.new config, 'hbase:meta'.to_java_bytes
+     scanner = table.getScanner(scan)
+     iter = scanner.iterator
+     break
+@@ -130,13 +132,14 @@ end
+ 
+ # query the master to see how many regions are on region servers
+ if not $tablename.nil?
+-  $tableq = HTable.new config, $tablename.to_java_bytes
++  $TableName = HTableDescriptor.new($tablename.to_java_bytes).getTableName()
+ end
+ while true
+   if $tablename.nil?
+     server_count = admin.getClusterStatus().getRegionsCount()
+   else
+-    server_count = MetaScanner::allTableRegions(config,$tablename.to_java_bytes,false).size()
++    connection = HConnectionManager::getConnection(config);
++    server_count = MetaScanner::allTableRegions(config, connection, $TableName ,false).size()
+   end
+   print "Region Status: #{server_count} / #{meta_count}\n"
+   if SHOULD_WAIT and server_count < meta_count
+-- 
+1.8.3.4 (Apple Git-47)
+
