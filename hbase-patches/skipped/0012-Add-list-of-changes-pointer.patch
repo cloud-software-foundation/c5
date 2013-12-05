@@ -1,0 +1,28 @@
+From 9b15a2963838a32f7f61f422cb6a9d4e7743d1ee Mon Sep 17 00:00:00 2001
+From: Michael Stack <stack@apache.org>
+Date: Tue, 26 Nov 2013 21:53:11 +0000
+Subject: [PATCH 12/35] Add list of changes pointer
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545858 13f79535-47bb-0310-9956-ffa450edef68
+---
+ CHANGES.txt | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/CHANGES.txt b/CHANGES.txt
+index db59b72..ee16227 100644
+--- a/CHANGES.txt
++++ b/CHANGES.txt
+@@ -1,6 +1,9 @@
+ HBase Change Log
+ 
+-Release 0.96.0 - Unreleased
++Release 0.96.1 - Release Candidate - Tue Nov 26, 2013
++126 issues closed/resolved.  See http://goo.gl/ZgYBW2 for list.
++
++Release 0.96.0 - Released October 18th, 2013 
+ 265+ issues resolved/closed.  See http://goo.gl/4zegPr for the list.
+ 
+ Release 0.95.1 -- Release Candidate, May 27th, 2013 
+-- 
+1.8.3.4 (Apple Git-47)
+

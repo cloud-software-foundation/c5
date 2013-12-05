@@ -1,0 +1,25 @@
+From 00af09fd85cf3f73554a552ac9a7b4468a068f93 Mon Sep 17 00:00:00 2001
+From: Michael Stack <stack@apache.org>
+Date: Thu, 28 Nov 2013 01:18:52 +0000
+Subject: [PATCH 24/35] Update the documentation, add date of second RC
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546251 13f79535-47bb-0310-9956-ffa450edef68
+---
+ CHANGES.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CHANGES.txt b/CHANGES.txt
+index ee16227..2798aec 100644
+--- a/CHANGES.txt
++++ b/CHANGES.txt
+@@ -1,6 +1,6 @@
+ HBase Change Log
+ 
+-Release 0.96.1 - Release Candidate - Tue Nov 26, 2013
++Release 0.96.1 - Release Candidate - Tue Nov 27, 2013
+ 126 issues closed/resolved.  See http://goo.gl/ZgYBW2 for list.
+ 
+ Release 0.96.0 - Released October 18th, 2013 
+-- 
+1.8.3.4 (Apple Git-47)
+

@@ -1,0 +1,30 @@
+From faf1d96ceb31e1c4f08eb5ebc0a6f70f6d44409f Mon Sep 17 00:00:00 2001
+From: Michael Stack <stack@apache.org>
+Date: Wed, 27 Nov 2013 22:21:43 +0000
+Subject: [PATCH 20/35] HBASE-10050 graceful_stop.sh syntax error
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546213 13f79535-47bb-0310-9956-ffa450edef68
+---
+ bin/graceful_stop.sh | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/bin/graceful_stop.sh b/bin/graceful_stop.sh
+index c14bbd7..37b5685 100755
+--- a/bin/graceful_stop.sh
++++ b/bin/graceful_stop.sh
+@@ -56,10 +56,8 @@ do
+     --rest)  rest=true; shift;;
+     --restart)  restart=true; shift;;
+     --reload)   reload=true; shift;;
+-    --failfast) ;&
+-    -e)  failfast=true; shift;;
+-    --debug)  ;&
+-    -d)  debug="--debug"; shift;;
++    --failfast | -e)  failfast=true; shift;;
++    --debug | -d)  debug="--debug"; shift;;
+     --) shift; break;;
+     -*) usage ;;
+     *)  break;;	# terminate while loop
+-- 
+1.8.3.4 (Apple Git-47)
+

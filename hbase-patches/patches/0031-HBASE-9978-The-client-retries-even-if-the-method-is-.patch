@@ -1,0 +1,31 @@
+From 727779583053be4e5353f41e492399d41baa43ec Mon Sep 17 00:00:00 2001
+From: Matteo Bertozzi <mbertozzi@apache.org>
+Date: Mon, 2 Dec 2013 11:09:31 +0000
+Subject: [PATCH 31/35] HBASE-9978 The client retries even if the method is not
+ present on the server
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546962 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../src/main/java/org/apache/hadoop/hbase/ipc/RpcServer.java        | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/ipc/RpcServer.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/ipc/RpcServer.java
+index a7f3e34..85bfad9 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/ipc/RpcServer.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/ipc/RpcServer.java
+@@ -1722,6 +1722,12 @@ public class RpcServer implements RpcServerInterface {
+       } catch (Throwable t) {
+         String msg = "Unable to read call parameter from client " + getHostAddress();
+         LOG.warn(msg, t);
++
++        // If the method is not present on the server, do not retry.
++        if (t instanceof UnsupportedOperationException) {
++          t = new DoNotRetryIOException(t);
++        }
++
+         final Call readParamsFailedCall =
+           new Call(id, this.service, null, null, null, this,
+             responder, totalRequestSize, null);
+-- 
+1.8.3.4 (Apple Git-47)
+

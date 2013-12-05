@@ -1,0 +1,176 @@
+From b715f399c0647b0b104efa1261c074dee10599e6 Mon Sep 17 00:00:00 2001
+From: Lars Hofhansl <larsh@apache.org>
+Date: Thu, 28 Nov 2013 18:38:51 +0000
+Subject: [PATCH 27/35] HBASE-10057 TestRestoreFlushSnapshotFromClient and
+ TestRestoreSnapshotFromClient fail to finish occasionally
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546444 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../client/TestRestoreSnapshotFromClient.java      | 45 +++++++--------
+ .../TestRestoreFlushSnapshotFromClient.java        | 64 ++++++++--------------
+ 2 files changed, 45 insertions(+), 64 deletions(-)
+
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
+index d1c708f..6b118e2 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/client/TestRestoreSnapshotFromClient.java
+@@ -109,30 +109,27 @@ public class TestRestoreSnapshotFromClient {
+     admin.snapshot(emptySnapshot, tableName);
+ 
+     HTable table = new HTable(TEST_UTIL.getConfiguration(), tableName);
+-    try {
+-      // enable table and insert data
+-      admin.enableTable(tableName);
+-      SnapshotTestingUtils.loadData(TEST_UTIL, table, 500, FAMILY);
+-      snapshot0Rows = TEST_UTIL.countRows(table);
+-      admin.disableTable(tableName);
+-
+-      // take a snapshot
+-      admin.snapshot(snapshotName0, tableName);
+-
+-      // enable table and insert more data
+-      admin.enableTable(tableName);
+-      SnapshotTestingUtils.loadData(TEST_UTIL, table, 500, FAMILY);
+-      snapshot1Rows = TEST_UTIL.countRows(table);
+-      admin.disableTable(tableName);
+-
+-      // take a snapshot of the updated table
+-      admin.snapshot(snapshotName1, tableName);
+-
+-      // re-enable table
+-      admin.enableTable(tableName);
+-    } finally {
+-      table.close();
+-    }
++    // enable table and insert data
++    admin.enableTable(tableName);
++    SnapshotTestingUtils.loadData(TEST_UTIL, table, 500, FAMILY);
++    snapshot0Rows = TEST_UTIL.countRows(table);
++    admin.disableTable(tableName);
++
++    // take a snapshot
++    admin.snapshot(snapshotName0, tableName);
++
++    // enable table and insert more data
++    admin.enableTable(tableName);
++    SnapshotTestingUtils.loadData(TEST_UTIL, table, 500, FAMILY);
++    snapshot1Rows = TEST_UTIL.countRows(table);
++    admin.disableTable(tableName);
++
++    // take a snapshot of the updated table
++    admin.snapshot(snapshotName1, tableName);
++
++    // re-enable table
++    admin.enableTable(tableName);
++    table.close();
+   }
+ 
+   @After
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/snapshot/TestRestoreFlushSnapshotFromClient.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/snapshot/TestRestoreFlushSnapshotFromClient.java
+index 8f77a84..0ce15b6 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/snapshot/TestRestoreFlushSnapshotFromClient.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/snapshot/TestRestoreFlushSnapshotFromClient.java
+@@ -17,34 +17,22 @@
+  */
+ package org.apache.hadoop.hbase.snapshot;
+ 
+-import static org.junit.Assert.assertEquals;
+-import static org.junit.Assert.assertTrue;
+-
+ import java.io.IOException;
+-import java.util.List;
+ 
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+-import org.apache.hadoop.fs.Path;
+ import org.apache.hadoop.hbase.HBaseTestingUtility;
+-import org.apache.hadoop.hbase.HColumnDescriptor;
+ import org.apache.hadoop.hbase.HConstants;
+-import org.apache.hadoop.hbase.HTableDescriptor;
+ import org.apache.hadoop.hbase.LargeTests;
+ import org.apache.hadoop.hbase.TableName;
+ import org.apache.hadoop.hbase.client.HBaseAdmin;
+ import org.apache.hadoop.hbase.client.HTable;
+-import org.apache.hadoop.hbase.client.Put;
+-import org.apache.hadoop.hbase.client.Durability;
+ import org.apache.hadoop.hbase.master.MasterFileSystem;
+ import org.apache.hadoop.hbase.master.snapshot.SnapshotManager;
+ import org.apache.hadoop.hbase.protobuf.generated.HBaseProtos.SnapshotDescription;
+-import org.apache.hadoop.hbase.regionserver.HRegion;
+-import org.apache.hadoop.hbase.regionserver.HRegionServer;
+ import org.apache.hadoop.hbase.regionserver.snapshot.RegionServerSnapshotManager;
+ import org.apache.hadoop.hbase.util.Bytes;
+ import org.apache.hadoop.hbase.util.FSUtils;
+-import org.apache.hadoop.hbase.util.MD5Hash;
+ import org.junit.After;
+ import org.junit.AfterClass;
+ import org.junit.Before;
+@@ -65,7 +53,6 @@ public class TestRestoreFlushSnapshotFromClient {
+   private final static HBaseTestingUtility UTIL = new HBaseTestingUtility();
+ 
+   private final byte[] FAMILY = Bytes.toBytes("cf");
+-  private static final byte[] TEST_QUAL = Bytes.toBytes("q");
+ 
+   private byte[] snapshotName0;
+   private byte[] snapshotName1;
+@@ -115,33 +102,30 @@ public class TestRestoreFlushSnapshotFromClient {
+     // create Table and disable it
+     SnapshotTestingUtils.createTable(UTIL, tableName, FAMILY);
+     HTable table = new HTable(UTIL.getConfiguration(), tableName);
+-    try {
+-      SnapshotTestingUtils.loadData(UTIL, table, 500, FAMILY);
+-      snapshot0Rows = UTIL.countRows(table);
+-      LOG.info("=== before snapshot with 500 rows");
+-      logFSTree();
+-
+-      // take a snapshot
+-      admin.snapshot(Bytes.toString(snapshotName0), tableName,
+-          SnapshotDescription.Type.FLUSH);
+-
+-      LOG.info("=== after snapshot with 500 rows");
+-      logFSTree();
+-
+-      // insert more data
+-      SnapshotTestingUtils.loadData(UTIL, table, 500, FAMILY);
+-      snapshot1Rows = UTIL.countRows(table);
+-      LOG.info("=== before snapshot with 1000 rows");
+-      logFSTree();
+-
+-      // take a snapshot of the updated table
+-      admin.snapshot(Bytes.toString(snapshotName1), tableName,
+-          SnapshotDescription.Type.FLUSH);
+-      LOG.info("=== after snapshot with 1000 rows");
+-      logFSTree();
+-    } finally {
+-      table.close();
+-    }
++    SnapshotTestingUtils.loadData(UTIL, table, 500, FAMILY);
++    snapshot0Rows = UTIL.countRows(table);
++    LOG.info("=== before snapshot with 500 rows");
++    logFSTree();
++
++    // take a snapshot
++    admin.snapshot(Bytes.toString(snapshotName0), tableName,
++        SnapshotDescription.Type.FLUSH);
++
++    LOG.info("=== after snapshot with 500 rows");
++    logFSTree();
++
++    // insert more data
++    SnapshotTestingUtils.loadData(UTIL, table, 500, FAMILY);
++    snapshot1Rows = UTIL.countRows(table);
++    LOG.info("=== before snapshot with 1000 rows");
++    logFSTree();
++
++    // take a snapshot of the updated table
++    admin.snapshot(Bytes.toString(snapshotName1), tableName,
++        SnapshotDescription.Type.FLUSH);
++    LOG.info("=== after snapshot with 1000 rows");
++    logFSTree();
++    table.close();
+   }
+ 
+   @After
+-- 
+1.8.3.4 (Apple Git-47)
+

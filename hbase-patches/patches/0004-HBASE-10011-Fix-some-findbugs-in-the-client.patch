@@ -1,0 +1,182 @@
+From 243ea4dfcae58fa49c5272c4159b896b36149bf4 Mon Sep 17 00:00:00 2001
+From: Nicolas Liochon <nkeywal@apache.org>
+Date: Mon, 25 Nov 2013 10:23:15 +0000
+Subject: [PATCH 04/35] HBASE-10011 Fix some findbugs in the client
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545211 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../java/org/apache/hadoop/hbase/RegionLoad.java   | 36 +++++++++++-----------
+ .../hadoop/hbase/client/HTableMultiplexer.java     |  2 ++
+ .../org/apache/hadoop/hbase/client/Result.java     |  2 +-
+ .../apache/hadoop/hbase/client/RowMutations.java   |  6 ++++
+ .../hadoop/hbase/client/RpcRetryingCaller.java     |  4 +++
+ .../apache/hadoop/hbase/filter/NullComparator.java |  1 +
+ .../org/apache/hadoop/hbase/zookeeper/ZKUtil.java  |  5 +--
+ 7 files changed, 35 insertions(+), 21 deletions(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/RegionLoad.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/RegionLoad.java
+index 427ad0e..2fa45e4 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/RegionLoad.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/RegionLoad.java
+@@ -166,40 +166,40 @@ public class RegionLoad {
+   @Override
+   public String toString() {
+     StringBuilder sb = Strings.appendKeyValue(new StringBuilder(), "numberOfStores",
+-      Integer.valueOf(this.getStores()));
++        this.getStores());
+     sb = Strings.appendKeyValue(sb, "numberOfStorefiles",
+-      Integer.valueOf(this.getStorefiles()));
++        this.getStorefiles());
+     sb = Strings.appendKeyValue(sb, "storefileUncompressedSizeMB",
+-      Integer.valueOf(this.getStoreUncompressedSizeMB()));
++        this.getStoreUncompressedSizeMB());
+     sb = Strings.appendKeyValue(sb, "storefileSizeMB",
+-        Integer.valueOf(this.getStorefileSizeMB()));
++        this.getStorefileSizeMB());
+     if (this.getStoreUncompressedSizeMB() != 0) {
+       sb = Strings.appendKeyValue(sb, "compressionRatio",
+-          String.format("%.4f", (float)this.getStorefileSizeMB()/
+-              (float)this.getStoreUncompressedSizeMB()));
++          String.format("%.4f", (float) this.getStorefileSizeMB() /
++              (float) this.getStoreUncompressedSizeMB()));
+     }
+     sb = Strings.appendKeyValue(sb, "memstoreSizeMB",
+-      Integer.valueOf(this.getMemStoreSizeMB()));
++        this.getMemStoreSizeMB());
+     sb = Strings.appendKeyValue(sb, "storefileIndexSizeMB",
+-      Integer.valueOf(this.getStorefileIndexSizeMB()));
++        this.getStorefileIndexSizeMB());
+     sb = Strings.appendKeyValue(sb, "readRequestsCount",
+-        Long.valueOf(this.getReadRequestsCount()));
++        this.getReadRequestsCount());
+     sb = Strings.appendKeyValue(sb, "writeRequestsCount",
+-        Long.valueOf(this.getWriteRequestsCount()));
++        this.getWriteRequestsCount());
+     sb = Strings.appendKeyValue(sb, "rootIndexSizeKB",
+-        Integer.valueOf(this.getRootIndexSizeKB()));
++        this.getRootIndexSizeKB());
+     sb = Strings.appendKeyValue(sb, "totalStaticIndexSizeKB",
+-        Integer.valueOf(this.getTotalStaticIndexSizeKB()));
++        this.getTotalStaticIndexSizeKB());
+     sb = Strings.appendKeyValue(sb, "totalStaticBloomSizeKB",
+-      Integer.valueOf(this.getTotalStaticBloomSizeKB()));
++        this.getTotalStaticBloomSizeKB());
+     sb = Strings.appendKeyValue(sb, "totalCompactingKVs",
+-        Long.valueOf(this.getTotalCompactingKVs()));
++        this.getTotalCompactingKVs());
+     sb = Strings.appendKeyValue(sb, "currentCompactedKVs",
+-        Long.valueOf(this.getCurrentCompactedKVs()));
++        this.getCurrentCompactedKVs());
+     float compactionProgressPct = Float.NaN;
+-    if( this.getTotalCompactingKVs() > 0 ) {
+-      compactionProgressPct = Float.valueOf(
+-          this.getCurrentCompactedKVs() / this.getTotalCompactingKVs());
++    if (this.getTotalCompactingKVs() > 0) {
++      compactionProgressPct = ((float) this.getCurrentCompactedKVs() /
++          (float) this.getTotalCompactingKVs());
+     }
+     sb = Strings.appendKeyValue(sb, "compactionProgressPct",
+         compactionProgressPct);
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HTableMultiplexer.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HTableMultiplexer.java
+index 807bf37..480a139 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HTableMultiplexer.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/HTableMultiplexer.java
+@@ -463,6 +463,8 @@ public class HTableMultiplexer {
+     }
+ 
+     @Override
++    @edu.umd.cs.findbugs.annotations.SuppressWarnings
++        (value = "REC_CATCH_EXCEPTION", justification = "na")
+     public void run() {
+       List<PutStatus> processingList = new ArrayList<PutStatus>();
+       /** 
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Result.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Result.java
+index a4b3045..8abbcf7 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Result.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Result.java
+@@ -125,7 +125,7 @@ public class Result implements CellScannable {
+     if (exists != null){
+       return new Result(null, exists);
+     }
+-    return new Result(cells.toArray(new Cell[cells.size()]), exists);
++    return new Result(cells.toArray(new Cell[cells.size()]), null);
+   }
+ 
+   /**
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RowMutations.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RowMutations.java
+index 8a613c2..4054274 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RowMutations.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RowMutations.java
+@@ -19,6 +19,7 @@ package org.apache.hadoop.hbase.client;
+ 
+ import java.io.IOException;
+ import java.util.ArrayList;
++import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.List;
+ 
+@@ -98,6 +99,11 @@ public class RowMutations implements Row {
+   }
+ 
+   @Override
++  public int hashCode(){
++    return Arrays.hashCode(row);
++  }
++
++  @Override
+   public byte[] getRow() {
+     return row;
+   }
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCaller.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCaller.java
+index 46caf58..b27123a 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCaller.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/RpcRetryingCaller.java
+@@ -44,6 +44,8 @@ import com.google.protobuf.ServiceException;
+  * Dynamic rather than static so can set the generic appropriately.
+  */
+ @InterfaceAudience.Private
++@edu.umd.cs.findbugs.annotations.SuppressWarnings
++    (value = "IS2_INCONSISTENT_SYNC", justification = "na")
+ public class RpcRetryingCaller<T> {
+   static final Log LOG = LogFactory.getLog(RpcRetryingCaller.class);
+   /**
+@@ -102,6 +104,8 @@ public class RpcRetryingCaller<T> {
+    * @throws IOException if a remote or network exception occurs
+    * @throws RuntimeException other unspecified error
+    */
++  @edu.umd.cs.findbugs.annotations.SuppressWarnings
++      (value = "SWL_SLEEP_WITH_LOCK_HELD", justification = "na")
+   public synchronized T callWithRetries(RetryingCallable<T> callable, int callTimeout)
+   throws IOException, RuntimeException {
+     this.callTimeout = callTimeout;
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/filter/NullComparator.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/filter/NullComparator.java
+index a30f81a..6597294 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/filter/NullComparator.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/filter/NullComparator.java
+@@ -44,6 +44,7 @@ public class NullComparator extends ByteArrayComparable {
+   }
+ 
+   @Override
++  @edu.umd.cs.findbugs.annotations.SuppressWarnings (value="EQ_UNUSUAL", justification="")
+   public boolean equals(Object obj) {
+     return obj == null;
+   }
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/zookeeper/ZKUtil.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/zookeeper/ZKUtil.java
+index 8c29e1f..93a5515 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/zookeeper/ZKUtil.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/zookeeper/ZKUtil.java
+@@ -1938,8 +1938,9 @@ public class ZKUtil {
+     ZooKeeperProtos.StoreSequenceId.Builder storeSequenceIdBuilder =
+         ZooKeeperProtos.StoreSequenceId.newBuilder();
+     if (storeSequenceIds != null) {
+-      for (byte[] columnFamilyName : storeSequenceIds.keySet()) {
+-        Long curSeqId = storeSequenceIds.get(columnFamilyName);
++      for (Map.Entry<byte[], Long> e : storeSequenceIds.entrySet()){
++        byte[] columnFamilyName = e.getKey();
++        Long curSeqId = e.getValue();
+         storeSequenceIdBuilder.setFamilyName(ZeroCopyLiteralByteString.wrap(columnFamilyName));
+         storeSequenceIdBuilder.setSequenceId(curSeqId);
+         regionSequenceIdsBuilder.addStoreSequenceId(storeSequenceIdBuilder.build());
+-- 
+1.8.3.4 (Apple Git-47)
+

@@ -1,0 +1,42 @@
+From a43988e48c74e60907f8dfce1bd266adafca3735 Mon Sep 17 00:00:00 2001
+From: Zhihong Yu <tedyu@apache.org>
+Date: Wed, 27 Nov 2013 16:33:45 +0000
+Subject: [PATCH 19/35] HBASE-10046 Unmonitored HBase service could accumulate
+ Status objects and OOM
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546095 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../java/org/apache/hadoop/hbase/monitoring/TaskMonitor.java   | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/monitoring/TaskMonitor.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/monitoring/TaskMonitor.java
+index 728d89d..1281613 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/monitoring/TaskMonitor.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/monitoring/TaskMonitor.java
+@@ -73,8 +73,9 @@ public class TaskMonitor {
+         new Class<?>[] { MonitoredTask.class },
+         new PassthroughInvocationHandler<MonitoredTask>(stat));
+     TaskAndWeakRefPair pair = new TaskAndWeakRefPair(stat, proxy);
+-    synchronized (this) {
+-      tasks.add(pair);
++    tasks.add(pair);
++    if (tasks.size() > MAX_TASKS) {
++      purgeExpiredTasks();
+     }
+     return proxy;
+   }
+@@ -87,8 +88,9 @@ public class TaskMonitor {
+         new Class<?>[] { MonitoredRPCHandler.class },
+         new PassthroughInvocationHandler<MonitoredRPCHandler>(stat));
+     TaskAndWeakRefPair pair = new TaskAndWeakRefPair(stat, proxy);
+-    synchronized (this) {
+-      tasks.add(pair);
++    tasks.add(pair);
++    if (tasks.size() > MAX_TASKS) {
++      purgeExpiredTasks();
+     }
+     return proxy;
+   }
+-- 
+1.8.3.4 (Apple Git-47)
+

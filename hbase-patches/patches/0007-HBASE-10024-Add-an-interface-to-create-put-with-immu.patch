@@ -1,0 +1,293 @@
+From 43db2e9bbb0517e5ddaed46bb564349efb10f671 Mon Sep 17 00:00:00 2001
+From: Nicolas Liochon <nkeywal@apache.org>
+Date: Tue, 26 Nov 2013 10:56:52 +0000
+Subject: [PATCH 07/35] HBASE-10024 Add an interface to create put with
+ immutable arrays
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1545609 13f79535-47bb-0310-9956-ffa450edef68
+---
+ .../java/org/apache/hadoop/hbase/client/Put.java   | 44 +++++++++++++++++++++-
+ .../apache/hadoop/hbase/protobuf/ProtobufUtil.java |  4 +-
+ .../apache/hadoop/hbase/catalog/MetaEditor.java    | 18 +++++----
+ .../hbase/catalog/MetaMigrationConvertingToPB.java |  2 +-
+ .../hadoop/hbase/master/TableNamespaceManager.java |  2 +-
+ .../balancer/FavoredNodeAssignmentHelper.java      |  2 +-
+ .../hadoop/hbase/migration/NamespaceUpgrade.java   |  2 +-
+ .../org/apache/hadoop/hbase/rest/RowResource.java  |  6 +--
+ .../hbase/security/access/AccessControlLists.java  |  2 +-
+ .../hbase/regionserver/TestSplitLogWorker.java     |  5 +--
+ 12 files changed, 71 insertions(+), 26 deletions(-)
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Put.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Put.java
+index 57a2c07..0256966 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Put.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/client/Put.java
+@@ -135,6 +135,15 @@ public class Put extends Mutation implements HeapSize, Comparable<Row> {
+   }
+
+   /**
++   * See {@link #add(byte[], byte[], byte[])}. This version expects
++   * that the underlying arrays won't change. It's intended
++   * for usage internal HBase to and for advanced client applications.
++   */
++  public Put addImmutable(byte [] family, byte [] qualifier, byte [] value) {
++    return addImmutable(family, qualifier, this.ts, value);
++  }
++
++  /**
+    * Add the specified column and value, with the specified timestamp as
+    * its version to this Put operation.
+    * @param family family name
+@@ -150,6 +159,22 @@ public class Put extends Mutation implements HeapSize, Comparable<Row> {
+     List<Cell> list = getCellList(family);
+     KeyValue kv = createPutKeyValue(family, qualifier, ts, value);
+     list.add(kv);
++    familyMap.put(CellUtil.cloneFamily(kv), list);
++    return this;
++  }
++
++  /**
++   * See {@link #add(byte[], byte[], long, byte[])}. This version expects
++   * that the underlying arrays won't change. It's intended
++   * for usage internal HBase to and for advanced client applications.
++   */
++  public Put addImmutable(byte [] family, byte [] qualifier, long ts, byte [] value) {
++    if (ts < 0) {
++      throw new IllegalArgumentException("Timestamp cannot be negative. ts=" + ts);
++    }
++    List<Cell> list = getCellList(family);
++    KeyValue kv = createPutKeyValue(family, qualifier, ts, value);
++    list.add(kv);
+     familyMap.put(family, list);
+     return this;
+   }
+@@ -170,7 +195,24 @@ public class Put extends Mutation implements HeapSize, Comparable<Row> {
+     List<Cell> list = getCellList(family);
+     KeyValue kv = createPutKeyValue(family, qualifier, ts, value);
+     list.add(kv);
+-    familyMap.put(kv.getFamily(), list);
++    familyMap.put(CellUtil.cloneFamily(kv), list);
++    return this;
++  }
++
++  /**
++   * See {@link #add(byte[], ByteBuffer, long, ByteBuffer)}. This version expects
++   * that the underlying arrays won't change. It's intended
++   * for usage internal HBase to and for advanced client applications.
++   */
++  @SuppressWarnings("unchecked")
++  public Put addImmutable(byte[] family, ByteBuffer qualifier, long ts, ByteBuffer value) {
++    if (ts < 0) {
++      throw new IllegalArgumentException("Timestamp cannot be negative. ts=" + ts);
++    }
++    List<Cell> list = getCellList(family);
++    KeyValue kv = createPutKeyValue(family, qualifier, ts, value);
++    list.add(kv);
++    familyMap.put(family, list);
+     return this;
+   }
+
+diff --git a/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java b/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
+index c4bf50c..f285dde 100644
+--- a/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
++++ b/hbase-client/src/main/java/org/apache/hadoop/hbase/protobuf/ProtobufUtil.java
+@@ -500,7 +500,7 @@ public final class ProtobufUtil {
+         if (put == null) {
+           put = new Put(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength(), timestamp);
+         }
+-        put.add(KeyValueUtil.ensureKeyValue(cell));
++        put.add(cell);
+       }
+     } else {
+       if (proto.hasRow()) {
+@@ -524,7 +524,7 @@ public final class ProtobufUtil {
+           if (qv.hasTimestamp()) {
+             ts = qv.getTimestamp();
+           }
+-          put.add(family, qualifier, ts, value);
++          put.addImmutable(family, qualifier, ts, value);
+         }
+       }
+     }
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaEditor.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaEditor.java
+index 93be297..f564c6d 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaEditor.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaEditor.java
+@@ -84,10 +84,12 @@ public class MetaEditor {
+    */
+   public static Put addDaughtersToPut(Put put, HRegionInfo splitA, HRegionInfo splitB) {
+     if (splitA != null) {
+-      put.add(HConstants.CATALOG_FAMILY, HConstants.SPLITA_QUALIFIER, splitA.toByteArray());
++      put.addImmutable(
++          HConstants.CATALOG_FAMILY, HConstants.SPLITA_QUALIFIER, splitA.toByteArray());
+     }
+     if (splitB != null) {
+-      put.add(HConstants.CATALOG_FAMILY, HConstants.SPLITB_QUALIFIER, splitB.toByteArray());
++      put.addImmutable(
++          HConstants.CATALOG_FAMILY, HConstants.SPLITB_QUALIFIER, splitB.toByteArray());
+     }
+     return put;
+   }
+@@ -315,9 +317,9 @@ public class MetaEditor {
+
+       // Put for parent
+       Put putOfMerged = makePutFromRegionInfo(copyOfMerged);
+-      putOfMerged.add(HConstants.CATALOG_FAMILY, HConstants.MERGEA_QUALIFIER,
++      putOfMerged.addImmutable(HConstants.CATALOG_FAMILY, HConstants.MERGEA_QUALIFIER,
+           regionA.toByteArray());
+-      putOfMerged.add(HConstants.CATALOG_FAMILY, HConstants.MERGEB_QUALIFIER,
++      putOfMerged.addImmutable(HConstants.CATALOG_FAMILY, HConstants.MERGEB_QUALIFIER,
+           regionB.toByteArray());
+
+       // Deletes for merging regions
+@@ -561,17 +563,17 @@ public class MetaEditor {
+
+   private static Put addRegionInfo(final Put p, final HRegionInfo hri)
+   throws IOException {
+-    p.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER,
++    p.addImmutable(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER,
+         hri.toByteArray());
+     return p;
+   }
+
+   private static Put addLocation(final Put p, final ServerName sn, long openSeqNum) {
+-    p.add(HConstants.CATALOG_FAMILY, HConstants.SERVER_QUALIFIER,
++    p.addImmutable(HConstants.CATALOG_FAMILY, HConstants.SERVER_QUALIFIER,
+       Bytes.toBytes(sn.getHostAndPort()));
+-    p.add(HConstants.CATALOG_FAMILY, HConstants.STARTCODE_QUALIFIER,
++    p.addImmutable(HConstants.CATALOG_FAMILY, HConstants.STARTCODE_QUALIFIER,
+       Bytes.toBytes(sn.getStartcode()));
+-    p.add(HConstants.CATALOG_FAMILY, HConstants.SEQNUM_QUALIFIER,
++    p.addImmutable(HConstants.CATALOG_FAMILY, HConstants.SEQNUM_QUALIFIER,
+         Bytes.toBytes(openSeqNum));
+     return p;
+   }
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaMigrationConvertingToPB.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaMigrationConvertingToPB.java
+index efe1204..f623c4b 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaMigrationConvertingToPB.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/catalog/MetaMigrationConvertingToPB.java
+@@ -91,7 +91,7 @@ public class MetaMigrationConvertingToPB {
+       //This will 'migrate' the HRI from 092.x and 0.94.x to 0.96+ by reading the
+       //writable serialization
+       HRegionInfo hri = parseFrom(hriSplitBytes);
+-      p.add(HConstants.CATALOG_FAMILY, which, hri.toByteArray());
++      p.addImmutable(HConstants.CATALOG_FAMILY, which, hri.toByteArray());
+     }
+   }
+
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/master/TableNamespaceManager.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/master/TableNamespaceManager.java
+index e7b8080..ae81a4d 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/master/TableNamespaceManager.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/master/TableNamespaceManager.java
+@@ -154,7 +154,7 @@ public class TableNamespaceManager {
+
+   private void upsert(HTable table, NamespaceDescriptor ns) throws IOException {
+     Put p = new Put(Bytes.toBytes(ns.getName()));
+-    p.add(HTableDescriptor.NAMESPACE_FAMILY_INFO_BYTES,
++    p.addImmutable(HTableDescriptor.NAMESPACE_FAMILY_INFO_BYTES,
+         HTableDescriptor.NAMESPACE_COL_DESC_BYTES,
+         ProtobufUtil.toProtoNamespaceDescriptor(ns).toByteArray());
+     table.put(p);
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/FavoredNodeAssignmentHelper.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/FavoredNodeAssignmentHelper.java
+index 7b2e598..bcc139a 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/FavoredNodeAssignmentHelper.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/FavoredNodeAssignmentHelper.java
+@@ -143,7 +143,7 @@ public class FavoredNodeAssignmentHelper {
+     if (favoredNodeList != null) {
+       put = MetaEditor.makePutFromRegionInfo(regionInfo);
+       byte[] favoredNodes = getFavoredNodes(favoredNodeList);
+-      put.add(HConstants.CATALOG_FAMILY, FAVOREDNODES_QUALIFIER,
++      put.addImmutable(HConstants.CATALOG_FAMILY, FAVOREDNODES_QUALIFIER,
+           EnvironmentEdgeManager.currentTimeMillis(), favoredNodes);
+       LOG.info("Create the region " + regionInfo.getRegionNameAsString() +
+           " with favored nodes " + favoredNodes);
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/migration/NamespaceUpgrade.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/migration/NamespaceUpgrade.java
+index 8c08a3e..616bada 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/migration/NamespaceUpgrade.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/migration/NamespaceUpgrade.java
+@@ -462,7 +462,7 @@ public class NamespaceUpgrade implements Tool {
+     // create a put for new _acl_ entry with rowkey as hbase:acl
+     Put p = new Put(AccessControlLists.ACL_GLOBAL_NAME);
+     for (Cell c : r.rawCells()) {
+-      p.add(CellUtil.cloneFamily(c), CellUtil.cloneQualifier(c), CellUtil.cloneValue(c));
++      p.addImmutable(CellUtil.cloneFamily(c), CellUtil.cloneQualifier(c), CellUtil.cloneValue(c));
+     }
+     region.put(p);
+     // delete the old entry
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/RowResource.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/RowResource.java
+index f3fc679..cf8c25f 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/RowResource.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/rest/RowResource.java
+@@ -224,7 +224,7 @@ public class RowResource extends ResourceBase {
+               .type(MIMETYPE_TEXT).entity("Bad request" + CRLF)
+               .build();
+           }
+-          put.add(parts[0], parts[1], cell.getTimestamp(), cell.getValue());
++          put.addImmutable(parts[0], parts[1], cell.getTimestamp(), cell.getValue());
+         }
+         puts.add(put);
+         if (LOG.isDebugEnabled()) {
+@@ -293,7 +293,7 @@ public class RowResource extends ResourceBase {
+           .type(MIMETYPE_TEXT).entity("Bad request" + CRLF)
+           .build();
+       }
+-      put.add(parts[0], parts[1], timestamp, message);
++      put.addImmutable(parts[0], parts[1], timestamp, message);
+       table = servlet.getTable(tableResource.getName());
+       table.put(put);
+       if (LOG.isDebugEnabled()) {
+@@ -471,7 +471,7 @@ public class RowResource extends ResourceBase {
+           .type(MIMETYPE_TEXT).entity("Bad request" + CRLF)
+           .build();
+       }
+-      put.add(valueToPutParts[0], valueToPutParts[1], valueToPutCell
++      put.addImmutable(valueToPutParts[0], valueToPutParts[1], valueToPutCell
+         .getTimestamp(), valueToPutCell.getValue());
+
+       table = servlet.getTable(this.tableResource.getName());
+diff --git a/hbase-server/src/main/java/org/apache/hadoop/hbase/security/access/AccessControlLists.java b/hbase-server/src/main/java/org/apache/hadoop/hbase/security/access/AccessControlLists.java
+index 2dc23b2..0d60548 100644
+--- a/hbase-server/src/main/java/org/apache/hadoop/hbase/security/access/AccessControlLists.java
++++ b/hbase-server/src/main/java/org/apache/hadoop/hbase/security/access/AccessControlLists.java
+@@ -157,7 +157,7 @@ public class AccessControlLists {
+     for (int i = 0; i < actions.length; i++) {
+       value[i] = actions[i].code();
+     }
+-    p.add(ACL_LIST_FAMILY, key, value);
++    p.addImmutable(ACL_LIST_FAMILY, key, value);
+     if (LOG.isDebugEnabled()) {
+       LOG.debug("Writing permission with rowKey "+
+           Bytes.toString(rowKey)+" "+
+diff --git a/hbase-server/src/test/java/org/apache/hadoop/hbase/regionserver/TestSplitLogWorker.java b/hbase-server/src/test/java/org/apache/hadoop/hbase/regionserver/TestSplitLogWorker.java
+index ad816f9..ef56d0c 100644
+--- a/hbase-server/src/test/java/org/apache/hadoop/hbase/regionserver/TestSplitLogWorker.java
++++ b/hbase-server/src/test/java/org/apache/hadoop/hbase/regionserver/TestSplitLogWorker.java
+@@ -32,7 +32,6 @@ import org.apache.hadoop.conf.Configuration;
+ import org.apache.hadoop.hbase.HBaseConfiguration;
+ import org.apache.hadoop.hbase.HBaseTestingUtility;
+ import org.apache.hadoop.hbase.MediumTests;
+-import org.apache.hadoop.hbase.Server;
+ import org.apache.hadoop.hbase.ServerName;
+ import org.apache.hadoop.hbase.SplitLogCounters;
+ import org.apache.hadoop.hbase.SplitLogTask;
+@@ -357,7 +356,7 @@ public class TestSplitLogWorker {
+     SplitLogWorker slw = new SplitLogWorker(zkw, testConf, mockedRS, neverEndingTask);
+     slw.start();
+     try {
+-      waitForCounter(SplitLogCounters.tot_wkr_task_acquired, 0, maxTasks, 3000);
++      waitForCounter(SplitLogCounters.tot_wkr_task_acquired, 0, maxTasks, 6000);
+       for (int i = 0; i < maxTasks; i++) {
+         byte[] bytes = ZKUtil.getData(zkw, ZKSplitLog.getEncodedNodeName(zkw, TATAS + i));
+         SplitLogTask slt = SplitLogTask.parseFrom(bytes);
+@@ -402,7 +401,7 @@ public class TestSplitLogWorker {
+     slw.start();
+     try {
+       int acquiredTasks = 0;
+-      waitForCounter(SplitLogCounters.tot_wkr_task_acquired, 0, 2, 3000);
++      waitForCounter(SplitLogCounters.tot_wkr_task_acquired, 0, 2, 6000);
+       for (int i = 0; i < maxTasks; i++) {
+         byte[] bytes = ZKUtil.getData(zkw, ZKSplitLog.getEncodedNodeName(zkw, TATAS + i));
+         SplitLogTask slt = SplitLogTask.parseFrom(bytes);
+--
+1.8.3.4 (Apple Git-47)
+

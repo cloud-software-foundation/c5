@@ -1,0 +1,30 @@
+From 5af0a60efed91ac2084f25f13edb21db0f510e7c Mon Sep 17 00:00:00 2001
+From: Andrew Kyle Purtell <apurtell@apache.org>
+Date: Mon, 2 Dec 2013 04:34:57 +0000
+Subject: [PATCH 30/35] HBASE-9718. Add a test scope dependency on
+ org.slf4j:slf4j-api to hbase-client
+
+git-svn-id: https://svn.apache.org/repos/asf/hbase/branches/0.96@1546893 13f79535-47bb-0310-9956-ffa450edef68
+---
+ hbase-client/pom.xml | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hbase-client/pom.xml b/hbase-client/pom.xml
+index 88cb336..af974f1 100644
+--- a/hbase-client/pom.xml
++++ b/hbase-client/pom.xml
+@@ -135,6 +135,11 @@
+       <artifactId>log4j</artifactId>
+       <scope>test</scope>
+     </dependency>
++    <dependency>
++      <groupId>org.slf4j</groupId>
++      <artifactId>slf4j-api</artifactId>
++      <scope>test</scope>
++    </dependency>
+   </dependencies>
+ 
+   <profiles>
+-- 
+1.8.3.4 (Apple Git-47)
+
