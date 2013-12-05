@@ -21,9 +21,9 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>parent</artifactId>
-    <groupId>ohmdb</groupId>
-    <version>0.1-SNAPSHOT</version>
+      <groupId>ohmdb</groupId>
+      <artifactId>parent</artifactId>
+      <version>0.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>hbase-common</artifactId>
