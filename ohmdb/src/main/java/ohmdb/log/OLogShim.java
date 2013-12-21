@@ -195,7 +195,11 @@ public class OLogShim implements Syncable, HLog {
     }
 
     @Override
-    public long appendNoSync(HRegionInfo info, TableName tableName, WALEdit edits, List<UUID> clusterIds, long now, HTableDescriptor htd) throws IOException {
+    public long appendNoSync(HRegionInfo info,
+                             TableName tableName,
+                             WALEdit edits, List<UUID> clusterIds,
+                             long now,
+                             HTableDescriptor htd) throws IOException {
         //ReplicatorInstance replicator = getReplicator(info);
 
         for (KeyValue edit : edits.getKeyValues()) {

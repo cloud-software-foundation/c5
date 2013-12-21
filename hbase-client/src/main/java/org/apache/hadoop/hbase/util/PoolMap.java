@@ -18,6 +18,8 @@
  */
 package org.apache.hadoop.hbase.util;
 
+import org.apache.hadoop.classification.InterfaceAudience;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,8 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.hadoop.classification.InterfaceAudience;
 
 /**
  *
@@ -93,11 +93,13 @@ public class PoolMap<K, V> implements Map<K, V> {
     return null;
   }
 
-  public boolean remove(K key, V value) {
+    @SuppressWarnings("unchecked")
+    @Override
+  public boolean remove(Object key, Object value) {
     Pool<V> pool = pools.get(key);
     boolean res = false;
     if (pool != null) {
-      res = pool.remove(value);
+      res = pool.remove((V) value);
       if (res && pool.size() == 0) {
         pools.remove(key);
       }
