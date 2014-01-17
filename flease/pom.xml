@@ -7,7 +7,7 @@
 
 
   <parent>
-    <groupId>ohmdb</groupId>
+    <groupId>c5db</groupId>
     <artifactId>parent</artifactId>
     <version>1</version>
   </parent>

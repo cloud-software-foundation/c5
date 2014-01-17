@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ohmdb</groupId>
+        <groupId>c5db</groupId>
         <artifactId>parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ohmdb</artifactId>
+    <artifactId>c5db</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <!--<properties>
@@ -110,7 +110,7 @@
         </dependency>
 
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-server</artifactId>
         </dependency>
         <dependency>
@@ -154,8 +154,8 @@
             <version>0.2.10</version>
         </dependency>
         <dependency>
-            <groupId>ohmdb</groupId>
-            <artifactId>ohmdb-client</artifactId>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-client</artifactId>
         </dependency>
         <dependency>
             <groupId>net.jpountz.lz4</groupId>
