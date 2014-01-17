@@ -38,7 +38,7 @@
 
 // This file contains protocol buffers that are shared throughout HBase
 
-option java_package = "ohmdb.client.generated";
+option java_package = "c5db.client.generated";
 option java_outer_classname = "HBaseProtos";
 option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
