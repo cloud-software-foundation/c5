@@ -46,27 +46,27 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class OhmTable extends OhmShim implements AutoCloseable {
-    private final OhmConnectionManager ohmConnectionManager
-            = OhmConnectionManager.INSTANCE;
+public class C5Table extends C5Shim implements AutoCloseable {
+    private final C5ConnectionManager c5ConnectionManager
+            = C5ConnectionManager.INSTANCE;
     private final ClientScannerManager clientScannerManager
             = ClientScannerManager.INSTANCE;
     private RequestHandler handler;
     private AtomicLong commandId = new AtomicLong(0);
     private Channel channel;
 
-    public OhmTable(ByteString tableName) throws IOException, InterruptedException {
-        this(tableName, OhmConstants.TEST_PORT);
+    public C5Table(ByteString tableName) throws IOException, InterruptedException {
+        this(tableName, C5Constants.TEST_PORT);
     }
     /**
-     * OhmTable is the main entry points for clients of OhmDB
+     * C5Table is the main entry points for clients of C5DB
      *
      * @param tableName The name of the table to connect to.
      */
-    public OhmTable(ByteString tableName, int port) throws IOException, InterruptedException {
+    public C5Table(ByteString tableName, int port) throws IOException, InterruptedException {
         super(tableName);
 
-        channel = ohmConnectionManager.getOrCreateChannel("localhost", port);
+        channel = c5ConnectionManager.getOrCreateChannel("localhost", port);
 
         handler = channel
                 .pipeline()
@@ -143,7 +143,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
         ClientProtos.ScanRequest scanRequest = ClientProtos.ScanRequest.newBuilder()
                 .setScan(ProtobufUtil.toScan(scan))
                 .setRegion(regionSpecifier)
-                .setNumberOfRows(OhmConstants.DEFAULT_INIT_SCAN)
+                .setNumberOfRows(C5Constants.DEFAULT_INIT_SCAN)
                 .build();
 
         ClientProtos.Call call = ClientProtos.Call.newBuilder()
@@ -277,7 +277,7 @@ public class OhmTable extends OhmShim implements AutoCloseable {
     public void close() throws IOException {
         //Currently if not called then we can't close the jvm.
         try {
-            ohmConnectionManager.close();
+            c5ConnectionManager.close();
         } catch (InterruptedException e) {
             throw new IOException(e);
         }

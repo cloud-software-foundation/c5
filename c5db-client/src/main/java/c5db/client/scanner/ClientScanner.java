@@ -40,8 +40,8 @@
 package c5db.client.scanner;
 
 import c5db.ProtobufUtil;
-import c5db.client.OhmConnectionManager;
-import c5db.client.OhmConstants;
+import c5db.client.C5ConnectionManager;
+import c5db.client.C5Constants;
 import c5db.client.RequestHandler;
 import c5db.client.generated.ClientProtos;
 import c5db.client.generated.HBaseProtos;
@@ -62,12 +62,12 @@ public class ClientScanner extends AbstractClientScanner {
   private final Channel ch;
   private final long scannerId;
   private final WickedQueue<ClientProtos.Result>
-      scanResults = new WickedQueue<>(OhmConstants.MAX_CACHE_SZ);
+      scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private boolean isClosed = true;
-  private final OhmConnectionManager ohmConnectionManager
-      = OhmConnectionManager.INSTANCE;
-  private int outStandingRequests = OhmConstants.DEFAULT_INIT_SCAN;
-  private int requestSize = OhmConstants.DEFAULT_INIT_SCAN;
+  private final C5ConnectionManager c5ConnectionManager
+      = C5ConnectionManager.INSTANCE;
+  private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
+  private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
 
   /**
    * Create a new ClientScanner for the specified table
@@ -76,10 +76,10 @@ public class ClientScanner extends AbstractClientScanner {
    * @throws IOException
    */
   public ClientScanner(final long scannerId) throws IOException {
-    OhmConnectionManager ohmConnectionManager = OhmConnectionManager.INSTANCE;
+    C5ConnectionManager c5ConnectionManager = C5ConnectionManager.INSTANCE;
     try {
-      ch = ohmConnectionManager.getOrCreateChannel("localhost",
-          OhmConstants.TEST_PORT);
+      ch = c5ConnectionManager.getOrCreateChannel("localhost",
+          C5Constants.TEST_PORT);
     } catch (InterruptedException e) {
       throw new IOException(e);
     }
@@ -103,13 +103,13 @@ public class ClientScanner extends AbstractClientScanner {
       if (!this.isClosed) {
         // If we don't have enough pending outstanding increase our rate
         if (this.outStandingRequests < .5 * requestSize) {
-          if (requestSize < OhmConstants.MAX_REQUEST_SIZE) {
+          if (requestSize < C5Constants.MAX_REQUEST_SIZE) {
             requestSize = requestSize * 2;
             System.out.println("increasing requestSize:" + requestSize);
             System.out.flush();
           }
         }
-        int queueSpace = OhmConstants.MAX_CACHE_SZ - this.scanResults.size();
+        int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
 
         // If we have plenty of room for another request
         if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
@@ -145,8 +145,8 @@ public class ClientScanner extends AbstractClientScanner {
         .build();
 
     try {
-      Channel channel = ohmConnectionManager
-          .getOrCreateChannel("localhost", OhmConstants.TEST_PORT);
+      Channel channel = c5ConnectionManager
+          .getOrCreateChannel("localhost", C5Constants.TEST_PORT);
       this.outStandingRequests += requestSize;
       channel.write(call);
 

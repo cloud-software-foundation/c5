@@ -19,7 +19,6 @@
  */
 package c5db.client;
 
-import c5db.client.OhmTable;
 import com.google.protobuf.ByteString;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -30,10 +29,10 @@ import java.io.IOException;
 
 public class TestScanner {
   ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
-  OhmTable table;
+  C5Table table;
 
   public TestScanner() throws IOException, InterruptedException {
-    table = new OhmTable(tableName);
+    table = new C5Table(tableName);
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {
