@@ -41,7 +41,7 @@ public class TestInOrderScan {
   }
 
   public void compareToHBaseScan() throws IOException, InterruptedException {
-    OhmTable table = new OhmTable(tableName);
+    C5Table table = new C5Table(tableName);
 
     Result result = null;
     ResultScanner scanner;

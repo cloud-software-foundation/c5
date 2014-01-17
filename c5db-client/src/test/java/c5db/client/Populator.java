@@ -39,7 +39,7 @@ public class Populator {
           return;
       }
       int port = Integer.parseInt(args[0]);
-      try (OhmTable table = new OhmTable(tableName, port)) {
+      try (C5Table table = new C5Table(tableName, port)) {
 
           long start = System.currentTimeMillis();
 

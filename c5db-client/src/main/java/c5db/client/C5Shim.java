@@ -31,15 +31,15 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import java.io.IOException;
 import java.util.List;
 
-public abstract class OhmShim implements TableInterface {
+public abstract class C5Shim implements TableInterface {
   private final byte[] tableName;
 
   /**
-   * OhmTable is the main entry points for clients of OhmDB
+   * C5Table is the main entry points for clients of C5DB
    *
    * @param tableName
    */
-  OhmShim(final ByteString tableName) {
+  C5Shim(final ByteString tableName) {
     this.tableName = tableName.toByteArray();
   }
 

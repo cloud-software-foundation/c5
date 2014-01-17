@@ -35,14 +35,14 @@ import java.util.List;
 public class TestMultiUtil {
 
   ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
-  OhmTable table;
+  C5Table table;
   byte[] row = Bytes.toBytes("multiRow");
   byte[] cf = Bytes.toBytes("cf");
   byte[] cq = Bytes.toBytes("cq");
   byte[] value = Bytes.toBytes("value");
 
   public TestMultiUtil() throws IOException, InterruptedException {
-    table = new OhmTable(tableName);
+    table = new C5Table(tableName);
   }
 
   public static void main(String[] args) throws IOException, InterruptedException {

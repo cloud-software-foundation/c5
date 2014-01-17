@@ -49,7 +49,7 @@ public class CompareToHBase {
   }
 
   public void compareToHBaseScan() throws IOException, InterruptedException {
-    OhmTable table = new OhmTable(tableName);
+    C5Table table = new C5Table(tableName);
 
     long As, Ae, Bs, Be;
     int i = 0;
