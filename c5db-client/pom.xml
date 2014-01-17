@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ohmdb</groupId>
+        <groupId>c5db</groupId>
         <artifactId>parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>ohmdb-client</artifactId>
+    <artifactId>c5db-client</artifactId>
     <properties>
         <log4j.version>1.2.16</log4j.version>
         <surefire.version>2.12</surefire.version>
@@ -84,14 +84,14 @@
         </dependency>-->
 
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-common</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-server</artifactId>
         </dependency>
         <dependency>
@@ -120,7 +120,7 @@
             <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-client</artifactId>
         </dependency>
     </dependencies>
