@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public enum OhmConnectionManager {
+public enum C5ConnectionManager {
   INSTANCE;
 
   private final EventLoopGroup group = new NioEventLoopGroup();
@@ -36,7 +36,7 @@ public enum OhmConnectionManager {
       new ConcurrentHashMap<>();
   private final Bootstrap bootstrap = new Bootstrap();
 
-  OhmConnectionManager() {
+  C5ConnectionManager() {
     bootstrap.group(group)
         .channel(NioSocketChannel.class)
         .handler(new RequestInitializer());

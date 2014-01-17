@@ -19,7 +19,6 @@
  */
 package c5db.client;
 
-import c5db.client.OhmTable;
 import com.google.protobuf.ByteString;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -35,7 +34,7 @@ import java.util.List;
 
 public class TestingUtil {
   ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
-  OhmTable table;
+  C5Table table;
   HTable hTable;
 
   byte[] row = Bytes.toBytes("startRow");
@@ -46,7 +45,7 @@ public class TestingUtil {
   byte[] value = Bytes.toBytes("value");
 
   public TestingUtil() throws IOException, InterruptedException {
-    table = new OhmTable(tableName);
+    table = new C5Table(tableName);
   }
 
   void close() throws IOException {

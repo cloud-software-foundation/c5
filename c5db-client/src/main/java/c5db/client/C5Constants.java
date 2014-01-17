@@ -20,7 +20,7 @@
 
 package c5db.client;
 
-public class OhmConstants {
+public class C5Constants {
   public static final long FLUSH_PERIOD = 30000;
 
   public static final int DEFAULT_INIT_SCAN = 100;
