@@ -20,7 +20,7 @@ limitations under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>parent</artifactId>
-    <groupId>ohmdb</groupId>
+    <groupId>c5db</groupId>
     <version>0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
@@ -75,11 +75,11 @@ limitations under the License.
 
     <dependencies>
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-hadoop-compat</artifactId>
         </dependency>
         <dependency>
-            <groupId>ohmdb</groupId>
+            <groupId>c5db</groupId>
             <artifactId>hbase-hadoop-compat</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>

@@ -21,7 +21,7 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>parent</artifactId>
       <version>0.1-SNAPSHOT</version>
       <relativePath>..</relativePath>
@@ -277,24 +277,24 @@
   <dependencies>
     <!-- Intra-project dependencies -->
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-protocol</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-prefix-tree</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-common</artifactId>
       <type>test-jar</type>
     </dependency>
@@ -307,22 +307,22 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>

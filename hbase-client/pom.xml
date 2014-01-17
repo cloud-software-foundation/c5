@@ -22,7 +22,7 @@
   -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>parent</artifactId>
       <version>0.1-SNAPSHOT</version>
       <relativePath>..</relativePath>
@@ -77,16 +77,16 @@
   <dependencies>
     <!-- Intra-project dependencies -->
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-common</artifactId>
       <type>test-jar</type>
     </dependency>
     <dependency>
-      <groupId>ohmdb</groupId>
+      <groupId>c5db</groupId>
       <artifactId>hbase-protocol</artifactId>
     </dependency>
     <!-- General dependencies -->
