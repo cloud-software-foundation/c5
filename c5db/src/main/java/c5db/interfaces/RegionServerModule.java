@@ -23,7 +23,7 @@ import c5db.messages.generated.ControlMessages;
  */
 @DependsOn(TabletModule.class)
 @ModuleTypeBinding(ControlMessages.ModuleType.RegionServer)
-public interface RegionServerModule extends OhmModule {
+public interface RegionServerModule extends C5Module {
 
 
 }

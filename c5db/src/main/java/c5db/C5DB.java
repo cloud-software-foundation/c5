@@ -17,8 +17,8 @@
 package c5db;
 
 import c5db.discovery.BeaconService;
-import c5db.interfaces.OhmModule;
-import c5db.interfaces.OhmServer;
+import c5db.interfaces.C5Module;
+import c5db.interfaces.C5Server;
 import c5db.log.LogService;
 import c5db.regionserver.RegionServerService;
 import c5db.replication.ReplicatorService;
@@ -66,11 +66,11 @@ import static c5db.messages.generated.ControlMessages.StopModule;
  *
  * To shut down the 'server' module is to shut down the server.
  */
-public class OhmDB extends AbstractService implements OhmServer {
-    private static final Logger LOG = LoggerFactory.getLogger(OhmDB.class);
+public class C5DB extends AbstractService implements C5Server {
+    private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
 
     public static void main(String[] args) throws Exception {
-        String cfgPath = "/tmp/ryan/ohmdb-" + System.currentTimeMillis();
+        String cfgPath = "/tmp/ryan/c5-" + System.currentTimeMillis();
 
         if (args.length > 0) {
             cfgPath = args[0];
@@ -86,7 +86,7 @@ public class OhmDB extends AbstractService implements OhmServer {
             cfgDir.setClusterNameFile(args[2]);
         }
 
-        instance = new OhmDB(cfgDir);
+        instance = new C5DB(cfgDir);
         instance.start();
 
         Random rnd = new Random();
@@ -129,10 +129,10 @@ public class OhmDB extends AbstractService implements OhmServer {
         instance.getCommandChannel().publish(startRegionServer);
     }
 
-    private static OhmServer instance = null;
+    private static C5Server instance = null;
 
 
-    public OhmDB(ConfigDirectory configDirectory) throws IOException {
+    public C5DB(ConfigDirectory configDirectory) throws IOException {
         this.configDirectory = configDirectory;
 
         String data = configDirectory.getNodeId();
@@ -164,7 +164,7 @@ public class OhmDB extends AbstractService implements OhmServer {
      * Returns the server, but it will be null if you aren't running inside one.
      * @return
      */
-    public static OhmServer getServer() {
+    public static C5Server getServer() {
         return instance;
     }
 
@@ -174,8 +174,8 @@ public class OhmDB extends AbstractService implements OhmServer {
     }
 
     @Override
-    public ListenableFuture<OhmModule> getModule(final ModuleType moduleType) {
-        final SettableFuture<OhmModule> future = SettableFuture.create();
+    public ListenableFuture<C5Module> getModule(final ModuleType moduleType) {
+        final SettableFuture<C5Module> future = SettableFuture.create();
         serverFiber.execute(new Runnable() {
             @Override
             public void run() {
@@ -207,8 +207,8 @@ public class OhmDB extends AbstractService implements OhmServer {
     }
 
     @Override
-    public ImmutableMap<ModuleType, OhmModule> getModules() throws ExecutionException, InterruptedException {
-        final SettableFuture<ImmutableMap<ModuleType, OhmModule>> future = SettableFuture.create();
+    public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
+        final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
         serverFiber.execute(new Runnable() {
             @Override
             public void run() {
@@ -218,8 +218,8 @@ public class OhmDB extends AbstractService implements OhmServer {
         return future.get();
     }
     @Override
-    public ListenableFuture<ImmutableMap<ModuleType, OhmModule>> getModules2() {
-        final SettableFuture<ImmutableMap<ModuleType, OhmModule>> future = SettableFuture.create();
+    public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
+        final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
         serverFiber.execute(new Runnable() {
             @Override
             public void run() {
@@ -236,7 +236,7 @@ public class OhmDB extends AbstractService implements OhmServer {
     private final ConfigDirectory configDirectory;
 
     // The mapping between module name and the instance.
-    private final Map<ModuleType, OhmModule> moduleRegistry = new HashMap<>();
+    private final Map<ModuleType, C5Module> moduleRegistry = new HashMap<>();
 
      private final long nodeId;
 
@@ -331,9 +331,9 @@ public class OhmDB extends AbstractService implements OhmServer {
     }
 
     private class ModuleListenerPublisher implements Listener {
-        private final OhmModule module;
+        private final C5Module module;
 
-        private ModuleListenerPublisher(OhmModule module) {
+        private ModuleListenerPublisher(C5Module module) {
             this.module = module;
         }
 
@@ -391,29 +391,29 @@ public class OhmDB extends AbstractService implements OhmServer {
                     l.put(name, moduleRegistry.get(name).port());
                 }
 
-                OhmModule module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
+                C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
                 startServiceModule(module);
                 break;
             }
             case Replication: {
-                OhmModule module = new ReplicatorService(fiberPool, bossGroup, workerGroup, modulePort, this);
+                C5Module module = new ReplicatorService(fiberPool, bossGroup, workerGroup, modulePort, this);
                 startServiceModule(module);
                 break;
             }
             case Log: {
-                OhmModule module = new LogService(this);
+                C5Module module = new LogService(this);
                 startServiceModule(module);
 
                 break;
             }
             case Tablet: {
-                OhmModule module = new TabletService(fiberPool, this);
+                C5Module module = new TabletService(fiberPool, this);
                 startServiceModule(module);
 
                 break;
             }
             case RegionServer: {
-                OhmModule module = new RegionServerService(fiberPool, bossGroup, workerGroup, modulePort, this);
+                C5Module module = new RegionServerService(fiberPool, bossGroup, workerGroup, modulePort, this);
                 startServiceModule(module);
 
                 break;
@@ -426,7 +426,7 @@ public class OhmDB extends AbstractService implements OhmServer {
         return true;
     }
 
-    private void startServiceModule(OhmModule module) {
+    private void startServiceModule(C5Module module) {
         LOG.info("Starting service {}", module.getModuleType());
         module.addListener(new ModuleListenerPublisher(module), serverFiber);
 
@@ -457,7 +457,7 @@ public class OhmDB extends AbstractService implements OhmServer {
             moveAwayOldLogs(configDirectory.baseConfigPath);
 
 //            if (existingRegister(registryFile)) {
-//                recoverOhmServer(conf, path, registryFile);
+//                recoverC5Server(conf, path, registryFile);
 //            } else {
 //                bootStrapRegions(conf, path, registryFile);
 //            }
@@ -467,7 +467,7 @@ public class OhmDB extends AbstractService implements OhmServer {
 
 
         try {
-            serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "OhmDb-Server", false);
+            serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
             fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
