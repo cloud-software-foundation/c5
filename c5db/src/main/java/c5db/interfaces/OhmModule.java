@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,25 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
-package c5db.log;
+package c5db.interfaces;
 
-option java_package = "c5db.generated";
-option java_outer_classname = "RegionRegistryLine";
-option java_generic_services = true;
-option java_generate_equals_and_hash = true;
-option optimize_for = SPEED;
+import c5db.messages.generated.ControlMessages;
+import com.google.common.util.concurrent.Service;
 
-message RegistryLine {
-    required bytes tableName = 1;
-    required bytes startKey = 2;
-    required bytes endKey = 3;
-    required uint64 regionId = 4;
-    repeated bytes cf = 5;
+/**
+ * An internal module. Is a guava module.
+ * <p/>
+ * An internal module is a component that can be started/stopped, and is the official
+ * internal interface between different modules.
+ * <p/>
+ * TODO module dependencies so if you stop one module, you have to stop the dependencies.
+ */
+public interface OhmModule extends Service {
 
-    repeated uint64 peers = 6;
+    public ControlMessages.ModuleType getModuleType();
+
+    public boolean hasPort();
+
+    public int port();
 }
