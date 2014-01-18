@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,32 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
-package c5db.log;
+package c5db.replication;
 
-option java_package = "c5db.generated";
-option java_outer_classname = "RegionRegistryLine";
-option java_generic_services = true;
-option java_generate_equals_and_hash = true;
-option optimize_for = SPEED;
+/**
+ *
+ */
+public interface RaftInformationInterface {
+    public long currentTimeMillis();
 
-message RegistryLine {
-    required bytes tableName = 1;
-    required bytes startKey = 2;
-    required bytes endKey = 3;
-    required uint64 regionId = 4;
-    repeated bytes cf = 5;
+    /**
+     * How often to check if the election needs to be rerun.
+     *
+     * TODO revisit this to see if necessary or can be set to another derivative value.
+     * @return
+     */
+    public long electionCheckRate();
 
-    repeated uint64 peers = 6;
+    /**
+     * The election timeout (straight from the paper).
+     * @return
+     */
+    public long electionTimeout();
+
+    /**
+     * How frequently we should check the append queue, and send RPCs to the clients.
+     * @return
+     */
+    public long groupCommitDelay();
 }
