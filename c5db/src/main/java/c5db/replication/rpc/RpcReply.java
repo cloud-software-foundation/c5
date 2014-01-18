@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,21 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
-package c5db.log;
+package c5db.replication.rpc;
 
-option java_package = "c5db.generated";
-option java_outer_classname = "RegionRegistryLine";
-option java_generic_services = true;
-option java_generate_equals_and_hash = true;
-option optimize_for = SPEED;
+import com.google.protobuf.Message;
 
-message RegistryLine {
-    required bytes tableName = 1;
-    required bytes startKey = 2;
-    required bytes endKey = 3;
-    required uint64 regionId = 4;
-    repeated bytes cf = 5;
-
-    repeated uint64 peers = 6;
+/**
+ * An rpc reply in response to a 'wire request'.
+ */
+public class RpcReply extends RpcMessage {
+     /**
+      *  Invert the to/from and quote the messageId.
+      *
+      * @param message the reply message
+      */
+    public RpcReply(Message message) {
+        super(0, 0, null, message);
+    }
 }
