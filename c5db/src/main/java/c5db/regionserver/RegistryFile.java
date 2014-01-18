@@ -41,20 +41,20 @@ import java.util.List;
 public class RegistryFile {
     private static final Logger LOG = LoggerFactory.getLogger(RegistryFile.class);
 
-    private final Path ohmPath;
+    private final Path c5Path;
     private File registryFile;
 
-    public RegistryFile(Path ohmPath) throws IOException {
-        this.ohmPath = ohmPath;
-        if (!(ohmPath.toFile().exists() && ohmPath.toFile().isDirectory())) {
-            boolean success = ohmPath.toFile().mkdirs();
+    public RegistryFile(Path c5Path) throws IOException {
+        this.c5Path = c5Path;
+        if (!(c5Path.toFile().exists() && c5Path.toFile().isDirectory())) {
+            boolean success = c5Path.toFile().mkdirs();
             if (!success) {
-                throw new IOException("Unable to create ohmPath:" + ohmPath);
+                throw new IOException("Unable to create c5Path:" + c5Path);
             }
 
         }
 
-        this.registryFile = new File(ohmPath.toString(), "REGISTRY");
+        this.registryFile = new File(c5Path.toString(), "REGISTRY");
         if (!registryFile.exists()) {
             boolean success = registryFile.createNewFile();
             if (!success) {
@@ -68,7 +68,7 @@ public class RegistryFile {
         if (!success) {
             throw new IOException("Unable to delete registry file");
         }
-        this.registryFile = new File(ohmPath.toString(), "REGISTRY");
+        this.registryFile = new File(c5Path.toString(), "REGISTRY");
     }
 
     public void addEntry(HRegionInfo hRegionInfo, HColumnDescriptor cf,

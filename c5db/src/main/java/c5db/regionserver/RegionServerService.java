@@ -17,8 +17,8 @@
 package c5db.regionserver;
 
 import c5db.client.generated.ClientProtos;
-import c5db.interfaces.OhmModule;
-import c5db.interfaces.OhmServer;
+import c5db.interfaces.C5Module;
+import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
 import c5db.messages.generated.ControlMessages;
@@ -56,7 +56,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     private final NioEventLoopGroup acceptGroup;
     private final NioEventLoopGroup workerGroup;
     private final int port;
-    private final OhmServer server;
+    private final C5Server server;
     private final ServerBootstrap bootstrap = new ServerBootstrap();
 
     TabletModule tabletModule;
@@ -65,7 +65,7 @@ public class RegionServerService extends AbstractService implements RegionServer
                                NioEventLoopGroup acceptGroup,
                                NioEventLoopGroup workerGroup,
                                int port,
-                               OhmServer server) {
+                               C5Server server) {
         this.fiberFactory = fiberFactory;
         this.acceptGroup = acceptGroup;
         this.workerGroup = workerGroup;
@@ -83,10 +83,10 @@ public class RegionServerService extends AbstractService implements RegionServer
             @Override
             public void run() {
                 // we need the tablet module:
-                ListenableFuture<OhmModule> f = server.getModule(ControlMessages.ModuleType.Tablet);
-                Futures.addCallback(f, new FutureCallback<OhmModule>() {
+                ListenableFuture<C5Module> f = server.getModule(ControlMessages.ModuleType.Tablet);
+                Futures.addCallback(f, new FutureCallback<C5Module>() {
                     @Override
-                    public void onSuccess(OhmModule result) {
+                    public void onSuccess(C5Module result) {
                         tabletModule = (TabletModule) result;
 
                         bootstrap.group(acceptGroup, workerGroup)
@@ -106,7 +106,7 @@ public class RegionServerService extends AbstractService implements RegionServer
                                                 p.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
                                                 p.addLast("protobufEncoder", new ProtobufEncoder());
 
-                                                p.addLast("handler", new OhmServerHandler(RegionServerService.this));
+                                                p.addLast("handler", new C5ServerHandler(RegionServerService.this));
                                             }
                                         }
                                 );

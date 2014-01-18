@@ -18,9 +18,9 @@ package c5db.tablet;
 
 import c5db.client.C5Constants;
 import c5db.generated.Log;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.DiscoveryModule;
-import c5db.interfaces.OhmModule;
-import c5db.interfaces.OhmServer;
+import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.log.OLogShim;
@@ -71,7 +71,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
     private final PoolFiberFactory fiberFactory;
     private final Fiber fiber;
-    private final OhmServer server;
+    private final C5Server server;
     // TODO bring this into this class, and not have an external class.
     //private final OnlineRegions onlineRegions = OnlineRegions.INSTANCE;
     private final Map<String, HRegion> onlineRegions = new HashMap<>();
@@ -79,7 +79,7 @@ public class TabletService extends AbstractService implements TabletModule {
     private DiscoveryModule discoveryModule = null;
     private final Configuration conf;
 
-    public TabletService(PoolFiberFactory fiberFactory, OhmServer server) {
+    public TabletService(PoolFiberFactory fiberFactory, C5Server server) {
         this.fiberFactory = fiberFactory;
         this.fiber = fiberFactory.create();
         this.server = server;
@@ -101,7 +101,7 @@ public class TabletService extends AbstractService implements TabletModule {
             @Override
             public void run() {
 
-                ListenableFuture<OhmModule> discoveryService = server.getModule(ModuleType.Discovery);
+                ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
                 try {
                     discoveryModule = (DiscoveryModule) discoveryService.get();
                 } catch (InterruptedException | ExecutionException e) {
@@ -109,10 +109,10 @@ public class TabletService extends AbstractService implements TabletModule {
                     return;
                 }
 
-                ListenableFuture<OhmModule> replicatorService = server.getModule(ModuleType.Replication);
-                Futures.addCallback(replicatorService, new FutureCallback<OhmModule>() {
+                ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
+                Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
                     @Override
-                    public void onSuccess(OhmModule result) {
+                    public void onSuccess(C5Module result) {
                         replicationModule = (ReplicationModule) result;
                         fiber.execute(new Runnable() {
                             @Override

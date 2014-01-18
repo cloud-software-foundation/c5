@@ -17,10 +17,10 @@
 package c5db.module_cfg;
 
 import c5db.discovery.BeaconService;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.DependsOn;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ModuleTypeBinding;
-import c5db.interfaces.OhmModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.replication.ReplicatorService;
@@ -163,7 +163,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
         }
     }
 
-    public static Class<? extends OhmModule> getImplClass(ModuleType moduleType) {
+    public static Class<? extends C5Module> getImplClass(ModuleType moduleType) {
         switch (moduleType) {
             case Discovery:
                 return BeaconService.class;
@@ -177,7 +177,7 @@ private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
         }
     }
 
-    public static Class<? extends OhmModule> getInterface(ModuleType moduleType) {
+    public static Class<? extends C5Module> getInterface(ModuleType moduleType) {
         switch (moduleType) {
             case Discovery:
                 return DiscoveryModule.class;
