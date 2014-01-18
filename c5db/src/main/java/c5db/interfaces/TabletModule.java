@@ -29,7 +29,7 @@ import java.util.List;
  */
 @DependsOn(ReplicationModule.class)
 @ModuleTypeBinding(ControlMessages.ModuleType.Tablet)
-public interface TabletModule extends OhmModule {
+public interface TabletModule extends C5Module {
 
     public HRegion getTablet(String tabletName);
 

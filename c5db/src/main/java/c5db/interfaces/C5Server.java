@@ -33,9 +33,9 @@ import static c5db.messages.generated.ControlMessages.ModuleType;
  * The root interface for all other modules and modules to get around inside the server.
  * <p/>
  * Provides bootstrapping and other module introspection and management utilities.  Ideally we can run multiple
- * OhmServer on the same JVM for testing (may be conflicts with the discovery methods).
+ * C5Server on the same JVM for testing (may be conflicts with the discovery methods).
  */
-public interface OhmServer extends Service {
+public interface C5Server extends Service {
     /**
      * ** Interface type public methods *****
      */
@@ -43,7 +43,7 @@ public interface OhmServer extends Service {
     public long getNodeId();
 
     // TODO this could be generified if we used an interface instead of ModuleType
-    public ListenableFuture<OhmModule> getModule(ModuleType moduleType);
+    public ListenableFuture<C5Module> getModule(ModuleType moduleType);
 
     public Channel<MessageLite> getCommandChannel();
 
@@ -51,14 +51,14 @@ public interface OhmServer extends Service {
 
     public Channel<ModuleStateChange> getModuleStateChangeChannel();
 
-    public ImmutableMap<ModuleType, OhmModule> getModules() throws ExecutionException, InterruptedException;
+    public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException;
 
-    public ListenableFuture<ImmutableMap<ModuleType, OhmModule>> getModules2();
+    public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
 
     public ConfigDirectory getConfigDirectory();
 
     public static class ModuleStateChange {
-        public final OhmModule module;
+        public final C5Module module;
         public final State state;
 
         @Override
@@ -69,7 +69,7 @@ public interface OhmServer extends Service {
                     '}';
         }
 
-        public ModuleStateChange(OhmModule module, State state) {
+        public ModuleStateChange(C5Module module, State state) {
             this.module = module;
             this.state = state;
         }
