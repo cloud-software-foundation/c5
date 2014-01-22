@@ -70,13 +70,19 @@ public class C5DB extends AbstractService implements C5Server {
     private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
 
     public static void main(String[] args) throws Exception {
-        String cfgPath = "/tmp/ryan/c5-" + System.currentTimeMillis();
+
+        String username = System.getProperty("user.name");
+
+
+        String cfgPath = "c5-" + System.currentTimeMillis();
+
+        //  args = "nodeId", if none, then randomly generate i guess?
 
         if (args.length > 0) {
             cfgPath = args[0];
         }
 
-        ConfigDirectory cfgDir = new ConfigDirectory(Paths.get(cfgPath));
+        ConfigDirectory cfgDir = new ConfigDirectory(Paths.get("/tmp", username, cfgPath));
 
         // manually set the node id into the file.
         if (args.length > 1) {
