@@ -34,24 +34,53 @@
      (str "-Dorg.slf4j.simpleLogger.logFile=" run-path "/log" )
      "-Dorg.slf4j.simpleLogger.showDateTime=true"])
 
-(defn run-directory [nodeId]
-    "The directory a nodeId will run in"
-    (str "/tmp/" username "/c5-" nodeId))
+(defn run-dir-fragment [node-id]
+    "returns a run-directory fragment
+    eg: c5-12345"
+    (str "c5-" node-id))
+
+(defn run-directory [node-id]
+    "The full directory a node-id will run in
+    eg: /tmp/${user}/c5-123456"
+    (str "/tmp/" username "/" (run-dir-fragment node-id)))
 
 (defn run-logfile [nodeId]
     "The full path to the logfile"
     (str (run-directory nodeId) "/log"))
 
-(defn run-c5db [nodeId & log-level]
-    "Runs a C5DB for the given nodeId and log-level, defaults to 'debug' log"
-    (let [log-level-str (or log-level "debug")
-          run-dir (run-directory nodeId)
+(defn run-c5db [node-id & log-level]
+    "Runs a C5DB for the given node-id and log-level, defaults to 'debug' log"
+    (let [node-id-str (str node-id)
+          log-level-str (or log-level "debug")
+          run-dir (run-directory node-id-str)
+          run-dir-fragment (run-dir-fragment node-id-str)
           log-args (slf4j-args run-dir)
-          args (flatten java-bin log-args "-cp" inherited-class-path c5main-class run-dir nodeId)
+          args (flatten [java-bin log-args "-cp" inherited-class-path c5main-class run-dir-fragment node-id-str])
+          process (.exec (Runtime/getRuntime)
+                      (into-array String args))
           ]
-        (.exec (Runtime/getRuntime)
-            (into-array String args))
+        (stash-new-process node-id-str process)
+        process
         ))
+
+(def all-processes (atom {}))
+
+(defn stash-new-process [nodeId process]
+    (let [exist @all-processes
+          new-map (assoc exist nodeId process)]
+        (reset! all-processes new-map)))
+
+(defn remove-process [nodeId]
+    (let [exist @all-processes
+          process (get nodeId exist)
+          new-map (dissoc exist nodeId)]
+        (.destroy process)
+        (reset! all-processes new-map)))
+
+(defn killall-process []
+    (let [exist @all-processes]
+        (doseq [x (vals exist)] (.destroy x))
+        (reset! all-processes {})))
 
 (defn do-java-exec [main-class]
     "returns the Process created by forkin'"
@@ -60,7 +89,6 @@
         (.exec (Runtime/getRuntime)
             (into-array String args))
         ))
-
 
 (defn get-path [p & more]
     (Paths/get p (into-array String more)))
