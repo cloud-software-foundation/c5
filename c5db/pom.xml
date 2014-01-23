@@ -49,7 +49,7 @@
                         <protoModule>
                             <source>src/main/resources/</source>
                             <outputDir>target/generated-sources/protostuff</outputDir>
-                            <output>java_bean</output>
+                            <output>java_bean_primitives</output>
                             <encoding>UTF-8</encoding>
                             <options>
                                 <property>
@@ -58,10 +58,6 @@
                                 </property>
                                 <property>
                                     <name>builder_pattern</name>
-                                    <value>true</value>
-                                </property>
-                                <property>
-                                    <name>primitive_numbers_if_optional</name>
                                     <value>true</value>
                                 </property>
 
