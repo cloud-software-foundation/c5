@@ -60,11 +60,6 @@
                                     <name>builder_pattern</name>
                                     <value>true</value>
                                 </property>
-
-                                <property>
-                                    <name>generate_helper_methods</name>
-                                    <value>true</value>
-                                </property>
                             </options>
                         </protoModule>
                     </protoModules>
