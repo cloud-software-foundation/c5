@@ -27,6 +27,25 @@
 (def java-bin (.getPath (file java-home "bin" "java")))
 (def c5main-class (.getName C5DB))
 
+(def all-processes (atom {}))
+
+(defn stash-new-process [nodeId process]
+    (let [exist @all-processes
+          new-map (assoc exist nodeId process)]
+        (reset! all-processes new-map)))
+
+(defn remove-process [nodeId]
+    (let [exist @all-processes
+          process (get nodeId exist)
+          new-map (dissoc exist nodeId)]
+        (.destroy process)
+        (reset! all-processes new-map)))
+
+(defn killall-process []
+    (let [exist @all-processes]
+        (doseq [x (vals exist)] (.destroy x))
+        (reset! all-processes {})))
+
 
 (defn slf4j-args [run-path]
     "Returns the slf4j default arguments, requires the run-path for logging"
@@ -62,25 +81,6 @@
         (stash-new-process node-id-str process)
         process
         ))
-
-(def all-processes (atom {}))
-
-(defn stash-new-process [nodeId process]
-    (let [exist @all-processes
-          new-map (assoc exist nodeId process)]
-        (reset! all-processes new-map)))
-
-(defn remove-process [nodeId]
-    (let [exist @all-processes
-          process (get nodeId exist)
-          new-map (dissoc exist nodeId)]
-        (.destroy process)
-        (reset! all-processes new-map)))
-
-(defn killall-process []
-    (let [exist @all-processes]
-        (doseq [x (vals exist)] (.destroy x))
-        (reset! all-processes {})))
 
 (defn do-java-exec [main-class]
     "returns the Process created by forkin'"
