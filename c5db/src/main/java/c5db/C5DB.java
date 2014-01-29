@@ -16,20 +16,23 @@
  */
 package c5db;
 
-import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.log.LogService;
+import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleType;
+import c5db.messages.generated.StartModule;
+import c5db.messages.generated.StopModule;
 import c5db.regionserver.RegionServerService;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.FiberOnly;
+import com.dyuproject.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.protobuf.MessageLite;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -54,10 +57,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static c5db.log.OLog.moveAwayOldLogs;
-import static c5db.messages.generated.ControlMessages.CommandReply;
-import static c5db.messages.generated.ControlMessages.ModuleType;
-import static c5db.messages.generated.ControlMessages.StartModule;
-import static c5db.messages.generated.ControlMessages.StopModule;
 
 
 /**
@@ -98,40 +97,20 @@ public class C5DB extends AbstractService implements C5Server {
         Random rnd = new Random();
 
         // issue startup commands here that are common/we always want:
-        StartModule startLog = StartModule.newBuilder()
-                .setModule(ModuleType.Log)
-                .setModulePort(0)
-                .setModuleArgv("")
-                .build();
+        StartModule startLog = new StartModule(ModuleType.Log, 0, "");
         instance.getCommandChannel().publish(startLog);
 
-        StartModule startBeacon = StartModule.newBuilder()
-                .setModule(ModuleType.Discovery)
-                .setModulePort(54333)
-                .setModuleArgv("")
-                .build();
+        StartModule startBeacon = new StartModule(ModuleType.Discovery, 54333, "");
         instance.getCommandChannel().publish(startBeacon);
 
 
-        StartModule startReplication = StartModule.newBuilder()
-                .setModule(ModuleType.Replication)
-                .setModulePort(rnd.nextInt(30000) + 1024)
-                .setModuleArgv("")
-                .build();
+        StartModule startReplication = new StartModule(ModuleType.Replication, rnd.nextInt(30000) + 1024, "");
         instance.getCommandChannel().publish(startReplication);
 
-        StartModule startTablet = StartModule.newBuilder()
-                .setModule(ModuleType.Tablet)
-                .setModulePort(0)
-                .setModuleArgv("")
-                .build();
+        StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
         instance.getCommandChannel().publish(startTablet);
 
-        StartModule startRegionServer = StartModule.newBuilder()
-                .setModule(ModuleType.RegionServer)
-                .setModulePort(8080+rnd.nextInt(1000))
-                .setModuleArgv("")
-                .build();
+        StartModule startRegionServer = new StartModule(ModuleType.RegionServer, 8080+rnd.nextInt(1000), "");
         instance.getCommandChannel().publish(startRegionServer);
     }
 
@@ -246,20 +225,20 @@ public class C5DB extends AbstractService implements C5Server {
 
      private final long nodeId;
 
-    private final Channel<MessageLite> commandChannel = new MemoryChannel<>();
+    private final Channel<Message<?>> commandChannel = new MemoryChannel<>();
 
     private PoolFiberFactory fiberPool;
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
 
     @Override
-    public Channel<MessageLite> getCommandChannel() {
+    public Channel<Message<?>> getCommandChannel() {
         return commandChannel;
     }
 
-    public RequestChannel<MessageLite, CommandReply> commandRequests = new MemoryRequestChannel<>();
+    public RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
     @Override
-    public RequestChannel<MessageLite, CommandReply> getCommandRequests() {
+    public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
         return commandRequests;
     }
 
@@ -283,7 +262,7 @@ public class C5DB extends AbstractService implements C5Server {
 
 
     @FiberOnly
-    private void processCommandMessage(MessageLite msg) throws Exception {
+    private void processCommandMessage(Message<?> msg) throws Exception {
         if (msg instanceof StartModule) {
             StartModule message = (StartModule) msg;
             startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
@@ -296,8 +275,8 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
     @FiberOnly
-    private void processCommandRequest(Request<MessageLite, CommandReply> request) {
-        MessageLite r = request.getRequest();
+    private void processCommandRequest(Request<Message<?>, CommandReply> request) {
+        Message<?> r = request.getRequest();
         try {
             String stdout = "";
 
@@ -313,25 +292,18 @@ public class C5DB extends AbstractService implements C5Server {
 
                 stdout = String.format("Module %s started", message.getModule());
             } else {
-                CommandReply reply = CommandReply.newBuilder()
-                        .setCommandSuccess(false)
-                        .setCommandStderr(String.format("Unknown message type: %s", r.getClass()))
-                        .build();
+                CommandReply reply = new CommandReply(false,
+                        "",
+                        String.format("Unknown message type: %s", r.getClass()));
                 request.reply(reply);
                 return;
             }
 
-            CommandReply reply = CommandReply.newBuilder()
-                    .setCommandSuccess(true)
-                    .setCommandStdout(stdout)
-                    .build();
+            CommandReply reply = new CommandReply(true, stdout, "");
             request.reply(reply);
 
         } catch (Exception e) {
-            CommandReply reply = CommandReply.newBuilder()
-                    .setCommandSuccess(false)
-                    .setCommandStderr(e.toString())
-                    .build();
+            CommandReply reply = new CommandReply(false, "", e.toString());
             request.reply(reply);
         }
     }
@@ -397,8 +369,8 @@ public class C5DB extends AbstractService implements C5Server {
                     l.put(name, moduleRegistry.get(name).port());
                 }
 
-                C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
-                startServiceModule(module);
+                //C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
+                //startServiceModule(module);
                 break;
             }
             case Replication: {
@@ -478,9 +450,9 @@ public class C5DB extends AbstractService implements C5Server {
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
 
-            commandChannel.subscribe(serverFiber, new Callback<MessageLite>() {
+            commandChannel.subscribe(serverFiber, new Callback<Message<?>>() {
                 @Override
-                public void onMessage(MessageLite message) {
+                public void onMessage(Message<?> message) {
                     try {
                         processCommandMessage(message);
                     } catch (Exception e) {
@@ -489,9 +461,9 @@ public class C5DB extends AbstractService implements C5Server {
                 }
             });
 
-            commandRequests.subscribe(serverFiber, new Callback<Request<MessageLite, CommandReply>>() {
+            commandRequests.subscribe(serverFiber, new Callback<Request<Message<?>, CommandReply>>() {
                 @Override
-                public void onMessage(Request<MessageLite, CommandReply> request) {
+                public void onMessage(Request<Message<?>, CommandReply> request) {
                     processCommandRequest(request);
                 }
             });

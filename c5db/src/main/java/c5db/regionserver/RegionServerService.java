@@ -21,7 +21,7 @@ import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
-import c5db.messages.generated.ControlMessages;
+import c5db.messages.generated.ModuleType;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -83,7 +83,7 @@ public class RegionServerService extends AbstractService implements RegionServer
             @Override
             public void run() {
                 // we need the tablet module:
-                ListenableFuture<C5Module> f = server.getModule(ControlMessages.ModuleType.Tablet);
+                ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
                 Futures.addCallback(f, new FutureCallback<C5Module>() {
                     @Override
                     public void onSuccess(C5Module result) {
@@ -140,8 +140,8 @@ public class RegionServerService extends AbstractService implements RegionServer
     }
 
     @Override
-    public ControlMessages.ModuleType getModuleType() {
-        return ControlMessages.ModuleType.RegionServer;
+    public ModuleType getModuleType() {
+        return ModuleType.RegionServer;
     }
 
     @Override
