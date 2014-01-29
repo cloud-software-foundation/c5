@@ -16,6 +16,7 @@
  */
 package c5db;
 
+import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.log.LogService;
@@ -343,7 +344,7 @@ public class C5DB extends AbstractService implements C5Server {
 
         @Override
         public void failed(State from, Throwable failure) {
-            LOG.debug("Failed module {}", module);
+            LOG.debug("Failed module {}: {}", module, failure);
             publishEvent(State.FAILED);
         }
 
@@ -369,8 +370,8 @@ public class C5DB extends AbstractService implements C5Server {
                     l.put(name, moduleRegistry.get(name).port());
                 }
 
-                //C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
-                //startServiceModule(module);
+                C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
+                startServiceModule(module);
                 break;
             }
             case Replication: {
