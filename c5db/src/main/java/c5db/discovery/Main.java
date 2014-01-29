@@ -16,7 +16,13 @@
  */
 package c5db.discovery;
 
+import c5db.ConfigDirectory;
+import c5db.interfaces.C5Module;
+import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
+import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleType;
+import com.dyuproject.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -31,6 +37,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
+import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.RequestChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -39,8 +47,10 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import static c5db.discovery.generated.Beacon.Availability;
@@ -49,11 +59,14 @@ import static c5db.interfaces.DiscoveryModule.NodeInfo;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-    final DiscoveryModule beaconService = null;
+    final DiscoveryModule beaconService;
     private final String clusterName;
     private final int discoveryPort;
     private final int servicePort;
     private final long nodeId;
+    Fiber theFiber = new ThreadFiber();
+    NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
+    C5Server theServer;
 
     Main(String clusterName) throws SocketException, InterruptedException {
         this.clusterName = clusterName;
@@ -72,8 +85,101 @@ public class Main {
         // nodeId
         // servicePort
         // discoveryPort
+        theServer = new C5Server() {
+            org.jetlang.channels.Channel<ModuleStateChange> moduleStateChangeChannel = new MemoryChannel<>();
+            @Override
+            public long getNodeId() {
+                return 0;
+            }
+
+            @Override
+            public ListenableFuture<C5Module> getModule(ModuleType moduleType) {
+                return null;
+            }
+
+            @Override
+            public org.jetlang.channels.Channel<Message<?>> getCommandChannel() {
+                return null;
+            }
+
+            @Override
+            public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
+                return null;
+            }
+
+            @Override
+            public org.jetlang.channels.Channel<ModuleStateChange> getModuleStateChangeChannel() {
+                return moduleStateChangeChannel;
+            }
+
+            @Override
+            public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
+                return null;
+            }
+
+            @Override
+            public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
+                return null;
+            }
+
+            @Override
+            public ConfigDirectory getConfigDirectory() {
+                return null;
+            }
+
+            @Override
+            public org.jetlang.channels.Channel<ConfigKeyUpdated> getConfigUpdateChannel() {
+                return null;
+            }
+
+            @Override
+            public ListenableFuture<State> start() {
+                return null;
+            }
+
+            @Override
+            public State startAndWait() {
+                return null;
+            }
+
+            @Override
+            public boolean isRunning() {
+                return false;
+            }
+
+            @Override
+            public State state() {
+                return null;
+            }
+
+            @Override
+            public ListenableFuture<State> stop() {
+                return null;
+            }
+
+            @Override
+            public State stopAndWait() {
+                return null;
+            }
+
+            @Override
+            public Throwable failureCause() {
+                return null;
+            }
+
+            @Override
+            public void addListener(Listener listener, Executor executor) {
+
+            }
+        };
+
 
         //beaconService = new BeaconService(discoveryPort, builder.buildPartial());
+        beaconService = new BeaconService(
+                nodeId, discoveryPort, theFiber, nioEventLoopGroup,
+                new HashMap<>(),
+                theServer
+        );
     }
 
     public static void main(String[] args) throws Exception {
@@ -158,7 +264,8 @@ public class Main {
                 // yes this is me, and continue
                 continue;
             }
-            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddresses(0), peer.availability.getBaseNetworkPort());
+            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddressesList().get(0),
+                    peer.availability.getBaseNetworkPort());
             // uh ok lets connect and make hash:
 
             SocketAddress localAddr = serverChannel.localAddress();
