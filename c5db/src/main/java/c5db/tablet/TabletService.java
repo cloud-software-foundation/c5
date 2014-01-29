@@ -19,11 +19,12 @@ package c5db.tablet;
 import c5db.client.C5Constants;
 import c5db.generated.Log;
 import c5db.interfaces.C5Module;
-import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.log.OLogShim;
+import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegistryFile;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableList;
@@ -61,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static c5db.messages.generated.ControlMessages.ModuleType;
 
 /**
  *

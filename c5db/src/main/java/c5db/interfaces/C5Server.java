@@ -17,17 +17,16 @@
 package c5db.interfaces;
 
 import c5db.ConfigDirectory;
-import c5db.messages.generated.ControlMessages;
+import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleType;
+import com.dyuproject.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
-import com.google.protobuf.MessageLite;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
 import java.util.concurrent.ExecutionException;
-
-import static c5db.messages.generated.ControlMessages.ModuleType;
 
 /**
  * The root interface for all other modules and modules to get around inside the server.
@@ -45,9 +44,9 @@ public interface C5Server extends Service {
     // TODO this could be generified if we used an interface instead of ModuleType
     public ListenableFuture<C5Module> getModule(ModuleType moduleType);
 
-    public Channel<MessageLite> getCommandChannel();
+    public Channel<Message<?>> getCommandChannel();
 
-    public RequestChannel<MessageLite, ControlMessages.CommandReply> getCommandRequests();
+    public RequestChannel<Message<?>, CommandReply> getCommandRequests();
 
     public Channel<ModuleStateChange> getModuleStateChangeChannel();
 
