@@ -63,7 +63,7 @@ public interface C5Server extends Service {
         @Override
         public String toString() {
             return "ModuleStateChange{" +
-                    ", module=" + module +
+                    "module=" + module +
                     ", state=" + state +
                     '}';
         }
