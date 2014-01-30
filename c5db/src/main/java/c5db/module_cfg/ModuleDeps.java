@@ -23,6 +23,7 @@ import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ModuleTypeBinding;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
+import c5db.messages.generated.ModuleType;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.Graph;
@@ -38,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-
-import static c5db.messages.generated.ControlMessages.ModuleType;
 
 /**
  *

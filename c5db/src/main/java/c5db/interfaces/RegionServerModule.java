@@ -16,13 +16,13 @@
  */
 package c5db.interfaces;
 
-import c5db.messages.generated.ControlMessages;
+import c5db.messages.generated.ModuleType;
 
 /**
  *
  */
 @DependsOn(TabletModule.class)
-@ModuleTypeBinding(ControlMessages.ModuleType.RegionServer)
+@ModuleTypeBinding(ModuleType.RegionServer)
 public interface RegionServerModule extends C5Module {
 
 
