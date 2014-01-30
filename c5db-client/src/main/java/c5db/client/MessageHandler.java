@@ -20,28 +20,23 @@
 package c5db.client;
 
 import c5db.client.generated.ClientProtos;
-import c5db.client.scanner.ClientScanner;
-import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import c5db.client.scanner.ClientScanner;
+import c5db.client.scanner.ClientScannerManager;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RequestHandler
-    extends SimpleChannelInboundHandler<ClientProtos.Response> {
+public class MessageHandler extends SimpleChannelInboundHandler<ClientProtos.Response> {
+  private final static ClientScannerManager clientScanManager = ClientScannerManager.INSTANCE;
   private final ConcurrentHashMap<Long, SettableFuture> futures = new ConcurrentHashMap<>();
-  ClientScannerManager manager = ClientScannerManager.INSTANCE;
-  public static final Log LOG = LogFactory.getLog(RequestHandler.class);
 
   @Override
-  public void channelRead0(final ChannelHandlerContext ctx, final ClientProtos.Response msg)
-      throws Exception {
-    SettableFuture f = futures.get(msg.getCommandId());
+  protected void channelRead0(ChannelHandlerContext ctx, ClientProtos.Response msg) throws Exception {
+    final SettableFuture f = futures.get(msg.getCommandId());
     switch (msg.getCommand()) {
       case MUTATE:
         if (!msg.getMutate().getProcessed()) {
@@ -52,21 +47,23 @@ public class RequestHandler
         break;
       case SCAN:
         long scannerId = msg.getScan().getScannerId();
-
         ClientScanner clientScanner;
-        if (!manager.hasScanner(scannerId)) {
-          clientScanner = manager.getOrCreate(scannerId);
-          f.set(scannerId);
+
+        if (clientScanManager.hasScanner(scannerId)) {
+          clientScanner = clientScanManager.get(scannerId);
         } else {
-          clientScanner = manager.getOrCreate(scannerId);
+          clientScanner = clientScanManager.createAndGet(ctx.channel(), scannerId);
+          f.set(scannerId);
         }
+
         clientScanner.add(msg.getScan());
+
         if (!msg.getScan().getMoreResults()) {
           clientScanner.close();
         }
+
         break;
       default:
-        LOG.error("msg:" +msg);
         f.set(msg);
         break;
     }
@@ -76,10 +73,5 @@ public class RequestHandler
       throws InterruptedException, IOException {
     futures.put(request.getCommandId(), future);
     channel.writeAndFlush(request);
-  }
-
-  @Override
-  public void channelReadComplete(ChannelHandlerContext ctx) {
-    ctx.flush();
   }
 }
