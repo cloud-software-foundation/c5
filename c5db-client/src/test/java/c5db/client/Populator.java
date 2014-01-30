@@ -70,6 +70,7 @@ public class Populator {
       throws IOException {
     ArrayList<Put> puts = new ArrayList<>();
 
+      long startTime = System.nanoTime();
     for (int j = 1; j != numberOfBatches + 1; j++) {
       puts.clear();
       for (int i = 1; i != batchSize + 1; i++) {
@@ -80,8 +81,10 @@ public class Populator {
       for (Put put : puts) {
         i++;
         if (i % 1024 == 0) {
-          System.out.print("#");
+            long timeDiff = (System.nanoTime()) - startTime;
+          System.out.print("#("+timeDiff+")");
           System.out.flush();
+            startTime = System.nanoTime();
         }
         if (i % (1024 * 80) == 0) {
           System.out.println("");
