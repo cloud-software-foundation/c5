@@ -16,6 +16,7 @@
  */
 package c5db.module_cfg;
 
+import c5db.messages.generated.ModuleType;
 import c5db.util.Graph;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -23,7 +24,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static c5db.messages.generated.ControlMessages.ModuleType;
 
 /**
  *
