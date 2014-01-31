@@ -24,6 +24,7 @@ import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.LogModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.log.Mooring;
+import c5db.messages.generated.ControlMessages;
 import c5db.messages.generated.ModuleType;
 import c5db.replication.generated.RaftWireMessage;
 import c5db.replication.rpc.RpcReply;

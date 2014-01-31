@@ -40,9 +40,8 @@
 package c5db.client.scanner;
 
 import c5db.ProtobufUtil;
-import c5db.client.C5ConnectionManager;
 import c5db.client.C5Constants;
-import c5db.client.RequestHandler;
+import c5db.client.MessageHandler;
 import c5db.client.generated.ClientProtos;
 import c5db.client.generated.HBaseProtos;
 import c5db.client.queue.WickedQueue;
@@ -58,14 +57,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ClientScanner extends AbstractClientScanner {
-  final RequestHandler handler;
+  final MessageHandler handler;
   private final Channel ch;
   private final long scannerId;
   private final WickedQueue<ClientProtos.Result>
       scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private boolean isClosed = true;
-  private final C5ConnectionManager c5ConnectionManager
-      = C5ConnectionManager.INSTANCE;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
 
@@ -75,17 +72,12 @@ public class ClientScanner extends AbstractClientScanner {
    *
    * @throws IOException
    */
-  public ClientScanner(final long scannerId) throws IOException {
-    C5ConnectionManager c5ConnectionManager = C5ConnectionManager.INSTANCE;
-    try {
-      ch = c5ConnectionManager.getOrCreateChannel("localhost",
-          C5Constants.TEST_PORT);
-    } catch (InterruptedException e) {
-      throw new IOException(e);
-    }
+  protected ClientScanner(Channel channel, final long scannerId) throws IOException {
+
+    ch = channel;
 
     final ChannelPipeline pipeline = ch.pipeline();
-    handler = pipeline.get(RequestHandler.class);
+    handler = pipeline.get(MessageHandler.class);
     this.scannerId = scannerId;
     this.isClosed = false;
   }
@@ -144,15 +136,9 @@ public class ClientScanner extends AbstractClientScanner {
         .setScan(scanRequest)
         .build();
 
-    try {
-      Channel channel = c5ConnectionManager
-          .getOrCreateChannel("localhost", C5Constants.TEST_PORT);
-      this.outStandingRequests += requestSize;
-      channel.write(call);
+    this.outStandingRequests += requestSize;
+    ch.writeAndFlush(call);
 
-    } catch (InterruptedException e) {
-      throw new IOException(e);
-    }
   }
 
   @Override

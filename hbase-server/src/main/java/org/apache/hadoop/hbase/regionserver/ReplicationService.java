@@ -18,15 +18,15 @@
  */
 package org.apache.hadoop.hbase.regionserver;
 
-import java.io.IOException;
-
-import org.apache.hadoop.hbase.Server;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.Server;
+
+import java.io.IOException;
 
 /**
- * Gateway to Cluster Replication.  
+ * Gateway to Cluster Replication.
  * Used by {@link org.apache.hadoop.hbase.regionserver.HRegionServer}.
  * One such application is a cross-datacenter
  * replication service that can keep two hbase clusters in sync.
@@ -36,14 +36,16 @@ public interface ReplicationService {
 
   /**
    * Initializes the replication service object.
+   *
    * @throws IOException
    */
   void initialize(
-    Server rs, FileSystem fs, Path logdir, Path oldLogDir
+      Server rs, FileSystem fs, Path logdir, Path oldLogDir
   ) throws IOException;
 
   /**
    * Start replication services.
+   *
    * @throws IOException
    */
   void startReplicationService() throws IOException;

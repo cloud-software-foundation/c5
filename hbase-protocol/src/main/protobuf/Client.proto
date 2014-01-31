@@ -370,3 +370,33 @@ service ClientService {
   rpc Multi(MultiRequest)
     returns(MultiResponse);
 }
+message Response {
+    enum Command {
+        GET = 0;
+        MUTATE = 1;
+        SCAN = 2;
+        MULTI = 3;
+    }
+    required Command command = 1;
+    required int64 commandId = 2;
+
+    optional GetResponse get = 3;
+    optional MutateResponse mutate = 4;
+    optional ScanResponse scan = 5;
+    optional MultiResponse multi = 6;
+}
+
+message Call {
+    enum Command {
+        GET = 0;
+        MUTATE = 1;
+        SCAN = 2;
+        MULTI = 3;
+    }
+    required Command command = 1;
+    required int64 commandId = 2;
+    optional GetRequest get = 3;
+    optional MutateRequest mutate = 4;
+    optional ScanRequest scan = 5;
+    optional MultiRequest multi = 6;
+}

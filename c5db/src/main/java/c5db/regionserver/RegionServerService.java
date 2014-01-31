@@ -16,7 +16,8 @@
  */
 package c5db.regionserver;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.codec.WebsocketProtostuffDecoder;
+import c5db.client.codec.WebsocketProtostuffEncoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -35,127 +36,121 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.protobuf.ProtobufDecoder;
-import io.netty.handler.codec.protobuf.ProtobufEncoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class RegionServerService extends AbstractService implements RegionServerModule {
-    private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
-    private final PoolFiberFactory fiberFactory;
-    private final Fiber fiber;
-    private final NioEventLoopGroup acceptGroup;
-    private final NioEventLoopGroup workerGroup;
-    private final int port;
-    private final C5Server server;
-    private final ServerBootstrap bootstrap = new ServerBootstrap();
+  private final Fiber fiber;
+  private final NioEventLoopGroup acceptGroup;
+  private final NioEventLoopGroup workerGroup;
+  private final int port;
+  private final C5Server server;
+  private final ServerBootstrap bootstrap = new ServerBootstrap();
 
-    TabletModule tabletModule;
+  TabletModule tabletModule;
 
-    public RegionServerService(PoolFiberFactory fiberFactory,
-                               NioEventLoopGroup acceptGroup,
-                               NioEventLoopGroup workerGroup,
-                               int port,
-                               C5Server server) {
-        this.fiberFactory = fiberFactory;
-        this.acceptGroup = acceptGroup;
-        this.workerGroup = workerGroup;
-        this.port = port;
-        this.server = server;
+  public RegionServerService(PoolFiberFactory fiberFactory,
+                             NioEventLoopGroup acceptGroup,
+                             NioEventLoopGroup workerGroup,
+                             int port,
+                             C5Server server) {
+    this.acceptGroup = acceptGroup;
+    this.workerGroup = workerGroup;
+    this.port = port;
+    this.server = server;
 
-        this.fiber = fiberFactory.create();
-    }
+    this.fiber = fiberFactory.create();
+  }
 
-    @Override
-    protected void doStart() {
-        fiber.start();
+  @Override
+  protected void doStart() {
+    fiber.start();
 
-        fiber.execute(new Runnable() {
-            @Override
-            public void run() {
-                // we need the tablet module:
-                ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
-                Futures.addCallback(f, new FutureCallback<C5Module>() {
-                    @Override
-                    public void onSuccess(C5Module result) {
-                        tabletModule = (TabletModule) result;
+    fiber.execute(new Runnable() {
+      @Override
+      public void run() {
+        // we need the tablet module:
+        ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
+        Futures.addCallback(f, new FutureCallback<C5Module>() {
+          @Override
+          public void onSuccess(C5Module result) {
+            tabletModule = (TabletModule) result;
 
-                        bootstrap.group(acceptGroup, workerGroup)
-                                .option(ChannelOption.SO_REUSEADDR, true)
-                                .childOption(ChannelOption.TCP_NODELAY, true)
-                                .channel(NioServerSocketChannel.class)
-                                .childHandler(
-                                        new ChannelInitializer<SocketChannel>() {
-                                            @Override
-                                            protected void initChannel(SocketChannel ch) throws Exception {
-                                                ChannelPipeline p = ch.pipeline();
+            bootstrap.group(acceptGroup, workerGroup)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(
+                    new ChannelInitializer<SocketChannel>() {
+                      @Override
+                      protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast(
+                            new HttpRequestDecoder(),
+                            new WebsocketProtostuffDecoder(),
+                            new HttpObjectAggregator(65536),
+                            new WebSocketServerProtocolHandler("/websocket"),
+                            new HttpResponseEncoder(),
+                            new WebsocketProtostuffEncoder(),
+                            new C5ServerHandler(RegionServerService.this));
+                      }
+                    });
 
-                                                p.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
-                                                p.addLast("protobufDecoder",
-                                                        new ProtobufDecoder(ClientProtos.Call.getDefaultInstance()));
+            bootstrap.bind(port).addListener(new ChannelFutureListener() {
+              @Override
+              public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()) {
+                  notifyStarted();
+                } else {
+                  //TODO WTF    LOG.error("Unable to find Region Server to {} {}", port, future.cause());
+                  notifyFailed(future.cause());
+                }
+              }
+            });
 
-                                                p.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
-                                                p.addLast("protobufEncoder", new ProtobufEncoder());
+          }
 
-                                                p.addLast("handler", new C5ServerHandler(RegionServerService.this));
-                                            }
-                                        }
-                                );
+          @Override
+          public void onFailure(Throwable t) {
+            notifyFailed(t);
+          }
+        }, fiber);
+      }
+    });
+  }
 
-                        bootstrap.bind(port).addListener(new ChannelFutureListener() {
-                            @Override
-                            public void operationComplete(ChannelFuture future) throws Exception {
-                                if (future.isSuccess()) {
-                                    notifyStarted();
-                                } else {
-                                    LOG.error("Unable to find Region Server to {} {}", port, future.cause());
-                                    notifyFailed(future.cause());
-                                }
-                            }
-                        });
+  @Override
+  protected void doStop() {
+    notifyStopped();
+  }
 
-                    }
+  @Override
+  public ModuleType getModuleType() {
+    return ModuleType.RegionServer;
+  }
 
-                    @Override
-                    public void onFailure(Throwable t) {
-                        notifyFailed(t);
-                    }
-                }, fiber);
-            }
-        });
-    }
+  @Override
+  public boolean hasPort() {
+    return true;
+  }
 
-    @Override
-    protected void doStop() {
-        notifyStopped();
-    }
+  @Override
+  public int port() {
+    return port;
+  }
 
-    @Override
-    public ModuleType getModuleType() {
-        return ModuleType.RegionServer;
-    }
+  public HRegion getOnlineRegion(String regionName) {
+// TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
+    return tabletModule.getTablet(regionName);
+  }
 
-    @Override
-    public boolean hasPort() {
-        return true;
-    }
-
-    @Override
-    public int port() {
-        return port;
-    }
-
-    public HRegion getOnlineRegion(String regionName) {
-        // TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
-        return tabletModule.getTablet(regionName);
-    }
 }
