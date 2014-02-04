@@ -344,7 +344,7 @@ public class C5DB extends AbstractService implements C5Server {
 
         @Override
         public void failed(State from, Throwable failure) {
-            LOG.debug("Failed module {}: {}", module, failure);
+            LOG.debug("Failed module " +  module, failure);
             publishEvent(State.FAILED);
         }
 
