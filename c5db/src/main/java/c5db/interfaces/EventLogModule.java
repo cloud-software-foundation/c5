@@ -16,14 +16,15 @@
  */
 package c5db.interfaces;
 
+import c5db.eventLogging.generated.EventLogEntry;
 import c5db.messages.generated.ModuleType;
+import org.jetlang.channels.Channel;
 
 /**
  *
  */
-@DependsOn(TabletModule.class)
-@ModuleTypeBinding(ModuleType.RegionServer)
-public interface RegionServerModule extends C5Module {
+@ModuleTypeBinding(ModuleType.EventLog)
+public interface EventLogModule extends C5Module {
 
-
+    Channel<EventLogEntry> eventLogChannel();
 }

@@ -17,7 +17,7 @@
 package c5db.interfaces;
 
 
-import c5db.messages.generated.ControlMessages;
+import c5db.messages.generated.ModuleType;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
@@ -28,7 +28,7 @@ import java.util.List;
  * Manager of tablets (aka regions)
  */
 @DependsOn(ReplicationModule.class)
-@ModuleTypeBinding(ControlMessages.ModuleType.Tablet)
+@ModuleTypeBinding(ModuleType.Tablet)
 public interface TabletModule extends C5Module {
 
     public HRegion getTablet(String tabletName);
