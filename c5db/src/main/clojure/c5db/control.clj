@@ -34,10 +34,11 @@
           new-map (assoc exist nodeId process)]
         (reset! all-processes new-map)))
 
-(defn remove-process [nodeId]
-    (let [exist @all-processes
-          process (get nodeId exist)
-          new-map (dissoc exist nodeId)]
+(defn remove-process [node-id]
+    (let [node-id-str (str node-id)
+          exist @all-processes
+          process (get exist node-id-str)
+          new-map (dissoc exist node-id-str)]
         (.destroy process)
         (reset! all-processes new-map)))
 
@@ -45,13 +46,6 @@
     (let [exist @all-processes]
         (doseq [x (vals exist)] (.destroy x))
         (reset! all-processes {})))
-
-
-(defn slf4j-args [run-path]
-    "Returns the slf4j default arguments, requires the run-path for logging"
-    ["-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
-     (str "-Dorg.slf4j.simpleLogger.logFile=" run-path "/log" )
-     "-Dorg.slf4j.simpleLogger.showDateTime=true"])
 
 (defn run-dir-fragment [node-id]
     "returns a run-directory fragment
@@ -63,35 +57,43 @@
     eg: /tmp/${user}/c5-123456"
     (str "/tmp/" username "/" (run-dir-fragment node-id)))
 
-(defn run-logfile [nodeId]
+
+(defn slf4j-args [node-id]
+    "Returns the slf4j default arguments, requires the run-path for logging"
+    ["-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
+     (str "-Dorg.slf4j.simpleLogger.logFile=" (run-directory node-id) "/" node-id ".log")
+     "-Dorg.slf4j.simpleLogger.showDateTime=true"])
+
+(defn run-logfile [node-id]
     "The full path to the logfile"
-    (str (run-directory nodeId) "/log"))
+    (str (run-directory node-id) "/" node-id ".log"))
+
+(defn tail-log [node-id]
+    (let [node-id-str (str node-id)
+          logfile (run-logfile node-id-str)]
+        (sh "/usr/bin/open" logfile)))
 
 (defn run-c5db [node-id & log-level]
     "Runs a C5DB for the given node-id and log-level, defaults to 'debug' log"
     (let [node-id-str (str node-id)
           log-level-str (or log-level "debug")
           run-dir (run-directory node-id-str)
-          run-dir-fragment (run-dir-fragment node-id-str)
-          log-args (slf4j-args run-dir)
-          args (flatten [java-bin log-args "-cp" inherited-class-path c5main-class run-dir-fragment node-id-str])
-          process (.exec (Runtime/getRuntime)
-                      (into-array String args))
-          ]
+          ; this is just the top-level directory, eg 'c5-NODEID' excluding the /tmp/$user portion
+          run-dir-frag (run-dir-fragment node-id-str)
+          ; side effects here, otherwise slf4j will fail to log.
+          create-run-dir (clojure.java.io/make-parents (run-logfile node-id-str))
+          log-args (slf4j-args node-id-str)
+          args (flatten [java-bin log-args "-cp" inherited-class-path c5main-class run-dir-frag node-id-str])
+          process-builder (.inheritIO (ProcessBuilder. (list* args)))
+          process (.start process-builder)]
         (stash-new-process node-id-str process)
         process
         ))
 
-(defn do-java-exec [main-class]
-    "returns the Process created by forkin'"
-    (let [args
-          (flatten [java-bin slf4j-args "-cp" inherited-class-path main-class])]
-        (.exec (Runtime/getRuntime)
-            (into-array String args))
-        ))
-
 (defn get-path [p & more]
     (Paths/get p (into-array String more)))
+
+;; Java compatability here
 
 (defn c5-cfg
     [run-name]
