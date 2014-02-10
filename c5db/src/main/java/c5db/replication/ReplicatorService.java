@@ -118,7 +118,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
                     LOG.error("Creating replicator for {}, peer list didnt contain myself", quorumId, peers);
                     peers.add(server.getNodeId());
                 }
-                LOG.debug("Creating replicator instance for {} peers {}", quorumId, peers);
+                LOG.info("Creating replicator instance for {} peers {}", quorumId, peers);
                 Mooring logMooring = logModule.getMooring(quorumId);
                 ReplicatorInstance instance =
                         new ReplicatorInstance(fiberFactory.create(),
@@ -527,7 +527,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
                                                 message.optError);
                                         replicatorInstances.remove(message.instance.getQuorumId());
                                     } else {
-                                        LOG.debug("replicator indicates state change {}", message);
+                                        LOG.info("replicator indicates state change {}", message);
                                     }
                                 }
                             });
