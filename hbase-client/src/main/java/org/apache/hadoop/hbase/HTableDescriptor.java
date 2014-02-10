@@ -258,7 +258,7 @@ public class HTableDescriptor implements WritableComparable<HTableDescriptor> {
    * <em> INTERNAL </em> Private constructor used internally creating table descriptors for
    * catalog tables, <code>hbase:meta</code> and <code>-ROOT-</code>.
    */
-  protected HTableDescriptor(final TableName name, HColumnDescriptor[] families) {
+  public HTableDescriptor(final TableName name, HColumnDescriptor[] families) {
     setName(name);
     for(HColumnDescriptor descriptor : families) {
       this.families.put(descriptor.getName(), descriptor);
@@ -1328,6 +1328,24 @@ public class HTableDescriptor implements WritableComparable<HTableDescriptor> {
     return new Path(rootdir, new Path(HConstants.BASE_NAMESPACE_DIR,
               new Path(name.getNamespaceAsString(), new Path(name.getQualifierAsString()))));
   }
+
+
+  public static final TableName ROOT_TABLE_NAME =
+            TableName.valueOf(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR, "root");
+  public static final HTableDescriptor ROOT_TABLEDESC = new HTableDescriptor(
+            ROOT_TABLE_NAME,
+            new HColumnDescriptor[] {
+                    new HColumnDescriptor(HConstants.CATALOG_FAMILY)
+                            .setMaxVersions(10)
+                            .setInMemory(true)
+                            .setBlocksize(8 * 1024)
+                            .setScope(HConstants.REPLICATION_SCOPE_LOCAL)
+                            .setBloomFilterType(BloomType.NONE)
+            });
+    static {
+        ROOT_TABLEDESC.setRootRegion(true);
+    }
+
 
   /** Table descriptor for <code>hbase:meta</code> catalog table */
   public static final HTableDescriptor META_TABLEDESC = new HTableDescriptor(
