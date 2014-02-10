@@ -73,24 +73,25 @@ public class C5DB extends AbstractService implements C5Server {
 
         String username = System.getProperty("user.name");
 
-
-        String cfgPath = "c5-" + System.currentTimeMillis();
-
-        //  args = "nodeId", if none, then randomly generate i guess?
+        // nodeId is random initially.  Then if provided on args, we take that.
+        Random rnd0 = new Random();
+        long nodeId = rnd0.nextLong();
 
         if (args.length > 0) {
-            cfgPath = args[0];
+            nodeId = Long.parseLong(args[0]);
         }
 
-        ConfigDirectory cfgDir = new ConfigDirectory(Paths.get("/tmp", username, cfgPath));
+        String cfgPath = "/tmp/" + username + "/c5-" + Long.toString(nodeId);
 
-        // manually set the node id into the file.
-        if (args.length > 1) {
-            cfgDir.setNodeIdFile(args[1]);
+        // use system properties for other config so we dont end up writing a whole command line
+        // parse framework.
+        String reqCfgPath = System.getProperty("c5.cfgPath");
+        if (reqCfgPath != null) {
+            cfgPath = reqCfgPath;
         }
-        if (args.length > 2) {
-            cfgDir.setClusterNameFile(args[2]);
-        }
+
+        ConfigDirectory cfgDir = new ConfigDirectory(Paths.get(cfgPath));
+        cfgDir.setNodeIdFile(Long.toString(nodeId));
 
         instance = new C5DB(cfgDir);
         instance.start();
@@ -131,9 +132,7 @@ public class C5DB extends AbstractService implements C5Server {
         }
 
         if (toNodeId == 0) {
-            Random r = new Random();
-            toNodeId = r.nextLong();
-            configDirectory.setNodeIdFile(Long.toString(toNodeId));
+            throw new RuntimeException("NodeId not set");
         }
 
         this.nodeId = toNodeId;
@@ -189,7 +188,6 @@ public class C5DB extends AbstractService implements C5Server {
             }
         });
         return future;
-
     }
 
     @Override

@@ -27,6 +27,7 @@
 (def java-bin (.getPath (file java-home "bin" "java")))
 (def c5main-class (.getName C5DB))
 
+;;; Process 'management'
 (def all-processes (atom {}))
 
 (defn stash-new-process [nodeId process]
@@ -47,16 +48,12 @@
         (doseq [x (vals exist)] (.destroy x))
         (reset! all-processes {})))
 
-(defn run-dir-fragment [node-id]
-    "returns a run-directory fragment
-    eg: c5-12345"
-    (str "c5-" node-id))
+;;; Process configuration, command line, and start functions
 
 (defn run-directory [node-id]
     "The full directory a node-id will run in
     eg: /tmp/${user}/c5-123456"
-    (str "/tmp/" username "/" (run-dir-fragment node-id)))
-
+    (str "/tmp/" username "/" "c5-" node-id))
 
 (defn slf4j-args [node-id]
     "Returns the slf4j default arguments, requires the run-path for logging"
@@ -64,36 +61,71 @@
      (str "-Dorg.slf4j.simpleLogger.logFile=" (run-directory node-id) "/" node-id ".log")
      "-Dorg.slf4j.simpleLogger.showDateTime=true"])
 
+(defn debug-args [node-id]
+    "Providers the JVM debug arguments"
+    ; if the node-id is too big, we probably have a problem, cant bind to huge addresses
+    (let [address (+ 5000 node-id)]
+            (str "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=" address)))
+
 (defn run-logfile [node-id]
     "The full path to the logfile"
     (str (run-directory node-id) "/" node-id ".log"))
 
-(defn tail-log [node-id]
-    (let [node-id-str (str node-id)
-          logfile (run-logfile node-id-str)]
-        (sh "/usr/bin/open" logfile)))
-
 (defn run-c5db [node-id & log-level]
     "Runs a C5DB for the given node-id and log-level, defaults to 'debug' log"
     (let [node-id-str (str node-id)
+          ;; TODO use this argument later.
           log-level-str (or log-level "debug")
-          run-dir (run-directory node-id-str)
-          ; this is just the top-level directory, eg 'c5-NODEID' excluding the /tmp/$user portion
-          run-dir-frag (run-dir-fragment node-id-str)
           ; side effects here, otherwise slf4j will fail to log.
           create-run-dir (clojure.java.io/make-parents (run-logfile node-id-str))
-          log-args (slf4j-args node-id-str)
-          args (flatten [java-bin log-args "-cp" inherited-class-path c5main-class run-dir-frag node-id-str])
+          args (flatten [java-bin
+                         (slf4j-args node-id-str)
+                         (debug-args node-id)
+                         "-cp"
+                         inherited-class-path
+                         c5main-class
+                         node-id-str])
           process-builder (.inheritIO (ProcessBuilder. (list* args)))
           process (.start process-builder)]
         (stash-new-process node-id-str process)
         process
         ))
 
+(defn tail-log [node-id]
+    (let [node-id-str (str node-id)
+          logfile (run-logfile node-id-str)]
+        (sh "/usr/bin/open" logfile)))
+
 (defn get-path [p & more]
     (Paths/get p (into-array String more)))
 
-;; Java compatability here
+;;; Easy to use functions
+
+(defn start [node-ids]
+    "Start a bunch of c5 processes based on the seq of node ids provided. We will also open/tail the logfile"
+    (doall (map run-c5db node-ids))
+    (doall (map tail-log node-ids)))
+
+(defn stop []
+    (killall-process))
+
+(defn kill [node-id]
+    (if (seq? node-id)
+        (doall (map remove-process node-id))
+        (remove-process node-id)))
+
+(defn killall []
+    "alias for killall-process"
+    (killall-process))
+
+(defn tail [node-id]
+    (if (seq? node-id)
+        (doall (map tail-log node-id))
+        (tail-log node-id)))
+
+
+
+;;; Calling into c5 code such as ConfigDirectory, etc
 
 (defn c5-cfg
     [run-name]
