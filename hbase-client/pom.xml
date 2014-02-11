@@ -44,7 +44,6 @@
       <plugin>
         <!--Make it so assembly:single does nothing in here-->
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven.assembly.version}</version>
         <configuration>
           <skipAssembly>true</skipAssembly>
         </configuration>
@@ -77,16 +76,16 @@
   <dependencies>
     <!-- Intra-project dependencies -->
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-common</artifactId>
       <type>test-jar</type>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-protocol</artifactId>
     </dependency>
     <!-- General dependencies -->
