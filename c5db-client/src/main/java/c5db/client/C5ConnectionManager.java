@@ -36,38 +36,32 @@ public enum C5ConnectionManager {
       new ConcurrentHashMap<>();
   private final Bootstrap bootstrap = new Bootstrap();
 
-  C5ConnectionManager() {
-    bootstrap.group(group)
-        .channel(NioSocketChannel.class)
-        .handler(new RequestInitializer());
-  }
-
   String getHostPortHash(String host, int port) {
     return host + ":" + port;
   }
 
   public Channel connect(String host, int port)
       throws InterruptedException, IOException {
-
-    if (host.isEmpty() || port == 0) {
-      throw new IOException("Invalid host and/or port provided " +
-          "host: " + host + " port: " + port);
-    } else {
-      return bootstrap
-          .connect(host, port)
-          .sync()
-          .channel();
-    }
+    bootstrap.group(group).channel(NioSocketChannel.class).handler(new C5ConnectionInitializer(host, port));
+    ChannelFuture future = bootstrap.connect(host, port);
+    return future.sync().channel();
   }
-
   //TODO thread safe?
   public Channel getOrCreateChannel(String host, int port)
       throws IOException, InterruptedException {
     String hash = getHostPortHash(host, port);
     if (!regionChannelMap.containsKey(hash)) {
-      regionChannelMap.put(hash, connect(host, port));
+      Channel channel = connect(host, port);
+      regionChannelMap.put(hash, channel);
     }
     return regionChannelMap.get(hash);
+  }
+
+  public ChannelFuture closeChannel(String host, int port) {
+    String hash = getHostPortHash(host, port);
+
+    Channel channel = regionChannelMap.get(hash);
+    return channel.close();
   }
 
   public void close() throws InterruptedException {
