@@ -19,13 +19,22 @@ package c5db.client.codec;
 import c5db.client.generated.ClientProtos;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import org.mortbay.log.Log;
 
 import java.util.List;
 
 public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<ClientProtos.Call> {
+  public final WebSocketClientHandshaker handShaker;
+  public WebsocketProtostuffEncoder(WebSocketClientHandshaker handShaker) {
+    this.handShaker = handShaker;
+  }
+
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
                         ClientProtos.Call call,
@@ -34,5 +43,4 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<ClientPr
     BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
   }
-
 }
