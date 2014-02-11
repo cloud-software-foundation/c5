@@ -42,7 +42,6 @@ limitations under the License.
             <plugin>
                 <!--Make it so assembly:single does nothing in here-->
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven.assembly.version}</version>
                 <configuration>
                     <skipAssembly>true</skipAssembly>
                 </configuration>
@@ -75,11 +74,11 @@ limitations under the License.
 
     <dependencies>
         <dependency>
-            <groupId>c5db</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>hbase-hadoop-compat</artifactId>
         </dependency>
         <dependency>
-            <groupId>c5db</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>hbase-hadoop-compat</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
