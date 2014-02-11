@@ -156,7 +156,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
     @FiberOnly
     private void startBootstrap(final RegistryFile registryFile) throws IOException {
-        LOG.info("Waiting to find at least 3 nodes to bootstrap with");
+        LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
 
         final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
             @Override
@@ -186,7 +186,7 @@ public class TabletService extends AbstractService implements TabletModule {
         List<Long> peers = new ArrayList<>(nodes.keySet());
 
         LOG.debug("Found a bunch of peers: {}", peers);
-        if (peers.size() < 1)
+        if (peers.size() < getMinQuorumSize())
             return;
 
         // bootstrap the frickin thing.
@@ -378,4 +378,12 @@ public class TabletService extends AbstractService implements TabletModule {
     public int port() {
         return 0;
     }
+
+  public int getMinQuorumSize() {
+    if (System.getProperties().containsKey("singleNode")) {
+      return 1;
+    } else {
+      return 3;
+    }
+  }
 }
