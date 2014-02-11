@@ -37,6 +37,7 @@ import org.apache.hadoop.hbase.client.RetriesExhaustedWithDetailsException;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import sun.plugin2.message.Message;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -51,7 +52,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
             = C5ConnectionManager.INSTANCE;
     private final ClientScannerManager clientScannerManager
             = ClientScannerManager.INSTANCE;
-    private RequestHandler handler;
+    private MessageHandler handler;
     private AtomicLong commandId = new AtomicLong(0);
     private Channel channel;
 
@@ -66,11 +67,9 @@ public class C5Table extends C5Shim implements AutoCloseable {
     public C5Table(ByteString tableName, int port) throws IOException, InterruptedException {
         super(tableName);
 
-        channel = c5ConnectionManager.getOrCreateChannel("localhost", port);
-
-        handler = channel
-                .pipeline()
-                .get(RequestHandler.class);
+      String hostname = "localhost";
+      channel = c5ConnectionManager.getOrCreateChannel(hostname, port);
+      handler = channel.pipeline().get(MessageHandler.class);
     }
 
     @Override
@@ -156,7 +155,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         try {
             handler.call(call, future, channel);
             Long scannerId = future.get();
-            return clientScannerManager.getOrCreate(scannerId);
+          /// TODO ADD A CREATE as well
+            return clientScannerManager.get(scannerId);
         } catch (InterruptedException | ExecutionException e) {
             throw new IOException(e);
         }

@@ -16,6 +16,8 @@
  */
 package c5db.client.scanner;
 
+import io.netty.channel.Channel;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,11 +27,18 @@ public enum ClientScannerManager {
   private final ConcurrentHashMap<Long, ClientScanner> scannerMap =
       new ConcurrentHashMap<>();
 
-  public ClientScanner getOrCreate(long scannerId)
-      throws IOException {
-    if (!scannerMap.containsKey(scannerId)) {
-      scannerMap.put(scannerId, new ClientScanner(scannerId));
+  public ClientScanner createAndGet(Channel channel, long scannerId) throws IOException {
+    if (hasScanner(scannerId)) {
+      throw new IOException("Scanner already created");
     }
+
+    System.out.println("creating scanner" + scannerId);
+    ClientScanner scanner = new ClientScanner(channel, scannerId);
+    scannerMap.put(scannerId, scanner);
+    return scanner;
+  }
+
+  public ClientScanner get(long scannerId) {
     return scannerMap.get(scannerId);
   }
 
