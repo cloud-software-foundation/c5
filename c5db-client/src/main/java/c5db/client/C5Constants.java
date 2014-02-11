@@ -36,4 +36,5 @@ public class C5Constants {
   public static final String TMP_DIR = "/tmp/";
   public static final int AMOUNT_OF_FLUSH_PER_OLD_LOG_CLEAR = 30;
   public static final long OLD_LOG_CLEAR_AGE = 300;
+  public static final long TIMEOUT = 10000;
 }
