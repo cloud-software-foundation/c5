@@ -26,6 +26,8 @@
 (def java-home (System/getProperty "java.home"))
 (def java-bin (.getPath (file java-home "bin" "java")))
 (def c5main-class (.getName C5DB))
+(def os-x (.contains (System/getProperty "os.name") "OS X"))
+(def linux (.contains (System/getProperty "os.name") "Linux"))
 
 ;;; Process 'management'
 (def all-processes (atom {}))
@@ -94,7 +96,11 @@
 (defn tail-log [node-id]
     (let [node-id-str (str node-id)
           logfile (run-logfile node-id-str)]
-        (sh "/usr/bin/open" logfile)))
+        (cond
+            os-x (sh "/usr/bin/open" logfile)
+            linux (let [command ["x-terminal-emulator" "-e" "tail" "-f" logfile]
+                        process-builder (.inheritIO (ProcessBuilder. (list* command)))]
+                      (.start process-builder)))))
 
 (defn get-path [p & more]
     (Paths/get p (into-array String more)))
