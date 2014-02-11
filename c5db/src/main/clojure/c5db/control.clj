@@ -110,19 +110,24 @@
     (killall-process))
 
 (defn kill [node-id]
-    (if (seq? node-id)
-        (doall (map remove-process node-id))
-        (remove-process node-id)))
+  (let [mult #(doall (map remove-process node-id))
+        sing #(remove-process node-id)]
+    (cond
+      (vector? node-id) (mult)
+      (seq? node-id) (mult)
+      :else (sing))))
 
 (defn killall []
     "alias for killall-process"
     (killall-process))
 
 (defn tail [node-id]
-    (if (seq? node-id)
-        (doall (map tail-log node-id))
-        (tail-log node-id)))
-
+  (let [mult #(doall (map tail-log node-id))
+        sing #(tail-log node-id)]
+  (cond
+    (vector? node-id) (mult)
+    (seq? node-id) (mult)
+    :else (sing))))
 
 
 ;;; Calling into c5 code such as ConfigDirectory, etc
