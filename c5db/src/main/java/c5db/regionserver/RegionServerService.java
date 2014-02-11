@@ -16,7 +16,8 @@
  */
 package c5db.regionserver;
 
-import c5db.client.generated.ClientProtos;
+import c5db.codec.WebsocketProtostuffDecoder;
+import c5db.codec.WebsocketProtostuffEncoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -35,10 +36,10 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.protobuf.ProtobufDecoder;
-import io.netty.handler.codec.protobuf.ProtobufEncoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -88,28 +89,27 @@ public class RegionServerService extends AbstractService implements RegionServer
                     @Override
                     public void onSuccess(C5Module result) {
                         tabletModule = (TabletModule) result;
+                      bootstrap.group(acceptGroup, workerGroup)
+                          .option(ChannelOption.SO_REUSEADDR, true)
+                          .childOption(ChannelOption.TCP_NODELAY, true)
+                          .channel(NioServerSocketChannel.class)
+                          .childHandler(
+                              new ChannelInitializer<SocketChannel>() {
+                                @Override
+                                protected void initChannel(SocketChannel ch) throws Exception {
+                                  ChannelPipeline p = ch.pipeline();
+                                  p.addLast(
+                                      new HttpRequestDecoder(),
+                                      new HttpObjectAggregator(65536),
+                                      new WebSocketServerProtocolHandler("/websocket"),
+                                      new WebsocketProtostuffDecoder(),
+                                      new HttpResponseEncoder(),
+                                      new WebsocketProtostuffEncoder(),
+                                      new C5ServerHandler(RegionServerService.this));
 
-                        bootstrap.group(acceptGroup, workerGroup)
-                                .option(ChannelOption.SO_REUSEADDR, true)
-                                .childOption(ChannelOption.TCP_NODELAY, true)
-                                .channel(NioServerSocketChannel.class)
-                                .childHandler(
-                                        new ChannelInitializer<SocketChannel>() {
-                                            @Override
-                                            protected void initChannel(SocketChannel ch) throws Exception {
-                                                ChannelPipeline p = ch.pipeline();
-
-                                                p.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());
-                                                p.addLast("protobufDecoder",
-                                                        new ProtobufDecoder(ClientProtos.Call.getDefaultInstance()));
-
-                                                p.addLast("frameEncoder", new ProtobufVarint32LengthFieldPrepender());
-                                                p.addLast("protobufEncoder", new ProtobufEncoder());
-
-                                                p.addLast("handler", new C5ServerHandler(RegionServerService.this));
-                                            }
-                                        }
-                                );
+                                }
+                              }
+                          );
 
                         bootstrap.bind(port).addListener(new ChannelFutureListener() {
                             @Override

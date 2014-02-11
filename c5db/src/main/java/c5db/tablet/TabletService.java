@@ -190,7 +190,7 @@ public class TabletService extends AbstractService implements TabletModule {
         List<Long> peers = new ArrayList<>(nodes.keySet());
 
         LOG.debug("Found a bunch of peers: {}", peers);
-        if (peers.size() < 3)
+        if (peers.size() < 1)
             return;
 
         if (rootStarted) return;
