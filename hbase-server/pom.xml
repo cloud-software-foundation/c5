@@ -277,24 +277,24 @@
   <dependencies>
     <!-- Intra-project dependencies -->
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-protocol</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-prefix-tree</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-common</artifactId>
       <type>test-jar</type>
     </dependency>
@@ -307,22 +307,22 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
@@ -360,10 +360,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.zookeeper</groupId>

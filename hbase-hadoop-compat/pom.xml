@@ -46,7 +46,6 @@
             <plugin>
                 <!--Make it so assembly:single does nothing in here-->
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven.assembly.version}</version>
                 <configuration>
                     <skipAssembly>true</skipAssembly>
                 </configuration>
@@ -73,10 +72,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-<!--            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-            </plugin>-->
         </plugins>
     </build>
 

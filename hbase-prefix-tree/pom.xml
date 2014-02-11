@@ -48,7 +48,6 @@
       <plugin>
         <!--Make it so assembly:single does nothing in here-->
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven.assembly.version}</version>
         <configuration>
           <skipAssembly>true</skipAssembly>
         </configuration>
@@ -75,15 +74,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>hbase-hadoop-compat</artifactId>
     </dependency>
     <dependency>
-      <groupId>c5db</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>${compat.module}</artifactId>
       <version>${project.version}</version>
     </dependency>
