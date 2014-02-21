@@ -223,7 +223,7 @@ public class OLogShim implements Syncable, HLog {
         return 0;
     }
 
-    private Channel<ReplicationModule.ReplicatorInstanceStateChange> stateChangeChannel = new MemoryChannel<>();
+    private Channel<ReplicationModule.ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
     private Channel<ReplicationModule.IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
 
 //    private ReplicatorInstance getReplicator(HRegionInfo info) {

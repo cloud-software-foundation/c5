@@ -349,8 +349,6 @@ public class TabletService extends AbstractService implements TabletModule {
         notifyStopped();
     }
 
-
-
     private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
 
 
