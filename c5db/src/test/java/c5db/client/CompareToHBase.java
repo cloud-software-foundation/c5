@@ -28,6 +28,8 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class CompareToHBase {
   private static HTable hTable;
@@ -41,14 +43,14 @@ public class CompareToHBase {
     conf = HBaseConfiguration.create();
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, ExecutionException {
     CompareToHBase testingUtil = new CompareToHBase();
     hTable = new HTable(conf, tableName.toByteArray());
     testingUtil.compareToHBaseScan();
     hTable.close();
   }
 
-  public void compareToHBaseScan() throws IOException, InterruptedException {
+  public void compareToHBaseScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
     C5Table table = new C5Table(tableName);
 
     long As, Ae, Bs, Be;

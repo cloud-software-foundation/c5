@@ -37,9 +37,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -50,112 +50,107 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class RegionServerService extends AbstractService implements RegionServerModule {
-    private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
-    private final PoolFiberFactory fiberFactory;
-    private final Fiber fiber;
-    private final NioEventLoopGroup acceptGroup;
-    private final NioEventLoopGroup workerGroup;
-    private final int port;
-    private final C5Server server;
-    private final ServerBootstrap bootstrap = new ServerBootstrap();
+  private final PoolFiberFactory fiberFactory;
+  private final Fiber fiber;
+  private final NioEventLoopGroup acceptGroup;
+  private final NioEventLoopGroup workerGroup;
+  private final int port;
+  private final C5Server server;
+  private final ServerBootstrap bootstrap = new ServerBootstrap();
 
-    TabletModule tabletModule;
 
-    public RegionServerService(PoolFiberFactory fiberFactory,
-                               NioEventLoopGroup acceptGroup,
-                               NioEventLoopGroup workerGroup,
-                               int port,
-                               C5Server server) {
-        this.fiberFactory = fiberFactory;
-        this.acceptGroup = acceptGroup;
-        this.workerGroup = workerGroup;
-        this.port = port;
-        this.server = server;
+  TabletModule tabletModule;
 
-        this.fiber = fiberFactory.create();
-    }
+  public RegionServerService(PoolFiberFactory fiberFactory,
+                             NioEventLoopGroup acceptGroup,
+                             NioEventLoopGroup workerGroup,
+                             int port,
+                             C5Server server) {
+    this.fiberFactory = fiberFactory;
+    this.acceptGroup = acceptGroup;
+    this.workerGroup = workerGroup;
+    this.port = port;
+    this.server = server;
 
-    @Override
-    protected void doStart() {
-        fiber.start();
+    this.fiber = fiberFactory.create();
+  }
 
-        fiber.execute(new Runnable() {
-            @Override
-            public void run() {
-                // we need the tablet module:
-                ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
-                Futures.addCallback(f, new FutureCallback<C5Module>() {
-                    @Override
-                    public void onSuccess(C5Module result) {
-                        tabletModule = (TabletModule) result;
-                      bootstrap.group(acceptGroup, workerGroup)
-                          .option(ChannelOption.SO_REUSEADDR, true)
-                          .childOption(ChannelOption.TCP_NODELAY, true)
-                          .channel(NioServerSocketChannel.class)
-                          .childHandler(
-                              new ChannelInitializer<SocketChannel>() {
-                                @Override
-                                protected void initChannel(SocketChannel ch) throws Exception {
-                                  ChannelPipeline p = ch.pipeline();
-                                  p.addLast(
-                                      new HttpRequestDecoder(),
-                                      new HttpObjectAggregator(65536),
-                                      new WebSocketServerProtocolHandler("/websocket"),
-                                      new WebsocketProtostuffDecoder(),
-                                      new HttpResponseEncoder(),
-                                      new WebsocketProtostuffEncoder(),
-                                      new C5ServerHandler(RegionServerService.this));
+  @Override
+  protected void doStart() {
+    fiber.start();
 
-                                }
-                              }
-                          );
-
-                        bootstrap.bind(port).addListener(new ChannelFutureListener() {
-                            @Override
-                            public void operationComplete(ChannelFuture future) throws Exception {
-                                if (future.isSuccess()) {
-                                    notifyStarted();
-                                } else {
-                                    LOG.error("Unable to find Region Server to {} {}", port, future.cause());
-                                    notifyFailed(future.cause());
-                                }
-                            }
-                        });
-
+    fiber.execute(new Runnable() {
+      @Override
+      public void run() {
+        // we need the tablet module:
+        ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
+        Futures.addCallback(f, new FutureCallback<C5Module>() {
+          @Override
+          public void onSuccess(C5Module result) {
+            tabletModule = (TabletModule) result;
+            bootstrap.group(acceptGroup, workerGroup)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                      @Override
+                      protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
+                        p.addLast(new HttpServerCodec(),
+                            new HttpObjectAggregator(65536),
+                            new WebsocketProtostuffDecoder("/websocket"));
+                        p.addLast(new WebsocketProtostuffEncoder(), new C5ServerHandler(RegionServerService.this));
+                      }
                     }
+                );
 
-                    @Override
-                    public void onFailure(Throwable t) {
-                        notifyFailed(t);
-                    }
-                }, fiber);
-            }
-        });
-    }
+            bootstrap.bind(port).addListener(new ChannelFutureListener() {
+              @Override
+              public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()) {
+                  notifyStarted();
+                } else {
+                  LOG.error("Unable to find Region Server to {} {}", port, future.cause());
+                  notifyFailed(future.cause());
+                }
+              }
+            });
+          }
 
-    @Override
-    protected void doStop() {
-        notifyStopped();
-    }
+          @Override
+          public void onFailure(Throwable t) {
+            notifyFailed(t);
+          }
+        }, fiber);
+      }
+    });
+  }
 
-    @Override
-    public ModuleType getModuleType() {
-        return ModuleType.RegionServer;
-    }
+  @Override
+  protected void doStop() {
+    notifyStopped();
+  }
 
-    @Override
-    public boolean hasPort() {
-        return true;
-    }
+  @Override
+  public ModuleType getModuleType() {
+    return ModuleType.RegionServer;
+  }
 
-    @Override
-    public int port() {
-        return port;
-    }
+  @Override
+  public boolean hasPort() {
+    return true;
+  }
 
-    public HRegion getOnlineRegion(String regionName) {
-        // TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
-        return tabletModule.getTablet(regionName);
-    }
+  @Override
+  public int port() {
+    return port;
+  }
+
+  public HRegion getOnlineRegion(String regionName) {
+    // TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
+    return tabletModule.getTablet(regionName);
+  }
 }
