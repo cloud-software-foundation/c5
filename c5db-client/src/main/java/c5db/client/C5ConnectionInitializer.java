@@ -32,6 +32,8 @@ import io.netty.handler.logging.LoggingHandler;
 import org.mortbay.log.Log;
 
 import java.net.URI;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -54,7 +56,7 @@ public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     pipeline.addLast("message-handler", new MessageHandler());
   }
 
-  public void syncOnHandshake() throws InterruptedException {
-      decoder.handshakeFuture.sync();
+  public void syncOnHandshake() throws InterruptedException, TimeoutException, ExecutionException {
+      decoder.syncOnHandshake();
   }
 }
