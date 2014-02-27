@@ -61,7 +61,7 @@ public class C5ConnectionManager {
     return host + ":" + port;
   }
 
-  public Channel connect(String host, int port) throws InterruptedException, IOException {
+  public Channel connect(String host, int port) throws InterruptedException, IOException, TimeoutException, ExecutionException {
     WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(
         uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders());
     C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
