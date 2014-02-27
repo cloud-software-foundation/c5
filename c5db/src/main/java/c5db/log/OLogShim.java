@@ -18,8 +18,8 @@ package c5db.log;
 
 import c5db.generated.Log;
 import c5db.interfaces.ReplicationModule;
-import c5db.replication.RaftInfoPersistence;
-import c5db.replication.RaftInformationInterface;
+import c5db.replication.ReplicatorInfoPersistence;
+import c5db.replication.ReplicatorInformationInterface;
 import com.google.protobuf.ByteString;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -41,7 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A distributed WriteAheadLog using RAFT
+ * A distributed WriteAheadLog using c5's replication algorithm
  */
 public class OLogShim implements Syncable, HLog {
     private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
@@ -160,7 +160,7 @@ public class OLogShim implements Syncable, HLog {
     }
 
     @Override
-    // TODO this is a problematic call because RAFT is in charge of the log-ids. We must
+    // TODO this is a problematic call because the replication algorithm is in charge of the log-ids. We must
     // TODO  depreciate this call, and bubble the consequences thruout the system.
     public void setSequenceNumber(long newValue) {
         for (long id = this.logSeqNum.get(); id < newValue &&
@@ -278,7 +278,7 @@ public class OLogShim implements Syncable, HLog {
         return 0;
     }
 
-    public static class Info implements RaftInformationInterface {
+    public static class Info implements ReplicatorInformationInterface {
 
         public final long offset;
 
@@ -307,7 +307,7 @@ public class OLogShim implements Syncable, HLog {
         }
     }
 
-    public static class Persister implements RaftInfoPersistence {
+    public static class Persister implements ReplicatorInfoPersistence {
         @Override
         public long readCurrentTerm(String quorumId) {
             return 0;  //To change body of implemented methods use File | Settings | File Templates.
