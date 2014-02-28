@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 
@@ -67,9 +68,10 @@ import java.util.concurrent.ExecutionException;
  *
  */
 public class TabletService extends AbstractService implements TabletModule {
-    private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
+  public static final int INITIALIZATION_TIME = 1000;
 
-    private final PoolFiberFactory fiberFactory;
+  private final PoolFiberFactory fiberFactory;
     private final Fiber fiber;
     private final C5Server server;
     // TODO bring this into this class, and not have an external class.
@@ -90,8 +92,16 @@ public class TabletService extends AbstractService implements TabletModule {
     @Override
     public HRegion getTablet(String tabletName) {
         // TODO ugly hack fix eventually
+        while (onlineRegions.size() == 0 ){
+          try {
+            LOG.error("Waiting for regions to come online");
+            Thread.sleep(INITIALIZATION_TIME);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
         return onlineRegions.values().iterator().next();
-    }
+      }
 
     @Override
     protected void doStart() {
