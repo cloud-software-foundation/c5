@@ -16,6 +16,7 @@
  */
 package c5db;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,12 @@ public class ConfigDirectory {
 
     public final static String nodeIdFile = "nodeId";
     public final static String clusterNameFile = "clusterName";
+
+    public final static String quorumsSubDir = "repl";
+    public final static String peerIdsFile = "peerIds";
+    public final static String regionInfoFile = "region-info";
+    public final static String persisterFile = "replication-data";
+
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     public final Path baseConfigPath;
@@ -90,37 +98,39 @@ public class ConfigDirectory {
         return getFirstLineOfFile(clusterNamePath);
     }
 
-    public void createSubDir(String subDir) throws IOException {
-        Path dirPath = baseConfigPath.resolve(subDir);
-        if (Files.isRegularFile(dirPath)) {
-            throw new IOException("subDir is a regular file! It needs to be a directory: " + dirPath);
-        }
-        // not a regular file.
-        if (Files.isDirectory(dirPath) && !Files.isWritable(dirPath)) {
-            throw new IOException("subDir is a directory but not writable by me: " + dirPath);
-        }
+    public void createSubDir(Path dirRelPath) throws IOException {
+      if (dirRelPath.isAbsolute()) {
+        throw new IllegalArgumentException("dirRelPath should a relative path with respect to the base config directory");
+      }
+      Path dirPath = this.baseConfigPath.resolve(dirRelPath);
+      if (Files.isRegularFile(dirPath)) {
+        throw new IOException("dirPath is a regular file! It needs to be a directory: " + dirPath);
+      }
+      // not a regular file.
+      if (Files.isDirectory(dirPath) && !Files.isWritable(dirPath)) {
+        throw new IOException("dirPath is a directory but not writable by me: " + dirPath);
+      }
 
-        if (Files.isDirectory(dirPath)) {
-            return;
-        }
-        Files.createDirectory(dirPath);
+      if (Files.isDirectory(dirPath)) {
+        return;
+      }
+      Files.createDirectories(dirPath);
     }
 
-    public void writeFile(String subDir, String fileName, List<String> data) throws IOException {
-        // create the subdir as necessary:
-        createSubDir(subDir);
-        Path filePath = baseConfigPath.resolve(subDir).resolve(fileName);
-        Files.write(filePath, data, UTF_8);
+    public void writeFile(Path dirRelPath, String fileName, List<String> data) throws IOException {
+      createSubDir(dirRelPath);
+      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
+      Files.write(filePath, data, UTF_8);
     }
 
-    public List<String> readFile(String subDir, String fileName) throws IOException {
-        Path filePath = baseConfigPath.resolve(subDir).resolve(fileName);
-        try {
-            return Files.readAllLines(filePath, UTF_8);
-        } catch (NoSuchFileException ex) {
-            // file doesnt exist, return empty:
-            return new ArrayList<>();
-        }
+    public List<String> readFile(Path dirRelPath, String fileName) throws IOException {
+      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
+      try {
+        return Files.readAllLines(filePath, UTF_8);
+      } catch (NoSuchFileException ex) {
+        // file doesnt exist, return empty:
+        return new ArrayList<>();
+      }
     }
 
     private String getFirstLineOfFile(Path path) throws IOException {
@@ -150,5 +160,22 @@ public class ConfigDirectory {
         List<String> lines = new ArrayList<>(1);
         lines.add(data);
         Files.write(path, lines, UTF_8);
+    }
+
+    public Path getQuorumRelPath(String quorumId) {
+      return Paths.get(quorumsSubDir, quorumId);
+    }
+
+    public void writePeersToFile(String quorumId, List<Long> peers) throws IOException {
+      //noinspection Convert2MethodRef
+      List<String> peerIdsStrings = Lists.transform(peers, (p) -> p.toString());
+      writeFile(getQuorumRelPath(quorumId), peerIdsFile, peerIdsStrings);
+    }
+
+    public void writeBinaryData(String quorumId, byte[] data) throws IOException {
+      Path quorumRelPath = getQuorumRelPath(quorumId);
+      createSubDir(quorumRelPath);
+      Path filePath = baseConfigPath.resolve(quorumRelPath).resolve(regionInfoFile);
+      Files.write(filePath, data);
     }
 }
