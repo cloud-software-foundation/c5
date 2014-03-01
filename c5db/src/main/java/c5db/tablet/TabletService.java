@@ -17,6 +17,7 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
+import c5db.ConfigDirectory;
 import c5db.generated.Log;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -60,7 +61,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 
@@ -251,8 +251,11 @@ public class TabletService extends AbstractService implements TabletModule {
                              final ImmutableList<Long> peers) {
         LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
+        String quorumId = regionInfo.getRegionNameAsString();
+        ConfigDirectory serverConfigDir = server.getConfigDirectory();
+
         ListenableFuture<ReplicationModule.Replicator> future =
-                replicationModule.createReplicator(regionInfo.getRegionNameAsString(), peers);
+                replicationModule.createReplicator(quorumId, peers);
         Futures.addCallback(future, new FutureCallback<ReplicationModule.Replicator>() {
             @Override
             public void onSuccess(ReplicationModule.Replicator result) {
@@ -264,15 +267,17 @@ public class TabletService extends AbstractService implements TabletModule {
 
                     // default place for a region is....
                     // tableName/encodedName.
-                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(server.getConfigDirectory().baseConfigPath.toString()),
+                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.baseConfigPath.toString()),
                             regionInfo,
                             tableDescriptor,
                             shim,
                             conf,
                             null, null);
 
-                    onlineRegions.put(regionInfo.getRegionNameAsString(), region);
+                    onlineRegions.put(quorumId, region);
 
+                    serverConfigDir.writeBinaryData(quorumId, regionInfo.toDelimitedByteArray());
+                    serverConfigDir.writePeersToFile(quorumId, peers);
                     LOG.debug("Moving region to opened status: {}", regionInfo);
                     getTabletStateChanges().publish(new TabletStateChange(regionInfo,
                             region,
