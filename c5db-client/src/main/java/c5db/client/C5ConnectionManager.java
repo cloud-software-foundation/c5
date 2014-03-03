@@ -16,63 +16,106 @@
  */
 package c5db.client;
 
+import c5db.client.codec.WebsocketProtostuffEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import org.mortbay.log.Log;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-public enum C5ConnectionManager {
-  INSTANCE;
+public class C5ConnectionManager {
 
-  private final EventLoopGroup group = new NioEventLoopGroup();
-  private final ConcurrentHashMap<String, Channel> regionChannelMap =
-      new ConcurrentHashMap<>();
-  private final Bootstrap bootstrap = new Bootstrap();
+  RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
+  private Bootstrap bootstrap = new Bootstrap();
+  private EventLoopGroup group = new NioEventLoopGroup();
+  URI uri = null;
+
+  public C5ConnectionManager() {
+    bootstrap.group(group);
+
+
+    try {
+      uri = new URI("ws://0.0.0.0:8080/websocket");
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
+  }
 
   String getHostPortHash(String host, int port) {
     return host + ":" + port;
   }
 
-  public Channel connect(String host, int port)
-      throws InterruptedException, IOException {
-    bootstrap.group(group).channel(NioSocketChannel.class).handler(new C5ConnectionInitializer(host, port));
+  public Channel connect(String host, int port) throws InterruptedException, IOException, TimeoutException, ExecutionException {
+    WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(
+        uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders());
+    C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
+    bootstrap.channel(NioSocketChannel.class).handler(initializer);
+
     ChannelFuture future = bootstrap.connect(host, port);
-    return future.sync().channel();
+    Channel channel = future.sync().channel();
+    initializer.syncOnHandshake();
+    return channel;
   }
-  //TODO thread safe?
+
   public Channel getOrCreateChannel(String host, int port)
-      throws IOException, InterruptedException {
+      throws IOException, InterruptedException, TimeoutException, ExecutionException {
     String hash = getHostPortHash(host, port);
+    Channel channel;
     if (!regionChannelMap.containsKey(hash)) {
-      Channel channel = connect(host, port);
+      channel = connect(host, port);
       regionChannelMap.put(hash, channel);
+      Log.warn("Channel" + channel);
+      return channel;
     }
-    return regionChannelMap.get(hash);
+
+    channel = regionChannelMap.get(hash);
+
+    // Clear stale channels
+    if (!(channel.isOpen() && channel.isActive() && isHandShakeConnected(channel))) {
+      closeChannel(host, port);
+      channel.disconnect();
+
+      channel = getOrCreateChannel(host, port);
+    }
+    return channel;
   }
 
-  public ChannelFuture closeChannel(String host, int port) {
-    String hash = getHostPortHash(host, port);
+  private boolean isHandShakeConnected(Channel channel) {
+    ChannelPipeline p = channel.pipeline();
+    WebsocketProtostuffEncoder encoder = p.get(WebsocketProtostuffEncoder.class);
+    return (encoder.handShaker.isHandshakeComplete());
+  }
 
-    Channel channel = regionChannelMap.get(hash);
-    return channel.close();
+  public void closeChannel(String host, int port)
+      throws InterruptedException, ExecutionException, TimeoutException {
+    String hash = getHostPortHash(host, port);
+    regionChannelMap.remove(hash);
   }
 
   public void close() throws InterruptedException {
     List<ChannelFuture> channels = new ArrayList<>();
-
-    for (Channel channel : regionChannelMap.values()) {
+    for (Channel channel : regionChannelMap.getValues()) {
       ChannelFuture channelFuture = channel.close();
       channels.add(channelFuture);
     }
-    regionChannelMap.clear();
 
+    regionChannelMap.clear();
     for (ChannelFuture future : channels) {
       future.sync();
     }
