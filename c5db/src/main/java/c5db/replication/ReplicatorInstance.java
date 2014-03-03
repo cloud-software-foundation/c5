@@ -204,6 +204,56 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
         LOG.debug("{} primed {}", myId, this.quorumId);
     }
 
+    /** Initialize object into the specified state, for testing purposes */
+    ReplicatorInstance(final Fiber fiber,
+                       final long myId,
+                       final String quorumId,
+                       List<Long> peers,
+                       ReplicatorLogAbstraction log,
+                       ReplicatorInformationInterface info,
+                       ReplicatorInfoPersistence persister,
+                       RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel,
+                       final Channel<ReplicatorInstanceEvent> stateChangeChannel,
+                       final Channel<ReplicationModule.IndexCommitNotice> commitNoticeChannel,
+                       long term,
+                       State state,
+                       long lastCommittedIndex,
+                       long leaderId,
+                       long votedFor) {
+
+      this.fiber = fiber;
+      this.myId = myId;
+      this.quorumId = quorumId;
+      this.peers = ImmutableList.copyOf(peers);
+      this.sendRpcChannel = sendRpcChannel;
+      this.log = log;
+      this.info = info;
+      this.persister = persister;
+      this.stateChangeChannel = stateChangeChannel;
+      this.commitNoticeChannel = commitNoticeChannel;
+      this.myElectionTimeout = info.electionTimeout();
+      this.lastRPC = info.currentTimeMillis();
+
+      assert this.peers.contains(this.myId);
+      assert votedFor == 0 || this.peers.contains(votedFor);
+      assert leaderId == 0 || this.peers.contains(leaderId);
+
+      incomingChannel.subscribe(fiber, this::onIncomingMessage);
+      electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection,
+          info.electionCheckRate(), info.electionCheckRate(), TimeUnit.MILLISECONDS);
+
+      LOG.debug("{} primed {}", myId, this.quorumId);
+
+      setCurrentTerm(term);
+      this.myState = state;
+      this.lastCommittedIndex = lastCommittedIndex;
+      this.whosLeader = leaderId;
+      this.votedFor = votedFor;
+      if (state == State.LEADER) {
+        becomeLeader();
+      }
+    }
+
     private void failReplicatorInstance(Throwable e) {
         stateChangeChannel.publish(
                 new ReplicatorInstanceEvent(
@@ -389,7 +439,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
                         request.reply(reply);
 
                         // Notify and mark the last committed index.
-                        lastCommittedIndex = appendMessage.getCommitIndex();
+                        lastCommittedIndex = Math.min(appendMessage.getCommitIndex(), log.getLastIndex());
                         notifyLastCommitted();
                     }
 
@@ -808,11 +858,19 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
                 peerEntries.addAll(newLogEntries);
             }
 
+            final long prevLogIndex = peerNextIdx - 1;
+            final long prevLogTerm;
+            if (prevLogIndex == 0) {
+              prevLogTerm = 0;
+            } else {
+              prevLogTerm = log.getLogTerm(prevLogIndex);
+            }
+
             // catch them up so the next RPC wont over-send old junk.
             peersNextIndex.put(peer, lastIndexSent + 1);
 
             AppendEntries msg = new AppendEntries(
-                    currentTerm, myId, logLastIndex, logLastTerm,
+                    currentTerm, myId, prevLogIndex, prevLogTerm,
                     peerEntries,
                     lastCommittedIndex
             );
