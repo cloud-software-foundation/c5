@@ -19,22 +19,23 @@ package c5db.codec;
 import c5db.client.generated.ClientProtos;
 import com.google.protobuf.ZeroCopyLiteralByteString;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
 import java.util.List;
 
-public class WebsocketProtostuffDecoder extends MessageToMessageDecoder<BinaryWebSocketFrame> {
+public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
 
+  public WebsocketProtostuffDecoder(String websocketPath) {
+    super(websocketPath);
+  }
 
   @Override
-  protected void decode(ChannelHandlerContext channelHandlerContext,
-                        BinaryWebSocketFrame binaryWebSocketFrame,
-                        List<Object> objects) throws Exception {
-
-    objects.add(ClientProtos.Call.parseFrom(
-        ZeroCopyLiteralByteString.copyFrom(
-            binaryWebSocketFrame.content().nioBuffer())));
-
+  protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
+    if (frame instanceof BinaryWebSocketFrame) {
+      out.add(ClientProtos.Call.parseFrom(ZeroCopyLiteralByteString.copyFrom(frame.content().nioBuffer())));
+    }
+    super.decode(ctx, frame, out);
   }
 }

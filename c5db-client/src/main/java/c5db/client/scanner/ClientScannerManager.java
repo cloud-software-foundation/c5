@@ -32,7 +32,6 @@ public enum ClientScannerManager {
       throw new IOException("Scanner already created");
     }
 
-    System.out.println("creating scanner" + scannerId);
     ClientScanner scanner = new ClientScanner(channel, scannerId);
     scannerMap.put(scannerId, scanner);
     return scanner;

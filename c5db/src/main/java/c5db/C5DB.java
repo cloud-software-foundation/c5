@@ -95,8 +95,14 @@ public class C5DB extends AbstractService implements C5Server {
 
         instance = new C5DB(cfgDir);
         instance.start();
+      Random rnd = new Random();
 
-        Random rnd = new Random();
+      int regionServerPort;
+      if (System.getProperties().containsKey("regionServerPort")) {
+        regionServerPort = Integer.parseInt(System.getProperty("regionServerPort"));
+      } else {
+        regionServerPort = 8080 + rnd.nextInt(1000);
+      }
 
         // issue startup commands here that are common/we always want:
         StartModule startLog = new StartModule(ModuleType.Log, 0, "");
@@ -112,7 +118,7 @@ public class C5DB extends AbstractService implements C5Server {
         StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
         instance.getCommandChannel().publish(startTablet);
 
-        StartModule startRegionServer = new StartModule(ModuleType.RegionServer, 8080+rnd.nextInt(1000), "");
+        StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
         instance.getCommandChannel().publish(startRegionServer);
     }
 

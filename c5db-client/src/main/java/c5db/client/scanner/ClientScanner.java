@@ -48,14 +48,16 @@ import c5db.client.generated.HBaseProtos;
 import c5db.client.queue.WickedQueue;
 import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
+import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class ClientScanner extends AbstractClientScanner {
   final MessageHandler handler;
@@ -65,9 +67,9 @@ public class ClientScanner extends AbstractClientScanner {
       scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private boolean isClosed = true;
   private final C5ConnectionManager c5ConnectionManager
-      = C5ConnectionManager.INSTANCE;
-  private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
+      = new C5ConnectionManager();
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
+  private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
 
 
   /**
@@ -88,6 +90,7 @@ public class ClientScanner extends AbstractClientScanner {
 
   @Override
   public Result next() throws IOException {
+    Log.warn("openSocket:" + ch.isOpen());
     if (this.isClosed && this.scanResults.isEmpty()) {
       return null;
     }
@@ -148,6 +151,10 @@ public class ClientScanner extends AbstractClientScanner {
 
     } catch (InterruptedException e) {
       throw new IOException(e);
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (TimeoutException e) {
+      e.printStackTrace();
     }
   }
 
@@ -167,12 +174,6 @@ public class ClientScanner extends AbstractClientScanner {
 
   @Override
   public void close() {
-    ChannelFuture f = ch.close();
-    try {
-      f.sync();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
     this.isClosed = true;
   }
 
