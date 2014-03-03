@@ -19,30 +19,26 @@
  */
 package c5db.client;
 
+import c5db.MiniClusterBase;
 import com.google.protobuf.ByteString;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-public class TestScanner {
+public class TestScanner extends MiniClusterBase {
   ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
-  C5Table table;
 
-  public TestScanner() throws IOException, InterruptedException {
-    table = new C5Table(tableName);
-  }
-
-  public static void main(String[] args) throws IOException, InterruptedException {
-    TestScanner testingUtil = new TestScanner();
-    testingUtil.scan();
-  }
-
-  public void scan() throws IOException {
+  @Test
+  public void scan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
     int i = 0;
     Result result;
+    C5Table table = new C5Table(tableName, getRegionServerPort());
 
     ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {

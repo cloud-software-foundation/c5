@@ -23,63 +23,40 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import org.mortbay.log.Log;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
-  private final String hostname;
-  private final int port;
+  private final WebSocketClientHandshaker handShaker;
+  private WebsocketProtostuffDecoder decoder;
 
-  C5ConnectionInitializer(String host, int port) {
+  public C5ConnectionInitializer(WebSocketClientHandshaker handShaker) {
     super();
-    this.hostname = host;
-    this.port = port;
-  }
-
-  private URI getUri(String host, int port) throws IOException {
-    URI uri = null;
-
-    if (host.isEmpty() || port == 0) {
-      throw new IOException("Invalid host and/or port provided " +
-          "host: " + host + " port: " + port);
-    }
-
-    try {
-      uri = new URI("ws://" + host + ":" + port + "/websocket");
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-    String protocol = uri != null ? uri.getScheme() : null;
-    if (!"ws".equals(protocol)) {
-      throw new IllegalArgumentException("Unsupported protocol: " + protocol);
-    }
-    return uri;
+    this.handShaker = handShaker;
   }
 
   @Override
   protected void initChannel(SocketChannel ch) throws Exception {
-    URI uri = getUri(hostname, port);
-
-    HttpHeaders customHeaders = new DefaultHttpHeaders();
-    final WebSocketClientHandshaker handShaker =
-        WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, false, customHeaders);
-
-    ChannelPipeline pipeline = ch.pipeline();
-    pipeline.addLast("http-codec", new HttpClientCodec());
-    pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
-    pipeline.addLast("ws-handler", new WebSocketClientProtocolHandler(handShaker));
-    pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder());
-    pipeline.addLast("message-codec", new WebsocketProtostuffDecoder());
+   decoder = new WebsocketProtostuffDecoder(handShaker);
+   ChannelPipeline pipeline = ch.pipeline();
+    pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
+    pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192));
+    pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
+    pipeline.addLast("message-codec", decoder);
     pipeline.addLast("message-handler", new MessageHandler());
+  }
 
+  public void syncOnHandshake() throws InterruptedException, TimeoutException, ExecutionException {
+      decoder.syncOnHandshake();
   }
 }

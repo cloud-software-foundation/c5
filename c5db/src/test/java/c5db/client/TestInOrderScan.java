@@ -19,29 +19,30 @@
  */
 package c5db.client;
 
+import c5db.MiniClusterBase;
 import com.google.protobuf.ByteString;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-public class TestInOrderScan {
+public class TestInOrderScan extends MiniClusterBase {
   private static ByteString tableName =
       ByteString.copyFrom(Bytes.toBytes("tableName"));
 
   byte[] cf = Bytes.toBytes("cf");
 
-  public TestInOrderScan() throws IOException, InterruptedException {
-  }
-
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, ExecutionException {
     TestInOrderScan testingUtil = new TestInOrderScan();
     testingUtil.compareToHBaseScan();
   }
 
-  public void compareToHBaseScan() throws IOException, InterruptedException {
-    C5Table table = new C5Table(tableName);
+  public void compareToHBaseScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    C5Table table = new C5Table(tableName, getRegionServerPort());
 
     Result result = null;
     ResultScanner scanner;
@@ -62,5 +63,9 @@ public class TestInOrderScan {
 
     } while (result != null);
     table.close();
+  }
+
+  public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    compareToHBaseScan();
   }
 }
