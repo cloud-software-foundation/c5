@@ -38,12 +38,13 @@
 
 package c5db;
 
-import c5db.client.generated.CellProtos;
-import c5db.client.generated.ClientProtos;
-import c5db.client.generated.FilterProtos;
-import c5db.client.generated.HBaseProtos;
-import com.google.protobuf.ByteString;
+
+import c5db.client.generated.Column;
+import c5db.client.generated.MutationProto;
+import c5db.client.generated.NameBytesPair;
+import com.dyuproject.protostuff.ByteString;
 import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.KeyValueUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -60,260 +61,327 @@ import java.util.Map;
 import java.util.NavigableSet;
 
 public class ProtobufUtil {
-    private ProtobufUtil() {
+  private ProtobufUtil() {
+  }
+
+  /**
+   * Convert a protocol buffer Result to a client Result
+   *
+   * @param proto the protocol buffer Result to convert
+   * @return the converted client Result
+   */
+  public static Result toResult(final c5db.client.generated.Result proto) {
+    if (proto == null) {
+      return null;
+    }
+    List<c5db.client.generated.Cell> values = proto.getCellList();
+    List<Cell> cells = new ArrayList<>();
+    for (c5db.client.generated.Cell c : values) {
+      cells.add(toCell(c));
+    }
+    return Result.create(cells);
+  }
+
+  private static Cell toCell(c5db.client.generated.Cell c) {
+
+    return CellUtil.createCell(c.getRow().toByteArray(),
+        c.getFamily().toByteArray(),
+        c.getQualifier().toByteArray(),
+        c.getTimestamp(),
+        (byte) c.getCellType().getNumber(),
+        c.getValue().toByteArray());
+  }
+
+  /**
+   * Create a protocol buffer Get based on a client Get.
+   *
+   * @param get           The client Get.
+   * @param existenceOnly Is this only an existence check.
+   * @return a protocol buffer Get
+   * @throws IOException
+   */
+  public static c5db.client.generated.Get toGet(final Get get, boolean existenceOnly) throws IOException {
+    c5db.client.generated.Get get_ = new c5db.client.generated.Get();
+    get_.setRow(ByteString.copyFrom(get.getRow()));
+    get_.setCacheBlocks(get.getCacheBlocks());
+    get_.setMaxVersions(get.getMaxVersions());
+    if (get.getFilter() != null) {
+      get_.setFilter(ProtobufUtil.toFilter(get.getFilter()));
+    }
+    TimeRange timeRange = get.getTimeRange();
+    if (!timeRange.isAllTime()) {
+      c5db.client.generated.TimeRange timeRange_ = new c5db.client.generated.TimeRange();
+      timeRange_.setFrom(timeRange.getMin());
+      timeRange_.setTo(timeRange.getMax());
+      get_.setTimeRange(timeRange_);
+    }
+    Map<String, byte[]> attributes = get.getAttributesMap();
+    if (!attributes.isEmpty()) {
+      NameBytesPair updatedAttribute = new NameBytesPair();
+      for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
+        updatedAttribute.setName(attribute.getKey());
+        updatedAttribute.setValue(ByteString.copyFrom(attribute.getValue()));
+        addAttribute(get_, updatedAttribute);
+      }
+    }
+    if (get.hasFamilies()) {
+
+      Map<byte[], NavigableSet<byte[]>> families = get.getFamilyMap();
+      for (Map.Entry<byte[], NavigableSet<byte[]>> family : families.entrySet()) {
+        Column column = new Column();
+        NavigableSet<byte[]> qualifiers = family.getValue();
+        column.setFamily(ByteString.copyFrom(family.getKey()));
+
+        if (qualifiers != null && qualifiers.size() > 0) {
+          for (byte[] qualifier : qualifiers) {
+            addQualifier(column, qualifier);
+          }
+        }
+        addColumn(get_, column);
+      }
+
+    }
+    if (get.getMaxResultsPerColumnFamily() >= 0) {
+      get_.setStoreLimit(get.getMaxResultsPerColumnFamily());
+    }
+    if (get.getRowOffsetPerColumnFamily() > 0) {
+      get_.setStoreOffset(get.getRowOffsetPerColumnFamily());
+    }
+    get_.setExistenceOnly(existenceOnly);
+    return get_;
+  }
+
+  private static void addColumn(c5db.client.generated.Get get, Column column) {
+    List<Column> columnList = get.getColumnList();
+    if (columnList == null){
+      columnList = new ArrayList<>();
+    }
+    columnList.add(column);
+    get.setColumnList(columnList);
+  }
+
+  private static void addQualifier(Column column, byte[] qualifier) {
+    ByteString byteStringQualifier = ByteString.copyFrom(qualifier);
+    List<ByteString> qualifierList = column.getQualifierList();
+    if (qualifierList == null){
+      qualifierList = new ArrayList<>();
+    }
+    qualifierList.add(byteStringQualifier);
+    column.setQualifierList(qualifierList);
+  }
+
+  private static void addAttribute(c5db.client.generated.Get get_, NameBytesPair attribute) {
+    List<NameBytesPair> attributeList = get_.getAttributeList();
+    if (attributeList == null){
+      attributeList = new ArrayList<>();
     }
 
-    /**
-     * Convert a protocol buffer Result to a client Result
-     *
-     * @param proto the protocol buffer Result to convert
-     * @return the converted client Result
-     */
-    public static Result toResult(final ClientProtos.Result proto) {
-        if (proto == null) {
-            return null;
-        }
-        List<CellProtos.Cell> values = proto.getCellList();
-        List<KeyValue> cells = new ArrayList<>();
-        for (CellProtos.Cell c : values) {
-            cells.add(toCell(c));
-        }
-        return new Result(cells);
-    }
+      attributeList.add(attribute);
+    get_.setAttributeList(attributeList);
+  }
 
-    private static KeyValue toCell(CellProtos.Cell c) {
-        //TODO fix type
-        return new KeyValue(c.getRow().toByteArray(),
-                c.getFamily().toByteArray(),
-                c.getQualifier().toByteArray(),
-                c.getTimestamp(),
-                c.getValue().toByteArray());
-    }
+  /**
+   * Convert a client Filter to a protocol buffer Filter
+   *
+   * @param filter_ the Filter to convert
+   * @return the converted protocol buffer Filter
+   */
+  public static c5db.client.generated.Filter toFilter(Filter filter_) throws IOException {
+    c5db.client.generated.Filter filter = new c5db.client.generated.Filter();
+    filter.setName(filter_.getClass().getName());
+    filter.setSerializedFilter(ByteString.copyFrom(filter_.toByteArray()));
+    return filter;
+  }
 
-    /**
-     * Create a protocol buffer Get based on a client Get.
-     *
-     *
-     * @param get the client Get
-     * @param existenceOnly
-     * @return a protocol buffer Get
-     * @throws IOException
-     */
-    public static ClientProtos.Get toGet(final Get get, boolean existenceOnly) throws IOException {
-        ClientProtos.Get.Builder builder =
-                ClientProtos.Get.newBuilder();
-        builder.setRow(ByteString.copyFrom(get.getRow()));
-        builder.setCacheBlocks(get.getCacheBlocks());
-        builder.setMaxVersions(get.getMaxVersions());
-        if (get.getFilter() != null) {
-            builder.setFilter(ProtobufUtil.toFilter(get.getFilter()));
-        }
-        TimeRange timeRange = get.getTimeRange();
-        if (!timeRange.isAllTime()) {
-            HBaseProtos.TimeRange.Builder timeRangeBuilder =
-                    HBaseProtos.TimeRange.newBuilder();
-            timeRangeBuilder.setFrom(timeRange.getMin());
-            timeRangeBuilder.setTo(timeRange.getMax());
-            builder.setTimeRange(timeRangeBuilder.build());
-        }
-        Map<String, byte[]> attributes = get.getAttributesMap();
-        if (!attributes.isEmpty()) {
-            HBaseProtos.NameBytesPair.Builder attributeBuilder = HBaseProtos.NameBytesPair.newBuilder();
-            for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
-                attributeBuilder.setName(attribute.getKey());
-                attributeBuilder.setValue(ByteString.copyFrom(attribute.getValue()));
-                builder.addAttribute(attributeBuilder.build());
-            }
-        }
-        if (get.hasFamilies()) {
-            ClientProtos.Column.Builder columnBuilder = ClientProtos.Column.newBuilder();
-            Map<byte[], NavigableSet<byte[]>> families = get.getFamilyMap();
-            for (Map.Entry<byte[], NavigableSet<byte[]>> family : families.entrySet()) {
-                NavigableSet<byte[]> qualifiers = family.getValue();
-                columnBuilder.setFamily(ByteString.copyFrom(family.getKey()));
-                columnBuilder.clearQualifier();
-                if (qualifiers != null && qualifiers.size() > 0) {
-                    for (byte[] qualifier : qualifiers) {
-                        columnBuilder.addQualifier(ByteString.copyFrom(qualifier));
-                    }
-                }
-                builder.addColumn(columnBuilder.build());
-            }
-        }
-        if (get.getMaxResultsPerColumnFamily() >= 0) {
-            builder.setStoreLimit(get.getMaxResultsPerColumnFamily());
-        }
-        if (get.getRowOffsetPerColumnFamily() > 0) {
-            builder.setStoreOffset(get.getRowOffsetPerColumnFamily());
-        }
-        builder.setExistenceOnly(existenceOnly);
-        return builder.build();
-    }
+  /**
+   * Create a protocol buffer Mutate based on a client Mutation
+   *
+   * @param type     The type of mutation to create
+   * @param mutation The client Mutation
+   * @return a protobuf'd Mutation
+   * @throws IOException
+   */
+  public static MutationProto toMutation(final MutationProto.MutationType type,
+                                         final Mutation mutation)
+      throws IOException {
+    MutationProto mutationProto = getMutationAndSetCommonFields(type, mutation);
 
-    /**
-     * Convert a client Filter to a protocol buffer Filter
-     *
-     * @param filter the Filter to convert
-     * @return the converted protocol buffer Filter
-     */
-    public static FilterProtos.Filter toFilter(Filter filter) throws IOException {
-        FilterProtos.Filter.Builder builder = FilterProtos.Filter.newBuilder();
-        builder.setName(filter.getClass().getName());
-        builder.setSerializedFilter(ByteString.copyFrom(filter.toByteArray()));
-        return builder.build();
-    }
+    MutationProto.ColumnValue.QualifierValue qualifierValue = new MutationProto.ColumnValue.QualifierValue();
+    for (Map.Entry<byte[], List<KeyValue>> family : mutation.getFamilyMap().entrySet()) {
+      MutationProto.ColumnValue columnValue = new MutationProto.ColumnValue();
+      columnValue.setFamily(ByteString.copyFrom(family.getKey()));
 
-    /**
-     * Create a protocol buffer Mutate based on a client Mutation
-     *
-     * @param type
-     * @param mutation
-     * @return a protobuf'd Mutation
-     * @throws IOException
-     */
-    public static ClientProtos.MutationProto toMutation(final ClientProtos.MutationProto.MutationType type,
-                                                        final Mutation mutation)
-            throws IOException {
-        ClientProtos.MutationProto.Builder builder = getMutationBuilderAndSetCommonFields(type, mutation);
-        ClientProtos.MutationProto.ColumnValue.Builder columnBuilder = ClientProtos.MutationProto.ColumnValue.newBuilder();
-        ClientProtos.MutationProto.ColumnValue.QualifierValue.Builder valueBuilder = ClientProtos.MutationProto.ColumnValue.QualifierValue.newBuilder();
-        for (Map.Entry<byte[], List<KeyValue>> family : mutation.getFamilyMap().entrySet()) {
-            columnBuilder.setFamily(ByteString.copyFrom(family.getKey()));
-            columnBuilder.clearQualifierValue();
-            for (Cell cell : family.getValue()) {
-                KeyValue kv = KeyValueUtil.ensureKeyValue(cell);
-                valueBuilder.setQualifier(ByteString.copyFrom(kv.getQualifier()));
-                valueBuilder.setValue(ByteString.copyFrom(kv.getValue()));
-                valueBuilder.setTimestamp(kv.getTimestamp());
-                if (type == ClientProtos.MutationProto.MutationType.DELETE) {
-                    KeyValue.Type keyValueType = KeyValue.Type.codeToType(kv.getType());
-                    valueBuilder.setDeleteType(toDeleteType(keyValueType));
-                }
-                columnBuilder.addQualifierValue(valueBuilder.build());
-            }
-            builder.addColumnValue(columnBuilder.build());
+      for (Cell cell : family.getValue()) {
+        KeyValue kv = KeyValueUtil.ensureKeyValue(cell);
+        qualifierValue.setQualifier(ByteString.copyFrom(kv.getQualifier()));
+        qualifierValue.setValue(ByteString.copyFrom(kv.getValue()));
+        qualifierValue.setTimestamp(kv.getTimestamp());
+        if (type == MutationProto.MutationType.DELETE) {
+          KeyValue.Type keyValueType = KeyValue.Type.codeToType(kv.getType());
+          qualifierValue.setDeleteType(toDeleteType(keyValueType));
         }
-        return builder.build();
-    }
+        addQualifierValue(columnValue, qualifierValue);
 
-    /**
-     * Code shared by {@link #toMutation(ClientProtos.MutationProto.MutationType, Mutation)} and
-     *
-     * @param type
-     * @param mutation
-     * @return A partly-filled out protobuf'd Mutation.
-     */
-    private static ClientProtos.MutationProto.Builder
-    getMutationBuilderAndSetCommonFields(final ClientProtos.MutationProto.MutationType type,
-                                         final Mutation mutation) {
-        ClientProtos.MutationProto.Builder builder = ClientProtos.MutationProto.newBuilder();
-        builder.setRow(ByteString.copyFrom(mutation.getRow()));
-        builder.setMutateType(type);
-        builder.setTimestamp(mutation.getTimeStamp());
-        Map<String, byte[]> attributes = mutation.getAttributesMap();
-        if (!attributes.isEmpty()) {
-            HBaseProtos.NameBytesPair.Builder attributeBuilder = HBaseProtos.NameBytesPair.newBuilder();
-            for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
-                attributeBuilder.setName(attribute.getKey());
-                attributeBuilder.setValue(ByteString.copyFrom(attribute.getValue()));
-                builder.addAttribute(attributeBuilder.build());
-            }
-        }
-        return builder;
+      }
+      addColumnValue(mutationProto, columnValue);
     }
+    return mutationProto;
+  }
 
-    /**
-     * Convert a delete KeyValue type to protocol buffer DeleteType.
-     *
-     * @param type
-     * @return protocol buffer DeleteType
-     * @throws IOException
-     */
-    public static ClientProtos.MutationProto.DeleteType toDeleteType(KeyValue.Type type) throws IOException {
-        switch (type) {
-            case Delete:
-                return ClientProtos.MutationProto.DeleteType.DELETE_ONE_VERSION;
-            case DeleteColumn:
-                return ClientProtos.MutationProto.DeleteType.DELETE_MULTIPLE_VERSIONS;
-            case DeleteFamily:
-                return ClientProtos.MutationProto.DeleteType.DELETE_FAMILY;
-            default:
-                throw new IOException("Unknown delete type: " + type);
-        }
+  private static void addColumnValue(final MutationProto mutationProto, final MutationProto.ColumnValue columnValue) {
+    List<MutationProto.ColumnValue> columnValueList = mutationProto.getColumnValueList();
+    if (columnValueList == null){
+      columnValueList = new ArrayList<>();
     }
+    columnValueList.add(columnValue);
+    mutationProto.setColumnValueList(columnValueList);
+  }
 
-    /**
-     * Convert a client Scan to a protocol buffer Scan
-     *
-     * @param scan the client Scan to convert
-     * @return the converted protocol buffer Scan
-     * @throws IOException
-     */
-    public static ClientProtos.Scan toScan(final Scan scan) throws IOException {
-        ClientProtos.Scan.Builder scanBuilder =
-                ClientProtos.Scan.newBuilder();
-        scanBuilder.setCacheBlocks(scan.getCacheBlocks());
-        if (scan.getBatch() > 0) {
-            scanBuilder.setBatchSize(scan.getBatch());
-        }
-        if (scan.getMaxResultSize() > 0) {
-            scanBuilder.setMaxResultSize(scan.getMaxResultSize());
-        }
-        Boolean loadColumnFamiliesOnDemand = scan.getLoadColumnFamiliesOnDemandValue();
-        if (loadColumnFamiliesOnDemand != null) {
-            scanBuilder.setLoadColumnFamiliesOnDemand(loadColumnFamiliesOnDemand);
-        }
-        scanBuilder.setMaxVersions(scan.getMaxVersions());
-        TimeRange timeRange = scan.getTimeRange();
-        if (!timeRange.isAllTime()) {
-            HBaseProtos.TimeRange.Builder timeRangeBuilder =
-                    HBaseProtos.TimeRange.newBuilder();
-            timeRangeBuilder.setFrom(timeRange.getMin());
-            timeRangeBuilder.setTo(timeRange.getMax());
-            scanBuilder.setTimeRange(timeRangeBuilder.build());
-        }
-        Map<String, byte[]> attributes = scan.getAttributesMap();
-        if (!attributes.isEmpty()) {
-            HBaseProtos.NameBytesPair.Builder attributeBuilder = HBaseProtos.NameBytesPair.newBuilder();
-            for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
-                attributeBuilder.setName(attribute.getKey());
-                attributeBuilder.setValue(ByteString.copyFrom(attribute.getValue()));
-                scanBuilder.addAttribute(attributeBuilder.build());
-            }
-        }
-        byte[] startRow = scan.getStartRow();
-        if (startRow != null && startRow.length > 0) {
-            scanBuilder.setStartRow(ByteString.copyFrom(startRow));
-        }
-        byte[] stopRow = scan.getStopRow();
-        if (stopRow != null && stopRow.length > 0) {
-            scanBuilder.setStopRow(ByteString.copyFrom(stopRow));
-        }
-        if (scan.hasFilter()) {
-            scanBuilder.setFilter(ProtobufUtil.toFilter(scan.getFilter()));
-        }
-        if (scan.hasFamilies()) {
-            ClientProtos.Column.Builder columnBuilder = ClientProtos.Column.newBuilder();
-            for (Map.Entry<byte[], NavigableSet<byte[]>>
-                    family : scan.getFamilyMap().entrySet()) {
-                columnBuilder.setFamily(ByteString.copyFrom(family.getKey()));
-                NavigableSet<byte[]> qualifiers = family.getValue();
-                columnBuilder.clearQualifier();
-                if (qualifiers != null && qualifiers.size() > 0) {
-                    for (byte[] qualifier : qualifiers) {
-                        columnBuilder.addQualifier(ByteString.copyFrom(qualifier));
-                    }
-                }
-                scanBuilder.addColumn(columnBuilder.build());
-            }
-        }
-        if (scan.getMaxResultsPerColumnFamily() >= 0) {
-            scanBuilder.setStoreLimit(scan.getMaxResultsPerColumnFamily());
-        }
-        if (scan.getRowOffsetPerColumnFamily() > 0) {
-            scanBuilder.setStoreOffset(scan.getRowOffsetPerColumnFamily());
-        }
-        return scanBuilder.build();
+  private static void addQualifierValue(final MutationProto.ColumnValue columnValue,
+                                        final MutationProto.ColumnValue.QualifierValue qualifierValue) {
+    List<MutationProto.ColumnValue.QualifierValue> qualifierValueList = columnValue.getQualifierValueList();
+    if (qualifierValueList == null){
+      qualifierValueList = new ArrayList<>();
     }
+    qualifierValueList.add(qualifierValue);
+    columnValue.setQualifierValueList(qualifierValueList);
+  }
+
+  /**
+   * Code shared by {@link #toMutation(MutationProto.MutationType, Mutation)} and
+   *
+   * @param type     The type of mutation to create
+   * @param mutation The mutation to get
+   * @return A partly-filled out protobuf'd Mutation.
+   */
+  private static MutationProto getMutationAndSetCommonFields(final MutationProto.MutationType type,
+                                                             final Mutation mutation) {
+    MutationProto mutationProto = new MutationProto();
+    mutationProto.setRow(ByteString.copyFrom(mutation.getRow()));
+    mutationProto.setMutateType(type);
+    mutationProto.setTimestamp(mutation.getTimeStamp());
+    Map<String, byte[]> attributes = mutation.getAttributesMap();
+    if (!attributes.isEmpty()) {
+      NameBytesPair attributePair = new NameBytesPair();
+      for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
+        attributePair.setName(attribute.getKey());
+        attributePair.setValue(ByteString.copyFrom(attribute.getValue()));
+        List<NameBytesPair> attributeList = mutationProto.getAttributeList();
+        attributeList.add(attributePair);
+        mutationProto.setAttributeList(attributeList);
+      }
+    }
+    return mutationProto;
+  }
+
+  /**
+   * Convert a delete KeyValue type to protocol buffer DeleteType.
+   *
+   * @param type The delete type to make
+   * @return protocol buffer DeleteType
+   * @throws IOException
+   */
+  public static MutationProto.DeleteType toDeleteType(KeyValue.Type type) throws IOException {
+    switch (type) {
+      case Delete:
+        return MutationProto.DeleteType.DELETE_ONE_VERSION;
+      case DeleteColumn:
+        return MutationProto.DeleteType.DELETE_MULTIPLE_VERSIONS;
+      case DeleteFamily:
+        return MutationProto.DeleteType.DELETE_FAMILY;
+      default:
+        throw new IOException("Unknown delete type: " + type);
+    }
+  }
+
+  /**
+   * Convert a client Scan to a protocol buffer Scan
+   *
+   * @param scan the client Scan to convert
+   * @return the converted protocol buffer Scan
+   * @throws IOException
+   */
+  public static c5db.client.generated.Scan toScan(final Scan scan) throws IOException {
+    c5db.client.generated.Scan scan_ = new c5db.client.generated.Scan();
+    scan_.setCacheBlocks(scan.getCacheBlocks());
+    if (scan.getBatch() > 0) {
+      scan_.setBatchSize(scan.getBatch());
+    }
+    if (scan.getMaxResultSize() > 0) {
+      scan_.setMaxResultSize(scan.getMaxResultSize());
+    }
+    Boolean loadColumnFamiliesOnDemand = scan.getLoadColumnFamiliesOnDemandValue();
+    if (loadColumnFamiliesOnDemand != null) {
+      scan_.setLoadColumnFamiliesOnDemand(loadColumnFamiliesOnDemand);
+    }
+    scan_.setMaxVersions(scan.getMaxVersions());
+    TimeRange timeRange = scan.getTimeRange();
+    if (!timeRange.isAllTime()) {
+      c5db.client.generated.TimeRange newTimeRange = new c5db.client.generated.TimeRange();
+      newTimeRange.setFrom(timeRange.getMin());
+      newTimeRange.setTo(timeRange.getMax());
+      scan_.setTimeRange(newTimeRange);
+    }
+    Map<String, byte[]> attributes = scan.getAttributesMap();
+    if (!attributes.isEmpty()) {
+
+      for (Map.Entry<String, byte[]> attribute : attributes.entrySet()) {
+        NameBytesPair nameBytesPair = new NameBytesPair();
+        nameBytesPair.setName(attribute.getKey());
+        nameBytesPair.setValue(ByteString.copyFrom(attribute.getValue()));
+        addAttribute(scan_, nameBytesPair);
+      }
+    }
+    byte[] startRow = scan.getStartRow();
+    if (startRow != null && startRow.length > 0) {
+      scan_.setStartRow(ByteString.copyFrom(startRow));
+    }
+    byte[] stopRow = scan.getStopRow();
+    if (stopRow != null && stopRow.length > 0) {
+      scan_.setStopRow(ByteString.copyFrom(stopRow));
+    }
+    if (scan.hasFilter()) {
+      scan_.setFilter(ProtobufUtil.toFilter(scan.getFilter()));
+    }
+    if (scan.hasFamilies()) {
+      for (Map.Entry<byte[], NavigableSet<byte[]>>
+          family : scan.getFamilyMap().entrySet()) {
+        Column column = new Column();
+        column.setFamily(ByteString.copyFrom(family.getKey()));
+        NavigableSet<byte[]> qualifiers = family.getValue();
+        if (qualifiers != null && qualifiers.size() > 0) {
+          for (byte[] qualifier : qualifiers) {
+            addQualifier(column, qualifier);
+          }
+        }
+        addColumn(scan_, column);
+      }
+    }
+    if (scan.getMaxResultsPerColumnFamily() >= 0) {
+      scan_.setStoreLimit(scan.getMaxResultsPerColumnFamily());
+    }
+    if (scan.getRowOffsetPerColumnFamily() > 0) {
+      scan_.setStoreOffset(scan.getRowOffsetPerColumnFamily());
+    }
+    return scan_;
+  }
+
+  private static void addColumn(c5db.client.generated.Scan scan_, Column column) {
+    List<Column> columnList = scan_.getColumnList();
+    if (columnList == null){
+      columnList = new ArrayList<>();
+    }
+    columnList.add(column);
+    scan_.setColumnList(columnList);
+  }
+
+  private static void addAttribute(c5db.client.generated.Scan scan_, NameBytesPair nameBytesPair) {
+    List<NameBytesPair> attributeList = scan_.getAttributeList();
+    if (attributeList == null){
+      attributeList = new ArrayList<>();
+    }
+    attributeList.add(nameBytesPair);
+    scan_.setAttributeList(attributeList);
+  }
 }
 

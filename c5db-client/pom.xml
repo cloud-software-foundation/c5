@@ -19,8 +19,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -47,7 +47,40 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-maven-plugin</artifactId>
+                <version>${protostuff.version}</version>
+                <configuration>
+                    <protoModules>
+                        <protoModule>
+                            <source>src/main/resources/</source>
+                            <outputDir>src/main/java</outputDir>
+                            <output>java_bean</output>
+                            <encoding>UTF-8</encoding>
+                            <options>
+                                <property>
+                                    <name>generate_field_map</name>
+                                    <value>true</value>
+                                </property>
+                                <property>
+                                    <name>builder_pattern</name>
+                                    <value>true</value>
+                                </property>
+                            </options>
+                        </protoModule>
+                    </protoModules>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -66,10 +99,6 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -92,6 +121,29 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>hbase-client</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-api</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-collectionschema</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>

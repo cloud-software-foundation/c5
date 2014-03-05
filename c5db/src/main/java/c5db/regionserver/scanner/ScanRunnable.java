@@ -18,7 +18,10 @@ package c5db.regionserver.scanner;
 
 
 import c5db.client.C5Constants;
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Call;
+import c5db.client.generated.Response;
+import c5db.client.generated.Result;
+import c5db.client.generated.ScanResponse;
 import c5db.regionserver.ReverseProtobufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
@@ -33,13 +36,13 @@ import java.util.List;
 
 public class ScanRunnable implements Callback<Integer> {
     private final long scannerId;
-    private final ClientProtos.Call call;
-    private final ChannelHandlerContext ctx;
+  private final Call call;
+  private final ChannelHandlerContext ctx;
     private final RegionScanner scanner;
     private boolean close;
 
     public ScanRunnable(final ChannelHandlerContext ctx,
-                        final ClientProtos.Call call,
+                        final Call call,
                         final long scannerId, HRegion region) throws IOException {
         super();
         Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
@@ -57,9 +60,8 @@ public class ScanRunnable implements Callback<Integer> {
         }
         long numberOfMsgsLeft = numberOfMessagesToSend;
         while (!this.close && numberOfMsgsLeft > 0) {
-            ClientProtos.ScanResponse.Builder scanResponse
-                    = ClientProtos.ScanResponse.newBuilder();
-            scanResponse.setScannerId(scannerId);
+          ScanResponse scanResponse = new ScanResponse();
+          scanResponse.setScannerId(scannerId);
 
             int rowsToSend = 0;
             boolean moreResults;
@@ -77,30 +79,48 @@ public class ScanRunnable implements Callback<Integer> {
                     return;
                 }
 
-                ClientProtos.Result.Builder resultBuilder =
-                        ClientProtos.Result.newBuilder();
+              Result resultBuilder = new Result();
 
-                for (Cell kv : kvs) {
-                    resultBuilder.addCell(ReverseProtobufUtil.toCell(kv));
-                }
-                scanResponse.addResults(resultBuilder.build());
-                rowsToSend++;
+              for (Cell kv : kvs) {
+                addCell(resultBuilder, ReverseProtobufUtil.toCell(kv));
+
+              }
+              addResult(scanResponse, resultBuilder);
+
+              rowsToSend++;
 
             } while (moreResults
                     && rowsToSend < C5Constants.MSG_SIZE
                     && numberOfMessagesToSend - rowsToSend > 0);
             scanResponse.setMoreResults(moreResults);
-            ClientProtos.Response response = ClientProtos
-                    .Response
-                    .newBuilder()
-                    .setCommand(ClientProtos.Response.Command.SCAN)
-                    .setCommandId(call.getCommandId())
-                    .setScan(scanResponse.build()).build();
+          Response response = new Response()
 
-            ctx.writeAndFlush(response);
+              .setCommand(Response.Command.SCAN)
+              .setCommandId(call.getCommandId())
+              .setScan(scanResponse);
+
+          ctx.writeAndFlush(response);
             numberOfMsgsLeft -= rowsToSend;
         }
     }
+
+  private void addResult(ScanResponse scanResponse, Result result) {
+    List<Result> resultList = scanResponse.getResultsList();
+    if (resultList == null) {
+      resultList = new ArrayList<>();
+    }
+    resultList.add(result);
+    scanResponse.setResultsList(resultList);
+  }
+
+  private void addCell(Result result, c5db.client.generated.Cell cell) {
+    List<c5db.client.generated.Cell> cellList = result.getCellList();
+    if (cellList == null) {
+      cellList = new ArrayList<>();
+    }
+    cellList.add(cell);
+    result.setCellList(cellList);
+  }
 }
 
 

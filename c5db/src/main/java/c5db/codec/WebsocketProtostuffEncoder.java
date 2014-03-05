@@ -16,7 +16,9 @@
  */
 package c5db.codec;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Response;
+import com.dyuproject.protostuff.LinkedBuffer;
+import com.dyuproject.protostuff.ProtobufIOUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,12 +27,13 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 
 import java.util.List;
 
-public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<ClientProtos.Response> {
+public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response> {
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
-                        ClientProtos.Response response,
+                        Response response,
                         List<Object> objects) throws Exception {
-    ByteBuf byteBuf = Unpooled.copiedBuffer(response.toByteArray());
+    byte[] byteArray = ProtobufIOUtil.toByteArray(response, Response.getSchema(), LinkedBuffer.allocate(256));
+    ByteBuf byteBuf = Unpooled.copiedBuffer(byteArray);
     BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
   }

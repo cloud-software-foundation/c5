@@ -16,13 +16,16 @@
  */
 package c5db.codec;
 
-import c5db.client.generated.ClientProtos;
-import com.google.protobuf.ZeroCopyLiteralByteString;
+import c5db.ByteBufferBackedInputStream;
+import c5db.client.generated.Call;
+import com.dyuproject.protostuff.ProtobufIOUtil;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
+import java.io.InputStream;
 import java.util.List;
 
 public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
@@ -34,8 +37,13 @@ public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
     if (frame instanceof BinaryWebSocketFrame) {
-      out.add(ClientProtos.Call.parseFrom(ZeroCopyLiteralByteString.copyFrom(frame.content().nioBuffer())));
+      Call call = new Call();
+      ByteBuf content = frame.content();
+      InputStream inputStream = new ByteBufferBackedInputStream(content.nioBuffer());
+      ProtobufIOUtil.mergeFrom(inputStream, call, Call.getSchema());
+      out.add(call);
+    } else {
+      super.decode(ctx, frame, out);
     }
-    super.decode(ctx, frame, out);
   }
 }

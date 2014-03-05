@@ -16,7 +16,18 @@
  */
 package c5db.regionserver;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Action;
+import c5db.client.generated.Call;
+import c5db.client.generated.Get;
+import c5db.client.generated.GetResponse;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MultiResponse;
+import c5db.client.generated.MutateRequest;
+import c5db.client.generated.MutateResponse;
+import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.Response;
+import c5db.client.generated.ScanRequest;
 import c5db.regionserver.scanner.ScanRunnable;
 import c5db.regionserver.scanner.ScannerManager;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,17 +45,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class C5ServerHandler extends
-        SimpleChannelInboundHandler<ClientProtos.Call> {
+        SimpleChannelInboundHandler<Call> {
     ScannerManager scanManager = ScannerManager.INSTANCE;
 
     private final RegionServerService regionServerService;
+
     public C5ServerHandler(RegionServerService myService) {
         this.regionServerService = myService;
     }
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx,
-                             final ClientProtos.Call call)
+                             final Call call)
             throws Exception {
         switch (call.getCommand()) {
             case GET:
@@ -62,18 +74,17 @@ public class C5ServerHandler extends
         }
     }
 
-    private void multi(ChannelHandlerContext ctx, ClientProtos.Call call)
+    private void multi(ChannelHandlerContext ctx, Call call)
             throws IOException {
-        ClientProtos.MultiRequest request = call.getMulti();
-        ClientProtos.MultiResponse.Builder multiResponse =
-                ClientProtos.MultiResponse.newBuilder();
+        MultiRequest request = call.getMulti();
+        MultiResponse multiResponse = new MultiResponse();
 
+        List<MutationProto> mutations = new ArrayList<>();
 
-        List<ClientProtos.MutationProto> mutations = new ArrayList<>();
-        for (int i = 0; i != request.getRegionActionCount(); i++) {
-            ClientProtos.RegionAction regionAction = request.getRegionAction(i);
-            for (ClientProtos.Action actionUnion : regionAction.getActionList()) {
-                if (actionUnion.hasMutation()) {
+        for (RegionAction regionAction : request.getRegionActionList()) {
+
+            for (Action actionUnion : regionAction.getActionList()) {
+                if (actionUnion.getMutation() != null) {
                     mutations.add(actionUnion.getMutation());
                 } else {
                     throw new IOException("Unsupported atomic action type: " + actionUnion);
@@ -81,11 +92,11 @@ public class C5ServerHandler extends
             }
         }
         if (!mutations.isEmpty()) {
-            ClientProtos.MutationProto firstMutate = mutations.get(0);
+            MutationProto firstMutate = mutations.get(0);
             byte[] row = firstMutate.getRow().toByteArray();
             RowMutations rm = new RowMutations(row);
-            for (ClientProtos.MutationProto mutate : mutations) {
-                ClientProtos.MutationProto.MutationType type = mutate.getMutateType();
+            for (MutationProto mutate : mutations) {
+                MutationProto.MutationType type = mutate.getMutateType();
                 switch (mutate.getMutateType()) {
                     case PUT:
                         rm.add(ReverseProtobufUtil.toPut(mutate, null));
@@ -102,20 +113,17 @@ public class C5ServerHandler extends
             HRegion region = regionServerService.getOnlineRegion("1");
             region.mutateRow(rm);
         }
-        ClientProtos.Response response = ClientProtos
-                .Response
-                .newBuilder()
-                .setCommand(ClientProtos.Response.Command.MULTI)
+        Response response = new Response()
+                .setCommand(Response.Command.MULTI)
                 .setCommandId(call.getCommandId())
-                .setMulti(multiResponse.build()).build();
+                .setMulti(multiResponse);
         ctx.writeAndFlush(response);
     }
 
-    private void mutate(ChannelHandlerContext ctx, ClientProtos.Call call)
+    private void mutate(ChannelHandlerContext ctx, Call call)
             throws IOException {
-        ClientProtos.MutateRequest mutateIn = call.getMutate();
-        ClientProtos.MutateResponse.Builder mutateResponse =
-                ClientProtos.MutateResponse.newBuilder();
+        MutateRequest mutateIn = call.getMutate();
+        MutateResponse mutateResponse = new MutateResponse();
         try {
             HRegion region = regionServerService.getOnlineRegion("1");
             switch (mutateIn.getMutation().getMutateType()) {
@@ -132,19 +140,17 @@ public class C5ServerHandler extends
             e.printStackTrace();
         }
 
-        ClientProtos.Response response = ClientProtos
-                .Response
-                .newBuilder()
-                .setCommand(ClientProtos.Response.Command.MUTATE)
+        Response response = new Response()
+                .setCommand(Response.Command.MUTATE)
                 .setCommandId(call.getCommandId())
-                .setMutate(mutateResponse.build()).build();
+                .setMutate(mutateResponse);
         ctx.writeAndFlush(response);
     }
 
-    private void scan(ChannelHandlerContext ctx, ClientProtos.Call call)
+    private void scan(ChannelHandlerContext ctx, Call call)
             throws IOException {
 
-        ClientProtos.ScanRequest scanIn = call.getScan();
+        ScanRequest scanIn = call.getScan();
 
         long scannerId = 0;
         scannerId = getScannerId(scanIn, scannerId);
@@ -165,36 +171,39 @@ public class C5ServerHandler extends
         channel.publish(numberOfRowsToSend);
     }
 
-    private long getScannerId(ClientProtos.ScanRequest scanIn, long scannerId) {
-        if (scanIn.hasScannerId() && scanIn.getScannerId() > 0) {
+    private long getScannerId(ScanRequest scanIn, long scannerId) {
+        if (scanIn.getScannerId() != null && scanIn.getScannerId() > 0) {
             scannerId = scanIn.getScannerId();
         } else {
             // Make a scanner with an Id not 0
-            while (scannerId == 0) {
+            do {
                 scannerId = System.currentTimeMillis();
-            }
+            } while (scannerId == 0);
         }
         return scannerId;
     }
 
-    private void get(ChannelHandlerContext ctx, ClientProtos.Call call)
+    private void get(ChannelHandlerContext ctx, Call call)
             throws IOException {
-        ClientProtos.Get getIn = call.getGet().getGet();
-        ClientProtos.GetResponse.Builder getResponse =
-                ClientProtos.GetResponse.newBuilder();
+        Get getIn = call.getGet().getGet();
+        GetResponse getResponse = new GetResponse();
         HRegion region = regionServerService.getOnlineRegion("1");
-        Result result = region.get(ReverseProtobufUtil.toGet(getIn));
-        if (! getIn.getExistenceOnly()){
-            getResponse.setResult(ReverseProtobufUtil.toResult(result));
+        Result regionResult = region.get(ReverseProtobufUtil.toGet(getIn));
+        c5db.client.generated.Result result;
+
+        if (getIn.getExistenceOnly()) {
+            result = new c5db.client.generated.Result();
+            result.setExists(regionResult.getExists());
         } else {
-            getResponse.setResult(ClientProtos.Result.newBuilder().setExists(result.getExists()));
+            result = ReverseProtobufUtil.toResult(regionResult);
         }
-        ClientProtos.Response response = ClientProtos
-                .Response
-                .newBuilder()
-                .setCommand(ClientProtos.Response.Command.GET)
+
+        getResponse.setResult(result);
+
+        Response response = new Response()
+                .setCommand(Response.Command.GET)
                 .setCommandId(call.getCommandId())
-                .setGet(getResponse.build()).build();
+                .setGet(getResponse);
 
         ctx.writeAndFlush(response);
     }
