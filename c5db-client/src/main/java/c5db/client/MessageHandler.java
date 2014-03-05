@@ -16,7 +16,8 @@
  */
 package c5db.client;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Call;
+import c5db.client.generated.Response;
 import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
@@ -27,12 +28,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MessageHandler extends SimpleChannelInboundHandler<ClientProtos.Response> {
+public class MessageHandler extends SimpleChannelInboundHandler<Response> {
   private final static ClientScannerManager clientScanManager = ClientScannerManager.INSTANCE;
   private final ConcurrentHashMap<Long, SettableFuture> futures = new ConcurrentHashMap<>();
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, ClientProtos.Response msg) throws Exception {
+  protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
     final SettableFuture f = futures.get(msg.getCommandId());
     switch (msg.getCommand()) {
       case MUTATE:
@@ -66,7 +67,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<ClientProtos.Res
     }
   }
 
-  public void call(final ClientProtos.Call request, final SettableFuture future, final Channel channel)
+  public void call(final Call request, final SettableFuture future, final Channel channel)
       throws InterruptedException, IOException {
     futures.put(request.getCommandId(), future);
     channel.writeAndFlush(request);

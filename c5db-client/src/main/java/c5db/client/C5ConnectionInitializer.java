@@ -21,17 +21,12 @@ import c5db.client.codec.WebsocketProtostuffEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.mortbay.log.Log;
 
-import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -47,8 +42,8 @@ public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
   @Override
   protected void initChannel(SocketChannel ch) throws Exception {
-   decoder = new WebsocketProtostuffDecoder(handShaker);
-   ChannelPipeline pipeline = ch.pipeline();
+    decoder = new WebsocketProtostuffDecoder(handShaker);
+    ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
     pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192));
     pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
@@ -57,6 +52,6 @@ public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
   }
 
   public void syncOnHandshake() throws InterruptedException, TimeoutException, ExecutionException {
-      decoder.syncOnHandshake();
+    decoder.syncOnHandshake();
   }
 }
