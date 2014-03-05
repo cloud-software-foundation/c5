@@ -16,15 +16,14 @@
  */
 package c5db.client.codec;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Response;
+import com.dyuproject.protostuff.ByteBufferInput;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.protobuf.ZeroCopyLiteralByteString;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import org.mortbay.log.Log;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -36,7 +35,7 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
 
   private static final long HANDSHAKE_TIMEOUT = 4000;
   private final WebSocketClientHandshaker handShaker;
-  SettableFuture handshakeFuture = SettableFuture.create();
+  SettableFuture<Boolean> handshakeFuture = SettableFuture.create();
 
   public WebsocketProtostuffDecoder(WebSocketClientHandshaker handShaker) throws URISyntaxException {
     super(handShaker);
@@ -47,7 +46,7 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt instanceof ClientHandshakeStateEvent) {
       ClientHandshakeStateEvent clientHandshakeStateEvent = (ClientHandshakeStateEvent) evt;
-      if (evt.equals(ClientHandshakeStateEvent.HANDSHAKE_COMPLETE)){
+      if (clientHandshakeStateEvent.equals(ClientHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
         handshakeFuture.set(true);
       }
     }
@@ -58,9 +57,11 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
     if (frame instanceof BinaryWebSocketFrame) {
-      out.add(ClientProtos.Response.parseFrom(
-          ZeroCopyLiteralByteString.copyFrom(frame.content().nioBuffer()))
-      );
+      ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
+      Response newMsg = Response.getSchema().newMessage();
+      Response.getSchema().mergeFrom(input, newMsg);
+      out.add(newMsg);
+    } else {
       super.decode(ctx, frame, out);
     }
   }
