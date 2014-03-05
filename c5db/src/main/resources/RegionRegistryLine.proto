@@ -26,11 +26,10 @@ option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
 
 message RegistryLine {
-    required bytes tableName = 1 [ByteBuffer = true];
-    required bytes startKey = 2 [ByteBuffer = true];
-    required bytes endKey = 3 [ByteBuffer = true];
+    required bytes tableName = 1;
+    required bytes startKey = 2;
+    required bytes endKey = 3;
     required uint64 regionId = 4;
-    repeated bytes cf = 5 [ByteBuffer = true];
-
+    repeated bytes cf = 5;
     repeated uint64 peers = 6;
 }
