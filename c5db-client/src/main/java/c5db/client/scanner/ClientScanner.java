@@ -42,11 +42,12 @@ package c5db.client.scanner;
 import c5db.ProtobufUtil;
 import c5db.client.C5ConnectionManager;
 import c5db.client.C5Constants;
+import c5db.client.C5Table;
 import c5db.client.MessageHandler;
-import c5db.client.generated.ClientProtos;
-import c5db.client.generated.HBaseProtos;
+import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.ScanRequest;
+import c5db.client.generated.ScanResponse;
 import c5db.client.queue.WickedQueue;
-import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
@@ -63,11 +64,12 @@ public class ClientScanner extends AbstractClientScanner {
   final MessageHandler handler;
   private final Channel ch;
   private final long scannerId;
-  private final WickedQueue<ClientProtos.Result>
+  private final WickedQueue<c5db.client.generated.Result>
       scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
-  private boolean isClosed = true;
+  private final long commandId;
   private final C5ConnectionManager c5ConnectionManager
       = new C5ConnectionManager();
+  private boolean isClosed = true;
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
 
@@ -78,13 +80,14 @@ public class ClientScanner extends AbstractClientScanner {
    *
    * @throws IOException
    */
-  protected ClientScanner(Channel channel, final long scannerId) throws IOException {
+  protected ClientScanner(Channel channel, final long scannerId, final long commandId) throws IOException {
 
     ch = channel;
 
     final ChannelPipeline pipeline = ch.pipeline();
     handler = pipeline.get(MessageHandler.class);
     this.scannerId = scannerId;
+    this.commandId = commandId;
     this.isClosed = false;
   }
 
@@ -95,7 +98,7 @@ public class ClientScanner extends AbstractClientScanner {
       return null;
     }
 
-    ClientProtos.Result result;
+    c5db.client.generated.Result result;
     do {
       result = scanResults.poll();
 
@@ -127,33 +130,20 @@ public class ClientScanner extends AbstractClientScanner {
   }
 
   private void getMoreRows() throws IOException {
-    HBaseProtos.RegionSpecifier regionSpecifier =
-        HBaseProtos.RegionSpecifier.newBuilder()
-            .setType(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME)
-            .setValue(ByteString.copyFromUtf8("value")).build();
+    //TODO getRegion shouldn't be needed and currently is hardcoded
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        C5Table.getRegion(new byte[]{}));
 
-    ClientProtos.ScanRequest.Builder scanRequest = ClientProtos.ScanRequest.newBuilder()
-        .setScannerId(scannerId)
-        .setRegion(regionSpecifier);
-    scanRequest.setNumberOfRows(requestSize);
-
-    ClientProtos.Call call = ClientProtos.Call.newBuilder()
-        .setCommand(ClientProtos.Call.Command.SCAN)
-        .setCommandId(0)
-        .setScan(scanRequest)
-        .build();
-
+    ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
     try {
       Channel channel = c5ConnectionManager
           .getOrCreateChannel("localhost", C5Constants.TEST_PORT);
       this.outStandingRequests += requestSize;
-      channel.write(call);
+      channel.write(ProtobufUtil.getScanCall(commandId, scanRequest));
 
     } catch (InterruptedException e) {
       throw new IOException(e);
-    } catch (ExecutionException e) {
-      e.printStackTrace();
-    } catch (TimeoutException e) {
+    } catch (ExecutionException | TimeoutException e) {
       e.printStackTrace();
     }
   }
@@ -177,8 +167,8 @@ public class ClientScanner extends AbstractClientScanner {
     this.isClosed = true;
   }
 
-  public void add(ClientProtos.ScanResponse response) {
-    for (ClientProtos.Result result : response.getResultsList()) {
+  public void add(ScanResponse response) {
+    for (c5db.client.generated.Result result : response.getResultsList()) {
       scanResults.add(result);
       this.outStandingRequests--;
     }

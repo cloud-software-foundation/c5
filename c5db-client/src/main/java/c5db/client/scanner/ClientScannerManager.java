@@ -27,12 +27,12 @@ public enum ClientScannerManager {
   private final ConcurrentHashMap<Long, ClientScanner> scannerMap =
       new ConcurrentHashMap<>();
 
-  public ClientScanner createAndGet(Channel channel, long scannerId) throws IOException {
+  public ClientScanner createAndGet(Channel channel, long scannerId, long commandId) throws IOException {
     if (hasScanner(scannerId)) {
       throw new IOException("Scanner already created");
     }
 
-    ClientScanner scanner = new ClientScanner(channel, scannerId);
+    ClientScanner scanner = new ClientScanner(channel, scannerId, commandId);
     scannerMap.put(scannerId, scanner);
     return scanner;
   }

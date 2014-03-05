@@ -21,7 +21,7 @@
 package c5db.client;
 
 
-import com.google.protobuf.ByteString;
+import com.dyuproject.protostuff.ByteString;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
