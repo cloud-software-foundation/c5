@@ -18,9 +18,12 @@
 package c5db.replication;
 
 import c5db.interfaces.ReplicationModule;
+import c5db.replication.generated.AppendEntries;
 import c5db.replication.generated.AppendEntriesReply;
 import c5db.replication.rpc.RpcRequest;
 import c5db.replication.rpc.RpcWireReply;
+import c5db.util.ExceptionHandlingBatchExecutor;
+import c5db.util.ThrowFiberExceptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import org.jetlang.channels.Channel;
@@ -29,10 +32,13 @@ import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
 import org.jetlang.core.Callback;
+import org.jetlang.core.RunnableExecutor;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -45,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static c5db.replication.ReplicatorInstance.State;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -62,16 +69,22 @@ public class InRamLeaderTest {
   private final Channel<ReplicationModule.IndexCommitNotice> commitNotices = new MemoryChannel<>();
   private final BlockingQueue<ReplicationModule.IndexCommitNotice> commits = new LinkedBlockingQueue<>();
 
+  @Rule
+  public ThrowFiberExceptions fiberExceptionHandler = new ThrowFiberExceptions(this);
+
+  private RunnableExecutor runnableExecutor = new RunnableExecutorImpl(
+      new ExceptionHandlingBatchExecutor(fiberExceptionHandler));
+
   ReplicatorLogAbstraction log = new InRamLog();
   private ReplicatorInstance repl;
-  private Fiber rpcFiber = new ThreadFiber();
+  private Fiber rpcFiber = new ThreadFiber(runnableExecutor, null, true);
 
   private ReplicatorInstance makeTestInstance() {
     final List<Long> peerIdList = ImmutableList.of(1L, 2L, 3L);
     TestableInRamSim.Info info = new TestableInRamSim.Info(0);
     info.startTimeout();
 
-    return new ReplicatorInstance(new ThreadFiber(),
+    return new ReplicatorInstance(new ThreadFiber(runnableExecutor, null, true),
         PEER_ID,
         QUORUM_ID,
         peerIdList,
@@ -216,5 +229,52 @@ public class InRamLeaderTest {
 
     // Test fails iff this throws TimeoutException
     waitCond.get(TEST_TIMEOUT, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void testFollowerWhoReceivedNothing() throws Exception {
+    long flakyPeer = 2;
+    ackAllRequestsToPeer(3);
+
+    // flaky peer drops all requests:
+    createRequestRule(flakyPeer, (request) -> {
+    });
+    for (int i = 1; i <= 10; i++) {
+      repl.logData(TEST_DATUM);
+    }
+    verifyCommitUpTo(10);
+
+    // At this point, the leader has sent ten requests and has committed them, but has not heard anything
+    // from one of its followers. Now that follower returns false, and the leader starts stepping back
+    // through log entries to find the most recent one it has in common with that follower. (Answer: none).
+    SettableFuture<Boolean> waitCond = SettableFuture.create();
+    createRequestRule(flakyPeer, (request) -> {
+      try {
+        AppendEntries msg = request.getRequest().getAppendMessage();
+
+        // Leader should only be sending AppendEntries
+        assertNotNull(msg);
+
+        // Return false until prevLogIndex = 0
+        if (msg.getPrevLogIndex() > 0) {
+          ackRequest(request, false);
+        } else {
+          // End test; check that the leader is correctly sending the first entry (at very least)
+          int numberEntriesSent = msg.getEntriesList().size();
+
+          assertEquals(0, msg.getPrevLogIndex());
+          assertNotEquals(0, numberEntriesSent);
+          assertEquals(1, msg.getEntriesList().get(0).getIndex());
+          assertEquals(numberEntriesSent, msg.getEntriesList().get(numberEntriesSent - 1).getIndex());
+          ackOrders.remove(flakyPeer);
+          waitCond.set(true);
+        }
+      } catch (Throwable t) {
+        // Catch assertion errors and forward to the test thread.
+        waitCond.setException(t);
+      }
+    });
+
+    assertTrue(waitCond.get(TEST_TIMEOUT, TimeUnit.SECONDS));
   }
 }
