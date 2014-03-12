@@ -13,12 +13,10 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
 
-/**
+/** Incorporates changes licensed under:
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
