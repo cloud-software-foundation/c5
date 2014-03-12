@@ -36,6 +36,7 @@
 
 // This file contains protocol buffers that are used for filters
 
+package c5db.client.generated;
 option java_package = "c5db.client.generated";
 option java_outer_classname = "ComparatorProtos";
 option java_generic_services = true;
