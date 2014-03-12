@@ -17,7 +17,7 @@
 package c5db.regionserver.scanner;
 
 
-import c5db.client.C5Constants;
+import c5db.C5ServerConstants;
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
@@ -33,7 +33,6 @@ import org.jetlang.core.Callback;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ScanRunnable implements Callback<Integer> {
@@ -104,7 +103,7 @@ public class ScanRunnable implements Callback<Integer> {
         rowsToSend++;
 
       } while (moreResults
-          && rowsToSend < C5Constants.MSG_SIZE
+          && rowsToSend < C5ServerConstants.MSG_SIZE
           && numberOfMessagesToSend - rowsToSend > 0);
 
       ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
