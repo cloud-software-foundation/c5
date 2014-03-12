@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2013  Ohm Data
  *
@@ -14,11 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  This file incorporates work covered by the following copyright and
- *  permission notice:
  */
-
 package c5db.client;
 
 import c5db.ProtobufUtil;
@@ -30,8 +25,6 @@ import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
