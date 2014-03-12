@@ -36,9 +36,13 @@
 
 package c5db;
 
-import c5db.client.generated.ClientProtos;
-import c5db.client.generated.HBaseProtos;
-import com.google.protobuf.ByteString;
+import c5db.client.generated.Action;
+import c5db.client.generated.Condition;
+import c5db.client.generated.GetRequest;
+import c5db.client.generated.MutateRequest;
+import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionSpecifier;
 import org.apache.hadoop.hbase.DoNotRetryIOException;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -47,6 +51,9 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.RowMutations;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestConverter {
 
@@ -59,15 +66,12 @@ public class RequestConverter {
    * @param existenceOnly indicate if check row existence only
    * @return a protocol buffer GetRequest
    */
-  public static ClientProtos.GetRequest buildGetRequest(final byte[] regionName,
-                                                        final Get get, final boolean existenceOnly) throws IOException {
-    ClientProtos.GetRequest.Builder builder = ClientProtos.GetRequest.newBuilder();
-    HBaseProtos.RegionSpecifier region = buildRegionSpecifier(
-        HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-
-    builder.setRegion(region);
-    builder.setGet(ProtobufUtil.toGet(get, existenceOnly));
-    return builder.build();
+  public static GetRequest buildGetRequest(final byte[] regionName,
+                                           final Get get,
+                                           final boolean existenceOnly) throws IOException {
+    RegionSpecifier region = buildRegionSpecifier(
+        RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    return new GetRequest(region, ProtobufUtil.toGet(get, existenceOnly));
   }
 
   /**
@@ -77,12 +81,9 @@ public class RequestConverter {
    * @param value the region specifier byte array value
    * @return a protocol buffer RegionSpecifier
    */
-  public static HBaseProtos.RegionSpecifier buildRegionSpecifier(
-      final HBaseProtos.RegionSpecifier.RegionSpecifierType type, final byte[] value) {
-    HBaseProtos.RegionSpecifier.Builder regionBuilder = HBaseProtos.RegionSpecifier.newBuilder();
-    regionBuilder.setValue(ByteString.copyFrom(value));
-    regionBuilder.setType(type);
-    return regionBuilder.build();
+  public static RegionSpecifier buildRegionSpecifier(
+      final RegionSpecifier.RegionSpecifierType type, final byte[] value) {
+    return new RegionSpecifier(type, ByteBuffer.wrap(value));
   }
 
   /**
@@ -93,71 +94,57 @@ public class RequestConverter {
    * @return a mutate request
    * @throws IOException
    */
-  public static ClientProtos.MutateRequest buildMutateRequest(
-      final byte[] regionName, final Delete delete) throws IOException {
-    ClientProtos.MutateRequest.Builder builder = ClientProtos.MutateRequest.newBuilder();
-    HBaseProtos.RegionSpecifier region = buildRegionSpecifier(
-        HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    builder.setRegion(region);
-    builder.setMutation(ProtobufUtil.toMutation(ClientProtos.MutationProto.MutationType.DELETE, delete));
-    return builder.build();
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) throws IOException {
+    RegionSpecifier region = buildRegionSpecifier(
+        RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete), new Condition());
   }
-
 
   /**
    * Create a protocol buffer MutateRequest for a put
    *
-   * @param regionName
-   * @param put
+   * @param regionName The region name to create the mutateRequest against
+   * @param put        The client request.
    * @return a mutate request
    * @throws IOException
    */
-  public static ClientProtos.MutateRequest buildMutateRequest(
-      final byte[] regionName, final Put put) throws IOException {
-    ClientProtos.MutateRequest.Builder builder = ClientProtos.MutateRequest.newBuilder();
-    HBaseProtos.RegionSpecifier region = buildRegionSpecifier(
-        HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    builder.setRegion(region);
-    builder.setMutation(ProtobufUtil.toMutation(ClientProtos.MutationProto.MutationType.PUT, put));
-    return builder.build();
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) throws IOException {
+    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
 
-    private static ClientProtos.RegionAction.Builder getRegionActionBuilderWithRegion(final byte [] regionName) {
-        ClientProtos.RegionAction.Builder builder = ClientProtos.RegionAction.newBuilder();
-        HBaseProtos.RegionSpecifier region =
-                buildRegionSpecifier(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-        builder.setRegion(region);
-        return builder;
-    }
+  /**
+   * Create a protocol buffer MultiRequest for row mutations.
+   * Does not propagate Action absolute position.
+   *
+   * @param regionName   The region name the actions apply to.
+   * @param rowMutations The row mutations to apply to the region
+   * @param atomic       Whether or not the actions should be atomic
+   * @return a data-laden RegionAction
+   */
+  public static RegionAction buildRegionAction(final byte[] regionName,
+                                               final boolean atomic,
+                                               final RowMutations rowMutations)
+      throws IOException {
+    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    List<Action> actions = new ArrayList<>();
+    int index = 0;
+    for (Mutation mutation : rowMutations.getMutations()) {
+      MutationProto.MutationType mutateType;
+      if (mutation instanceof Put) {
+        mutateType = MutationProto.MutationType.PUT;
+      } else if (mutation instanceof Delete) {
+        mutateType = MutationProto.MutationType.DELETE;
+      } else {
+        throw new DoNotRetryIOException("RowMutations supports only put and delete, not " +
+            mutation.getClass().getName());
+      }
+      MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
+      Action action = new Action(++index, mp, new c5db.client.generated.Get());
+      actions.add(action);
 
-    /**
-     * Create a protocol buffer MultiRequest for row mutations.
-     * Does not propagate Action absolute position.  Does not set atomic action on the created
-     * RegionAtomic.  Caller should do that if wanted.
-     * @param regionName
-     * @param rowMutations
-     * @return a data-laden RegionMutation.Builder
-     * @throws IOException
-     */
-    public static ClientProtos.RegionAction.Builder buildRegionAction(final byte [] regionName,
-                                                         final RowMutations rowMutations)
-            throws IOException {
-        ClientProtos.RegionAction.Builder builder = getRegionActionBuilderWithRegion(regionName);
-        for (Mutation mutation: rowMutations.getMutations()) {
-            ClientProtos.MutationProto.MutationType mutateType = null;
-            if (mutation instanceof Put) {
-                mutateType = ClientProtos.MutationProto.MutationType.PUT;
-            } else if (mutation instanceof Delete) {
-                mutateType = ClientProtos.MutationProto.MutationType.DELETE;
-            } else {
-                throw new DoNotRetryIOException("RowMutations supports only put and delete, not " +
-                        mutation.getClass().getName());
-            }
-            ClientProtos.MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
-            builder.addAction(ClientProtos.Action.newBuilder().setMutation(mp).build());
-        }
-        return builder;
     }
-
+    return new RegionAction(region, atomic, actions);
+  }
 }

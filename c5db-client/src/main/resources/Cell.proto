@@ -36,6 +36,7 @@
 
 // Cell and KeyValue protos
 
+package c5db.client.generated;
 option java_package = "c5db.client.generated";
 option java_outer_classname = "CellProtos";
 option java_generate_equals_and_hash = true;

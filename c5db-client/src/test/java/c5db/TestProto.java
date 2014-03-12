@@ -23,15 +23,19 @@
  */
 package c5db;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Call;
+import c5db.client.generated.Response;
 import org.junit.Test;
 
 public class TestProto {
-
+  @Test
+  public void testClientProtoCall() {
+    Call call = Call.getDefaultInstance();
+  }
 
   @Test
-  public void testClientProto() {
-    ClientProtos.Call call = ClientProtos.Call.getDefaultInstance();
-    call.toString();
+  public void testClientProtoResponse() {
+    Response response = Response.getDefaultInstance();
   }
+
 }

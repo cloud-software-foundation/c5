@@ -18,12 +18,18 @@ package c5db.client;
 
 import c5db.ProtobufUtil;
 import c5db.RequestConverter;
-import c5db.client.codec.WebsocketProtostuffDecoder;
-import c5db.client.generated.ClientProtos;
-import c5db.client.generated.HBaseProtos;
+import c5db.client.generated.Call;
+import c5db.client.generated.GetRequest;
+import c5db.client.generated.GetResponse;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MutateRequest;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.Response;
+import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScannerManager;
+import com.dyuproject.protostuff.ByteString;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import org.apache.hadoop.hbase.client.Delete;
@@ -39,9 +45,9 @@ import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -50,12 +56,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class C5Table extends C5Shim implements AutoCloseable {
   private final C5ConnectionManager c5ConnectionManager = new C5ConnectionManager();
-  private final ClientScannerManager clientScannerManager
-      = ClientScannerManager.INSTANCE;
+  private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private final int port;
   private MessageHandler handler;
   private AtomicLong commandId = new AtomicLong(0);
-  private UUID uuid = UUID.randomUUID();
   private Channel channel;
   private String hostname;
 
@@ -74,28 +78,19 @@ public class C5Table extends C5Shim implements AutoCloseable {
     this.port = port;
     channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
     handler = channel.pipeline().get(MessageHandler.class);
-    WebsocketProtostuffDecoder webSocketDecoder = channel.pipeline().get(WebsocketProtostuffDecoder.class);
-
-
-   }
+  }
 
   @Override
   public Result get(final Get get) throws IOException {
 
-    final SettableFuture<ClientProtos.Response> resultFuture
+    final SettableFuture<Response> resultFuture
         = SettableFuture.create();
-    final ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
-    final ClientProtos.GetRequest getRequest =
+    final GetRequest getRequest =
         RequestConverter.buildGetRequest(getRegionName(),
             get,
             false);
-    call.setGet(getRequest);
-    call.setCommand(ClientProtos.Call.Command.GET);
-    call.setCommandId(commandId.incrementAndGet());
-
-
     try {
-      handler.call(call.build(), resultFuture, channel);
+      handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
       return ProtobufUtil.toResult(resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet().getResult());
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
@@ -115,20 +110,16 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public boolean exists(final Get get) throws IOException {
 
-    final SettableFuture<ClientProtos.Response> resultFuture
-        = SettableFuture.create();
-    final ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
-    final ClientProtos.GetRequest getRequest =
-        RequestConverter.buildGetRequest(getRegionName(),
-            get,
-            true);
-    call.setGet(getRequest);
-    call.setCommand(ClientProtos.Call.Command.GET);
-    call.setCommandId(commandId.incrementAndGet());
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    final GetRequest getRequest = RequestConverter.buildGetRequest(getRegionName(),
+        get,
+        true);
 
     try {
-      handler.call(call.build(), resultFuture, channel);
-      return resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet().getResult().getExists();
+      handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
+      GetResponse getResponse = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet();
+      c5db.client.generated.Result result = getResponse.getResult();
+      return result.getExists();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
     }
@@ -146,30 +137,29 @@ public class C5Table extends C5Shim implements AutoCloseable {
     }
 
     SettableFuture<Long> future = SettableFuture.create();
-    HBaseProtos.RegionSpecifier regionSpecifier =
-        HBaseProtos.RegionSpecifier.newBuilder()
-            .setType(HBaseProtos.RegionSpecifier.RegionSpecifierType.REGION_NAME)
-            .setValue(ByteString.copyFromUtf8("value")).build();
-    ClientProtos.ScanRequest scanRequest = ClientProtos.ScanRequest.newBuilder()
-        .setScan(ProtobufUtil.toScan(scan))
-        .setRegion(regionSpecifier)
-        .setNumberOfRows(C5Constants.DEFAULT_INIT_SCAN)
-        .build();
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        getRegion(scan.getStartRow()));
 
-    ClientProtos.Call call = ClientProtos.Call.newBuilder()
-        .setCommand(ClientProtos.Call.Command.SCAN)
-        .setCommandId(commandId.incrementAndGet())
-        .setScan(scanRequest)
-        .build();
+    ScanRequest scanRequest = new ScanRequest(regionSpecifier,
+        ProtobufUtil.toScan(scan),
+        0l,
+        C5Constants.DEFAULT_INIT_SCAN,
+        false,
+        0l);
 
     try {
-      handler.call(call, future, channel);
+      handler.call(ProtobufUtil.getScanCall(commandId.incrementAndGet(), scanRequest), future, channel);
       Long scannerId = future.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
       /// TODO ADD A CREATE as well
       return clientScannerManager.get(scannerId);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
     }
+  }
+
+  // TODO actually make this work
+  public static ByteBuffer getRegion(byte [] row) {
+    return ByteBuffer.wrap(new byte[]{});
   }
 
   @Override
@@ -203,22 +193,19 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   private void doPut(Put put) throws InterruptedIOException, RetriesExhaustedWithDetailsException {
 
-    final SettableFuture<ClientProtos.Response> resultFuture
+    final SettableFuture<Response> resultFuture
         = SettableFuture.create();
 
-    ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
-    ClientProtos.MutateRequest mutateRequest;
+    Call call = new Call();
+    MutateRequest mutateRequest;
     try {
       mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
     } catch (IOException e) {
       throw new InterruptedIOException(e.getLocalizedMessage());
     }
-    call.setMutate(mutateRequest);
-    call.setCommand(ClientProtos.Call.Command.MUTATE);
-    call.setCommandId(commandId.incrementAndGet());
 
     try {
-      handler.call(call.build(), resultFuture, channel);
+      handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
       throw new InterruptedIOException(e.toString());
@@ -236,18 +223,13 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public void delete(Delete delete) throws IOException {
 
-    final SettableFuture<ClientProtos.Response> resultFuture
+    final SettableFuture<Response> resultFuture
         = SettableFuture.create();
 
-    ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
-    ClientProtos.MutateRequest mutateRequest =
-        RequestConverter.buildMutateRequest(getRegionName(), delete);
-    call.setMutate(mutateRequest);
-    call.setCommand(ClientProtos.Call.Command.MUTATE);
-    call.setCommandId(commandId.incrementAndGet());
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), delete);
 
     try {
-      handler.call(call.build(), resultFuture, channel);
+      handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
@@ -264,22 +246,17 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public void mutateRow(RowMutations rm) throws IOException {
 
-    final SettableFuture<ClientProtos.Response> resultFuture
-        = SettableFuture.create();
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
 
-    ClientProtos.Call.Builder call = ClientProtos.Call.newBuilder();
+    List<RegionAction> regionActions = new ArrayList<>();
     try {
-      ClientProtos.RegionAction.Builder regionMutationBuilder =
-          RequestConverter.buildRegionAction(getRegionName(), rm);
-      ClientProtos.MultiRequest.Builder multiRequest = ClientProtos
-          .MultiRequest
-          .newBuilder()
-          .addRegionAction(regionMutationBuilder.build());
-      call.setMulti(multiRequest.build());
-      call.setCommand(ClientProtos.Call.Command.MULTI);
-      call.setCommandId(commandId.incrementAndGet());
+      RegionAction regionAction = RequestConverter.buildRegionAction(getRegionName(), false, rm);
+      regionActions.add(regionAction);
 
-      handler.call(call.build(), resultFuture, channel);
+      handler.call(ProtobufUtil.getMultiCall(commandId.incrementAndGet(),
+          new MultiRequest(regionActions)),
+          resultFuture,
+          channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
