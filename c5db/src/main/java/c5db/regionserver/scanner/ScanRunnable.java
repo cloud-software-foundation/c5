@@ -18,7 +18,10 @@ package c5db.regionserver.scanner;
 
 
 import c5db.client.C5Constants;
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Call;
+import c5db.client.generated.Response;
+import c5db.client.generated.Result;
+import c5db.client.generated.ScanResponse;
 import c5db.regionserver.ReverseProtobufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
@@ -28,79 +31,90 @@ import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.jetlang.core.Callback;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ScanRunnable implements Callback<Integer> {
-    private final long scannerId;
-    private final ClientProtos.Call call;
-    private final ChannelHandlerContext ctx;
-    private final RegionScanner scanner;
-    private boolean close;
+  private final long scannerId;
+  private final Call call;
+  private final ChannelHandlerContext ctx;
+  private final RegionScanner scanner;
+  private boolean close;
 
-    public ScanRunnable(final ChannelHandlerContext ctx,
-                        final ClientProtos.Call call,
-                        final long scannerId, HRegion region) throws IOException {
-        super();
-        Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
-        this.ctx = ctx;
-        this.call = call;
-        this.scannerId = scannerId;
-        this.scanner = region.getScanner(scan);
-        this.close = false;
+  public ScanRunnable(final ChannelHandlerContext ctx,
+                      final Call call,
+                      final long scannerId, HRegion region) throws IOException {
+    super();
+    Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
+    this.ctx = ctx;
+    this.call = call;
+    this.scannerId = scannerId;
+    this.scanner = region.getScanner(scan);
+    this.close = false;
+  }
+
+  @Override
+  public void onMessage(Integer numberOfMessagesToSend) {
+    if (this.close) {
+      return;
     }
+    long numberOfMsgsLeft = numberOfMessagesToSend;
+    List<Result> scanResults = new ArrayList<>();
+    List<Integer> cellsPerResult = new ArrayList<>();
+    ByteBuffer previousRow = null;
+    while (!this.close && numberOfMsgsLeft > 0) {
+      int rowsToSend = 0;
+      boolean moreResults;
+      do {
+        List<Cell> rawCells = new ArrayList<>();
 
-    @Override
-    public void onMessage(Integer numberOfMessagesToSend) {
-        if (this.close) {
-            return;
+        try {
+          moreResults = scanner.nextRaw(rawCells);
+          if (!moreResults) {
+            this.scanner.close();
+            this.close = true;
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+          return;
         }
-        long numberOfMsgsLeft = numberOfMessagesToSend;
-        while (!this.close && numberOfMsgsLeft > 0) {
-            ClientProtos.ScanResponse.Builder scanResponse
-                    = ClientProtos.ScanResponse.newBuilder();
-            scanResponse.setScannerId(scannerId);
 
-            int rowsToSend = 0;
-            boolean moreResults;
-            do {
-                List<Cell> kvs = new ArrayList<>();
+        List<c5db.client.generated.Cell> cells = new ArrayList<>();
+        for (Cell cell : rawCells) {
+          ByteBuffer cellBufferRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
+          // If we are not the first one and we are a different row than the previous
+          cells.add(ReverseProtobufUtil.toCell(cell));
 
-                try {
-                    moreResults = scanner.nextRaw(kvs);
-                    if (!moreResults) {
-                        this.scanner.close();
-                        this.close = true;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-
-                ClientProtos.Result.Builder resultBuilder =
-                        ClientProtos.Result.newBuilder();
-
-                for (Cell kv : kvs) {
-                    resultBuilder.addCell(ReverseProtobufUtil.toCell(kv));
-                }
-                scanResponse.addResults(resultBuilder.build());
-                rowsToSend++;
-
-            } while (moreResults
-                    && rowsToSend < C5Constants.MSG_SIZE
-                    && numberOfMessagesToSend - rowsToSend > 0);
-            scanResponse.setMoreResults(moreResults);
-            ClientProtos.Response response = ClientProtos
-                    .Response
-                    .newBuilder()
-                    .setCommand(ClientProtos.Response.Command.SCAN)
-                    .setCommandId(call.getCommandId())
-                    .setScan(scanResponse.build()).build();
-
-            ctx.writeAndFlush(response);
-            numberOfMsgsLeft -= rowsToSend;
+          if (previousRow == null ||  previousRow.compareTo(cellBufferRow) == 0 ) {
+          } else {
+            cellsPerResult.add(cells.size());
+            scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
+            cells = new ArrayList<>();
+          }
+          previousRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
         }
+        // Add the last one
+        if (cells.size() > 0) {
+          cellsPerResult.add(cells.size());
+          scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
+        }
+
+        rowsToSend++;
+
+      } while (moreResults
+          && rowsToSend < C5Constants.MSG_SIZE
+          && numberOfMessagesToSend - rowsToSend > 0);
+
+      ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
+      Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
+
+      ctx.writeAndFlush(response);
+      numberOfMsgsLeft -= rowsToSend;
     }
+  }
+
 }
 
 

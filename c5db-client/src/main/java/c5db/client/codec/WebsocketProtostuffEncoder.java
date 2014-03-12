@@ -16,7 +16,8 @@
  */
 package c5db.client.codec;
 
-import c5db.client.generated.ClientProtos;
+import c5db.client.generated.Call;
+import com.dyuproject.protostuff.LowCopyProtobufOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,9 +25,10 @@ import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
-public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<ClientProtos.Call> {
+public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
   public final WebSocketClientHandshaker handShaker;
 
   public WebsocketProtostuffEncoder(WebSocketClientHandshaker handShaker) {
@@ -35,9 +37,13 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<ClientPr
 
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
-                        ClientProtos.Call call,
+                        Call call,
                         List<Object> objects) throws Exception {
-    ByteBuf byteBuf = Unpooled.copiedBuffer(call.toByteArray());
+    LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
+    Call.getSchema().writeTo(lcpo, call);
+
+    List<ByteBuffer> buffers = lcpo.buffer.finish();
+    ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
     BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
   }
