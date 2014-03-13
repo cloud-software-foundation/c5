@@ -16,22 +16,10 @@
  */
 package c5db;
 
-import org.junit.Test;
+public class C5ServerConstants {
+  public static final int MSG_SIZE = 100;
+  public static final String LOG_NAME = "log";
+  public static final String WAL_DIR = "wal";
+  public static final String ARCHIVE_DIR = "old_wal";
 
-import static org.junit.Assert.assertTrue;
-
-/**
- * A class for tests pertinent to multiple packages.
- */
-public class C5CommonTest {
-
-  /** Ensure that java assertions are enabled */
-  @Test
-  public void testAssertionsEnabled() {
-    boolean assertsEnabled = false;
-    //noinspection AssertWithSideEffects
-    assert (assertsEnabled = true); // deliberate side effect
-    //noinspection ConstantConditions
-    assertTrue(assertsEnabled);
-  }
 }

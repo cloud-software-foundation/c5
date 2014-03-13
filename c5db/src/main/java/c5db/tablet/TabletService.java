@@ -16,7 +16,7 @@
  */
 package c5db.tablet;
 
-import c5db.client.C5Constants;
+import c5db.C5ServerConstants;
 import c5db.generated.Log;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -302,8 +302,7 @@ public class TabletService extends AbstractService implements TabletModule {
     }
 
     private void logReplay(final Path path) throws IOException {
-        java.nio.file.Path archiveLogPath = Paths.get(path.toString(),
-                C5Constants.ARCHIVE_DIR);
+        java.nio.file.Path archiveLogPath = Paths.get(path.toString(), C5ServerConstants.ARCHIVE_DIR);
         File[] archiveLogs = archiveLogPath.toFile().listFiles();
 
         if (archiveLogs == null) {
