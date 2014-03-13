@@ -220,7 +220,7 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
     /**** Implementation ****/
-    private Fiber tabletServicesFiber;
+
 
     private Fiber serverFiber;
     private final ConfigDirectory configDirectory;
@@ -474,7 +474,6 @@ public class C5DB extends AbstractService implements C5Server {
             });
 
             serverFiber.start();
-            tabletServicesFiber.start();
 
             notifyStarted();
         } catch (Exception e) {
