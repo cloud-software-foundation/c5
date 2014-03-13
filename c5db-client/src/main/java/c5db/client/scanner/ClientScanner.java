@@ -37,7 +37,6 @@
 package c5db.client.scanner;
 
 import c5db.ProtobufUtil;
-import c5db.client.C5ConnectionManager;
 import c5db.client.C5Constants;
 import c5db.client.C5Table;
 import c5db.client.MessageHandler;
@@ -50,7 +49,6 @@ import io.netty.channel.ChannelPipeline;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
-import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,9 +62,8 @@ public class ClientScanner extends AbstractClientScanner {
   private final WickedQueue<c5db.client.generated.Result>
       scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private final long commandId;
-  private final C5ConnectionManager c5ConnectionManager
-      = new C5ConnectionManager();
   private boolean isClosed = true;
+
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
 
@@ -78,19 +75,16 @@ public class ClientScanner extends AbstractClientScanner {
    * @throws IOException
    */
   protected ClientScanner(Channel channel, final long scannerId, final long commandId) throws IOException {
-
     ch = channel;
-
     final ChannelPipeline pipeline = ch.pipeline();
     handler = pipeline.get(MessageHandler.class);
     this.scannerId = scannerId;
     this.commandId = commandId;
     this.isClosed = false;
   }
-
   @Override
   public Result next() throws IOException {
-    Log.warn("openSocket:" + ch.isOpen());
+
     if (this.isClosed && this.scanResults.isEmpty()) {
       return null;
     }
@@ -104,9 +98,7 @@ public class ClientScanner extends AbstractClientScanner {
         if (this.outStandingRequests < .5 * requestSize) {
           if (requestSize < C5Constants.MAX_REQUEST_SIZE) {
             requestSize = requestSize * 2;
-            System.out.println("increasing requestSize:" + requestSize);
-            System.out.flush();
-          }
+           }
         }
         int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
 
@@ -132,17 +124,8 @@ public class ClientScanner extends AbstractClientScanner {
         C5Table.getRegion(new byte[]{}));
 
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
-    try {
-      Channel channel = c5ConnectionManager
-          .getOrCreateChannel("localhost", C5Constants.TEST_PORT);
       this.outStandingRequests += requestSize;
-      channel.write(ProtobufUtil.getScanCall(commandId, scanRequest));
-
-    } catch (InterruptedException e) {
-      throw new IOException(e);
-    } catch (ExecutionException | TimeoutException e) {
-      e.printStackTrace();
-    }
+      ch.write(ProtobufUtil.getScanCall(commandId, scanRequest));
   }
 
   @Override
