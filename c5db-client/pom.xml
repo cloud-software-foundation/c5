@@ -17,6 +17,18 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.2-SNAPSHOT</version>
+                <configuration>
+                    <targetJdk>1.8</targetJdk>
+                    <sourceEncoding>utf-8</sourceEncoding>
+                    <excludes>
+                        <exclude>**/generated/*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.8</source>
@@ -115,4 +127,5 @@
             <version>${version}</version>
         </dependency>
     </dependencies>
+
 </project>
