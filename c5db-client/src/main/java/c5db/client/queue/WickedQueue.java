@@ -58,11 +58,6 @@ public final class WickedQueue<E> implements Queue<E> {
 
   private final AtomicLong tail = new c5db.client.queue.PaddedAtomicLong(0);
   private final AtomicLong head = new c5db.client.queue.PaddedAtomicLong(0);
-
-  public static class PaddedLong {
-    public long value = 0, p1, p2, p3, p4, p5, p6;
-  }
-
   private final PaddedLong tailCache = new PaddedLong();
   private final PaddedLong headCache = new PaddedLong();
 
@@ -214,5 +209,9 @@ public final class WickedQueue<E> implements Queue<E> {
     do {
       value = poll();
     } while (null != value);
+  }
+
+  public static class PaddedLong {
+    public long value = 0, p1, p2, p3, p4, p5, p6;
   }
 }

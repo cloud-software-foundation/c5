@@ -25,7 +25,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -35,9 +34,9 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
 
   private static final long HANDSHAKE_TIMEOUT = 4000;
   private final WebSocketClientHandshaker handShaker;
-  SettableFuture<Boolean> handshakeFuture = SettableFuture.create();
+  private final SettableFuture<Boolean> handshakeFuture = SettableFuture.create();
 
-  public WebsocketProtostuffDecoder(WebSocketClientHandshaker handShaker) throws URISyntaxException {
+  public WebsocketProtostuffDecoder(WebSocketClientHandshaker handShaker) {
     super(handShaker);
     this.handShaker = handShaker;
   }

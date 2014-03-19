@@ -52,9 +52,21 @@ import java.util.UUID;
  * Common helper methods for testing C5
  */
 public class C5CommonTestUtil {
+  /**
+   * System property key to get base test directory value
+   */
+  public static final String BASE_TEST_DIRECTORY_KEY =
+      "test.build.data.basedirectory";
+  /**
+   * Default base directory for test output.
+   */
+  public static final String DEFAULT_BASE_TEST_DIRECTORY = "target/test-data";
   protected static final Logger LOG = LoggerFactory.getLogger(C5CommonTestUtil.class);
-
-  protected Configuration conf;
+  protected final Configuration conf;
+  /**
+   * Directory where we put the data for this instance of C5CommonTestUtil
+   */
+  private File dataTestDir = null;
 
   public C5CommonTestUtil() {
     this(HBaseConfiguration.create());
@@ -72,22 +84,6 @@ public class C5CommonTestUtil {
   public Configuration getConfiguration() {
     return this.conf;
   }
-
-  /**
-   * System property key to get base test directory value
-   */
-  public static final String BASE_TEST_DIRECTORY_KEY =
-      "test.build.data.basedirectory";
-
-  /**
-   * Default base directory for test output.
-   */
-  public static final String DEFAULT_BASE_TEST_DIRECTORY = "target/test-data";
-
-  /**
-   * Directory where we put the data for this instance of C5CommonTestUtil
-   */
-  private File dataTestDir = null;
 
   /**
    * @return Where to write test data on local filesystem, specific to
@@ -174,10 +170,7 @@ public class C5CommonTestUtil {
    * @throws IOException
    */
   boolean cleanupTestDir(final String subdir) throws IOException {
-    if (this.dataTestDir == null) {
-      return false;
-    }
-    return deleteDir(new File(this.dataTestDir, subdir));
+    return this.dataTestDir != null && deleteDir(new File(this.dataTestDir, subdir));
   }
 
   /**
@@ -197,9 +190,8 @@ public class C5CommonTestUtil {
   /**
    * @param dir Directory to delete
    * @return True if we deleted it.
-   * @throws IOException
    */
-  boolean deleteDir(final File dir) throws IOException {
+  boolean deleteDir(final File dir) {
     if (dir == null || !dir.exists()) {
       return true;
     }

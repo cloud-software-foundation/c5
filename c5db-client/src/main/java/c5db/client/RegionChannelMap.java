@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum RegionChannelMap {
   INSTANCE;
 
-  private static ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
+  private final static ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
 
   public boolean containsKey(String key) {
     return regionChannelMap.containsKey(key);
