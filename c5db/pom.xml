@@ -14,6 +14,22 @@
     <version>0.1-SNAPSHOT</version>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.12</version>
+		    <configuration>
+		        <excludes>**/generated/**/*</excludes>
+                        <configLocation>checkstyle_checks.xml</configLocation>
+                        <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                        <suppressionsLocation>suppressions.xml</suppressionsLocation>
+                    </configuration>
+
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
