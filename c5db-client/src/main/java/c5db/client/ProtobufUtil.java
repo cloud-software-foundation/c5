@@ -34,7 +34,7 @@
  * limitations under the License.
  */
 
-package c5db;
+package c5db.client;
 
 
 import c5db.client.generated.Call;
