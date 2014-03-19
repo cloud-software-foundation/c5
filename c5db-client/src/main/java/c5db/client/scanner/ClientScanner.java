@@ -36,7 +36,7 @@
 
 package c5db.client.scanner;
 
-import c5db.ProtobufUtil;
+import c5db.client.ProtobufUtil;
 import c5db.client.C5Constants;
 import c5db.client.C5Table;
 import c5db.client.MessageHandler;
