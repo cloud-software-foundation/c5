@@ -22,6 +22,9 @@
                     <version>2.12</version>
                     <configuration>
                         <excludes>**/generated/**/*</excludes>
+                        <configLocation>checkstyle_checks.xml</configLocation>
+                        <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                        <suppressionsLocation>suppressions.xml</suppressionsLocation>
                     </configuration>
                 </plugin>
             </plugins>
