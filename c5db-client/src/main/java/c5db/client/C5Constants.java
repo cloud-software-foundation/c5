@@ -19,7 +19,7 @@ package c5db.client;
 public class C5Constants {
   public static final int DEFAULT_INIT_SCAN = 100;
   public static final int MAX_REQUEST_SIZE = 1000000;
-  public static final int TEST_PORT = 8080;
   public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
+  public static final int TEST_PORT = 8080;
   public static final long TIMEOUT = 10000;
 }

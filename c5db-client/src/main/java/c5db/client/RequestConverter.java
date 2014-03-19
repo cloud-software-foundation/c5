@@ -95,9 +95,8 @@ public class RequestConverter {
    * @param regionName The region name to request from
    * @param delete     The delete to process
    * @return a mutate request
-   * @throws IOException
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) throws IOException {
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) {
     RegionSpecifier region = buildRegionSpecifier(
         RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete), new Condition());
@@ -109,9 +108,8 @@ public class RequestConverter {
    * @param regionName The region name to create the mutateRequest against
    * @param put        The client request.
    * @return a mutate request
-   * @throws IOException
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) throws IOException {
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) {
     RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
