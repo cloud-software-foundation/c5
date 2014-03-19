@@ -129,9 +129,9 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public ResultScanner getScanner(final Scan scan) throws IOException {
-    if ((scan.getStartRow() != null && scan.getStartRow().length > 0) &&
-       (scan.getStopRow() != null && scan.getStopRow().length > 0) &&
-            (Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0)) {
+    if (scan.getStartRow() != null && scan.getStartRow().length > 0 &&
+       scan.getStopRow() != null && scan.getStopRow().length > 0 &&
+            Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
           throw new IOException("StopRow needs to be greater than StartRow");
     }
 

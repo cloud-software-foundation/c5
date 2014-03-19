@@ -38,14 +38,12 @@ package c5db.client.scanner;
 
 import c5db.client.C5Constants;
 import c5db.client.C5Table;
-import c5db.client.MessageHandler;
 import c5db.client.ProtobufUtil;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.ScanResponse;
 import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -54,7 +52,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class ClientScanner extends AbstractClientScanner {
-  private final MessageHandler handler;
   private final Channel ch;
   private final long scannerId;
   private final WickedQueue<c5db.client.generated.Result>
@@ -69,13 +66,9 @@ public class ClientScanner extends AbstractClientScanner {
   /**
    * Create a new ClientScanner for the specified table
    * Note that the passed {@link Scan}'s start row maybe changed changed.
-   *
-   * @throws IOException
    */
   ClientScanner(Channel channel, final long scannerId, final long commandId) {
     ch = channel;
-    final ChannelPipeline pipeline = ch.pipeline();
-    handler = pipeline.get(MessageHandler.class);
     this.scannerId = scannerId;
     this.commandId = commandId;
     this.isClosed = false;
@@ -94,7 +87,7 @@ public class ClientScanner extends AbstractClientScanner {
 
       if (!this.isClosed) {
         // If we don't have enough pending outstanding increase our rate
-        if ((this.outStandingRequests < .5 * requestSize) && (requestSize < C5Constants.MAX_REQUEST_SIZE)) {
+        if (this.outStandingRequests < .5 * requestSize && requestSize < C5Constants.MAX_REQUEST_SIZE) {
           requestSize = requestSize * 2;
         }
         int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
