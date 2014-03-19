@@ -52,8 +52,6 @@ import org.apache.hadoop.hbase.client.Scan;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 public class ClientScanner extends AbstractClientScanner {
   final MessageHandler handler;
@@ -95,10 +93,8 @@ public class ClientScanner extends AbstractClientScanner {
 
       if (!this.isClosed) {
         // If we don't have enough pending outstanding increase our rate
-        if (this.outStandingRequests < .5 * requestSize) {
-          if (requestSize < C5Constants.MAX_REQUEST_SIZE) {
+        if ((this.outStandingRequests < .5 * requestSize) && (requestSize < C5Constants.MAX_REQUEST_SIZE)) {
             requestSize = requestSize * 2;
-           }
         }
         int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
 
