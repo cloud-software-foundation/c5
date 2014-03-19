@@ -16,8 +16,6 @@
  */
 package c5db.client;
 
-import c5db.ProtobufUtil;
-import c5db.RequestConverter;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
 import c5db.client.generated.MultiRequest;
