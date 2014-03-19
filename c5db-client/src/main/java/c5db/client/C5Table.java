@@ -18,7 +18,6 @@ package c5db.client;
 
 import c5db.ProtobufUtil;
 import c5db.RequestConverter;
-import c5db.client.generated.Call;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
 import c5db.client.generated.MultiRequest;
@@ -128,12 +127,10 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public ResultScanner getScanner(final Scan scan) throws IOException {
-    if (scan.getStartRow() != null && scan.getStartRow().length > 0) {
-      if (scan.getStopRow() != null && scan.getStopRow().length > 0) {
-        if (Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
+    if ((scan.getStartRow() != null && scan.getStartRow().length > 0) &&
+       (scan.getStopRow() != null && scan.getStopRow().length > 0) &&
+            (Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0)) {
           throw new IOException("StopRow needs to be greater than StartRow");
-        }
-      }
     }
 
     SettableFuture<Long> future = SettableFuture.create();
@@ -196,7 +193,6 @@ public class C5Table extends C5Shim implements AutoCloseable {
     final SettableFuture<Response> resultFuture
         = SettableFuture.create();
 
-    Call call = new Call();
     MutateRequest mutateRequest;
     try {
       mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
@@ -238,7 +234,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public void delete(List<Delete> deletes) throws IOException {
-    for (Delete delete : deletes) {
+      for (Delete delete : deletes) {
       delete(delete);
     }
   }

@@ -99,7 +99,7 @@ public class C5ConnectionManager {
   private boolean isHandShakeConnected(Channel channel) {
     ChannelPipeline p = channel.pipeline();
     WebsocketProtostuffEncoder encoder = p.get(WebsocketProtostuffEncoder.class);
-    return (encoder.handShaker.isHandshakeComplete());
+    return encoder.handShaker.isHandshakeComplete();
   }
 
   public void closeChannel(String host, int port)
