@@ -38,12 +38,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class C5ConnectionManager {
-
-  RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
-  private Bootstrap bootstrap = new Bootstrap();
-  private EventLoopGroup group = new NioEventLoopGroup();
-  URI uri = null;
+class C5ConnectionManager {
+  final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
+  private final Bootstrap bootstrap = new Bootstrap();
+  private final EventLoopGroup group = new NioEventLoopGroup();
+  private URI uri = null;
 
   public C5ConnectionManager() {
     bootstrap.group(group);
@@ -61,7 +60,7 @@ public class C5ConnectionManager {
     return host + ":" + port;
   }
 
-  public Channel connect(String host, int port) throws InterruptedException, IOException, TimeoutException, ExecutionException {
+  Channel connect(String host, int port) throws InterruptedException, TimeoutException, ExecutionException {
     WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(
         uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders());
     C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);

@@ -33,7 +33,7 @@ public abstract class C5Shim implements TableInterface {
   /**
    * C5Table is the main entry points for clients of C5DB
    *
-   * @param tableName
+   * @param tableName The tablename to create a table for.
    */
   C5Shim(final ByteString tableName) {
     this.tableName = tableName.toByteArray();
@@ -43,7 +43,7 @@ public abstract class C5Shim implements TableInterface {
     return tableName;
   }
 
-  public byte[] getRegionName() {
+  byte[] getRegionName() {
     return new byte[]{0, 1, 2};
   }
 
