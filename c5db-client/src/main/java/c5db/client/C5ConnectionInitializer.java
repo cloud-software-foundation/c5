@@ -30,7 +30,7 @@ import io.netty.handler.logging.LoggingHandler;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
+class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
   private final WebSocketClientHandshaker handShaker;
   private WebsocketProtostuffDecoder decoder;
