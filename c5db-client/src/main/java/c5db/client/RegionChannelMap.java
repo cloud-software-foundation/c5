@@ -7,33 +7,36 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+/***
+ * A helper singleton to store all of the regions that the client jvm is connected to.
+ */
 public enum RegionChannelMap {
   INSTANCE;
 
-  private final static ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, Channel> REGION_CHANNEL_MAP = new ConcurrentHashMap<>();
 
   public boolean containsKey(String key) {
-    return regionChannelMap.containsKey(key);
+    return REGION_CHANNEL_MAP.containsKey(key);
   }
 
   public void put(String key, Channel value) {
-    regionChannelMap.put(key, value);
+    REGION_CHANNEL_MAP.put(key, value);
   }
 
   public Channel get(String key) {
-    return regionChannelMap.get(key);
+    return REGION_CHANNEL_MAP.get(key);
   }
 
   public void clear() {
-    regionChannelMap.clear();
+    REGION_CHANNEL_MAP.clear();
   }
 
   public Collection<Channel> getValues() {
-    return regionChannelMap.values();
+    return REGION_CHANNEL_MAP.values();
   }
 
   public void remove(String hash) {
     Log.warn("remove hash:" + hash);
-    regionChannelMap.remove(hash);
+    REGION_CHANNEL_MAP.remove(hash);
   }
 }
