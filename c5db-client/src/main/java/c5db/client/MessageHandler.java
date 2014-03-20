@@ -28,30 +28,34 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+/***
+ * A simple handler to handle inbound responses from the C5 server.
+ */
 public class MessageHandler extends SimpleChannelInboundHandler<Response> {
-  private final static ClientScannerManager clientScanManager = ClientScannerManager.INSTANCE;
-  private final ConcurrentHashMap<Long, SettableFuture> futures = new ConcurrentHashMap<>();
+  private static final ClientScannerManager CLIENT_SCANNER_MANAGER = ClientScannerManager.INSTANCE;
+  private final ConcurrentHashMap<Long, SettableFuture<Response>> futures = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, SettableFuture<Long>> scannerFutures = new ConcurrentHashMap<>();
+
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
-    final SettableFuture f = futures.get(msg.getCommandId());
     switch (msg.getCommand()) {
       case MUTATE:
+        final SettableFuture<Response> f = futures.get(msg.getCommandId());
         if (!msg.getMutate().getProcessed()) {
-          IOException exception = new IOException("Not Processed");
-          f.setException(exception);
+          f.setException(new IOException("Not Processed"));
         }
         f.set(null);
         break;
       case SCAN:
-        long scannerId = msg.getScan().getScannerId();
+        final long scannerId = msg.getScan().getScannerId();
         ClientScanner clientScanner;
 
-        if (clientScanManager.hasScanner(scannerId)) {
-          clientScanner = clientScanManager.get(scannerId);
+        if (CLIENT_SCANNER_MANAGER.hasScanner(scannerId)) {
+          clientScanner = CLIENT_SCANNER_MANAGER.get(scannerId);
         } else {
-          clientScanner = clientScanManager.createAndGet(ctx.channel(), scannerId, msg.getCommandId());
-          f.set(scannerId);
+          clientScanner = CLIENT_SCANNER_MANAGER.createAndGet(ctx.channel(), scannerId, msg.getCommandId());
+          scannerFutures.get(msg.getCommandId()).set(scannerId);
         }
 
         clientScanner.add(msg.getScan());
@@ -59,16 +63,20 @@ public class MessageHandler extends SimpleChannelInboundHandler<Response> {
         if (!msg.getScan().getMoreResults()) {
           clientScanner.close();
         }
-
         break;
       default:
-        f.set(msg);
+        futures.get(msg.getCommandId()).set(msg);
         break;
     }
   }
 
-  public void call(final Call request, final SettableFuture future, final Channel channel) {
+  public void call(final Call request, final SettableFuture<Response> future, final Channel channel) {
     futures.put(request.getCommandId(), future);
+    channel.writeAndFlush(request);
+  }
+
+  public void callScan(final Call request, final SettableFuture<Long> future, final Channel channel) {
+    scannerFutures.put(request.getCommandId(), future);
     channel.writeAndFlush(request);
   }
 }

@@ -50,6 +50,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 
+/**
+ * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
+ */
 public class C5Table extends C5Shim implements AutoCloseable {
   private final C5ConnectionManager c5ConnectionManager = new C5ConnectionManager();
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
@@ -68,7 +71,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
    *
    * @param tableName The name of the table to connect to.
    */
-  public C5Table(ByteString tableName, int port) throws IOException, InterruptedException, TimeoutException, ExecutionException {
+  public C5Table(ByteString tableName, int port)
+      throws IOException, InterruptedException, TimeoutException, ExecutionException {
     super(tableName);
     this.hostname = "localhost";
     this.port = port;
@@ -77,19 +81,15 @@ public class C5Table extends C5Shim implements AutoCloseable {
   }
 
   // TODO actually make this work
-  public static ByteBuffer getRegion(byte [] row) {
+  public static ByteBuffer getRegion(byte[] row) {
     return ByteBuffer.wrap(new byte[]{});
   }
 
   @Override
   public Result get(final Get get) throws IOException {
 
-    final SettableFuture<Response> resultFuture
-        = SettableFuture.create();
-    final GetRequest getRequest =
-        RequestConverter.buildGetRequest(getRegionName(),
-            get,
-            false);
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    final GetRequest getRequest = RequestConverter.buildGetRequest(getRegionName(), get, false);
     try {
       handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
       return ProtobufUtil.toResult(resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet().getResult());
@@ -101,7 +101,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public Result[] get(List<Get> gets) throws IOException {
     //TODO Batch get
-    List<Result> results = new ArrayList<>();
+    final List<Result> results = new ArrayList<>();
     for (Get get : gets) {
       results.add(this.get(get));
     }
@@ -110,7 +110,6 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public boolean exists(final Get get) throws IOException {
-
     final SettableFuture<Response> resultFuture = SettableFuture.create();
     final GetRequest getRequest = RequestConverter.buildGetRequest(getRegionName(),
         get,
@@ -118,8 +117,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
     try {
       handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
-      GetResponse getResponse = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet();
-      c5db.client.generated.Result result = getResponse.getResult();
+      final GetResponse getResponse = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet();
+      final c5db.client.generated.Result result = getResponse.getResult();
       return result.getExists();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
@@ -129,26 +128,26 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public ResultScanner getScanner(final Scan scan) throws IOException {
-    if (scan.getStartRow() != null && scan.getStartRow().length > 0 &&
-       scan.getStopRow() != null && scan.getStopRow().length > 0 &&
-            Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
-          throw new IOException("StopRow needs to be greater than StartRow");
+    if (scan.getStartRow() != null && scan.getStartRow().length > 0
+        && scan.getStopRow() != null && scan.getStopRow().length > 0
+        && Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
+      throw new IOException("StopRow needs to be greater than StartRow");
     }
 
-    SettableFuture<Long> future = SettableFuture.create();
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+    final SettableFuture<Long> future = SettableFuture.create();
+    final RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         getRegion(scan.getStartRow()));
 
-    ScanRequest scanRequest = new ScanRequest(regionSpecifier,
+    final ScanRequest scanRequest = new ScanRequest(regionSpecifier,
         ProtobufUtil.toScan(scan),
-        0l,
+        0L,
         C5Constants.DEFAULT_INIT_SCAN,
         false,
-        0l);
+        0L);
 
     try {
-      handler.call(ProtobufUtil.getScanCall(commandId.incrementAndGet(), scanRequest), future, channel);
-      Long scannerId = future.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
+      handler.callScan(ProtobufUtil.getScanCall(commandId.incrementAndGet(), scanRequest), future, channel);
+      final long scannerId = future.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
       /// TODO ADD A CREATE as well
       return clientScannerManager.get(scannerId);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -158,14 +157,14 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public ResultScanner getScanner(byte[] family) throws IOException {
-    Scan scan = new Scan();
+    final Scan scan = new Scan();
     scan.addFamily(family);
     return getScanner(scan);
   }
 
   @Override
   public ResultScanner getScanner(byte[] family, byte[] qualifier) throws IOException {
-    Scan scan = new Scan();
+    final Scan scan = new Scan();
     scan.addColumn(family, qualifier);
     return getScanner(scan);
   }
@@ -178,7 +177,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public Boolean[] exists(List<Get> gets) throws IOException {
     //TODO Batch get
-    List<Boolean> results = new ArrayList<>();
+    final List<Boolean> results = new ArrayList<>();
     for (Get get : gets) {
       results.add(this.exists(get));
     }
@@ -186,12 +185,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
   }
 
   private void doPut(Put put) throws InterruptedIOException {
-
-    final SettableFuture<Response> resultFuture
-        = SettableFuture.create();
-
-    MutateRequest mutateRequest;
-      mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
 
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
@@ -211,11 +206,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public void delete(Delete delete) throws IOException {
-
-    final SettableFuture<Response> resultFuture
-        = SettableFuture.create();
-
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), delete);
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), delete);
 
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
@@ -227,19 +219,17 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public void delete(List<Delete> deletes) throws IOException {
-      for (Delete delete : deletes) {
+    for (Delete delete : deletes) {
       delete(delete);
     }
   }
 
   @Override
   public void mutateRow(RowMutations rm) throws IOException {
-
     final SettableFuture<Response> resultFuture = SettableFuture.create();
-
-    List<RegionAction> regionActions = new ArrayList<>();
+    final List<RegionAction> regionActions = new ArrayList<>();
     try {
-      RegionAction regionAction = RequestConverter.buildRegionAction(getRegionName(), false, rm);
+      final RegionAction regionAction = RequestConverter.buildRegionAction(getRegionName(), false, rm);
       regionActions.add(regionAction);
 
       handler.call(ProtobufUtil.getMultiCall(commandId.incrementAndGet(),
