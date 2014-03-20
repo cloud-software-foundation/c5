@@ -44,7 +44,7 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt instanceof ClientHandshakeStateEvent) {
-      ClientHandshakeStateEvent clientHandshakeStateEvent = (ClientHandshakeStateEvent) evt;
+      final ClientHandshakeStateEvent clientHandshakeStateEvent = (ClientHandshakeStateEvent) evt;
       if (clientHandshakeStateEvent.equals(ClientHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
         handshakeFuture.set(true);
       }
@@ -56,8 +56,8 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
     if (frame instanceof BinaryWebSocketFrame) {
-      ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
-      Response newMsg = Response.getSchema().newMessage();
+      final ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
+      final Response newMsg = Response.getSchema().newMessage();
       Response.getSchema().mergeFrom(input, newMsg);
       out.add(newMsg);
     } else {
