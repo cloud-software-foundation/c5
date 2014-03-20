@@ -30,6 +30,10 @@ import io.netty.handler.logging.LoggingHandler;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * A simple helper class which initializes a websocket / protocol buffers (protostuff) handler
+ * for netty.
+ */
 class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
 
   private final WebSocketClientHandshaker handShaker;
@@ -43,9 +47,9 @@ class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
   @Override
   protected void initChannel(SocketChannel ch) throws Exception {
     decoder = new WebsocketProtostuffDecoder(handShaker);
-    ChannelPipeline pipeline = ch.pipeline();
+    final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
-    pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192));
+    pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(C5Constants.MAX_CONTENT_LENGTH_HTTP_AGG));
     pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
     pipeline.addLast("message-codec", decoder);
     pipeline.addLast("message-handler", new MessageHandler());
