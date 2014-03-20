@@ -38,11 +38,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * A class which manages all of the outbound connections from a client to a set of regions/tablets.
+ */
 class C5ConnectionManager {
-  final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
+  private final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
   private final Bootstrap bootstrap = new Bootstrap();
   private final EventLoopGroup group = new NioEventLoopGroup();
-  private URI uri = null;
+  private URI uri;
 
   public C5ConnectionManager() {
     bootstrap.group(group);
@@ -61,9 +64,12 @@ class C5ConnectionManager {
   }
 
   Channel connect(String host, int port) throws InterruptedException, TimeoutException, ExecutionException {
-    WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(
-        uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders());
-    C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
+    final WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(uri,
+        WebSocketVersion.V13,
+        null,
+        false,
+        new DefaultHttpHeaders());
+    final C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
     bootstrap.channel(NioSocketChannel.class).handler(initializer);
 
     ChannelFuture future = bootstrap.connect(host, port);
@@ -96,21 +102,21 @@ class C5ConnectionManager {
   }
 
   private boolean isHandShakeConnected(Channel channel) {
-    ChannelPipeline p = channel.pipeline();
-    WebsocketProtostuffEncoder encoder = p.get(WebsocketProtostuffEncoder.class);
+    final ChannelPipeline pipeline = channel.pipeline();
+    final WebsocketProtostuffEncoder encoder = pipeline.get(WebsocketProtostuffEncoder.class);
     return encoder.handShaker.isHandshakeComplete();
   }
 
   public void closeChannel(String host, int port)
       throws InterruptedException, ExecutionException, TimeoutException {
-    String hash = getHostPortHash(host, port);
+    final String hash = getHostPortHash(host, port);
     regionChannelMap.remove(hash);
   }
 
   public void close() throws InterruptedException {
-    List<ChannelFuture> channels = new ArrayList<>();
+    final List<ChannelFuture> channels = new ArrayList<>();
     for (Channel channel : regionChannelMap.getValues()) {
-      ChannelFuture channelFuture = channel.close();
+      final ChannelFuture channelFuture = channel.close();
       channels.add(channelFuture);
     }
 
