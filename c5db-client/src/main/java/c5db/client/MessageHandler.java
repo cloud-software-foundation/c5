@@ -67,8 +67,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Response> {
     }
   }
 
-  public void call(final Call request, final SettableFuture future, final Channel channel)
-      throws InterruptedException, IOException {
+  public void call(final Call request, final SettableFuture future, final Channel channel) {
     futures.put(request.getCommandId(), future);
     channel.writeAndFlush(request);
   }

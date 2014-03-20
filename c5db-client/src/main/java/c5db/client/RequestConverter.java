@@ -34,7 +34,7 @@
  * limitations under the License.
  */
 
-package c5db;
+package c5db.client;
 
 import c5db.client.generated.Action;
 import c5db.client.generated.Condition;
@@ -57,9 +57,12 @@ import java.util.List;
 
 public class RequestConverter {
 
+  private RequestConverter() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
-   * Create a protocol buffer GetRequest for a client Get
+   * Create a protocol buffer GetRequest for a client Get.
    *
    * @param regionName    the name of the region to get
    * @param get           the client Get
@@ -75,7 +78,7 @@ public class RequestConverter {
   }
 
   /**
-   * Convert a byte array to a protocol buffer RegionSpecifier
+   * Convert a byte array to a protocol buffer RegionSpecifier.
    *
    * @param type  the region specifier type
    * @param value the region specifier byte array value
@@ -87,28 +90,26 @@ public class RequestConverter {
   }
 
   /**
-   * Create a protocol buffer MutateRequest for a put
+   * Create a protocol buffer MutateRequest for a put.
    *
    * @param regionName The region name to request from
    * @param delete     The delete to process
    * @return a mutate request
-   * @throws IOException
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) throws IOException {
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) {
     RegionSpecifier region = buildRegionSpecifier(
         RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete), new Condition());
   }
 
   /**
-   * Create a protocol buffer MutateRequest for a put
+   * Create a protocol buffer MutateRequest for a put.
    *
    * @param regionName The region name to create the mutateRequest against
    * @param put        The client request.
    * @return a mutate request
-   * @throws IOException
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) throws IOException {
+  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) {
     RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
