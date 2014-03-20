@@ -34,7 +34,7 @@
  * limitations under the License.
  */
 
-package c5db;
+package c5db.client;
 
 
 import c5db.client.generated.Call;
@@ -323,19 +323,19 @@ public class ProtobufUtil {
         false);
   }
 
-  public static Call getGetCall(long commandId, GetRequest get) throws IOException {
+  public static Call getGetCall(long commandId, GetRequest get) {
     return new Call(Call.Command.GET, commandId, get, null,  null, null);
   }
 
-  public static Call getMutateCall(long commandId, MutateRequest mutateRequest) throws IOException {
+  public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
     return new Call(Call.Command.MUTATE, commandId, null, mutateRequest,  null, null);
   }
 
-  public static Call getScanCall(long commandId, ScanRequest scanRequest) throws IOException {
+  public static Call getScanCall(long commandId, ScanRequest scanRequest) {
     return new Call(Call.Command.SCAN, commandId, null, null,  scanRequest, null);
   }
 
-  public static Call getMultiCall(long commandId, MultiRequest multiRequest) throws IOException {
+  public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
     return new Call(Call.Command.MULTI, commandId, null, null,  null, multiRequest);
   }
 }
