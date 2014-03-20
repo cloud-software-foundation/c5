@@ -72,32 +72,32 @@ class C5ConnectionManager {
     final C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
     bootstrap.channel(NioSocketChannel.class).handler(initializer);
 
-    ChannelFuture future = bootstrap.connect(host, port);
-    Channel channel = future.sync().channel();
+    final ChannelFuture future = bootstrap.connect(host, port);
+    final Channel channel = future.sync().channel();
     initializer.syncOnHandshake();
     return channel;
   }
 
   public Channel getOrCreateChannel(String host, int port)
       throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    String hash = getHostPortHash(host, port);
-    Channel channel;
+    final String hash = getHostPortHash(host, port);
+
     if (!regionChannelMap.containsKey(hash)) {
-      channel = connect(host, port);
+      final Channel channel = connect(host, port);
       regionChannelMap.put(hash, channel);
       Log.warn("Channel" + channel);
       return channel;
     }
 
-    channel = regionChannelMap.get(hash);
+    Channel channel = regionChannelMap.get(hash);
 
     // Clear stale channels
     if (!(channel.isOpen() && channel.isActive() && isHandShakeConnected(channel))) {
       closeChannel(host, port);
       channel.disconnect();
-
       channel = getOrCreateChannel(host, port);
     }
+
     return channel;
   }
 
