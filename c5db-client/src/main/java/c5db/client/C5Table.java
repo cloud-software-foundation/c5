@@ -16,9 +16,6 @@
  */
 package c5db.client;
 
-import c5db.ProtobufUtil;
-import c5db.RequestConverter;
-import c5db.client.generated.Call;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
 import c5db.client.generated.MultiRequest;
@@ -37,7 +34,6 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.RetriesExhaustedWithDetailsException;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -58,10 +54,10 @@ public class C5Table extends C5Shim implements AutoCloseable {
   private final C5ConnectionManager c5ConnectionManager = new C5ConnectionManager();
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private final int port;
+  private final AtomicLong commandId = new AtomicLong(0);
+  private final Channel channel;
+  private final String hostname;
   private MessageHandler handler;
-  private AtomicLong commandId = new AtomicLong(0);
-  private Channel channel;
-  private String hostname;
 
   public C5Table(ByteString tableName) throws IOException, InterruptedException, TimeoutException, ExecutionException {
     this(tableName, C5Constants.TEST_PORT);
@@ -78,6 +74,11 @@ public class C5Table extends C5Shim implements AutoCloseable {
     this.port = port;
     channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
     handler = channel.pipeline().get(MessageHandler.class);
+  }
+
+  // TODO actually make this work
+  public static ByteBuffer getRegion(byte [] row) {
+    return ByteBuffer.wrap(new byte[]{});
   }
 
   @Override
@@ -128,12 +129,10 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public ResultScanner getScanner(final Scan scan) throws IOException {
-    if (scan.getStartRow() != null && scan.getStartRow().length > 0) {
-      if (scan.getStopRow() != null && scan.getStopRow().length > 0) {
-        if (Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
+    if (scan.getStartRow() != null && scan.getStartRow().length > 0 &&
+       scan.getStopRow() != null && scan.getStopRow().length > 0 &&
+            Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
           throw new IOException("StopRow needs to be greater than StartRow");
-        }
-      }
     }
 
     SettableFuture<Long> future = SettableFuture.create();
@@ -155,11 +154,6 @@ public class C5Table extends C5Shim implements AutoCloseable {
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
     }
-  }
-
-  // TODO actually make this work
-  public static ByteBuffer getRegion(byte [] row) {
-    return ByteBuffer.wrap(new byte[]{});
   }
 
   @Override
@@ -191,23 +185,18 @@ public class C5Table extends C5Shim implements AutoCloseable {
     return results.toArray(new Boolean[results.size()]);
   }
 
-  private void doPut(Put put) throws InterruptedIOException, RetriesExhaustedWithDetailsException {
+  private void doPut(Put put) throws InterruptedIOException {
 
     final SettableFuture<Response> resultFuture
         = SettableFuture.create();
 
-    Call call = new Call();
     MutateRequest mutateRequest;
-    try {
       mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
-    } catch (IOException e) {
-      throw new InterruptedIOException(e.getLocalizedMessage());
-    }
 
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new InterruptedIOException(e.toString());
     }
   }
@@ -231,14 +220,14 @@ public class C5Table extends C5Shim implements AutoCloseable {
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
     }
   }
 
   @Override
   public void delete(List<Delete> deletes) throws IOException {
-    for (Delete delete : deletes) {
+      for (Delete delete : deletes) {
       delete(delete);
     }
   }
