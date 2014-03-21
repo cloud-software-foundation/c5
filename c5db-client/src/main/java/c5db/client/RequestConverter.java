@@ -55,7 +55,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-final public class RequestConverter {
+/***
+ * A utility class responsible for generating requests to c5.
+ */
+public final class RequestConverter {
 
   private RequestConverter() {
     throw new UnsupportedOperationException();
@@ -96,7 +99,7 @@ final public class RequestConverter {
    * @return a mutate request
    */
   public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) {
-    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region,
         ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete),
         new Condition());
@@ -110,7 +113,7 @@ final public class RequestConverter {
    * @return a mutate request
    */
   public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) {
-    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
