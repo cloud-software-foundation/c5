@@ -39,12 +39,12 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
   protected void encode(ChannelHandlerContext channelHandlerContext,
                         Call call,
                         List<Object> objects) throws Exception {
-    LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
+    final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
     Call.getSchema().writeTo(lcpo, call);
 
-    List<ByteBuffer> buffers = lcpo.buffer.finish();
-    ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
-    BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
+    final List<ByteBuffer> buffers = lcpo.buffer.finish();
+    final ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
+    final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
   }
 }

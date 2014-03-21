@@ -55,7 +55,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestConverter {
+final public class RequestConverter {
 
   private RequestConverter() {
     throw new UnsupportedOperationException();
@@ -72,8 +72,7 @@ public class RequestConverter {
   public static GetRequest buildGetRequest(final byte[] regionName,
                                            final Get get,
                                            final boolean existenceOnly) throws IOException {
-    RegionSpecifier region = buildRegionSpecifier(
-        RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
     return new GetRequest(region, ProtobufUtil.toGet(get, existenceOnly));
   }
 
@@ -84,8 +83,8 @@ public class RequestConverter {
    * @param value the region specifier byte array value
    * @return a protocol buffer RegionSpecifier
    */
-  public static RegionSpecifier buildRegionSpecifier(
-      final RegionSpecifier.RegionSpecifierType type, final byte[] value) {
+  public static RegionSpecifier buildRegionSpecifier(final RegionSpecifier.RegionSpecifierType type,
+                                                     final byte[] value) {
     return new RegionSpecifier(type, ByteBuffer.wrap(value));
   }
 
@@ -97,9 +96,10 @@ public class RequestConverter {
    * @return a mutate request
    */
   public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) {
-    RegionSpecifier region = buildRegionSpecifier(
-        RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete), new Condition());
+    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    return new MutateRequest(region,
+        ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete),
+        new Condition());
   }
 
   /**
@@ -128,8 +128,8 @@ public class RequestConverter {
                                                final boolean atomic,
                                                final RowMutations rowMutations)
       throws IOException {
-    RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    List<Action> actions = new ArrayList<>();
+    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final List<Action> actions = new ArrayList<>();
     int index = 0;
     for (Mutation mutation : rowMutations.getMutations()) {
       MutationProto.MutationType mutateType;
@@ -138,11 +138,11 @@ public class RequestConverter {
       } else if (mutation instanceof Delete) {
         mutateType = MutationProto.MutationType.DELETE;
       } else {
-        throw new DoNotRetryIOException("RowMutations supports only put and delete, not " +
-            mutation.getClass().getName());
+        throw new DoNotRetryIOException("RowMutations supports only put and delete, not "
+            + mutation.getClass().getName());
       }
-      MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
-      Action action = new Action(++index, mp, new c5db.client.generated.Get());
+      final MutationProto mp = ProtobufUtil.toMutation(mutateType, mutation);
+      final Action action = new Action(++index, mp, new c5db.client.generated.Get());
       actions.add(action);
 
     }

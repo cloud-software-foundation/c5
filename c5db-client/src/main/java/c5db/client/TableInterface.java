@@ -50,6 +50,9 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import java.io.IOException;
 import java.util.List;
 
+/***
+ * A shared interface so that a user can interchange HTable and C5Table.
+ */
 public interface TableInterface {
 
   Configuration getConfiguration();
@@ -62,9 +65,11 @@ public interface TableInterface {
 
   Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException;
 
-  <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) throws IOException, InterruptedException;
+  <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
+      throws IOException, InterruptedException;
 
-  <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) throws IOException, InterruptedException;
+  <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
+      throws IOException, InterruptedException;
 
   Result get(Get get) throws IOException;
 
