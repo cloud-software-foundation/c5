@@ -40,7 +40,6 @@ import org.jetlang.channels.MemoryChannel;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
-import org.jetlang.core.Callback;
 import org.jetlang.core.Disposable;
 import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
@@ -134,6 +133,7 @@ public class C5DB extends AbstractService implements C5Server {
             try {
                 toNodeId = Long.parseLong(data);
             } catch (NumberFormatException ignored) {
+              throw new RuntimeException("NodeId not set");
             }
         }
 
@@ -153,7 +153,7 @@ public class C5DB extends AbstractService implements C5Server {
 
     /**
      * Returns the server, but it will be null if you aren't running inside one.
-     * @return
+     * @return return a static instance of C5DB.
      */
     public static C5Server getServer() {
         return instance;
@@ -167,31 +167,25 @@ public class C5DB extends AbstractService implements C5Server {
     @Override
     public ListenableFuture<C5Module> getModule(final ModuleType moduleType) {
         final SettableFuture<C5Module> future = SettableFuture.create();
-        serverFiber.execute(new Runnable() {
-            @Override
-            public void run() {
+        serverFiber.execute(() -> {
 
-                // What happens iff the moduleRegistry has EMPTY?
-                if (!moduleRegistry.containsKey(moduleType)) {
-                    // listen to the registration stream:
-                    final Disposable[] d = new Disposable[]{null};
-                    d[0] = getModuleStateChangeChannel().subscribe(serverFiber, new Callback<ModuleStateChange>() {
-                        @Override
-                        public void onMessage(ModuleStateChange message) {
-                            if (message.state != State.RUNNING) return;
+            // What happens iff the moduleRegistry has EMPTY?
+            if (!moduleRegistry.containsKey(moduleType)) {
+                // listen to the registration stream:
+                final Disposable[] d = new Disposable[]{null};
+                d[0] = getModuleStateChangeChannel().subscribe(serverFiber, message -> {
+                    if (message.state != State.RUNNING) return;
 
-                            if (message.module.getModuleType().equals(moduleType)) {
-                                future.set(message.module);
+                    if (message.module.getModuleType().equals(moduleType)) {
+                        future.set(message.module);
 
-                                assert d[0] != null;  // this is pretty much impossible because of how fibers work.
-                                d[0].dispose();
-                            }
-                        }
-                    });
-                }
-
-                future.set(moduleRegistry.get(moduleType));
+                        assert d[0] != null;  // this is pretty much impossible because of how fibers work.
+                        d[0].dispose();
+                    }
+                });
             }
+
+            future.set(moduleRegistry.get(moduleType));
         });
         return future;
     }
@@ -199,22 +193,16 @@ public class C5DB extends AbstractService implements C5Server {
     @Override
     public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
         final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-        serverFiber.execute(new Runnable() {
-            @Override
-            public void run() {
-                future.set(ImmutableMap.copyOf(moduleRegistry));
-            }
+        serverFiber.execute(() -> {
+            future.set(ImmutableMap.copyOf(moduleRegistry));
         });
         return future.get();
     }
     @Override
     public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
         final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-        serverFiber.execute(new Runnable() {
-            @Override
-            public void run() {
-                future.set(ImmutableMap.copyOf(moduleRegistry));
-            }
+        serverFiber.execute(() -> {
+            future.set(ImmutableMap.copyOf(moduleRegistry));
         });
         return future;
     }
@@ -274,7 +262,6 @@ public class C5DB extends AbstractService implements C5Server {
         }
         else if (msg instanceof StopModule) {
             StopModule message = (StopModule)msg;
-
             stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
         }
     }
@@ -283,7 +270,7 @@ public class C5DB extends AbstractService implements C5Server {
     private void processCommandRequest(Request<Message<?>, CommandReply> request) {
         Message<?> r = request.getRequest();
         try {
-            String stdout = "";
+            String stdout;
 
             if (r instanceof StartModule) {
                 StartModule message = (StartModule)r;
@@ -455,22 +442,16 @@ public class C5DB extends AbstractService implements C5Server {
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
 
-            commandChannel.subscribe(serverFiber, new Callback<Message<?>>() {
-                @Override
-                public void onMessage(Message<?> message) {
-                    try {
-                        processCommandMessage(message);
-                    } catch (Exception e) {
-                        LOG.warn("exception during message processing", e);
-                    }
+            commandChannel.subscribe(serverFiber, message -> {
+                try {
+                    processCommandMessage(message);
+                } catch (Exception e) {
+                    LOG.warn("exception during message processing", e);
                 }
             });
 
-            commandRequests.subscribe(serverFiber, new Callback<Request<Message<?>, CommandReply>>() {
-                @Override
-                public void onMessage(Request<Message<?>, CommandReply> request) {
-                    processCommandRequest(request);
-                }
+            commandRequests.subscribe(serverFiber, request -> {
+                processCommandRequest(request);
             });
 
             serverFiber.start();
