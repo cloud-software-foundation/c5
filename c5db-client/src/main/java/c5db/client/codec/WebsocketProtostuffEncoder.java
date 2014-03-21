@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
-  public final WebSocketClientHandshaker handShaker;
+  private final WebSocketClientHandshaker handShaker;
 
   public WebsocketProtostuffEncoder(WebSocketClientHandshaker handShaker) {
     this.handShaker = handShaker;
@@ -46,5 +46,9 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
     final ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
     final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
+  }
+
+  public WebSocketClientHandshaker getHandShaker() {
+    return handShaker;
   }
 }
