@@ -206,22 +206,25 @@ public class Main {
         final Fiber fiber = new ThreadFiber();
         fiber.start();
 
-        fiber.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                ListenableFuture<ImmutableMap<Long,NodeInfo>> fut = beaconService.getState();
-                try {
-                    ImmutableMap<Long,NodeInfo> state = fut.get();
+        fiber.scheduleAtFixedRate(() -> {
+            ListenableFuture<ImmutableMap<Long,NodeInfo>> fut = beaconService.getState();
+          ImmutableMap<Long,NodeInfo> state = null;
+          try {
+            state = fut.get();
+          } catch (InterruptedException | ExecutionException e) {
+            LOG.error(e.toString());
+          }
 
-                    System.out.println("State info:");
-                    for(DiscoveryModule.NodeInfo info : state.values()) {
-                        System.out.println(info);
-                    }
-
-                } catch (InterruptedException | ExecutionException e) {
-                    // ignore
-                }
+          LOG.debug("State info:");
+          if (state != null) {
+            for(NodeInfo info : state.values()) {
+              LOG.debug(info.toString());
             }
+          } else {
+            LOG.error("state is null");
+          }
+
+
         }, 10, 10, TimeUnit.SECONDS);
 
 
