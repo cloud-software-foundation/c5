@@ -46,7 +46,6 @@ import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Scan;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,8 +53,7 @@ import java.util.ArrayList;
 public class ClientScanner extends AbstractClientScanner {
   private final Channel ch;
   private final long scannerId;
-  private final WickedQueue<c5db.client.generated.Result>
-      scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
+  private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private final long commandId;
   private boolean isClosed = true;
 
@@ -65,7 +63,7 @@ public class ClientScanner extends AbstractClientScanner {
 
   /**
    * Create a new ClientScanner for the specified table
-   * Note that the passed {@link Scan}'s start row maybe changed changed.
+   * Note that the passed {@link org.apache.hadoop.hbase.client.Scan}'s start row maybe changed changed.
    */
   ClientScanner(Channel channel, final long scannerId, final long commandId) {
     ch = channel;
@@ -90,7 +88,7 @@ public class ClientScanner extends AbstractClientScanner {
         if (this.outStandingRequests < .5 * requestSize && requestSize < C5Constants.MAX_REQUEST_SIZE) {
           requestSize = requestSize * 2;
         }
-        int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
+        final int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
 
         // If we have plenty of room for another request
         if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
@@ -110,10 +108,10 @@ public class ClientScanner extends AbstractClientScanner {
 
   private void getMoreRows() throws IOException {
     //TODO getRegion shouldn't be needed and currently is hardcoded
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+    final RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         C5Table.getRegion(new byte[]{}));
 
-    ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
+    final ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
     this.outStandingRequests += requestSize;
     ch.write(ProtobufUtil.getScanCall(commandId, scanRequest));
   }
