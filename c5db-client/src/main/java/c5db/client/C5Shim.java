@@ -27,6 +27,9 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import java.io.IOException;
 import java.util.List;
 
+/***
+ * A shim for unsupported options to allow C5Table to implement TableInterface
+ */
 public abstract class C5Shim implements TableInterface {
   private final byte[] tableName;
 
@@ -48,39 +51,38 @@ public abstract class C5Shim implements TableInterface {
   }
 
   @Override
-  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
+      throws IOException {
+    return false;
   }
 
   @Override
-  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete) throws IOException {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
+      throws IOException {
+    return false;
   }
 
   @Override
   public Configuration getConfiguration() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null;
   }
-
 
   @Override
-  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
+  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException { }
 
   @Override
   public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
-    return new Object[0];  //To change body of implemented methods use File | Settings | File Templates.
+    return new Object[0];
   }
 
   @Override
-  public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) throws IOException, InterruptedException {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
+  public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
+      throws IOException, InterruptedException {  }
 
   @Override
-  public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) throws IOException, InterruptedException {
-    return new Object[0];  //To change body of implemented methods use File | Settings | File Templates.
+  public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
+      throws IOException, InterruptedException {
+    return new Object[0];
   }
 
 }
