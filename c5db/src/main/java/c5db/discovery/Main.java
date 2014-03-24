@@ -64,20 +64,20 @@ public class Main {
     private final int discoveryPort;
     private final int servicePort;
     private final long nodeId;
-    Fiber theFiber = new ThreadFiber();
-    NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
-    C5Server theServer;
+    private final Fiber theFiber = new ThreadFiber();
+    private final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
+    private final C5Server theServer;
 
     Main(String clusterName) throws SocketException, InterruptedException {
         this.clusterName = clusterName;
 
         // a non-privileged port between 1024 -> ....
         this.discoveryPort = (Math.abs(clusterName.hashCode()) % 16384) + 1024;
-        System.out.println("Cluster port = " + discoveryPort);
+        LOG.debug("Cluster port = " + discoveryPort);
 
         this.servicePort = discoveryPort + (int)(Math.random() * 5000);
 
-        Availability.Builder builder = Availability.newBuilder();
+        final Availability.Builder builder = Availability.newBuilder();
         builder.setBaseNetworkPort(servicePort);
         nodeId = new Random().nextLong();
         builder.setNodeId(nodeId);
@@ -188,49 +188,33 @@ public class Main {
             System.exit(1);
         }
         String clusterName = args[0];
-
-
         new Main(clusterName).run();
     }
 
     public void run() throws Exception {
         beaconService.startAndWait();
+        LOG.debug("Started");
 
-
-        System.out.println("Started");
-
-//        Thread.sleep(10000);
-
-//        System.out.println("making state request to beacon module");
         // now try to RPC myself a tad:
         final Fiber fiber = new ThreadFiber();
         fiber.start();
 
         fiber.scheduleAtFixedRate(() -> {
             ListenableFuture<ImmutableMap<Long,NodeInfo>> fut = beaconService.getState();
-          ImmutableMap<Long,NodeInfo> state = null;
           try {
-            state = fut.get();
-          } catch (InterruptedException | ExecutionException e) {
-            LOG.error(e.toString());
-          }
-
-          LOG.debug("State info:");
-          if (state != null) {
+            final ImmutableMap<Long,NodeInfo> state = fut.get();
+            LOG.debug("State info:");
             for(NodeInfo info : state.values()) {
               LOG.debug(info.toString());
             }
-          } else {
-            LOG.error("state is null");
+          } catch (InterruptedException | ExecutionException e) {
+            LOG.error(e.toString());
           }
-
-
         }, 10, 10, TimeUnit.SECONDS);
 
-
-        ServerBootstrap b = new ServerBootstrap();
-        NioEventLoopGroup parentGroup = new NioEventLoopGroup(1);
-        NioEventLoopGroup childGroup = new NioEventLoopGroup();
+        final ServerBootstrap b = new ServerBootstrap();
+        final NioEventLoopGroup parentGroup = new NioEventLoopGroup(1);
+        final NioEventLoopGroup childGroup = new NioEventLoopGroup();
         b.group(parentGroup, childGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 100)
@@ -242,12 +226,11 @@ public class Main {
                         ch.pipeline().addLast(new InboundHandler());
                     }
                 });
-        Channel serverChannel = b.bind(servicePort).sync().channel();
-
-        ImmutableMap<Long,NodeInfo> peers = waitForAPeerOrMore();
+        final Channel serverChannel = b.bind(servicePort).sync().channel();
+        final ImmutableMap<Long,NodeInfo> peers = waitForAPeerOrMore();
 
         // make a new bootstrap, it's just so silly:
-        Bootstrap b2 = new Bootstrap();
+        final Bootstrap b2 = new Bootstrap();
         b2.group(childGroup)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .channel(NioSocketChannel.class)
@@ -259,22 +242,21 @@ public class Main {
                 });
         // we dont even need to do anything else!
 
-
-        System.out.println("Listening on module port: " + servicePort);
+        LOG.debug("Listening on module port: " + servicePort);
         // now send messages to all my peers except myself of course, duh.
         for ( NodeInfo peer: peers.values()) {
             if (peer.availability.getNodeId() == nodeId) {
                 // yes this is me, and continue
                 continue;
             }
-            InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddressesList().get(0),
+            final InetSocketAddress remotePeerAddr = new InetSocketAddress(peer.availability.getAddressesList().get(0),
                     peer.availability.getBaseNetworkPort());
             // uh ok lets connect and make hash:
 
-            SocketAddress localAddr = serverChannel.localAddress();
-            System.out.println("Writing some junk to: " + remotePeerAddr + " from: " + localAddr);
-            Channel peerChannel = b2.connect(remotePeerAddr, localAddr).channel();
-            System.out.println("Channel RemoteAddr: " + peerChannel.remoteAddress() + " localaddr: " + peerChannel.localAddress());
+            final SocketAddress localAddr = serverChannel.localAddress();
+            LOG.debug("Writing some junk to: " + remotePeerAddr + " from: " + localAddr);
+            final Channel peerChannel = b2.connect(remotePeerAddr, localAddr).channel();
+            LOG.debug("Channel RemoteAddr: " + peerChannel.remoteAddress() + " localaddr: " + peerChannel.localAddress());
             // now write a little bit:
             peerChannel.write("42");
         }
@@ -284,8 +266,6 @@ public class Main {
         final Fiber fiber = new ThreadFiber();
         fiber.start();
         final SettableFuture<ImmutableMap<Long,NodeInfo>> future = SettableFuture.create();
-
-
         LOG.info("Waiting for peers...");
         return future.get();
     }
