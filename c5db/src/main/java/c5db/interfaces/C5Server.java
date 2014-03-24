@@ -101,6 +101,8 @@ public interface C5Server extends Service {
 
     public ConfigDirectory getConfigDirectory();
 
+    public String getClusterName();
+
     public static class ModuleStateChange {
         public final C5Module module;
         public final State state;

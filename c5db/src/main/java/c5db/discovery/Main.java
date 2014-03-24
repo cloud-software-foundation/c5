@@ -129,6 +129,11 @@ public class Main {
       }
 
       @Override
+      public String getClusterName() {
+        return null;
+      }
+
+      @Override
       public org.jetlang.channels.Channel<ConfigKeyUpdated> getConfigUpdateChannel() {
         return null;
       }

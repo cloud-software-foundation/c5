@@ -16,6 +16,7 @@
  */
 package c5db.tablet;
 
+import c5db.C5DB;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.generated.Log;
@@ -392,7 +393,7 @@ public class TabletService extends AbstractService implements TabletModule {
     }
 
   public int getMinQuorumSize() {
-    if (System.getProperties().containsKey("singleNode")) {
+    if (server.getClusterName().equals(C5ServerConstants.LOCALHOST)) {
       return 1;
     } else {
       return 3;

@@ -66,9 +66,10 @@ import static c5db.log.OLog.moveAwayOldLogs;
  * To shut down the 'server' module is to shut down the server.
  */
 public class C5DB extends AbstractService implements C5Server {
-    private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
+  private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
+  private String clusterName;
 
-    public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
 
         String username = System.getProperty("user.name");
 
@@ -103,7 +104,7 @@ public class C5DB extends AbstractService implements C5Server {
         regionServerPort = 8080 + rnd.nextInt(1000);
       }
 
-        // issue startup commands here that are common/we always want:
+      // issue startup commands here that are common/we always want:
         StartModule startLog = new StartModule(ModuleType.Log, 0, "");
         instance.getCommandChannel().publish(startLog);
 
@@ -143,12 +144,20 @@ public class C5DB extends AbstractService implements C5Server {
 
         this.nodeId = toNodeId;
 
+        if (System.getProperties().containsKey(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME)) {
+          this.clusterName = System.getProperty(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME);
+        } else {
+          this.clusterName = C5ServerConstants.LOCALHOST;
+        }
+
+
 //        String clusterNameData = configDirectory.getClusterName();
 //        if (clusterNameData == null) {
 //            clusterNameData = "the-cluster";
 //            configDirectory.setClusterNameFile(clusterNameData);
 //        }
 //        this.clusterName = clusterNameData;
+
     }
 
     /**
@@ -159,7 +168,7 @@ public class C5DB extends AbstractService implements C5Server {
         return instance;
     }
 
-    @Override
+  @Override
     public long getNodeId() {
         return nodeId;
     }
@@ -246,7 +255,12 @@ public class C5DB extends AbstractService implements C5Server {
         return configDirectory;
     }
 
-    @Override
+  @Override
+  public String getClusterName() {
+    return this.clusterName;
+  }
+
+  @Override
     public Channel<ConfigKeyUpdated> getConfigUpdateChannel() {
 
         // TODO this
