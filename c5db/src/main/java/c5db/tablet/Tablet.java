@@ -20,11 +20,13 @@ import c5db.interfaces.ReplicationModule;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A tablet, responsible for lifecycle of a tablet, creation of said tablet, etc.
@@ -37,6 +39,11 @@ public class Tablet {
     CreatingReplicator, // Waiting for replication instance to be created
     Open,  // Ready to service requests.
   }
+
+  // Config type info:
+  final HRegionInfo regionInfo;
+  final HTableDescriptor tableDescriptor;
+  final List<Long> peers;
 
   // Finals
   private final Fiber tabletFiber;
@@ -51,8 +58,15 @@ public class Tablet {
 
   private ReplicationModule.Replicator replicator;
 
-  public Tablet(Fiber tabletFiber, ReplicationModule replicationModule,
+  public Tablet(final HRegionInfo regionInfo,
+                final HTableDescriptor tableDescriptor,
+                final List<Long> peers,
+                Fiber tabletFiber, ReplicationModule replicationModule,
                 IRegion.Creator regionCreator) {
+    this.regionInfo = regionInfo;
+    this.tableDescriptor = tableDescriptor;
+    this.peers = peers;
+
     this.tabletFiber = tabletFiber;
     this.replicationModule = replicationModule;
     this.regionCreator = regionCreator;
@@ -69,7 +83,7 @@ public class Tablet {
     // TODO look this data up!
 
     ListenableFuture<ReplicationModule.Replicator> future =
-        replicationModule.createReplicator("", new ArrayList<>());
+        replicationModule.createReplicator(regionInfo.getRegionNameAsString(), peers);
 
     C5Futures.addCallback(future, this::replicatorCreated, this::handleFail, tabletFiber);
 
