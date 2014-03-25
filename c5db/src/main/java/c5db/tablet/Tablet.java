@@ -20,7 +20,6 @@ import c5db.interfaces.ReplicationModule;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +41,21 @@ public class Tablet {
   // Finals
   private final Fiber tabletFiber;
   private final ReplicationModule replicationModule;
+  private final IRegion.Creator regionCreator;
 
   // State
   private State tabletState;
-  // this is a heavyweight object.
-  private HRegion region;
+
+
+  private IRegion region;
+
   private ReplicationModule.Replicator replicator;
 
-  public Tablet(Fiber tabletFiber, ReplicationModule replicationModule) {
+  public Tablet(Fiber tabletFiber, ReplicationModule replicationModule,
+                IRegion.Creator regionCreator) {
     this.tabletFiber = tabletFiber;
     this.replicationModule = replicationModule;
+    this.regionCreator = regionCreator;
     tabletState = State.Initialized;
 
     this.tabletFiber.start();
@@ -75,7 +79,6 @@ public class Tablet {
   private void replicatorCreated(ReplicationModule.Replicator replicator) {
     assert tabletState == State.CreatingReplicator;
 
-
     tabletState = State.Open;
   }
 
@@ -88,5 +91,13 @@ public class Tablet {
 
   public boolean isOpen() {
     return tabletState == State.Open;
+  }
+
+  public State getTabletState() {
+    return tabletState;
+  }
+
+  public void dispose() {
+    this.tabletFiber.dispose();
   }
 }
