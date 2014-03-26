@@ -128,7 +128,7 @@ public class TabletService extends AbstractService implements TabletModule {
                             @Override
                             public void run() {
                                 try {
-                                    Path path = server.getConfigDirectory().baseConfigPath;
+                                    Path path = server.getConfigDirectory().getBaseConfigPath();
 
 
 //                                    RegistryFile registryFile = new RegistryFile(path);
@@ -290,7 +290,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
                     // default place for a region is....
                     // tableName/encodedName.
-                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.baseConfigPath.toString()),
+                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.getBaseConfigPath().toString()),
                             regionInfo,
                             tableDescriptor,
                             shim,

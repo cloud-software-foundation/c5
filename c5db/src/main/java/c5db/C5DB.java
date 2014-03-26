@@ -424,7 +424,7 @@ public class C5DB extends AbstractService implements C5Server {
 //            registryFile = new RegistryFile(configDirectory.baseConfigPath);
 
             // TODO this should probably be done somewhere else.
-            moveAwayOldLogs(configDirectory.baseConfigPath);
+            moveAwayOldLogs(configDirectory.getBaseConfigPath());
 
 //            if (existingRegister(registryFile)) {
 //                recoverC5Server(conf, path, registryFile);
