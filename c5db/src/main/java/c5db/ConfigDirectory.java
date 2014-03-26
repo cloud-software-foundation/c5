@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Created by ryan on 3/25/14.
+ *
  */
 public interface ConfigDirectory {
   String nodeIdFile = "nodeId";
@@ -52,5 +52,6 @@ public interface ConfigDirectory {
 
   void writeBinaryData(String quorumId, byte[] data) throws IOException;
 
+  // TODO reduce the number of callers who can call this
   Path getBaseConfigPath();
 }
