@@ -34,8 +34,8 @@ public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
     if (frame instanceof BinaryWebSocketFrame) {
-      ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
-      Call newMsg = Call.getSchema().newMessage();
+      final ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
+      final Call newMsg = Call.getSchema().newMessage();
       Call.getSchema().mergeFrom(input, newMsg);
       out.add(newMsg);
     } else {
