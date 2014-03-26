@@ -51,4 +51,6 @@ public interface ConfigDirectory {
   void writePeersToFile(String quorumId, List<Long> peers) throws IOException;
 
   void writeBinaryData(String quorumId, byte[] data) throws IOException;
+
+  Path getBaseConfigPath();
 }

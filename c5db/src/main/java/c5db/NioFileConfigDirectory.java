@@ -33,151 +33,153 @@ import java.util.List;
  *
  */
 public class NioFileConfigDirectory implements ConfigDirectory {
-    private static final Logger LOG = LoggerFactory.getLogger(NioFileConfigDirectory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NioFileConfigDirectory.class);
 
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    public final Path baseConfigPath;
-    public final Path nodeIdPath;
-    public final Path clusterNamePath;
+  final Path baseConfigPath;
+  public final Path nodeIdPath;
+  public final Path clusterNamePath;
 
+  public NioFileConfigDirectory(Path baseConfigPath) throws Exception {
+    this.baseConfigPath = baseConfigPath;
+    this.nodeIdPath = baseConfigPath.resolve(nodeIdFile);
+    this.clusterNamePath = baseConfigPath.resolve(clusterNameFile);
 
-    public NioFileConfigDirectory(Path baseConfigPath) throws Exception {
-        this.baseConfigPath = baseConfigPath;
-        this.nodeIdPath = baseConfigPath.resolve(nodeIdFile);
-        this.clusterNamePath = baseConfigPath.resolve(clusterNameFile);
+    init();
+  }
 
-        init();
+  /**
+   * Verifies that the 'config directory' is actually usable.  If it doesn't exist, create it.  If it exists,
+   * ensure that it's writable.  Ensure that primary configuration files aren't directories.
+   *
+   * @throws Exception
+   */
+  private void init() throws Exception {
+    if (Files.exists(getBaseConfigPath()) && !Files.isDirectory(getBaseConfigPath())) {
+      throw new Exception("Base config path exists and is not a directory " + getBaseConfigPath());
     }
 
-    /**
-     * Verifies that the 'config directory' is actually usable.  If it doesn't exist, create it.  If it exists,
-     * ensure that it's writable.  Ensure that primary configuration files aren't directories.
-     *
-     * @throws Exception
-     */
-    private void init() throws Exception {
-
-
-        if (Files.exists(baseConfigPath) && !Files.isDirectory(baseConfigPath)) {
-            throw new Exception("Base config path exists and is not a directory " + baseConfigPath);
-        }
-
-        if (!Files.exists(baseConfigPath)) {
-            Files.createDirectories(baseConfigPath);
-        }
-
-
-        if (Files.exists(nodeIdPath) && !Files.isRegularFile(nodeIdPath)) {
-            throw new Exception("NodeId file is not a regular directory!");
-        }
-
-        if (Files.exists(clusterNamePath) && !Files.isRegularFile(clusterNamePath)) {
-            throw new Exception("Cluster name is not a regular directory!");
-        }
-
-        if (!Files.isWritable(baseConfigPath)) {
-            throw new Exception("Can't write to the base configuration path!");
-        }
+    if (!Files.exists(getBaseConfigPath())) {
+      Files.createDirectories(getBaseConfigPath());
     }
 
-    /** Get the contents of the node id config file */
-    @Override
-    public String getNodeId() throws IOException {
-        return getFirstLineOfFile(nodeIdPath);
+
+    if (Files.exists(nodeIdPath) && !Files.isRegularFile(nodeIdPath)) {
+      throw new Exception("NodeId file is not a regular directory!");
     }
 
-    @Override
-    public String getClusterName() throws IOException {
-        return getFirstLineOfFile(clusterNamePath);
+    if (Files.exists(clusterNamePath) && !Files.isRegularFile(clusterNamePath)) {
+      throw new Exception("Cluster name is not a regular directory!");
     }
 
-    @Override
-    public void createSubDir(Path dirRelPath) throws IOException {
-      if (dirRelPath.isAbsolute()) {
-        throw new IllegalArgumentException("dirRelPath should a relative path with respect to the base config directory");
-      }
-      Path dirPath = this.baseConfigPath.resolve(dirRelPath);
-      if (Files.isRegularFile(dirPath)) {
-        throw new IOException("dirPath is a regular file! It needs to be a directory: " + dirPath);
-      }
-      // not a regular file.
-      if (Files.isDirectory(dirPath) && !Files.isWritable(dirPath)) {
-        throw new IOException("dirPath is a directory but not writable by me: " + dirPath);
-      }
+    if (!Files.isWritable(getBaseConfigPath())) {
+      throw new Exception("Can't write to the base configuration path!");
+    }
+  }
 
-      if (Files.isDirectory(dirPath)) {
-        return;
-      }
-      Files.createDirectories(dirPath);
+  /** Get the contents of the node id config file */
+  @Override
+  public String getNodeId() throws IOException {
+    return getFirstLineOfFile(nodeIdPath);
+  }
+
+  @Override
+  public String getClusterName() throws IOException {
+    return getFirstLineOfFile(clusterNamePath);
+  }
+
+  @Override
+  public void createSubDir(Path dirRelPath) throws IOException {
+    if (dirRelPath.isAbsolute()) {
+      throw new IllegalArgumentException("dirRelPath should a relative path with respect to the base config directory");
+    }
+    Path dirPath = this.getBaseConfigPath().resolve(dirRelPath);
+    if (Files.isRegularFile(dirPath)) {
+      throw new IOException("dirPath is a regular file! It needs to be a directory: " + dirPath);
+    }
+    // not a regular file.
+    if (Files.isDirectory(dirPath) && !Files.isWritable(dirPath)) {
+      throw new IOException("dirPath is a directory but not writable by me: " + dirPath);
     }
 
-    @Override
-    public void writeFile(Path dirRelPath, String fileName, List<String> data) throws IOException {
-      createSubDir(dirRelPath);
-      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
-      Files.write(filePath, data, UTF_8);
+    if (Files.isDirectory(dirPath)) {
+      return;
     }
+    Files.createDirectories(dirPath);
+  }
 
-    @Override
-    public List<String> readFile(Path dirRelPath, String fileName) throws IOException {
-      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
+  @Override
+  public void writeFile(Path dirRelPath, String fileName, List<String> data) throws IOException {
+    createSubDir(dirRelPath);
+    Path filePath = getBaseConfigPath().resolve(dirRelPath).resolve(fileName);
+    Files.write(filePath, data, UTF_8);
+  }
+
+  @Override
+  public List<String> readFile(Path dirRelPath, String fileName) throws IOException {
+    Path filePath = getBaseConfigPath().resolve(dirRelPath).resolve(fileName);
+    try {
+      return Files.readAllLines(filePath, UTF_8);
+    } catch (NoSuchFileException ex) {
+      // file doesnt exist, return empty:
+      return new ArrayList<>();
+    }
+  }
+
+  private String getFirstLineOfFile(Path path) throws IOException {
+    if (Files.isRegularFile(path)) {
+      List<String> allLines;
+
       try {
-        return Files.readAllLines(filePath, UTF_8);
+        allLines = Files.readAllLines(path, UTF_8);
       } catch (NoSuchFileException ex) {
-        // file doesnt exist, return empty:
-        return new ArrayList<>();
-      }
-    }
-
-    private String getFirstLineOfFile(Path path) throws IOException {
-        if (Files.isRegularFile(path)) {
-            List<String> allLines;
-
-            try {
-                allLines = Files.readAllLines(path, UTF_8);
-            } catch (NoSuchFileException ex) {
-                return null;
-            }
-            if (allLines.isEmpty())
-                return null;
-            return allLines.get(0);
-        }
         return null;
+      }
+      if (allLines.isEmpty())
+        return null;
+      return allLines.get(0);
     }
+    return null;
+  }
 
-    @Override
-    public void setNodeIdFile(String data) throws IOException {
-        setFile(data, nodeIdPath);
-    }
-    @Override
-    public void setClusterNameFile(String data) throws IOException {
-        setFile(data, clusterNamePath);
-    }
+  @Override
+  public void setNodeIdFile(String data) throws IOException {
+    setFile(data, nodeIdPath);
+  }
+  @Override
+  public void setClusterNameFile(String data) throws IOException {
+    setFile(data, clusterNamePath);
+  }
 
-    private void setFile(String data, Path path) throws IOException {
-        List<String> lines = new ArrayList<>(1);
-        lines.add(data);
-        Files.write(path, lines, UTF_8);
-    }
+  private void setFile(String data, Path path) throws IOException {
+    List<String> lines = new ArrayList<>(1);
+    lines.add(data);
+    Files.write(path, lines, UTF_8);
+  }
 
-    @Override
-    public Path getQuorumRelPath(String quorumId) {
-      return Paths.get(quorumsSubDir, quorumId);
-    }
+  @Override
+  public Path getQuorumRelPath(String quorumId) {
+    return Paths.get(quorumsSubDir, quorumId);
+  }
 
-    @Override
-    public void writePeersToFile(String quorumId, List<Long> peers) throws IOException {
-      //noinspection Convert2MethodRef
-      List<String> peerIdsStrings = Lists.transform(peers, (p) -> p.toString());
-      writeFile(getQuorumRelPath(quorumId), peerIdsFile, peerIdsStrings);
-    }
+  @Override
+  public void writePeersToFile(String quorumId, List<Long> peers) throws IOException {
+    //noinspection Convert2MethodRef
+    List<String> peerIdsStrings = Lists.transform(peers, (p) -> p.toString());
+    writeFile(getQuorumRelPath(quorumId), peerIdsFile, peerIdsStrings);
+  }
 
-    @Override
-    public void writeBinaryData(String quorumId, byte[] data) throws IOException {
-      Path quorumRelPath = getQuorumRelPath(quorumId);
-      createSubDir(quorumRelPath);
-      Path filePath = baseConfigPath.resolve(quorumRelPath).resolve(regionInfoFile);
-      Files.write(filePath, data);
-    }
+  @Override
+  public void writeBinaryData(String quorumId, byte[] data) throws IOException {
+    Path quorumRelPath = getQuorumRelPath(quorumId);
+    createSubDir(quorumRelPath);
+    Path filePath = getBaseConfigPath().resolve(quorumRelPath).resolve(regionInfoFile);
+    Files.write(filePath, data);
+  }
+
+  @Override
+  public Path getBaseConfigPath() {
+    return baseConfigPath;
+  }
 }
