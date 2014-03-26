@@ -24,6 +24,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -49,8 +50,10 @@ class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     decoder = new WebsocketProtostuffDecoder(handShaker);
     final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
-    pipeline.addLast(new HttpClientCodec(), new HttpObjectAggregator(C5Constants.MAX_CONTENT_LENGTH_HTTP_AGG));
+    pipeline.addLast("http-client", new HttpClientCodec());
+    pipeline.addLast("aggregator", new HttpObjectAggregator(C5Constants.MAX_RESPONSE_SIZE));
     pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
+    pipeline.addLast("websocket-aggregator", new WebSocketFrameAggregator(C5Constants.MAX_RESPONSE_SIZE));
     pipeline.addLast("message-codec", decoder);
     pipeline.addLast("message-handler", new MessageHandler());
   }
