@@ -16,7 +16,7 @@
  */
 package c5db.discovery;
 
-import c5db.ConfigDirectory;
+import c5db.NioFileConfigDirectory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -124,7 +124,7 @@ public class Main {
       }
 
       @Override
-      public ConfigDirectory getConfigDirectory() {
+      public NioFileConfigDirectory getConfigDirectory() {
         return null;
       }
 

@@ -89,7 +89,7 @@ public class C5DB extends AbstractService implements C5Server {
             cfgPath = reqCfgPath;
         }
 
-        ConfigDirectory cfgDir = new ConfigDirectory(Paths.get(cfgPath));
+        NioFileConfigDirectory cfgDir = new NioFileConfigDirectory(Paths.get(cfgPath));
         cfgDir.setNodeIdFile(Long.toString(nodeId));
 
         instance = new C5DB(cfgDir);
@@ -124,7 +124,7 @@ public class C5DB extends AbstractService implements C5Server {
     private static C5Server instance = null;
 
 
-    public C5DB(ConfigDirectory configDirectory) throws IOException {
+    public C5DB(NioFileConfigDirectory configDirectory) throws IOException {
         this.configDirectory = configDirectory;
 
         String data = configDirectory.getNodeId();
@@ -211,7 +211,7 @@ public class C5DB extends AbstractService implements C5Server {
 
 
     private Fiber serverFiber;
-    private final ConfigDirectory configDirectory;
+    private final NioFileConfigDirectory configDirectory;
 
     // The mapping between module name and the instance.
     private final Map<ModuleType, C5Module> moduleRegistry = new HashMap<>();
@@ -242,7 +242,7 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
     @Override
-    public ConfigDirectory getConfigDirectory() {
+    public NioFileConfigDirectory getConfigDirectory() {
         return configDirectory;
     }
 
