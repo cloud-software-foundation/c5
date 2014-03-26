@@ -31,12 +31,11 @@ import java.nio.file.Path;
  * Provides an abstraction and test point, and lessons in how to abstract
  * and extract HRegion functionality.
  */
-public class HRegionBridge implements IRegion {
+public class HRegionBridge implements Region {
 
-  public static class HRegionBridgeCreator implements IRegion.Creator {
-
+  public static class Creator implements Region.Creator {
     @Override
-    public IRegion getHRegion(Path basePath,
+    public Region getHRegion(Path basePath,
                               HRegionInfo regionInfo,
                               HTableDescriptor tableDescriptor,
                               HLog log,

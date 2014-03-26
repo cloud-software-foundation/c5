@@ -25,16 +25,19 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Interface for an HRegion.  Abstracts out the public callable methods that
- * we may wish to mock.
+ * Our interface to a region.
+ *
+ * While seemingly silly, this provides us a test hook for TDD.
  */
-public interface IRegion {
+public interface Region {
   /**
-   * Creates instances of IHRegion.  This exists to make mocking and testing
+   * Creates instances of Region.  This exists to make mocking and testing
    * easier.
+   *
+   * Mock out the creator interface - then create/return mock region interfaces.
    */
-  public static interface Creator {
-    IRegion getHRegion(
+  public interface Creator {
+    Region getHRegion(
         Path basePath,
         HRegionInfo regionInfo,
         HTableDescriptor tableDescriptor,
