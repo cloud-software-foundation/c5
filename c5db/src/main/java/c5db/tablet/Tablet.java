@@ -48,13 +48,13 @@ public class Tablet {
   // Finals
   private final Fiber tabletFiber;
   private final ReplicationModule replicationModule;
-  private final IRegion.Creator regionCreator;
+  private final Region.Creator regionCreator;
 
   // State
   private State tabletState;
 
 
-  private IRegion region;
+  private Region region;
 
   private ReplicationModule.Replicator replicator;
 
@@ -62,7 +62,7 @@ public class Tablet {
                 final HTableDescriptor tableDescriptor,
                 final List<Long> peers,
                 Fiber tabletFiber, ReplicationModule replicationModule,
-                IRegion.Creator regionCreator) {
+                Region.Creator regionCreator) {
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
     this.peers = peers;
