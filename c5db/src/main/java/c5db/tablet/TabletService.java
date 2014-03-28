@@ -303,17 +303,17 @@ public class TabletService extends AbstractService implements TabletModule {
                     serverConfigDir.writeBinaryData(quorumId, regionInfo.toDelimitedByteArray());
                     serverConfigDir.writePeersToFile(quorumId, peers);
                     LOG.debug("Moving region to opened status: {}", regionInfo);
-                    getTabletStateChanges().publish(new TabletStateChange(regionInfo,
-                            region,
-                            1, null));
+//                    getTabletStateChanges().publish(new TabletStateChange(regionInfo,
+//                            region,
+//                            1, null));
 
                 } catch (IOException e) {
                     LOG.error("Error opening OLogShim for {}, err: {}", regionInfo, e);
-                    getTabletStateChanges().publish(new TabletStateChange(
-                            regionInfo,
-                            null,
-                            0,
-                            e));
+//                    getTabletStateChanges().publish(new TabletStateChange(
+//                            regionInfo,
+//                            null,
+//                            0,
+//                            e));
                 }
             }
 
@@ -321,11 +321,11 @@ public class TabletService extends AbstractService implements TabletModule {
             public void onFailure(Throwable t) {
                 LOG.error("Unable to open replicator instance for region {}, err: {}",
                         regionInfo, t);
-                getTabletStateChanges().publish(new TabletStateChange(
-                        regionInfo,
-                        null,
-                        0,
-                        t));
+//                getTabletStateChanges().publish(new TabletStateChange(
+//                        regionInfo,
+//                        null,
+//                        0,
+//                        t));
             }
         }, fiber);
     }
