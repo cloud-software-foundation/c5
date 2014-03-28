@@ -18,6 +18,7 @@ package c5db.regionserver;
 
 
 import c5db.client.generated.CellType;
+import c5db.client.generated.Comparator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.DoNotRetryIOException;
@@ -29,6 +30,8 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.BinaryComparator;
+import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.DynamicClassLoader;
@@ -160,7 +163,7 @@ public class ReverseProtobufUtil {
    * @param proto the protocol buffer Filter to convert
    * @return the converted Filter
    */
-  public static Filter toFilter(c5db.client.generated.Filter proto) throws IOException {
+  private static Filter toFilter(c5db.client.generated.Filter proto) throws IOException {
     String type = proto.getName();
     final byte[] value = proto.getSerializedFilter().array();
     String funcName = "parseFrom";
@@ -250,7 +253,7 @@ public class ReverseProtobufUtil {
       for (c5db.client.generated.MutationProto.ColumnValue.QualifierValue qv : column.getQualifierValueList()) {
         byte[] qualifier = qv.getQualifier().array();
         if (qv.getValue() == null) {
-          throw new DoNotRetryIOException("Missing required field: qualifer value");
+          throw new DoNotRetryIOException("Missing required field: qualifier value");
         }
         byte[] value = qv.getValue().array();
         long ts = qv.getTimestamp();
@@ -271,9 +274,8 @@ public class ReverseProtobufUtil {
    *
    * @param proto the protocol buffer Mutate to convert
    * @return the converted client Delete
-   * @throws IOException
    */
-  public static Delete toDelete(final c5db.client.generated.MutationProto proto) throws IOException {
+  public static Delete toDelete(final c5db.client.generated.MutationProto proto) {
     c5db.client.generated.MutationProto.MutationType type = proto.getMutateType();
     assert type == c5db.client.generated.MutationProto.MutationType.DELETE : type.name();
     byte[] row = proto.getRow() != null ? proto.getRow().array() : null;
@@ -335,5 +337,15 @@ public class ReverseProtobufUtil {
   static String toShortString(final c5db.client.generated.MutationProto proto) {
     return "row=" + Bytes.toString(proto.getRow().array()) +
         ", type=" + proto.getMutateType().toString();
+  }
+
+  //TODO support more than byte comparable
+  public static ByteArrayComparable toComparator(Comparator comparator) {
+    byte[] serializedArray = comparator.getSerializedComparator().array();
+    c5db.client.generated.ByteArrayComparable byteArrayComparable =
+        new c5db.client.generated.ByteArrayComparable(ByteBuffer.wrap(serializedArray));
+    c5db.client.generated.BinaryComparator binaryComparator
+        = new c5db.client.generated.BinaryComparator(byteArrayComparable);
+    return new BinaryComparator(binaryComparator.getComparable().getValue().array());
   }
 }

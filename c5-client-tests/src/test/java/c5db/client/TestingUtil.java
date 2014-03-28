@@ -21,6 +21,7 @@ package c5db.client;
 
 import c5db.MiniClusterBase;
 import com.dyuproject.protostuff.ByteString;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -40,14 +41,15 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 
 public class TestingUtil extends MiniClusterBase {
-  ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
 
-  byte[] cf = Bytes.toBytes("cf");
-  byte[] cq = Bytes.toBytes("cq");
-  byte[] value = Bytes.toBytes("value");
+
+  private final byte[] cf = Bytes.toBytes("cf");
+  private final byte[] cq = Bytes.toBytes("cq");
+  private final byte[] value = Bytes.toBytes("value");
 
   @Test
   public void testSimplePutGet() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testSimplePutGet"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
     byte[] row = Bytes.toBytes("testSimplePutGet");
@@ -60,6 +62,7 @@ public class TestingUtil extends MiniClusterBase {
 
   @Test
   public void testSimplePutGet2() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testSimplePutGet2"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
     byte[] row = Bytes.toBytes("testSimplePutGet2");
@@ -72,6 +75,7 @@ public class TestingUtil extends MiniClusterBase {
 
   @Test
   public void testSimplePutGet3() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testSimplePutGet3"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
     byte[] row = Bytes.toBytes("testSimplePutGet3");
@@ -83,11 +87,14 @@ public class TestingUtil extends MiniClusterBase {
 
   @Test
   public void testExist() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testExist"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
     byte[] row = Bytes.toBytes("testExist");
     table.put(new Put(row).add(cf, cq, value));
-    boolean result = table.exists(new Get(row).addColumn(cf, cq));
+    Get get = new Get(row).addColumn(cf, cq);
+
+    boolean result = table.exists(get);
     assertTrue(result);
 
     result = table.exists(new Get(Bytes.add(row, row)).addColumn(cf, cq));
@@ -97,6 +104,7 @@ public class TestingUtil extends MiniClusterBase {
 
   @Test
   public void testScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testScan"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
 
@@ -121,6 +129,7 @@ public class TestingUtil extends MiniClusterBase {
 
   @Test
   public void testMultiGet() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testMultiGet"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
 
@@ -130,27 +139,81 @@ public class TestingUtil extends MiniClusterBase {
     List<Get> gets = new ArrayList<>();
     gets.add(new Get(row).addColumn(cf, cq));
     gets.add(new Get(Bytes.add(row, row)).addColumn(cf, cq));
-    Result[] result = table.get(gets);
-
-    result.toString();
+    Result[] response = table.get(gets);
+    assertArrayEquals(row, response[0].getRow());
+    assertArrayEquals(null, response[1].getRow());
     table.close();
   }
 
   @Test
   public void testMultiExists() throws IOException, InterruptedException, TimeoutException, ExecutionException {
-
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testMultiExists"));
     C5Table table;
     table = new C5Table(tableName, getRegionServerPort());
     byte[] row = Bytes.toBytes("testMultiExists");
 
     List<Get> gets = new ArrayList<>();
+    Put put = new Put(row);
+    put.add(cf, cq, value);
+    table.put(put);
     gets.add(new Get(row).addColumn(cf, cq));
     gets.add(new Get(Bytes.add(Bytes.add(row, row), row)).addColumn(cf, cq));
     gets.add(new Get(Bytes.add(row, row)).addColumn(cf, cq));
-    Boolean[] result = table.exists(gets);
+    Boolean[] results = table.exists(gets);
+    assertArrayEquals(new Boolean[]{true, false, false}, results);
 
-    result.toString();
     table.close();
   }
+
+
+  @Test
+  public void testSimpleCheckAndPut() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testSimpleCheckAndPut"));
+    C5Table table;
+    table = new C5Table(tableName, getRegionServerPort());
+    byte[] row = Bytes.toBytes("testSimpleCheckAndPut");
+
+
+    Put put = new Put(row).add(cf, cq, Bytes.add(value, value));
+    // null source
+    assertFalse(table.checkAndPut(row, cf, cq, value, put));
+    table.put(put);
+
+    put = new Put(row).add(cf, cq, value);
+    // wrong source
+    assertFalse(table.checkAndPut(row, cf, cq, value, put));
+    table.put(put);
+
+    // success
+    assertTrue(table.checkAndPut(row, cf, cq, value, put));
+    table.close();
+  }
+
+
+  @Test
+  public void testSimpleCheckAndDelete() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes("testSimpleCheckAndDelete"));
+    C5Table table;
+    table = new C5Table(tableName, getRegionServerPort());
+    byte[] row = Bytes.toBytes("testSimpleCheckAndDelete");
+
+    Delete delete = new Delete(row);
+    // null source
+    assertFalse(table.checkAndDelete(row, cf, cq, value, delete));
+
+    Put put = new Put(row);
+    put.addImmutable(cf, cq, Bytes.add(value, value));
+    table.put(put);
+
+    put = new Put(row).add(cf, cq, value);
+    // wrong source
+    assertFalse(table.checkAndDelete(row, cf, cq, value, delete));
+    table.put(put);
+
+    // success
+    assertTrue(table.checkAndDelete(row, cf, cq, value, delete));
+    table.close();
+  }
+
 
 }

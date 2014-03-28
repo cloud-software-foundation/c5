@@ -32,11 +32,11 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response
   protected void encode(ChannelHandlerContext channelHandlerContext,
                         Response response,
                         List<Object> objects) throws Exception {
-    LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
+    final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
     Response.getSchema().writeTo(lcpo, response);
-    List<ByteBuffer> buffers = lcpo.buffer.finish();
-    ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
-    BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
+    final List<ByteBuffer> buffers = lcpo.buffer.finish();
+    final ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
+    final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
     objects.add(frame);
   }
 }
