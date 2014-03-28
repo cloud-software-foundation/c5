@@ -16,12 +16,9 @@
  */
 package c5db.log;
 
-import c5db.generated.Log;
 import c5db.replication.ReplicatorLogAbstraction;
 import c5db.replication.generated.LogEntry;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.google.protobuf.ByteString;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,42 +39,28 @@ public class Mooring implements ReplicatorLogAbstraction {
 
     @Override
     public ListenableFuture<Boolean> logEntries(List<LogEntry> entries) {
-        List<Log.OLogEntry> oLogEntries = new ArrayList<>();
+        List<LogEntry> logEntries = new ArrayList<>();
         for (LogEntry entry : entries) {
             long idx = getNextIdxGreaterThan(0);
-            oLogEntries.add(Log.OLogEntry
-                    .newBuilder()
-                    .setTombStone(false)
-                    .setTerm(entry.getTerm())
-                    .setIndex(idx)
-                    .setQuorumId(quorumId)
-                    .setValue(ByteString.copyFrom(entry.getData())).build());
+          logEntries.add(new LogEntry(
+                entry.getTerm(),
+                idx,
+                entry.getData()));
         }
-        if (oLogEntries.size() > 0) {
-            currentTerm = oLogEntries.get(oLogEntries.size() - 1).getTerm();
+        if (logEntries.size() > 0) {
+            currentTerm = logEntries.get(logEntries.size() - 1).getTerm();
         }
-        return this.log.logEntry(oLogEntries, quorumId);
+        return this.log.logEntry(logEntries, quorumId);
     }
 
   @Override
   public ListenableFuture<LogEntry> getLogEntry(long index) {
-    // TODO replace with an async implementation
-    SettableFuture<LogEntry> future = SettableFuture.create();
-    future.set(this.log.getLogEntry(index, quorumId));
-    return future;
+    return this.log.getLogEntry(index, quorumId);
   }
 
   @Override
   public ListenableFuture<List<LogEntry>> getLogEntries(long start, long end) {
-    // TODO replace with an async implementation and retrieve entries in a batch
-    SettableFuture<List<LogEntry>> future = SettableFuture.create();
-    ArrayList<LogEntry> entries = new ArrayList<>();
-    for (long i = start; i < end; i++) {
-      LogEntry entry = log.getLogEntry(i, quorumId);
-      entries.add(entry);
-    }
-    future.set(entries);
-    return future;
+    return this.log.getLogEntries(start, end, quorumId);
   }
 
     @Override

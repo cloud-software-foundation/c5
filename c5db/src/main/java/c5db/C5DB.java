@@ -19,6 +19,7 @@ package c5db;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.log.LogFileManager;
 import c5db.log.LogService;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
@@ -55,8 +56,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-
-import static c5db.log.OLog.moveAwayOldLogs;
 
 
 /**
@@ -424,7 +423,7 @@ public class C5DB extends AbstractService implements C5Server {
 //            registryFile = new RegistryFile(configDirectory.baseConfigPath);
 
             // TODO this should probably be done somewhere else.
-            moveAwayOldLogs(configDirectory.baseConfigPath);
+            new LogFileManager(configDirectory.baseConfigPath).clearOldArchivedLogs(0);
 
 //            if (existingRegister(registryFile)) {
 //                recoverC5Server(conf, path, registryFile);
