@@ -16,7 +16,7 @@
 ;
 
 (ns c5db.control
-    (:import (c5db C5DB ConfigDirectory)
+    (:import (c5db C5DB NioFileConfigDirectory)
              (java.nio.file Paths))
     (:use [clojure.java.shell :only [sh]]
           [clojure.java.io :only [file]]))
@@ -140,7 +140,7 @@
 
 (defn c5-cfg
     [run-name]
-    (ConfigDirectory. (get-path "/tmp" username run-name)))
+    (NioFileConfigDirectory. (get-path "/tmp" username run-name)))
 
 (defn c5-any-runs? []
     "Simple check to see if there are any c5db run-dirs for the user"
