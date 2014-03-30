@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,21 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client;
+package c5db.testing;
 
 /**
- * A class to abstract all of the magic numbers for our client
+ * Hamcrest matcher static functions to facilitate byte comparisons.
  */
-public final class C5Constants {
-  private C5Constants() {
-    throw new UnsupportedOperationException();
+public class BytesMatchers {
+
+  public static BytesEqualMatcher equal(byte[] expectedValue) {
+    return new BytesEqualMatcher(expectedValue);
   }
 
-  public static final int DEFAULT_INIT_SCAN = 100;
-  public static final int MAX_REQUEST_SIZE = 1000000;
-  public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
-  public static final int TEST_PORT = 8080;
-  public static final long TIMEOUT = 10000;
-  public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
+  public static BytesEqualMatcher equalTo(byte[] expectedValue) {
+    return equal(expectedValue);
+  }
 }

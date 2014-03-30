@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,19 +16,21 @@
  */
 package c5db.client;
 
-/**
- * A class to abstract all of the magic numbers for our client
- */
-public final class C5Constants {
-  private C5Constants() {
-    throw new UnsupportedOperationException();
-  }
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
 
-  public static final int DEFAULT_INIT_SCAN = 100;
-  public static final int MAX_REQUEST_SIZE = 1000000;
-  public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
-  public static final int TEST_PORT = 8080;
-  public static final long TIMEOUT = 10000;
-  public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
+import java.io.IOException;
+
+/**
+ * language to help verify data from the database.
+ *
+ * Add additional static verbs as necessary!
+ */
+public class DataHelper {
+  public static byte[] valueReadFromDatabase(byte[] row, C5Table c5Table) throws IOException {
+    Get get = new Get(row);
+    get.addColumn(row, row);
+    Result result = c5Table.get(get);
+    return result.getValue(row, row);
+  }
 }
