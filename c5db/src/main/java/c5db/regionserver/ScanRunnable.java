@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.regionserver.scanner;
+package c5db.regionserver;
 
 
 import c5db.C5ServerConstants;
@@ -22,7 +22,6 @@ import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
 import c5db.client.generated.ScanResponse;
-import c5db.regionserver.ReverseProtobufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Scan;
@@ -35,6 +34,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Creates a runnable in the background so that the regionserver always has a setup of scanner results
+ * ready to send back to the user. It directly sends the data back through netty back to the user.
+ */
 public class ScanRunnable implements Callback<Integer> {
   private final long scannerId;
   private final Call call;
@@ -44,7 +47,8 @@ public class ScanRunnable implements Callback<Integer> {
 
   public ScanRunnable(final ChannelHandlerContext ctx,
                       final Call call,
-                      final long scannerId, HRegion region) throws IOException {
+                      final long scannerId,
+                      final HRegion region) throws IOException {
     super();
     Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
     this.ctx = ctx;
@@ -86,8 +90,7 @@ public class ScanRunnable implements Callback<Integer> {
           // If we are not the first one and we are a different row than the previous
           cells.add(ReverseProtobufUtil.toCell(cell));
 
-          if (previousRow == null ||  previousRow.compareTo(cellBufferRow) == 0 ) {
-          } else {
+        if (!(previousRow == null ||  previousRow.compareTo(cellBufferRow) == 0 )) {
             cellsPerResult.add(cells.size());
             scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
             cells = new ArrayList<>();

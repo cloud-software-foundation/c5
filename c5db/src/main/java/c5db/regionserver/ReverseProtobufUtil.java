@@ -41,6 +41,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A set of static functions to map between the HBase API and the protocolbuffers API.
+ */
 public class ReverseProtobufUtil {
   private static final Logger LOG = LoggerFactory.getLogger(ReverseProtobufUtil.class);
 
