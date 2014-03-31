@@ -42,14 +42,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
-  static boolean initialized = false;
   private static int regionServerPort;
-  private static Random rnd = new Random();
+  private static final Random rnd = new Random();
 
-  public static int getRegionServerPort() throws InterruptedException {
+  public static int getRegionServerPort() {
     return regionServerPort;
   }
-  static C5Server server;
+  private static C5Server server;
 
   @Before
   public void resetDatabaseStateBeforeTest() {
@@ -81,10 +80,7 @@ public class MiniClusterBase {
   @BeforeClass
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
-
     regionServerPort = 8080 + rnd.nextInt(1000);
-
     System.setProperty("regionServerPort", String.valueOf(regionServerPort));
 
     C5DB.main(new String[]{});
@@ -116,7 +112,6 @@ public class MiniClusterBase {
     Callback<TabletModule.TabletStateChange> onMsg = message -> {
       //open latch
       System.out.println(message);
-      initialized = true;
       latch.countDown();
     };
     stateChanges.subscribe(receiver, onMsg);

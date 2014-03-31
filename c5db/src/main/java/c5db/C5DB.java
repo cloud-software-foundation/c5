@@ -68,6 +68,7 @@ import static c5db.log.OLog.moveAwayOldLogs;
 public class C5DB extends AbstractService implements C5Server {
   private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
   private String clusterName;
+  private final RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   public static void main(String[] args) throws Exception {
 
@@ -125,7 +126,7 @@ public class C5DB extends AbstractService implements C5Server {
     private static C5Server instance = null;
 
 
-    public C5DB(ConfigDirectory configDirectory) throws IOException {
+    private C5DB(ConfigDirectory configDirectory) throws IOException {
         this.configDirectory = configDirectory;
 
         String data = configDirectory.getNodeId();
@@ -238,7 +239,6 @@ public class C5DB extends AbstractService implements C5Server {
         return commandChannel;
     }
 
-    public RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
     @Override
     public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
         return commandRequests;
@@ -269,7 +269,7 @@ public class C5DB extends AbstractService implements C5Server {
 
 
     @FiberOnly
-    private void processCommandMessage(Message<?> msg) throws Exception {
+    private void processCommandMessage(Message<?> msg) {
         if (msg instanceof StartModule) {
             StartModule message = (StartModule) msg;
             startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
@@ -361,11 +361,19 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
     @FiberOnly
-    private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
+    /**
+     * Start a specific module
+     *
+     * @param moduleType The type of module to start
+     * @param modulePort The port on which to start the module
+     * @return Whether or not we successfully started.
+     * @throws java.net.SocketException
+     */
+    private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) {
         if (moduleRegistry.containsKey(moduleType)) {
             // already running, dont start twice?
             LOG.warn("Module {} already running", moduleType);
-            throw new Exception("Cant start, running, module: " + moduleType);
+            throw new RuntimeException("Cant start, running, module: " + moduleType);
         }
 
         switch (moduleType) {
@@ -404,7 +412,7 @@ public class C5DB extends AbstractService implements C5Server {
             }
 
             default:
-                throw new Exception("No such module as " + moduleType);
+                throw new RuntimeException("No such module as " + moduleType);
         }
 
         return true;
@@ -431,20 +439,8 @@ public class C5DB extends AbstractService implements C5Server {
 
     @Override
     protected void doStart() {
-//        Path path;
-//        path = Paths.get(getRandomPath());
-//        RegistryFile registryFile;
         try {
-//            registryFile = new RegistryFile(configDirectory.baseConfigPath);
-
-            // TODO this should probably be done somewhere else.
             moveAwayOldLogs(configDirectory.baseConfigPath);
-
-//            if (existingRegister(registryFile)) {
-//                recoverC5Server(conf, path, registryFile);
-//            } else {
-//                bootStrapRegions(conf, path, registryFile);
-//            }
         } catch (IOException e) {
             notifyFailed(e);
         }
@@ -464,9 +460,7 @@ public class C5DB extends AbstractService implements C5Server {
                 }
             });
 
-            commandRequests.subscribe(serverFiber, request -> {
-                processCommandRequest(request);
-            });
+            commandRequests.subscribe(serverFiber, this::processCommandRequest);
 
             serverFiber.start();
 
@@ -480,12 +474,10 @@ public class C5DB extends AbstractService implements C5Server {
     @Override
     protected void doStop() {
         // stop module set.
-
         // TODO write any last minute persistent data to disk (is there any?)
         // note: guava docs recommend doing long-acting operations in separate thread
 
         serverFiber.dispose();
-
         notifyStopped();
     }
 

@@ -16,7 +16,6 @@
  */
 package c5db.tablet;
 
-import c5db.C5DB;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.generated.Log;
@@ -46,7 +45,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.core.Callback;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -70,9 +68,8 @@ import java.util.concurrent.ExecutionException;
  */
 public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
-  public static final int INITIALIZATION_TIME = 1000;
+  private static final int INITIALIZATION_TIME = 1000;
 
-  private final PoolFiberFactory fiberFactory;
     private final Fiber fiber;
     private final C5Server server;
     // TODO bring this into this class, and not have an external class.
@@ -81,13 +78,14 @@ public class TabletService extends AbstractService implements TabletModule {
     private ReplicationModule replicationModule = null;
     private DiscoveryModule discoveryModule = null;
     private final Configuration conf;
+    private Disposable newNodeWatcher;
 
     public TabletService(PoolFiberFactory fiberFactory, C5Server server) {
-        this.fiberFactory = fiberFactory;
         this.fiber = fiberFactory.create();
         this.server = server;
         this.conf = HBaseConfiguration.create();
 
+      newNodeWatcher = null;
     }
 
     @Override
@@ -108,67 +106,54 @@ public class TabletService extends AbstractService implements TabletModule {
     protected void doStart() {
         fiber.start();
 
-        fiber.execute(new Runnable() {
-            @Override
-            public void run() {
+        fiber.execute(() -> {
 
-                ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
-                try {
-                    discoveryModule = (DiscoveryModule) discoveryService.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    notifyFailed(e);
-                    return;
+            ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
+            try {
+                discoveryModule = (DiscoveryModule) discoveryService.get();
+            } catch (InterruptedException | ExecutionException e) {
+                notifyFailed(e);
+                return;
+            }
+
+            ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
+            Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
+                @Override
+                public void onSuccess(C5Module result) {
+                    replicationModule = (ReplicationModule) result;
+                    fiber.execute(() -> {
+                        try {
+                            Path path = server.getConfigDirectory().baseConfigPath;
+                            RegistryFile registryFile = new RegistryFile(path);
+
+                            int startCount = startRegions(registryFile);
+
+                            // if no regions were started, we need to bootstrap once we have
+                            // enough online regions.
+                            if (startCount == 0) {
+                                startBootstrap(registryFile);
+                            }
+
+                            logReplay(path);
+
+                            notifyStarted();
+                        } catch (Exception e) {
+                            notifyFailed(e);
+                        }
+                    });
                 }
 
-                ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
-                Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
-                    @Override
-                    public void onSuccess(C5Module result) {
-                        replicationModule = (ReplicationModule) result;
-                        fiber.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Path path = server.getConfigDirectory().baseConfigPath;
-
-
-                                    RegistryFile registryFile = new RegistryFile(path);
-
-                                    int startCount = startRegions(registryFile);
-
-                                    // if no regions were started, we need to bootstrap once we have
-                                    // enough online regions.
-                                    if (startCount == 0) {
-                                        startBootstrap(registryFile);
-                                    }
-
-                                    logReplay(path);
-
-                                    notifyStarted();
-                                } catch (Exception e) {
-                                    notifyFailed(e);
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        notifyFailed(t);
-                    }
-                }, fiber);
-            }
+                @Override
+                public void onFailure(Throwable t) {
+                    notifyFailed(t);
+                }
+            }, fiber);
         });
-
     }
 
-    Disposable newNodeWatcher = null;
-
-
     @FiberOnly
-    private void startBootstrap(final RegistryFile registryFile) throws IOException {
+    private void startBootstrap(final RegistryFile registryFile) {
         LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
-
         final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
             @Override
             public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
@@ -181,12 +166,9 @@ public class TabletService extends AbstractService implements TabletModule {
             }
         };
 
-        newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, new Callback<DiscoveryModule.NewNodeVisible>() {
-            @Override
-            public void onMessage(DiscoveryModule.NewNodeVisible message) {
-                ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
-                Futures.addCallback(f, callback, fiber);
-            }
+        newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, message -> {
+            ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+            Futures.addCallback(f, callback, fiber);
         });
 
         ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
@@ -226,14 +208,12 @@ public class TabletService extends AbstractService implements TabletModule {
         }
     }
 
-
     @FiberOnly
     private int startRegions(RegistryFile registryFile) throws IOException {
         RegistryFile.Registry registry = registryFile.getRegistry();
         int cnt = 0;
         for (HRegionInfo regionInfo : registry.regions.keySet()) {
-            HTableDescriptor tableDescriptor =
-                    new HTableDescriptor(regionInfo.getTableName());
+            HTableDescriptor tableDescriptor = new HTableDescriptor(regionInfo.getTableName());
             for (HColumnDescriptor cf : registry.regions.get(regionInfo)) {
                 tableDescriptor.addFamily(cf);
             }
@@ -308,7 +288,7 @@ public class TabletService extends AbstractService implements TabletModule {
     }
 
     private void logReplay(final Path path) throws IOException {
-        java.nio.file.Path archiveLogPath = Paths.get(path.toString(), C5ServerConstants.ARCHIVE_DIR);
+        Path archiveLogPath = Paths.get(path.toString(), C5ServerConstants.ARCHIVE_DIR);
         File[] archiveLogs = archiveLogPath.toFile().listFiles();
 
         if (archiveLogs == null) {
@@ -392,7 +372,7 @@ public class TabletService extends AbstractService implements TabletModule {
         return 0;
     }
 
-  public int getMinQuorumSize() {
+  int getMinQuorumSize() {
     if (server.getClusterName().equals(C5ServerConstants.LOCALHOST)) {
       return 1;
     } else {
