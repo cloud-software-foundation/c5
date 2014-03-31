@@ -65,7 +65,7 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- *
+ * The main entry point for the service which manages the tablet level lifecycle. 
  */
 public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
