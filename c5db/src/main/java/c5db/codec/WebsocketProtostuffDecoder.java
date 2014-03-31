@@ -25,6 +25,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
 import java.util.List;
 
+
+/**
+ * A specialized Protostuff decoder used to deserialize Protostuff from a WebSocketStream and map them to a Call
+ * object.
+ */
 public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
 
   public WebsocketProtostuffDecoder(String websocketPath) {
