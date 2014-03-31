@@ -30,6 +30,10 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+/**
+ * A specialized Protostuff encoder used to serialize Protostuff into a WebSocketStream and map them to a Response
+ * object. Special care must be paid to handle chunking websocket files transparently for the user.
+ */
 public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response> {
 
   private static final long MAX_SIZE = C5ServerConstants.MAX_CONTENT_LENGTH_HTTP_AGG;
