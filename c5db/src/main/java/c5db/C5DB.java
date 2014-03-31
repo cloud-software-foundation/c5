@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.discovery.BeaconService;
+import c5db.util.C5FiberFactory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.log.LogService;
@@ -27,7 +28,9 @@ import c5db.messages.generated.StopModule;
 import c5db.regionserver.RegionServerService;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
+import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberOnly;
+import c5db.util.PoolFiberFactoryWithExecutor;
 import io.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
@@ -55,6 +58,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import static c5db.log.OLog.moveAwayOldLogs;
 
@@ -267,6 +271,11 @@ public class C5DB extends AbstractService implements C5Server {
         return null;
     }
 
+    @Override
+    public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
+      return new PoolFiberFactoryWithExecutor(fiberPool,
+          new ExceptionHandlingBatchExecutor(throwableConsumer));
+    }
 
     @FiberOnly
     private void processCommandMessage(Message<?> msg) throws Exception {
@@ -380,7 +389,7 @@ public class C5DB extends AbstractService implements C5Server {
                 break;
             }
             case Replication: {
-                C5Module module = new ReplicatorService(fiberPool, bossGroup, workerGroup, modulePort, this);
+                C5Module module = new ReplicatorService(bossGroup, workerGroup, modulePort, this);
                 startServiceModule(module);
                 break;
             }
@@ -391,13 +400,13 @@ public class C5DB extends AbstractService implements C5Server {
                 break;
             }
             case Tablet: {
-                C5Module module = new TabletService(fiberPool, this);
+                C5Module module = new TabletService(this);
                 startServiceModule(module);
 
                 break;
             }
             case RegionServer: {
-                C5Module module = new RegionServerService(fiberPool, bossGroup, workerGroup, modulePort, this);
+                C5Module module = new RegionServerService(bossGroup, workerGroup, modulePort, this);
                 startServiceModule(module);
 
                 break;
@@ -483,6 +492,7 @@ public class C5DB extends AbstractService implements C5Server {
         // note: guava docs recommend doing long-acting operations in separate thread
 
         serverFiber.dispose();
+        fiberPool.dispose();
 
         notifyStopped();
     }
