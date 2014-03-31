@@ -19,6 +19,7 @@ package c5db.regionserver;
 import c5db.C5ServerConstants;
 import c5db.codec.WebsocketProtostuffDecoder;
 import c5db.codec.WebsocketProtostuffEncoder;
+import c5db.util.C5FiberFactory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -42,7 +43,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
+  private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private final NioEventLoopGroup acceptGroup;
   private final NioEventLoopGroup workerGroup;
@@ -63,8 +64,7 @@ public class RegionServerService extends AbstractService implements RegionServer
 
   TabletModule tabletModule;
 
-  public RegionServerService(PoolFiberFactory fiberFactory,
-                             NioEventLoopGroup acceptGroup,
+  public RegionServerService(NioEventLoopGroup acceptGroup,
                              NioEventLoopGroup workerGroup,
                              int port,
                              C5Server server) {
@@ -72,6 +72,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
+    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
 
     this.fiber = fiberFactory.create();
   }

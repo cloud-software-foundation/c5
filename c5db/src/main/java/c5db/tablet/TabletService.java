@@ -20,6 +20,7 @@ import c5db.C5DB;
 import c5db.C5ServerConstants;
 import c5db.NioFileConfigDirectory;
 import c5db.generated.Log;
+import c5db.util.C5FiberFactory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -48,7 +49,6 @@ import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
   private static final int INITIALIZATION_TIME = 1000;
 
-  private final PoolFiberFactory fiberFactory;
+    private final C5FiberFactory fiberFactory;
     private final Fiber fiber;
     private final C5Server server;
     // TODO bring this into this class, and not have an external class.
@@ -84,8 +84,8 @@ public class TabletService extends AbstractService implements TabletModule {
     private boolean rootStarted = false;
 
 
-    public TabletService(PoolFiberFactory fiberFactory, C5Server server) {
-        this.fiberFactory = fiberFactory;
+    public TabletService(C5Server server) {
+        this.fiberFactory = server.getFiberFactory(this::notifyFailed);
         this.fiber = fiberFactory.create();
         this.server = server;
         this.conf = HBaseConfiguration.create();
