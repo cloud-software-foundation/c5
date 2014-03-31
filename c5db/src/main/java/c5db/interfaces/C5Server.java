@@ -19,6 +19,7 @@ package c5db.interfaces;
 import c5db.NioFileConfigDirectory;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
+import c5db.util.C5FiberFactory;
 import io.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -27,6 +28,7 @@ import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 /**
  * A C5Server stands in for global resources that modules might need.  It provides global
@@ -102,6 +104,15 @@ public interface C5Server extends Service {
     public NioFileConfigDirectory getConfigDirectory();
 
     public boolean isSingleNodeMode();
+
+    /**
+     * Return a C5FiberFactory using the passed exception handler, which will be run on the fiber
+     * that throws an uncaught exception.
+     *
+     * @param throwableHandler Exception handler for pool fibers to use.
+     * @return C5FiberFactory instance.
+     */
+    public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableHandler);
 
     public static class ModuleStateChange {
         public final C5Module module;
