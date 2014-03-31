@@ -14,27 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.regionserver.scanner;
 
-import org.jetlang.channels.Channel;
-
-import java.util.concurrent.ConcurrentHashMap;
-
-public enum ScannerManager {
-  INSTANCE;
-
-  private ConcurrentHashMap<Long, Channel<Integer>> scannerMap =
-      new ConcurrentHashMap<>();
+/*
+ * A package responsible for Imitating an HBase Server. A server which closely resembles an HRegionServer and that uses
+ * HRegion to provide HRegionServer type functionality.
+ */
+package c5db.regionserver;
 
 
-  ScannerManager() {
-  }
-
-  public Channel<Integer> getChannel(long scannerId) {
-    return scannerMap.get(scannerId);
-  }
-
-  public void addChannel(long scannerId, Channel<Integer> channel) {
-    scannerMap.put(scannerId, channel);
-  }
-}

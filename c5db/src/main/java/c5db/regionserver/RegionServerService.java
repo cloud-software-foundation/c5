@@ -47,7 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
+ * and attaching the netty infrastructure to the region server.
  */
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
