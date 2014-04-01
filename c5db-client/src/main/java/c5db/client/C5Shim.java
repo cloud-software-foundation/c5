@@ -17,50 +17,17 @@
 package c5db.client;
 
 
-import com.dyuproject.protostuff.ByteString;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
 
 import java.io.IOException;
 import java.util.List;
 
-/***
+/**
  * A shim for unsupported options to allow C5Table to implement TableInterface
  */
 public abstract class C5Shim implements TableInterface {
-  private final byte[] tableName;
-
-  /**
-   * C5Table is the main entry points for clients of C5DB
-   *
-   * @param tableName The tablename to create a table for.
-   */
-  C5Shim(final ByteString tableName) {
-    this.tableName = tableName.toByteArray();
-  }
-
-  public byte[] getTableName() {
-    return tableName;
-  }
-
-  byte[] getRegionName() {
-    return new byte[]{0, 1, 2};
-  }
-
-  @Override
-  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
-      throws IOException {
-    return false;
-  }
-
-  @Override
-  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
-      throws IOException {
-    return false;
-  }
 
   @Override
   public Configuration getConfiguration() {
@@ -68,7 +35,8 @@ public abstract class C5Shim implements TableInterface {
   }
 
   @Override
-  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException { }
+  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException {
+  }
 
   @Override
   public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
@@ -77,7 +45,8 @@ public abstract class C5Shim implements TableInterface {
 
   @Override
   public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
-      throws IOException, InterruptedException {  }
+      throws IOException, InterruptedException {
+  }
 
   @Override
   public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)

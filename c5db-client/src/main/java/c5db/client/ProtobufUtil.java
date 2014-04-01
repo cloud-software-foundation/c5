@@ -37,8 +37,10 @@
 package c5db.client;
 
 
+import c5db.client.generated.ByteArrayComparable;
 import c5db.client.generated.Call;
 import c5db.client.generated.Column;
+import c5db.client.generated.Comparator;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
@@ -83,6 +85,19 @@ public class ProtobufUtil {
       cells.add(toCell(c));
     }
     return Result.create(cells);
+  }
+
+  /**
+   * Convert a protocol buffer Result to a client Result
+   *
+   * @param proto the protocol buffer Result to convert
+   * @return the converted client Result
+   */
+  public static Result toResultExists(final c5db.client.generated.Result proto) {
+    if (proto == null) {
+      return null;
+    }
+    return Result.create(null, proto.getExists());
   }
 
   private static Cell toCell(c5db.client.generated.Cell c) {
@@ -165,8 +180,8 @@ public class ProtobufUtil {
    * @param filter the Filter to convert
    * @return the converted protocol buffer Filter
    */
-  public static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
-    if (filter == null){
+  private static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
+    if (filter == null) {
       return new c5db.client.generated.Filter();
     }
     return new c5db.client.generated.Filter(filter.getClass().getName(), ByteBuffer.wrap(filter.toByteArray()));
@@ -177,7 +192,7 @@ public class ProtobufUtil {
    *
    * @param type     The type of mutation to create
    * @param mutation The client Mutation
-   * @return a protobuf'd Mutation
+   * @return a protobuf  Mutation
    */
   public static MutationProto toMutation(final MutationProto.MutationType type,
                                          final Mutation mutation) {
@@ -236,7 +251,7 @@ public class ProtobufUtil {
    * @param type The delete type to make
    * @return protocol buffer DeleteType
    */
-  public static MutationProto.DeleteType toDeleteType(KeyValue.Type type) {
+  private static MutationProto.DeleteType toDeleteType(KeyValue.Type type) {
     switch (type) {
       case Delete:
         return MutationProto.DeleteType.DELETE_ONE_VERSION;
@@ -263,7 +278,7 @@ public class ProtobufUtil {
     long maxResultSize = scan.getMaxResultSize();
 
     Boolean loadColumnFamiliesOnDemand = scan.getLoadColumnFamiliesOnDemandValue();
-    if (loadColumnFamiliesOnDemand == null){
+    if (loadColumnFamiliesOnDemand == null) {
       loadColumnFamiliesOnDemand = false;
     }
     int maxVersions = scan.getMaxVersions();
@@ -324,19 +339,30 @@ public class ProtobufUtil {
   }
 
   public static Call getGetCall(long commandId, GetRequest get) {
-    return new Call(Call.Command.GET, commandId, get, null,  null, null);
+    return new Call(Call.Command.GET, commandId, get, null, null, null);
   }
 
   public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
-    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest,  null, null);
+    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null);
   }
 
   public static Call getScanCall(long commandId, ScanRequest scanRequest) {
-    return new Call(Call.Command.SCAN, commandId, null, null,  scanRequest, null);
+    return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
   }
 
   public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
-    return new Call(Call.Command.MULTI, commandId, null, null,  null, multiRequest);
+    return new Call(Call.Command.MULTI, commandId, null, null, null, multiRequest);
   }
+
+  /**
+   * Convert a ByteArrayComparable to a protocol buffer Comparator
+   *
+   * @param comparator the ByteArrayComparable to convert
+   * @return the converted protocol buffer Comparator
+   */
+  public static Comparator toComparator(ByteArrayComparable comparator) {
+    return new Comparator(comparator.getClass().getName(), comparator.getValue());
+  }
+
 }
 
