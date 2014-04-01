@@ -16,10 +16,14 @@
  */
 package c5db.client;
 
+import c5db.client.generated.ByteArrayComparable;
+import c5db.client.generated.CompareType;
+import c5db.client.generated.Condition;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
+import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
@@ -186,7 +190,9 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   private void doPut(Put put) throws InterruptedIOException {
     final SettableFuture<Response> resultFuture = SettableFuture.create();
-    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), put);
+    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(),
+        MutationProto.MutationType.PUT,
+        put);
 
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
@@ -207,7 +213,9 @@ public class C5Table extends C5Shim implements AutoCloseable {
   @Override
   public void delete(Delete delete) throws IOException {
     final SettableFuture<Response> resultFuture = SettableFuture.create();
-    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(), delete);
+    final MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(),
+        MutationProto.MutationType.DELETE,
+        delete);
 
     try {
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
@@ -251,6 +259,64 @@ public class C5Table extends C5Shim implements AutoCloseable {
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       Log.warn(e);
     }
-
   }
+
+  @Override
+  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
+      throws IOException {
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    ByteArrayComparable byteArrayComparable = new ByteArrayComparable(ByteBuffer.wrap(value));
+
+    final Condition condition = new Condition(ByteBuffer.wrap(row),
+        ByteBuffer.wrap(family),
+        ByteBuffer.wrap(qualifier),
+        CompareType.EQUAL,
+        ProtobufUtil.toComparator(byteArrayComparable));
+
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(),
+        MutationProto.MutationType.PUT,
+        put,
+        condition);
+
+    try {
+      handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
+      Response result = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
+      if (result.getMutate().getProcessed()) {
+        return true;
+      }
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new IOException(e.toString());
+    }
+    return false;
+  }
+
+  @Override
+  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
+      throws IOException {
+    final SettableFuture<Response> resultFuture = SettableFuture.create();
+    ByteArrayComparable byteArrayComparable = new ByteArrayComparable(ByteBuffer.wrap(value));
+
+    final Condition condition = new Condition(ByteBuffer.wrap(row),
+        ByteBuffer.wrap(family),
+        ByteBuffer.wrap(qualifier),
+        CompareType.EQUAL,
+        ProtobufUtil.toComparator(byteArrayComparable));
+
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(getRegionName(),
+        MutationProto.MutationType.DELETE,
+        delete,
+        condition);
+    try {
+      handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
+      Response result = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
+      if (result.getMutate().getProcessed()) {
+        return true;
+      }
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new IOException(e.toString());
+    }
+    return false;
+  }
+
+
 }
