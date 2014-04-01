@@ -25,7 +25,13 @@ import org.jetlang.channels.Channel;
 import java.util.List;
 
 /**
- * Manager of tablets (aka regions)
+ * Manages the lifecycle of tablets - the individual chunks of tables.  Each tablet is
+ * an ordered portion of the key space, and has a distinct lifecycle.  This module handles
+ * coordination with other modules.
+ * <p>
+ * Roughtly, to bring a tablet online, first a replicator instance must be created for it. Then it
+ * must be bound to the write-ahead-log.  Finally the local tablet files must be located,
+ * verified and loaded.
  */
 @DependsOn(ReplicationModule.class)
 @ModuleTypeBinding(ModuleType.Tablet)
