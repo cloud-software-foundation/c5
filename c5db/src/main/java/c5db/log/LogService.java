@@ -19,11 +19,15 @@ package c5db.log;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.LogModule;
 import c5db.messages.generated.ModuleType;
+import c5db.util.ExceptionHandlingBatchExecutor;
 import com.google.common.util.concurrent.AbstractService;
+import org.jetlang.core.BatchExecutor;
+import org.jetlang.fibers.PoolFiberFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * The Log module.
@@ -33,6 +37,9 @@ public class LogService extends AbstractService implements LogModule {
     private OLog olog;
     private final Map<String, Mooring> moorings = new HashMap<>();
 
+    private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newCachedThreadPool());
+    private final BatchExecutor batchExecutor = new ExceptionHandlingBatchExecutor(this::failModule);
+
     public LogService(C5Server server) {
         this.server = server;
     }
@@ -40,12 +47,12 @@ public class LogService extends AbstractService implements LogModule {
     @Override
     protected void doStart() {
         try {
-            // TODO the log should have it's own dedicated sync threads.
-            this.olog = new OLog(server.getConfigDirectory().baseConfigPath);
+            LogFileManager logFileManager = new LogFileManager(server.getConfigDirectory().baseConfigPath);
+            this.olog = new NioOLog(logFileManager, fiberFactory, batchExecutor);
 
-            // TODO start the flush threads as necessary
-            // TODO log maintenance threads can go here too.
-            notifyStarted();
+          // TODO start the flush threads as necessary
+          // TODO log maintenance threads can go here too.
+          notifyStarted();
         } catch (IOException e) {
             notifyFailed(e);
         }
@@ -54,6 +61,10 @@ public class LogService extends AbstractService implements LogModule {
     @Override
     protected void doStop() {
         notifyStopped();
+    }
+
+    protected void failModule(Throwable throwable) {
+      notifyFailed(throwable);
     }
 
     @Override

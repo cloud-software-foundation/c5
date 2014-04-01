@@ -17,7 +17,6 @@
 
 package c5db.log;
 
-import c5db.generated.Log;
 import c5db.replication.ReplicatorLogAbstraction;
 import c5db.replication.generated.LogEntry;
 import com.google.common.collect.Lists;
@@ -39,18 +38,18 @@ import static org.mockito.Mockito.when;
 public class MooringTest {
   ReplicatorLogAbstraction log;
 
-  private static OLog makeMockAsyncOLog() {
+  private static OLog makeMockLog() {
     // Create a mock OLog, to be used by Mooring, whose logEntry method simulates a logging operation that does
     // not "complete" synchronously. It simulates this by returning an "unset" future.
     OLog mock = mock(OLog.class);
-    when(mock.logEntry(anyListOf(Log.OLogEntry.class), anyString()))
+    when(mock.logEntry(anyListOf(LogEntry.class), anyString()))
         .thenReturn(SettableFuture.create());
     return mock;
   }
 
   @Before
   public final void setUp() {
-    log = new Mooring(makeMockAsyncOLog(), "quorumId");
+    log = new Mooring(makeMockLog(), "quorumId");
   }
 
   @After
