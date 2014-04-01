@@ -55,7 +55,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-/***
+/**
  * A utility class responsible for generating requests to c5.
  */
 public final class RequestConverter {
@@ -75,48 +75,55 @@ public final class RequestConverter {
   public static GetRequest buildGetRequest(final byte[] regionName,
                                            final Get get,
                                            final boolean existenceOnly) throws IOException {
-    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final RegionSpecifier region = buildRegionSpecifier(regionName);
     return new GetRequest(region, ProtobufUtil.toGet(get, existenceOnly));
   }
 
   /**
    * Convert a byte array to a protocol buffer RegionSpecifier.
    *
-   * @param type  the region specifier type
    * @param value the region specifier byte array value
    * @return a protocol buffer RegionSpecifier
    */
-  public static RegionSpecifier buildRegionSpecifier(final RegionSpecifier.RegionSpecifierType type,
-                                                     final byte[] value) {
-    return new RegionSpecifier(type, ByteBuffer.wrap(value));
+  private static RegionSpecifier buildRegionSpecifier(final byte[] value) {
+    return new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(value));
   }
 
   /**
-   * Create a protocol buffer MutateRequest for a put.
+   * Create a protocol buffer MutateRequest.
    *
    * @param regionName The region name to request from
-   * @param delete     The delete to process
+   * @param mutation   The mutation to process
+   * @param type       The type of mutation to process
    * @return a mutate request
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Delete delete) {
-    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    return new MutateRequest(region,
-        ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, delete),
-        new Condition());
+  public static MutateRequest buildMutateRequest(final byte[] regionName,
+                                                 final MutationProto.MutationType type,
+                                                 final Mutation mutation) {
+
+    final RegionSpecifier region = buildRegionSpecifier(regionName);
+    return new MutateRequest(region, ProtobufUtil.toMutation(type, mutation), new Condition());
   }
+
 
   /**
-   * Create a protocol buffer MutateRequest for a put.
+   * Create a protocol buffer MutateRequest with a condition.
    *
-   * @param regionName The region name to create the mutateRequest against
-   * @param put        The client request.
+   * @param regionName The region name to request from
+   * @param mutation   The mutation to process
+   * @param type       The type of mutation to process
+   * @param condition  The optional condition or null
    * @return a mutate request
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName, final Put put) {
-    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
-    return new MutateRequest(region, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
+  public static MutateRequest buildMutateRequest(final byte[] regionName,
+                                                 final MutationProto.MutationType type,
+                                                 final Mutation mutation,
+                                                 final Condition condition) {
+    final RegionSpecifier region = buildRegionSpecifier(regionName);
+    return new MutateRequest(region,
+        ProtobufUtil.toMutation(type, mutation),
+        condition);
   }
-
 
   /**
    * Create a protocol buffer MultiRequest for row mutations.
@@ -131,7 +138,7 @@ public final class RequestConverter {
                                                final boolean atomic,
                                                final RowMutations rowMutations)
       throws IOException {
-    final RegionSpecifier region = buildRegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, regionName);
+    final RegionSpecifier region = buildRegionSpecifier(regionName);
     final List<Action> actions = new ArrayList<>();
     int index = 0;
     for (Mutation mutation : rowMutations.getMutations()) {
