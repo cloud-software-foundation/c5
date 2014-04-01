@@ -51,18 +51,6 @@ public abstract class C5Shim implements TableInterface {
   }
 
   @Override
-  public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put)
-      throws IOException {
-    return false;
-  }
-
-  @Override
-  public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
-      throws IOException {
-    return false;
-  }
-
-  @Override
   public Configuration getConfiguration() {
     return null;
   }

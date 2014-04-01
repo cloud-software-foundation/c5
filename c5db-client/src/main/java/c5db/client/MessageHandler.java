@@ -42,10 +42,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Response> {
     switch (msg.getCommand()) {
       case MUTATE:
         final SettableFuture<Response> f = futures.get(msg.getCommandId());
-        if (!msg.getMutate().getProcessed()) {
-          f.setException(new IOException("Not Processed"));
-        }
-        f.set(null);
+        f.set(msg) ;
         break;
       case SCAN:
         final long scannerId = msg.getScan().getScannerId();
