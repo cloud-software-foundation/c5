@@ -21,7 +21,9 @@ import c5db.messages.generated.ModuleType;
 import org.jetlang.channels.Channel;
 
 /**
- *
+ * The Event log module provides a system-wide service for publishing high value events.
+ * This module then can go on to do whatever it wishes with the data, the first implementations
+ * might broadcast them on UDP to facilitate remote observation and debugging.
  */
 @ModuleTypeBinding(ModuleType.EventLog)
 public interface EventLogModule extends C5Module {

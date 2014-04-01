@@ -29,24 +29,69 @@ import org.jetlang.channels.RequestChannel;
 import java.util.concurrent.ExecutionException;
 
 /**
- * The root interface for all other modules and modules to get around inside the server.
- * <p/>
- * Provides bootstrapping and other module introspection and management utilities.  Ideally we can run multiple
- * C5Server on the same JVM for testing (may be conflicts with the discovery methods).
+ * A C5Server stands in for global resources that modules might need.  It provides global
+ * services, configuration, notification buses and more.
+ * <p>
+ * Right now this interface is a little too kitchen-sinky, and it should probably have
+ * individual responsibilities broken off to make dependencies a bit more clear.
+ * <p>
+ * Note that multiple {@link c5db.interfaces.C5Server} may be in a single JVM, so avoiding
+ * static method calls is of paramount importance.
  */
 public interface C5Server extends Service {
-    /**
-     * ** Interface type public methods *****
-     */
-
+  /**
+   * Every server has a persistent id that is independent of it's (in some cases temporary)
+   * network or host identification.  Normally this would be persisted in a configuration
+   * file, and generated randomly (64 bits is enough for everyone, right?).  There may be
+   * provisions to allow adminstrators to assign node ids.
+   * <p>
+   * @return THE node id for this server.
+   */
     public long getNodeId();
 
     // TODO this could be generified if we used an interface instead of ModuleType
-    public ListenableFuture<C5Module> getModule(ModuleType moduleType);
 
-    public Channel<Message<?>> getCommandChannel();
+  /**
+   * This is primary mechanism via which modules with compile time binding via interfaces
+   * that live in {@link c5db.interfaces} may obtain instances of their dependencies.
+   * <p>
+   * This method returns a future, which implies that the module may not be started yet.
+   * The future will be signalled when the module is started, and callers may just add a
+   * callback and wait.
+   * <p>
+   * In the future when automatic service startup order is working, this method might just
+   * return the type without a future, or may not require much/any waiting.
+   * <p>
+   * Right now modules are specified via an enum, in the future perhaps we should
+   * use a Java interface type?
+   * @param moduleType the specific module type you wish to retrieve
+   * @return a future that will be set when the module is running
+   */
+  public ListenableFuture<C5Module> getModule(ModuleType moduleType);
 
-    public RequestChannel<Message<?>, CommandReply> getCommandRequests();
+  /**
+   * A jetlang channel to submit command objects to the 'system'.
+   * A command is the extensible (and not entirely specified/thought out) mechanism by which
+   * entities (code, RPCs, people via command line interfaces, etc) can start/stop/adjust
+   * modules or other configuration settings, or anything else at a cross-service level.
+   * <p>
+   * The intent is to centralize and standardize all configuration, startup, and other details
+   * on how we manage services, servers and whatnot.  Every single operation should be accessible
+   * via command messages, and those command messages should be able to be conveyed via RPC.
+   * This allows administration-via tooling, and avoids the need to have something like
+   * password-less ssh set up (which not all wish to do).
+   * <p>
+   * @return The jetlang channel to submit command messages
+   */
+  public Channel<Message<?>> getCommandChannel();
+
+  /**
+   * Similar to {@link #getCommandChannel()} except providing a feedback message with information
+   * on the status and success of commands.
+   * <p>
+   * @return The jetlang request channel to submit requests
+   */
+  public RequestChannel<Message<?>, CommandReply> getCommandRequests();
 
     public Channel<ModuleStateChange> getModuleStateChangeChannel();
 
