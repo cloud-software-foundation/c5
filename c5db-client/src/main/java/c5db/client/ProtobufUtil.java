@@ -37,8 +37,10 @@
 package c5db.client;
 
 
+import c5db.client.generated.ByteArrayComparable;
 import c5db.client.generated.Call;
 import c5db.client.generated.Column;
+import c5db.client.generated.Comparator;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
@@ -165,7 +167,7 @@ public class ProtobufUtil {
    * @param filter the Filter to convert
    * @return the converted protocol buffer Filter
    */
-  public static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
+  private static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
     if (filter == null){
       return new c5db.client.generated.Filter();
     }
@@ -177,7 +179,7 @@ public class ProtobufUtil {
    *
    * @param type     The type of mutation to create
    * @param mutation The client Mutation
-   * @return a protobuf'd Mutation
+   * @return a protobuf Mutation
    */
   public static MutationProto toMutation(final MutationProto.MutationType type,
                                          final Mutation mutation) {
@@ -338,5 +340,29 @@ public class ProtobufUtil {
   public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
     return new Call(Call.Command.MULTI, commandId, null, null,  null, multiRequest);
   }
+    /**
+      * Convert a protocol buffer Result to a client Result
+      *
+      * @param proto the protocol buffer Result to convert
+      * @return the converted client Result
+      */
+        public static Result toResultExists(final c5db.client.generated.Result proto) {
+        if (proto == null) {
+            return null;
+          }
+        return Result.create(null, proto.getExists());
+      }
+    /**
+      * Convert a ByteArrayComparable to a protocol buffer Comparator
+      *
+      * @param comparator the ByteArrayComparable to convert
+      * @return the converted protocol buffer Comparator
+      */
+        public static Comparator toComparator(ByteArrayComparable comparator) {
+        return new Comparator(comparator.getClass().getName(), comparator.getValue());
+      }
+
+
 }
+
 
