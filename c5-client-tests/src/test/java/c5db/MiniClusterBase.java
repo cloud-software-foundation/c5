@@ -42,17 +42,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
-  private static int regionServerPort;
   private static final Random rnd = new Random();
+  private static int regionServerPort;
+  private static C5Server server;
 
   public static int getRegionServerPort() {
     return regionServerPort;
-  }
-  private static C5Server server;
-
-  @Before
-  public void resetDatabaseStateBeforeTest() {
-    // TODO please implement me!
   }
 
   @AfterClass
@@ -61,17 +56,17 @@ public class MiniClusterBase {
     ImmutableMap<ModuleType, C5Module> modules = server.getModules();
 
     List<ListenableFuture<Service.State>> states = new ArrayList<>();
-    for (C5Module module: modules.values()){
+    for (C5Module module : modules.values()) {
       ListenableFuture<Service.State> future = module.stop();
       states.add(future);
     }
 
-    for (ListenableFuture<Service.State> state: states){
-     try {
-       state.get(10000, TimeUnit.MILLISECONDS);
-     } catch (Exception e){
-       e.printStackTrace();
-     }
+    for (ListenableFuture<Service.State> state : states) {
+      try {
+        state.get(10000, TimeUnit.MILLISECONDS);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     server.stopAndWait();
@@ -116,5 +111,10 @@ public class MiniClusterBase {
     };
     stateChanges.subscribe(receiver, onMsg);
     latch.await();
+  }
+
+  @Before
+  public void resetDatabaseStateBeforeTest() {
+    // TODO please implement me!
   }
 }

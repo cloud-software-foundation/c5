@@ -16,7 +16,6 @@
  */
 package c5db.replication;
 
-import c5db.C5DB;
 import c5db.C5ServerConstants;
 import c5db.codec.ProtostuffDecoder;
 import c5db.codec.ProtostuffEncoder;
@@ -85,207 +84,165 @@ import java.util.concurrent.atomic.AtomicInteger;
  * TODO consider being symmetric in how we handle sent messages.
  */
 public class ReplicatorService extends AbstractService implements ReplicationModule {
-    private static final Logger LOG = LoggerFactory.getLogger(ReplicatorService.class);
-    private final MemoryChannel<IndexCommitNotice> indexCommitNotices = new MemoryChannel<>();
-    private final MemoryChannel<ReplicatorInstanceEvent> replicatorStateChanges = new MemoryChannel<>();
-    /**************** C5Module informational methods ************************************/
+  private static final Logger LOG = LoggerFactory.getLogger(ReplicatorService.class);
+  private final MemoryChannel<IndexCommitNotice> indexCommitNotices = new MemoryChannel<>();
+  private final MemoryChannel<ReplicatorInstanceEvent> replicatorStateChanges = new MemoryChannel<>();
+  private final int port;
+  private final C5Server server;
+  private final PoolFiberFactory fiberFactory;
+  private final Fiber fiber;
+  private final NioEventLoopGroup bossGroup;
+  private final NioEventLoopGroup workerGroup;
+  private final Map<Long, Channel> connections = new HashMap<>();
+  private final Map<String, ReplicatorInstance> replicatorInstances = new HashMap<>();
+  private final ChannelGroup allChannels;
+  // map of message_id -> Request
+  // TODO we need a way to remove these after a while, because if we fail to get a reply we will be unhappy.
+  private final Map<Long, Request<RpcRequest, RpcWireReply>> outstandingRPCs = new HashMap<>();
+  private final Map<Session, Long> outstandingRPCbySession = new HashMap<>();
+  private final RequestChannel<RpcRequest, RpcWireReply> outgoingRequests = new MemoryRequestChannel<>();
+  private final Persister persister;
+  private ServerBootstrap serverBootstrap;
+  private Bootstrap outgoingBootstrap;
+  // Initalized in the module start, by the time any messages or fiber executions trigger, this should be not-null
+  private DiscoveryModule discoveryModule = null;
+  private LogModule logModule = null;
+  private Channel listenChannel;
+  private long messageIdGen = 1;
 
-    @Override
-    public ModuleType getModuleType() {
-        return ModuleType.Replication;
+  public ReplicatorService(final PoolFiberFactory fiberFactory,
+                           NioEventLoopGroup bossGroup,
+                           NioEventLoopGroup workerGroup,
+                           int port, C5Server server) {
+    this.fiberFactory = fiberFactory;
+    this.bossGroup = bossGroup;
+    this.workerGroup = workerGroup;
+    this.port = port;
+    this.server = server;
+    this.fiber = fiberFactory.create(new ExceptionHandlingBatchExecutor(this::failModule));
+    this.allChannels = new DefaultChannelGroup(workerGroup.next());
+
+    this.persister = new Persister(server.getConfigDirectory());
+  }
+
+  /**
+   * ************* C5Module informational methods ***********************************
+   */
+
+  @Override
+  public ModuleType getModuleType() {
+    return ModuleType.Replication;
+  }
+
+  @Override
+  public boolean hasPort() {
+    return true;
+  }
+
+  @Override
+  public int port() {
+    return this.port;
+  }
+
+  @Override
+  public ListenableFuture<Replicator> createReplicator(final String quorumId,
+                                                       final List<Long> peers) {
+    final SettableFuture<Replicator> future = SettableFuture.create();
+    fiber.execute(() -> {
+      if (replicatorInstances.containsKey(quorumId)) {
+        LOG.debug("Replicator for quorum {} exists already", quorumId);
+        future.set(replicatorInstances.get(quorumId));
+        return;
+      }
+
+      // We need to make sure that it's not coming from another singlemode daemon.
+      if (!peers.contains(server.getNodeId()) && !server.getClusterName().equals(C5ServerConstants.LOCALHOST)) {
+        LOG.error("Creating replicator for {}, peer list didnt contain myself", quorumId, peers);
+        peers.add(server.getNodeId());
+      }
+      LOG.debug("Creating replicator instance for {} peers {}", quorumId, peers);
+      Mooring logMooring = logModule.getMooring(quorumId);
+      MemoryChannel<Throwable> throwableChannel = new MemoryChannel<>();
+      BatchExecutor batchExecutor = new ExceptionHandlingBatchExecutor(throwableChannel::publish);
+      ReplicatorInstance instance =
+          new ReplicatorInstance(fiberFactory.create(batchExecutor),
+              server.getNodeId(),
+              quorumId,
+              peers,
+              logMooring,
+              new Info(),
+              persister,
+              outgoingRequests,
+              replicatorStateChanges,
+              indexCommitNotices
+          );
+      throwableChannel.subscribe(fiber, instance::failReplicatorInstance);
+      replicatorInstances.put(quorumId, instance);
+      future.set(instance);
+    });
+    return future;
+  }
+
+  @Override
+  public org.jetlang.channels.Channel<IndexCommitNotice> getIndexCommitNotices() {
+    return indexCommitNotices;
+  }
+
+  @Override
+  public org.jetlang.channels.Channel<ReplicatorInstanceEvent> getReplicatorEventChannel() {
+    return replicatorStateChanges;
+  }
+
+  @FiberOnly
+  private void handleWireInboundMessage(Channel channel, ReplicationWireMessage msg) {
+    long messageId = msg.getMessageId();
+    if (msg.getReceiverId() != this.server.getNodeId()) {
+      LOG.debug("Got messageId {} for {} but I am {}, ignoring!", messageId, msg.getReceiverId(), server.getNodeId());
+      return;
     }
 
-    @Override
-    public boolean hasPort() {
-        return true;
+    if (msg.getInReply()) {
+      Request<RpcRequest, RpcWireReply> request = outstandingRPCs.get(messageId);
+      if (request == null) {
+        LOG.debug("Got a reply message_id {} which we don't track", messageId);
+        return;
+      }
+
+      outstandingRPCs.remove(messageId);
+      outstandingRPCbySession.remove(request.getSession());
+      request.reply(new RpcWireReply(msg));
+    } else {
+      handleWireRequestMessage(channel, msg);
+    }
+  }
+
+  @FiberOnly
+  private void handleWireRequestMessage(final Channel channel, final ReplicationWireMessage msg) {
+    RpcWireRequest wireRequest = new RpcWireRequest(msg);
+    String quorumId = wireRequest.quorumId;
+
+    ReplicatorInstance replInst = replicatorInstances.get(quorumId);
+    if (replInst == null) {
+      LOG.trace("Instance not found {} for message id {} from {} (normal during region bootstrap)",
+          quorumId,
+          msg.getMessageId(),
+          msg.getSenderId());
+      // TODO send RPC failure to the sender?
+      return;
     }
 
-    @Override
-    public int port() {
-        return this.port;
-    }
+    AsyncRequest.withOneReply(fiber, replInst.getIncomingChannel(), wireRequest, reply -> {
+      if (!channel.isOpen()) {
+        // TODO cant signal comms failure, so just drop on the floor. Is there a better thing to do?
+        return;
+      }
 
-    @Override
-    public ListenableFuture<Replicator> createReplicator(final String quorumId,
-                                                         final List<Long> peers) {
-        final SettableFuture<Replicator> future = SettableFuture.create();
-        fiber.execute(() -> {
-            if (replicatorInstances.containsKey(quorumId)) {
-                LOG.debug("Replicator for quorum {} exists already", quorumId);
-                future.set(replicatorInstances.get(quorumId));
-                return;
-            }
-
-          // We need to make sure that it's not coming from another singlemode daemon.
-            if (!peers.contains(server.getNodeId()) && !server.getClusterName().equals(C5ServerConstants.LOCALHOST)){
-                LOG.error("Creating replicator for {}, peer list didnt contain myself", quorumId, peers);
-                peers.add(server.getNodeId());
-            }
-            LOG.debug("Creating replicator instance for {} peers {}", quorumId, peers);
-            Mooring logMooring = logModule.getMooring(quorumId);
-            MemoryChannel<Throwable> throwableChannel = new MemoryChannel<>();
-            BatchExecutor batchExecutor = new ExceptionHandlingBatchExecutor(throwableChannel::publish);
-            ReplicatorInstance instance =
-                    new ReplicatorInstance(fiberFactory.create(batchExecutor),
-                            server.getNodeId(),
-                            quorumId,
-                            peers,
-                            logMooring,
-                            new Info(),
-                            persister,
-                            outgoingRequests,
-                            replicatorStateChanges,
-                            indexCommitNotices
-                            );
-            throwableChannel.subscribe(fiber, instance::failReplicatorInstance);
-            replicatorInstances.put(quorumId, instance);
-            future.set(instance);
-        });
-        return future;
-    }
-
-    @Override
-    public org.jetlang.channels.Channel<IndexCommitNotice> getIndexCommitNotices() {
-        return indexCommitNotices;
-    }
-
-    @Override
-    public org.jetlang.channels.Channel<ReplicatorInstanceEvent> getReplicatorEventChannel() {
-        return replicatorStateChanges;
-    }
-
-    // TODO this should be actually via whatever configuration system we end up using.
-    private static class Info implements ReplicatorInformationInterface {
-
-        @Override
-        public long currentTimeMillis() {
-            return System.currentTimeMillis();
-        }
-
-        @Override
-        public long electionCheckRate() {
-            return 100;
-        }
-
-        @Override
-        public long electionTimeout() {
-            return 1000;
-        }
-
-        @Override
-        public long groupCommitDelay() {
-            return 100;
-        }
-    }
-
-    private final int port;
-    private final C5Server server;
-    private final PoolFiberFactory fiberFactory;
-    private final Fiber fiber;
-    private final NioEventLoopGroup bossGroup;
-    private final NioEventLoopGroup workerGroup;
-
-    private final Map<Long, Channel> connections = new HashMap<>();
-    private final Map<String, ReplicatorInstance> replicatorInstances = new HashMap<>();
-    private final ChannelGroup allChannels;
-    // map of message_id -> Request
-    // TODO we need a way to remove these after a while, because if we fail to get a reply we will be unhappy.
-    private final Map<Long, Request<RpcRequest, RpcWireReply>> outstandingRPCs = new HashMap<>();
-    private final Map<Session, Long> outstandingRPCbySession = new HashMap<>();
-
-    private final RequestChannel<RpcRequest, RpcWireReply> outgoingRequests = new MemoryRequestChannel<>();
-    private final Persister persister;
-
-    private ServerBootstrap serverBootstrap;
-    private Bootstrap outgoingBootstrap;
-
-    // Initalized in the module start, by the time any messages or fiber executions trigger, this should be not-null
-    private DiscoveryModule discoveryModule = null;
-    private LogModule logModule = null;
-    private Channel listenChannel;
-
-    private long messageIdGen = 1;
-
-    public ReplicatorService(final PoolFiberFactory fiberFactory,
-                             NioEventLoopGroup bossGroup,
-                             NioEventLoopGroup workerGroup,
-                             int port, C5Server server) {
-        this.fiberFactory = fiberFactory;
-        this.bossGroup = bossGroup;
-        this.workerGroup = workerGroup;
-        this.port = port;
-        this.server = server;
-        this.fiber = fiberFactory.create(new ExceptionHandlingBatchExecutor(this::failModule));
-        this.allChannels = new DefaultChannelGroup(workerGroup.next());
-
-        this.persister = new Persister(server.getConfigDirectory());
-    }
-
-    /****************** Handlers for netty/messages from the wire/TCP ************************/
-    @ChannelHandler.Sharable
-    private class MessageHandler extends SimpleChannelInboundHandler<ReplicationWireMessage> {
-        @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            allChannels.add(ctx.channel());
-            super.channelActive(ctx);
-        }
-
-        @Override
-        protected void channelRead0(final ChannelHandlerContext ctx, final ReplicationWireMessage msg) throws Exception {
-            fiber.execute(() -> handleWireInboundMessage(ctx.channel(), msg));
-        }
-    }
-
-    @FiberOnly
-    private void handleWireInboundMessage(Channel channel, ReplicationWireMessage msg) {
-        long messageId = msg.getMessageId();
-        if (msg.getReceiverId() != this.server.getNodeId()) {
-            LOG.debug("Got messageId {} for {} but I am {}, ignoring!", messageId, msg.getReceiverId(), server.getNodeId());
-            return;
-        }
-
-        if (msg.getInReply()) {
-            Request<RpcRequest, RpcWireReply> request = outstandingRPCs.get(messageId);
-            if (request == null) {
-                LOG.debug("Got a reply message_id {} which we don't track", messageId);
-                return;
-            }
-
-            outstandingRPCs.remove(messageId);
-            outstandingRPCbySession.remove(request.getSession());
-            request.reply(new RpcWireReply(msg));
-        } else {
-            handleWireRequestMessage(channel, msg);
-        }
-    }
-
-    @FiberOnly
-    private void handleWireRequestMessage(final Channel channel, final ReplicationWireMessage msg) {
-        RpcWireRequest wireRequest = new RpcWireRequest(msg);
-        String quorumId = wireRequest.quorumId;
-
-        ReplicatorInstance replInst = replicatorInstances.get(quorumId);
-        if (replInst == null) {
-            LOG.trace("Instance not found {} for message id {} from {} (normal during region bootstrap)",
-                    quorumId,
-                    msg.getMessageId(),
-                    msg.getSenderId());
-            // TODO send RPC failure to the sender?
-            return;
-        }
-
-        AsyncRequest.withOneReply(fiber, replInst.getIncomingChannel(), wireRequest, reply -> {
-            if (!channel.isOpen()) {
-                // TODO cant signal comms failure, so just drop on the floor. Is there a better thing to do?
-                return;
-            }
-
-            ReplicationWireMessage b = reply.getWireMessage(
-                    msg.getMessageId(),
-                    server.getNodeId(),
-                    msg.getSenderId(),
-                    true
-            );
+      ReplicationWireMessage b = reply.getWireMessage(
+          msg.getMessageId(),
+          server.getNodeId(),
+          msg.getSenderId(),
+          true
+      );
 //                ReplicationWireMessage.Builder b = reply.getWireMessage();
 //                b.setSenderId(server.getNodeId())
 //                        .setInReply(true)
@@ -293,269 +250,313 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 //                        .setReceiverId(msg.getSenderId())
 //                        .setMessageId(msg.getMessageId());
 
-            channel.writeAndFlush(b);
-        });
+      channel.writeAndFlush(b);
+    });
+  }
+
+  /**
+   * ************* Handlers for Request<> from replicator instances ***********************************
+   */
+  @FiberOnly
+  private void handleCancelledSession(Session session) {
+    Long messageId = outstandingRPCbySession.get(session);
+    outstandingRPCbySession.remove(session);
+    if (messageId == null) {
+      return;
+    }
+    LOG.trace("Removing cancelled RPC, message ID {}", messageId);
+    outstandingRPCs.remove(messageId);
+  }
+
+  @FiberOnly
+  private void handleOutgoingMessage(final Request<RpcRequest, RpcWireReply> message) {
+    final RpcRequest request = message.getRequest();
+    final long to = request.to;
+
+    if (to == server.getNodeId()) {
+      handleLoopBackMessage(message);
+      return;
     }
 
-    /**************** Handlers for Request<> from replicator instances ************************************/
-    @FiberOnly
-    private void handleCancelledSession(Session session) {
-        Long messageId = outstandingRPCbySession.get(session);
-        outstandingRPCbySession.remove(session);
-        if (messageId == null) {
-            return;
-        }
-        LOG.trace("Removing cancelled RPC, message ID {}", messageId);
-        outstandingRPCs.remove(messageId);
+    // check to see if we have a connection:
+    Channel channel = connections.get(to);
+    if (channel != null && channel.isOpen()) {
+      sendMessage0(message, channel);
+      return;
+    } else if (channel != null) {
+      // stale?
+      LOG.debug("Removing stale !isOpen channel from connections.get() for peer {}", to);
+      connections.remove(to);
     }
 
-    @FiberOnly
-    private void handleOutgoingMessage(final Request<RpcRequest, RpcWireReply> message) {
-        final RpcRequest request = message.getRequest();
-        final long to = request.to;
-
-        if (to == server.getNodeId()) {
-            handleLoopBackMessage(message);
-            return;
+    DiscoveryModule.NodeInfoRequest nodeInfoRequest = new DiscoveryModule.NodeInfoRequest(to, ModuleType.Replication);
+    AsyncRequest.withOneReply(fiber, discoveryModule.getNodeInfo(), nodeInfoRequest, new Callback<DiscoveryModule.NodeInfoReply>() {
+      @FiberOnly
+      @Override
+      public void onMessage(DiscoveryModule.NodeInfoReply nodeInfoReply) {
+        if (!nodeInfoReply.found) {
+          LOG.debug("Can't find the info for the peer {}", to);
+          // TODO signal TCP/transport layer failure in a better way
+          //message.reply(null);
+          return;
         }
 
-        // check to see if we have a connection:
+        // what if existing outgoing connection attempt?
         Channel channel = connections.get(to);
         if (channel != null && channel.isOpen()) {
-            sendMessage0(message, channel);
-            return;
+          sendMessage0(message, channel);
+          return;
         } else if (channel != null) {
-            // stale?
-            LOG.debug("Removing stale !isOpen channel from connections.get() for peer {}", to);
-            connections.remove(to);
+          LOG.debug("Removing stale2 !isOpen channel from connections.get() for peer {}", to);
+          connections.remove(to);
         }
 
-        DiscoveryModule.NodeInfoRequest nodeInfoRequest = new DiscoveryModule.NodeInfoRequest(to, ModuleType.Replication);
-        AsyncRequest.withOneReply(fiber, discoveryModule.getNodeInfo(), nodeInfoRequest, new Callback<DiscoveryModule.NodeInfoReply>() {
-            @FiberOnly
-            @Override
-            public void onMessage(DiscoveryModule.NodeInfoReply nodeInfoReply) {
-                if (!nodeInfoReply.found) {
-                    LOG.debug("Can't find the info for the peer {}", to);
-                    // TODO signal TCP/transport layer failure in a better way
-                    //message.reply(null);
-                    return;
-                }
+        // ok so we connect now:
+        ChannelFuture channelFuture = outgoingBootstrap.connect(nodeInfoReply.addresses.get(0), nodeInfoReply.port);
+        LOG.trace("Connecting to peer {} at address {} port {}", to, nodeInfoReply.addresses.get(0), nodeInfoReply.port);
 
-                // what if existing outgoing connection attempt?
-                Channel channel = connections.get(to);
-                if (channel != null && channel.isOpen()) {
-                    sendMessage0(message, channel);
-                    return;
-                } else if (channel != null) {
-                    LOG.debug("Removing stale2 !isOpen channel from connections.get() for peer {}", to);
-                    connections.remove(to);
-                }
-
-                // ok so we connect now:
-                ChannelFuture channelFuture = outgoingBootstrap.connect(nodeInfoReply.addresses.get(0), nodeInfoReply.port);
-                LOG.trace("Connecting to peer {} at address {} port {}", to, nodeInfoReply.addresses.get(0), nodeInfoReply.port);
-
-                // the channel might not be open, so defer the write.
-                connections.put(to, channelFuture.channel());
-                channelFuture.channel().closeFuture().addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        fiber.execute(() -> {
-                            // remove only THIS channel. It might have been removed prior so.
-                            //LOG.debug("Close future fired for {} so we are removing it as a connection", to);
-                            connections.remove(to, future.channel());
-                        });
-                    }
-                });
-
-                // funny hack, if the channel future is already open, we execute immediately!
-                channelFuture.addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
-                            if (future.isSuccess()) {
-                                //LOG.debug("Connected to peer {}, sending message!", to);
-                                sendMessage0(message, future.channel());
-                            }
-                        }
-                    });
-            }
+        // the channel might not be open, so defer the write.
+        connections.put(to, channelFuture.channel());
+        channelFuture.channel().closeFuture().addListener(new ChannelFutureListener() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            fiber.execute(() -> {
+              // remove only THIS channel. It might have been removed prior so.
+              //LOG.debug("Close future fired for {} so we are removing it as a connection", to);
+              connections.remove(to, future.channel());
+            });
+          }
         });
+
+        // funny hack, if the channel future is already open, we execute immediately!
+        channelFuture.addListener(new ChannelFutureListener() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (future.isSuccess()) {
+              //LOG.debug("Connected to peer {}, sending message!", to);
+              sendMessage0(message, future.channel());
+            }
+          }
+        });
+      }
+    });
+  }
+
+  private void sendMessage0(final Request<RpcRequest, RpcWireReply> message, final Channel channel) {
+    fiber.execute(() -> {
+
+      RpcRequest request = message.getRequest();
+      long to = request.to;
+      long messageId = messageIdGen++;
+
+      outstandingRPCs.put(messageId, message);
+      outstandingRPCbySession.put(message.getSession(), messageId);
+
+      LOG.trace("Sending message id {} to {} / {}", messageId, to, request.quorumId);
+
+      ReplicationWireMessage wireMessage = request.getWireMessage(
+          messageId,
+          server.getNodeId(),
+          to,
+          false
+      );
+
+      channel.writeAndFlush(wireMessage);
+    });
+  }
+
+  private void handleLoopBackMessage(final Request<RpcRequest, RpcWireReply> origMessage) {
+    final long toFrom = server.getNodeId(); // I am me.
+    final RpcRequest request = origMessage.getRequest();
+    final String quorumId = request.quorumId;
+
+    // Funny thing we don't have a direct handle on who sent us this message, so we have to do this. Sok though.
+    final ReplicatorInstance repl = replicatorInstances.get(quorumId);
+    if (repl == null) {
+      // rare failure condition, whereby the replicator died AFTER it send messages.
+      return; // ignore the message.
     }
 
-    private void sendMessage0(final Request<RpcRequest, RpcWireReply> message, final Channel channel) {
-        fiber.execute(() -> {
+    final RpcWireRequest newRequest = new RpcWireRequest(toFrom, quorumId, request.message);
+    AsyncRequest.withOneReply(fiber, repl.getIncomingChannel(), newRequest, msg -> {
+      assert msg.message != null;
+      RpcWireReply newReply = new RpcWireReply(toFrom, quorumId, msg.message);
+      origMessage.reply(newReply);
+    });
+  }
 
-            RpcRequest request = message.getRequest();
-            long to = request.to;
-            long messageId = messageIdGen++;
+  /**
+   * ********** Service startup/registration and shutdown/termination **************
+   */
+  @Override
+  protected void doStart() {
+    // must start the fiber up early.
+    fiber.start();
 
-            outstandingRPCs.put(messageId, message);
-            outstandingRPCbySession.put(message.getSession(), messageId);
 
-            LOG.trace("Sending message id {} to {} / {}", messageId, to, request.quorumId);
+    fiber.execute(() -> {
+      // TODO this is a shitty way to do this, more refactoring is necessary.
+      LOG.warn("ReplicatorService now waiting for module dependency on Log & BeaconService");
 
-            ReplicationWireMessage wireMessage = request.getWireMessage(
-                    messageId,
-                    server.getNodeId(),
-                    to,
-                    false
+      ListenableFuture<C5Module> logListen = server.getModule(ModuleType.Log);
+      try {
+        logModule = (LogModule) logListen.get();
+      } catch (InterruptedException | ExecutionException e) {
+        notifyFailed(e);
+      }
+
+      ListenableFuture<C5Module> f = server.getModule(ModuleType.Discovery);
+      Futures.addCallback(f, new FutureCallback<C5Module>() {
+        @Override
+        public void onSuccess(C5Module result) {
+          discoveryModule = (DiscoveryModule) result;
+
+          // finish init:
+          try {
+            ChannelInitializer<SocketChannel> initer = new ChannelInitializer<SocketChannel>() {
+              @Override
+              protected void initChannel(SocketChannel ch) throws Exception {
+                ChannelPipeline p = ch.pipeline();
+                p.addLast("frameDecode", new ProtobufVarint32FrameDecoder());
+                p.addLast("pbufDecode", new ProtostuffDecoder<>(ReplicationWireMessage.getSchema()));
+
+                p.addLast("frameEncode", new ProtobufVarint32LengthFieldPrepender());
+                p.addLast("pbufEncoder", new ProtostuffEncoder<ReplicationWireMessage>());
+
+                p.addLast(new MessageHandler());
+              }
+            };
+
+            serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .option(ChannelOption.SO_BACKLOG, 100)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childHandler(initer);
+            serverBootstrap.bind(port).addListener(new ChannelFutureListener() {
+              @Override
+              public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()) {
+                  listenChannel = future.channel();
+                } else {
+                  LOG.error("Unable to bind! ", future.cause());
+                }
+              }
+            });
+
+            outgoingBootstrap = new Bootstrap();
+            outgoingBootstrap.group(workerGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .handler(initer);
+
+            outgoingRequests.subscribe(fiber, message -> handleOutgoingMessage(message), new Callback<SessionClosed<RpcRequest>>() {
+              @FiberOnly
+              @Override
+              public void onMessage(SessionClosed<RpcRequest> message) {
+                // Clean up cancelled requests.
+                handleCancelledSession(message.getSession());
+              }
+            }
             );
 
-            channel.writeAndFlush(wireMessage);
-        });
-    }
+            replicatorStateChanges.subscribe(fiber, message -> {
+              if (message.eventType == ReplicatorInstanceEvent.EventType.QUORUM_FAILURE) {
+                LOG.error("replicator {} indicates failure, removing. Error {}", message.instance,
+                    message.error);
+                replicatorInstances.remove(message.instance.getQuorumId());
+              } else {
+                LOG.debug("replicator indicates state change {}", message);
+              }
+            });
 
-    private void handleLoopBackMessage(final Request<RpcRequest, RpcWireReply> origMessage) {
-        final long toFrom = server.getNodeId(); // I am me.
-        final RpcRequest request = origMessage.getRequest();
-        final String quorumId = request.quorumId;
-
-        // Funny thing we don't have a direct handle on who sent us this message, so we have to do this. Sok though.
-        final ReplicatorInstance repl = replicatorInstances.get(quorumId);
-        if (repl == null) {
-            // rare failure condition, whereby the replicator died AFTER it send messages.
-            return; // ignore the message.
+            notifyStarted();
+          } catch (Exception e) {
+            notifyFailed(e);
+          }
         }
 
-        final RpcWireRequest newRequest = new RpcWireRequest(toFrom, quorumId, request.message);
-        AsyncRequest.withOneReply(fiber, repl.getIncomingChannel(), newRequest, msg -> {
-            assert msg.message != null;
-            RpcWireReply newReply = new RpcWireReply(toFrom, quorumId, msg.message);
-            origMessage.reply(newReply);
-        });
-    }
-
-
-    /************* Service startup/registration and shutdown/termination ***************/
-    @Override
-    protected void doStart() {
-        // must start the fiber up early.
-        fiber.start();
-
-
-        fiber.execute(() -> {
-            // TODO this is a shitty way to do this, more refactoring is necessary.
-            LOG.warn("ReplicatorService now waiting for module dependency on Log & BeaconService");
-
-            ListenableFuture<C5Module> logListen = server.getModule(ModuleType.Log);
-            try {
-                logModule = (LogModule) logListen.get();
-            } catch (InterruptedException | ExecutionException e) {
-                notifyFailed(e);
-            }
-
-            ListenableFuture<C5Module> f = server.getModule(ModuleType.Discovery);
-            Futures.addCallback(f, new FutureCallback<C5Module>() {
-                @Override
-                public void onSuccess(C5Module result) {
-                    discoveryModule = (DiscoveryModule) result;
-
-                    // finish init:
-                    try {
-                        ChannelInitializer<SocketChannel> initer = new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            protected void initChannel(SocketChannel ch) throws Exception {
-                                ChannelPipeline p = ch.pipeline();
-                                p.addLast("frameDecode", new ProtobufVarint32FrameDecoder());
-                                p.addLast("pbufDecode", new ProtostuffDecoder<>(ReplicationWireMessage.getSchema()));
-
-                                p.addLast("frameEncode", new ProtobufVarint32LengthFieldPrepender());
-                                p.addLast("pbufEncoder", new ProtostuffEncoder<ReplicationWireMessage>());
-
-                                p.addLast(new MessageHandler());
-                            }
-                        };
-
-                        serverBootstrap = new ServerBootstrap();
-                        serverBootstrap.group(bossGroup, workerGroup)
-                                .channel(NioServerSocketChannel.class)
-                                .option(ChannelOption.SO_REUSEADDR, true)
-                                .option(ChannelOption.SO_BACKLOG, 100)
-                                .childOption(ChannelOption.TCP_NODELAY, true)
-                                .childHandler(initer);
-                        serverBootstrap.bind(port).addListener(new ChannelFutureListener() {
-                            @Override
-                            public void operationComplete(ChannelFuture future) throws Exception {
-                                if (future.isSuccess()) {
-                                    listenChannel = future.channel();
-                                } else {
-                                    LOG.error("Unable to bind! ", future.cause());
-                                }
-                            }
-                        });
-
-                        outgoingBootstrap = new Bootstrap();
-                        outgoingBootstrap.group(workerGroup)
-                                .channel(NioSocketChannel.class)
-                                .option(ChannelOption.SO_REUSEADDR, true)
-                                .option(ChannelOption.TCP_NODELAY, true)
-                                .handler(initer);
-
-                        outgoingRequests.subscribe(fiber, message -> handleOutgoingMessage(message), new Callback<SessionClosed<RpcRequest>>() {
-                                    @FiberOnly
-                                    @Override
-                                    public void onMessage(SessionClosed<RpcRequest> message) {
-                                        // Clean up cancelled requests.
-                                        handleCancelledSession(message.getSession());
-                                    }
-                                }
-                        );
-
-                        replicatorStateChanges.subscribe(fiber, message -> {
-                            if (message.eventType == ReplicatorInstanceEvent.EventType.QUORUM_FAILURE) {
-                                LOG.error("replicator {} indicates failure, removing. Error {}", message.instance,
-                                        message.error);
-                                replicatorInstances.remove(message.instance.getQuorumId());
-                            } else {
-                                LOG.debug("replicator indicates state change {}", message);
-                            }
-                        });
-
-                        notifyStarted();
-                    } catch (Exception e) {
-                        notifyFailed(e);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    LOG.error("ReplicatorService unable to retrieve BeaconService!", t);
-                    notifyFailed(t);
-                }
-            }, fiber);
-        });
-    }
-
-    void failModule(Throwable t) {
-      LOG.error("ReplicatorService failure, shutting down all ReplicatorInstances");
-      try {
-        replicatorInstances.values().forEach(ReplicatorInstance::dispose);
-        fiber.dispose();
-        if (listenChannel != null) {
-          listenChannel.close();
+        @Override
+        public void onFailure(Throwable t) {
+          LOG.error("ReplicatorService unable to retrieve BeaconService!", t);
+          notifyFailed(t);
         }
-        allChannels.close();
-      } finally {
-        notifyFailed(t);
+      }, fiber);
+    });
+  }
+
+  void failModule(Throwable t) {
+    LOG.error("ReplicatorService failure, shutting down all ReplicatorInstances");
+    try {
+      replicatorInstances.values().forEach(ReplicatorInstance::dispose);
+      fiber.dispose();
+      if (listenChannel != null) {
+        listenChannel.close();
       }
+      allChannels.close();
+    } finally {
+      notifyFailed(t);
+    }
+  }
+
+  @Override
+  protected void doStop() {
+    fiber.execute(() -> {
+      final AtomicInteger countDown = new AtomicInteger(1);
+      GenericFutureListener<? extends Future<? super Void>> listener = future -> {
+        if (countDown.decrementAndGet() == 0)
+          notifyStopped();
+
+      };
+      if (listenChannel != null) {
+        countDown.incrementAndGet();
+        listenChannel.close().addListener(listener);
+      }
+
+      allChannels.close().addListener(listener);
+    });
+  }
+
+  // TODO this should be actually via whatever configuration system we end up using.
+  private static class Info implements ReplicatorInformationInterface {
+
+    @Override
+    public long currentTimeMillis() {
+      return System.currentTimeMillis();
     }
 
     @Override
-    protected void doStop() {
-        fiber.execute(() -> {
-            final AtomicInteger countDown = new AtomicInteger(1);
-            GenericFutureListener<? extends Future<? super Void>> listener = future -> {
-                if (countDown.decrementAndGet() == 0)
-                    notifyStopped();
-
-            };
-            if (listenChannel != null) {
-                countDown.incrementAndGet();
-                listenChannel.close().addListener(listener);
-            }
-
-            allChannels.close().addListener(listener);
-        });
+    public long electionCheckRate() {
+      return 100;
     }
+
+    @Override
+    public long electionTimeout() {
+      return 1000;
+    }
+
+    @Override
+    public long groupCommitDelay() {
+      return 100;
+    }
+  }
+
+  /**
+   * *************** Handlers for netty/messages from the wire/TCP ***********************
+   */
+  @ChannelHandler.Sharable
+  private class MessageHandler extends SimpleChannelInboundHandler<ReplicationWireMessage> {
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+      allChannels.add(ctx.channel());
+      super.channelActive(ctx);
+    }
+
+    @Override
+    protected void channelRead0(final ChannelHandlerContext ctx, final ReplicationWireMessage msg) throws Exception {
+      fiber.execute(() -> handleWireInboundMessage(ctx.channel(), msg));
+    }
+  }
 }
