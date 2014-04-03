@@ -54,7 +54,6 @@
                     <protoModules>
                         <protoModule>
                             <source>src/main/resources/</source>
-                            <outputDir>src/main/java</outputDir>
                             <output>java_bean_primitives</output>
                             <encoding>UTF-8</encoding>
                             <options>
