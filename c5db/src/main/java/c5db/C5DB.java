@@ -83,7 +83,7 @@ public class C5DB extends AbstractService implements C5Server {
 
         String cfgPath = "/tmp/" + username + "/c5-" + Long.toString(nodeId);
 
-        // use system properties for other config so we dont end up writing a whole command line
+        // use system properties for other config so we don't end up writing a whole command line
         // parse framework.
         String reqCfgPath = System.getProperty("c5.cfgPath");
         if (reqCfgPath != null) {
@@ -363,7 +363,7 @@ public class C5DB extends AbstractService implements C5Server {
     @FiberOnly
     private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
         if (moduleRegistry.containsKey(moduleType)) {
-            // already running, dont start twice?
+            // already running, don't start twice?
             LOG.warn("Module {} already running", moduleType);
             throw new Exception("Cant start, running, module: " + moduleType);
         }
@@ -464,9 +464,7 @@ public class C5DB extends AbstractService implements C5Server {
                 }
             });
 
-            commandRequests.subscribe(serverFiber, request -> {
-                processCommandRequest(request);
-            });
+            commandRequests.subscribe(serverFiber, this::processCommandRequest);
 
             serverFiber.start();
 
