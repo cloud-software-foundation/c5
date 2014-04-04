@@ -256,8 +256,8 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
   @Override
-  public String getClusterName() {
-    return this.clusterName;
+  public boolean isSingleNodeMode() {
+    return this.clusterName.equals(C5ServerConstants.LOCALHOST);
   }
 
   @Override
