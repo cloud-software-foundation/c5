@@ -16,166 +16,39 @@
  */
 package c5db;
 
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Created by ryan on 3/25/14.
  */
-public class ConfigDirectory {
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigDirectory.class);
+public interface ConfigDirectory {
+  String nodeIdFile = "nodeId";
+  String clusterNameFile = "clusterName";
+  String quorumsSubDir = "repl";
+  String peerIdsFile = "peerIds";
+  String regionInfoFile = "region-info";
+  String persisterFile = "replication-data";
 
-    public final static String nodeIdFile = "nodeId";
-    public final static String clusterNameFile = "clusterName";
+  /** Get the contents of the node id config file */
+  String getNodeId() throws IOException;
 
-    public final static String quorumsSubDir = "repl";
-    public final static String peerIdsFile = "peerIds";
-    public final static String regionInfoFile = "region-info";
-    public final static String persisterFile = "replication-data";
+  String getClusterName() throws IOException;
 
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+  void createSubDir(Path dirRelPath) throws IOException;
 
-    public final Path baseConfigPath;
-    public final Path nodeIdPath;
-    public final Path clusterNamePath;
+  void writeFile(Path dirRelPath, String fileName, List<String> data) throws IOException;
 
+  List<String> readFile(Path dirRelPath, String fileName) throws IOException;
 
-    public ConfigDirectory(Path baseConfigPath) throws Exception {
-        this.baseConfigPath = baseConfigPath;
-        this.nodeIdPath = baseConfigPath.resolve(nodeIdFile);
-        this.clusterNamePath = baseConfigPath.resolve(clusterNameFile);
+  void setNodeIdFile(String data) throws IOException;
 
-        init();
-    }
+  void setClusterNameFile(String data) throws IOException;
 
-    /**
-     * Verifies that the 'config directory' is actually usable.  If it doesn't exist, create it.  If it exists,
-     * ensure that it's writable.  Ensure that primary configuration files aren't directories.
-     *
-     * @throws Exception
-     */
-    private void init() throws Exception {
+  Path getQuorumRelPath(String quorumId);
 
+  void writePeersToFile(String quorumId, List<Long> peers) throws IOException;
 
-        if (Files.exists(baseConfigPath) && !Files.isDirectory(baseConfigPath)) {
-            throw new Exception("Base config path exists and is not a directory " + baseConfigPath);
-        }
-
-        if (!Files.exists(baseConfigPath)) {
-            Files.createDirectories(baseConfigPath);
-        }
-
-
-        if (Files.exists(nodeIdPath) && !Files.isRegularFile(nodeIdPath)) {
-            throw new Exception("NodeId file is not a regular directory!");
-        }
-
-        if (Files.exists(clusterNamePath) && !Files.isRegularFile(clusterNamePath)) {
-            throw new Exception("Cluster name is not a regular directory!");
-        }
-
-        if (!Files.isWritable(baseConfigPath)) {
-            throw new Exception("Can't write to the base configuration path!");
-        }
-    }
-
-    /** Get the contents of the node id config file */
-    public String getNodeId() throws IOException {
-        return getFirstLineOfFile(nodeIdPath);
-    }
-
-    public String getClusterName() throws IOException {
-        return getFirstLineOfFile(clusterNamePath);
-    }
-
-    public void createSubDir(Path dirRelPath) throws IOException {
-      if (dirRelPath.isAbsolute()) {
-        throw new IllegalArgumentException("dirRelPath should a relative path with respect to the base config directory");
-      }
-      Path dirPath = this.baseConfigPath.resolve(dirRelPath);
-      if (Files.isRegularFile(dirPath)) {
-        throw new IOException("dirPath is a regular file! It needs to be a directory: " + dirPath);
-      }
-      // not a regular file.
-      if (Files.isDirectory(dirPath) && !Files.isWritable(dirPath)) {
-        throw new IOException("dirPath is a directory but not writable by me: " + dirPath);
-      }
-
-      if (Files.isDirectory(dirPath)) {
-        return;
-      }
-      Files.createDirectories(dirPath);
-    }
-
-    public void writeFile(Path dirRelPath, String fileName, List<String> data) throws IOException {
-      createSubDir(dirRelPath);
-      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
-      Files.write(filePath, data, UTF_8);
-    }
-
-    public List<String> readFile(Path dirRelPath, String fileName) throws IOException {
-      Path filePath = baseConfigPath.resolve(dirRelPath).resolve(fileName);
-      try {
-        return Files.readAllLines(filePath, UTF_8);
-      } catch (NoSuchFileException ex) {
-        // file doesnt exist, return empty:
-        return new ArrayList<>();
-      }
-    }
-
-    private String getFirstLineOfFile(Path path) throws IOException {
-        if (Files.isRegularFile(path)) {
-            List<String> allLines;
-
-            try {
-                allLines = Files.readAllLines(path, UTF_8);
-            } catch (NoSuchFileException ex) {
-                return null;
-            }
-            if (allLines.isEmpty())
-                return null;
-            return allLines.get(0);
-        }
-        return null;
-    }
-
-    public void setNodeIdFile(String data) throws IOException {
-        setFile(data, nodeIdPath);
-    }
-    public void setClusterNameFile(String data) throws IOException {
-        setFile(data, clusterNamePath);
-    }
-
-    private void setFile(String data, Path path) throws IOException {
-        List<String> lines = new ArrayList<>(1);
-        lines.add(data);
-        Files.write(path, lines, UTF_8);
-    }
-
-    public Path getQuorumRelPath(String quorumId) {
-      return Paths.get(quorumsSubDir, quorumId);
-    }
-
-    public void writePeersToFile(String quorumId, List<Long> peers) throws IOException {
-      //noinspection Convert2MethodRef
-      List<String> peerIdsStrings = Lists.transform(peers, (p) -> p.toString());
-      writeFile(getQuorumRelPath(quorumId), peerIdsFile, peerIdsStrings);
-    }
-
-    public void writeBinaryData(String quorumId, byte[] data) throws IOException {
-      Path quorumRelPath = getQuorumRelPath(quorumId);
-      createSubDir(quorumRelPath);
-      Path filePath = baseConfigPath.resolve(quorumRelPath).resolve(regionInfoFile);
-      Files.write(filePath, data);
-    }
+  void writeBinaryData(String quorumId, byte[] data) throws IOException;
 }
