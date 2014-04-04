@@ -17,7 +17,7 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
-import c5db.ConfigDirectory;
+import c5db.NioFileConfigDirectory;
 import c5db.generated.Log;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -39,13 +39,11 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.core.Callback;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -80,6 +78,8 @@ public class TabletService extends AbstractService implements TabletModule {
     private ReplicationModule replicationModule = null;
     private DiscoveryModule discoveryModule = null;
     private final Configuration conf;
+    private boolean rootStarted = false;
+
 
     public TabletService(PoolFiberFactory fiberFactory, C5Server server) {
         this.fiberFactory = fiberFactory;
@@ -128,20 +128,25 @@ public class TabletService extends AbstractService implements TabletModule {
                             @Override
                             public void run() {
                                 try {
-                                    Path path = server.getConfigDirectory().baseConfigPath;
+                                    Path path = server.getConfigDirectory().getBaseConfigPath();
 
 
-                                    RegistryFile registryFile = new RegistryFile(path);
+//                                    RegistryFile registryFile = new RegistryFile(path);
 
-                                    int startCount = startRegions(registryFile);
+//                                    int startCount = startRegions(registryFile);
 
                                     // if no regions were started, we need to bootstrap once we have
                                     // enough online regions.
-                                    if (startCount == 0) {
-                                        startBootstrap(registryFile);
-                                    }
+//                                    if (startCount == 0) {
 
-                                    logReplay(path);
+
+// TODO start ROOT region instead of boot-strapping root region.
+                                    startBootstrap();
+
+
+//                                    }
+
+//                                    logReplay(path);
 
                                     notifyStarted();
                                 } catch (Exception e) {
@@ -165,13 +170,14 @@ public class TabletService extends AbstractService implements TabletModule {
 
 
     @FiberOnly
-    private void startBootstrap(final RegistryFile registryFile) throws IOException {
+    private void startBootstrap() throws IOException {
         LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
 
         final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
             @Override
+            @FiberOnly
             public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
-                maybeStartBootstrap(registryFile, result);
+                maybeStartBootstrap(result);
             }
 
             @Override
@@ -180,49 +186,65 @@ public class TabletService extends AbstractService implements TabletModule {
             }
         };
 
-        newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, new Callback<DiscoveryModule.NewNodeVisible>() {
-            @Override
-            public void onMessage(DiscoveryModule.NewNodeVisible message) {
-                ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
-                Futures.addCallback(f, callback, fiber);
-            }
+        newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, message -> {
+            ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+            Futures.addCallback(f, callback, fiber);
         });
 
         ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
         Futures.addCallback(f, callback, fiber);
     }
 
-    private void maybeStartBootstrap(RegistryFile registryFile, ImmutableMap<Long, DiscoveryModule.NodeInfo> nodes) {
+    @FiberOnly
+    private void maybeStartBootstrap(ImmutableMap<Long, DiscoveryModule.NodeInfo> nodes) {
         List<Long> peers = new ArrayList<>(nodes.keySet());
 
         LOG.debug("Found a bunch of peers: {}", peers);
         if (peers.size() < getMinQuorumSize())
             return;
 
-        // bootstrap the frickin thing.
-        LOG.debug("Bootstrapping empty region");
-        // simple bootstrap, only bootstrap my own ID:
-        byte[] startKey = {0};
-        byte[] endKey = {};
-        TableName tableName = TableName.valueOf("tableName");
-        HRegionInfo hRegionInfo = new HRegionInfo(tableName,
-                startKey, endKey, false, 0);
-        HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-        tableDescriptor.addFamily(new HColumnDescriptor("cf"));
+        if (rootStarted) return;
+        rootStarted = true;
+        bootstrapRoot(ImmutableList.copyOf(peers));
 
-        try {
-            registryFile.addEntry(hRegionInfo, new HColumnDescriptor("cf"), peers);
-        } catch (IOException e) {
-            LOG.error("Cant append to registryFile, not bootstrapping!!!", e);
-            return;
-        }
-
-        openRegion0(hRegionInfo, tableDescriptor, ImmutableList.copyOf(peers));
+//        // bootstrap the frickin thing.
+//        LOG.debug("Bootstrapping empty region");
+//        // simple bootstrap, only bootstrap my own ID:
+//        byte[] startKey = {0};
+//        byte[] endKey = {};
+//        TableName tableName = TableName.valueOf("tableName");
+//        HRegionInfo hRegionInfo = new HRegionInfo(tableName,
+//                startKey, endKey, false, 0);
+//        HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
+//        tableDescriptor.addFamily(new HColumnDescriptor("cf"));
+//
+//        try {
+//            registryFile.addEntry(hRegionInfo, new HColumnDescriptor("cf"), peers);
+//        } catch (IOException e) {
+//            LOG.error("Cant append to registryFile, not bootstrapping!!!", e);
+//            return;
+//        }
+//
+//        openRegion0(hRegionInfo, tableDescriptor, ImmutableList.copyOf(peers));
 
         if (newNodeWatcher != null) {
             newNodeWatcher.dispose();
             newNodeWatcher = null;
         }
+    }
+
+    // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
+    // how to bootstrap?
+    private void bootstrapRoot(List<Long> peers) {
+        HTableDescriptor rootDesc = HTableDescriptor.ROOT_TABLEDESC;
+        HRegionInfo rootRegion = new HRegionInfo(
+                rootDesc.getTableName(), new byte[]{0}, new byte[]{}, false, 1);
+
+        // ok we have enough to start a region up now:
+
+        openRegion0(rootRegion,
+                rootDesc,
+                ImmutableList.copyOf(peers));
     }
 
 
@@ -252,12 +274,13 @@ public class TabletService extends AbstractService implements TabletModule {
         LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
         String quorumId = regionInfo.getRegionNameAsString();
-        ConfigDirectory serverConfigDir = server.getConfigDirectory();
+        NioFileConfigDirectory serverConfigDir = server.getConfigDirectory();
 
         ListenableFuture<ReplicationModule.Replicator> future =
                 replicationModule.createReplicator(quorumId, peers);
         Futures.addCallback(future, new FutureCallback<ReplicationModule.Replicator>() {
             @Override
+            @FiberOnly
             public void onSuccess(ReplicationModule.Replicator result) {
                 try {
                     // TODO subscribe to the replicator's broadcasts.
@@ -267,7 +290,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
                     // default place for a region is....
                     // tableName/encodedName.
-                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.baseConfigPath.toString()),
+                    HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.getBaseConfigPath().toString()),
                             regionInfo,
                             tableDescriptor,
                             shim,
@@ -279,17 +302,17 @@ public class TabletService extends AbstractService implements TabletModule {
                     serverConfigDir.writeBinaryData(quorumId, regionInfo.toDelimitedByteArray());
                     serverConfigDir.writePeersToFile(quorumId, peers);
                     LOG.debug("Moving region to opened status: {}", regionInfo);
-                    getTabletStateChanges().publish(new TabletStateChange(regionInfo,
-                            region,
-                            1, null));
+//                    getTabletStateChanges().publish(new TabletStateChange(regionInfo,
+//                            region,
+//                            1, null));
 
                 } catch (IOException e) {
                     LOG.error("Error opening OLogShim for {}, err: {}", regionInfo, e);
-                    getTabletStateChanges().publish(new TabletStateChange(
-                            regionInfo,
-                            null,
-                            0,
-                            e));
+//                    getTabletStateChanges().publish(new TabletStateChange(
+//                            regionInfo,
+//                            null,
+//                            0,
+//                            e));
                 }
             }
 
@@ -297,11 +320,11 @@ public class TabletService extends AbstractService implements TabletModule {
             public void onFailure(Throwable t) {
                 LOG.error("Unable to open replicator instance for region {}, err: {}",
                         regionInfo, t);
-                getTabletStateChanges().publish(new TabletStateChange(
-                        regionInfo,
-                        null,
-                        0,
-                        t));
+//                getTabletStateChanges().publish(new TabletStateChange(
+//                        regionInfo,
+//                        null,
+//                        0,
+//                        t));
             }
         }, fiber);
     }
