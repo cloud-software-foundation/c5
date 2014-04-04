@@ -393,7 +393,7 @@ public class TabletService extends AbstractService implements TabletModule {
     }
 
   public int getMinQuorumSize() {
-    if (server.getClusterName().equals(C5ServerConstants.LOCALHOST)) {
+    if (server.isSingleNodeMode()) {
       return 1;
     } else {
       return 3;
