@@ -145,7 +145,8 @@ public class RegionServerService extends AbstractService implements RegionServer
   }
 
   public HRegion getOnlineRegion(String regionName) {
-    // TODO note that regionName is just a placeholder, the following call only returns a single tablet every time.
+    // TODO REMOVE ME!
+
     return tabletModule.getTablet(regionName);
   }
 }
