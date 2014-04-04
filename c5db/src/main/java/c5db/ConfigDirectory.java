@@ -31,7 +31,9 @@ public interface ConfigDirectory {
   String regionInfoFile = "region-info";
   String persisterFile = "replication-data";
 
-  /** Get the contents of the node id config file */
+  /**
+   * Get the contents of the node id config file
+   */
   String getNodeId() throws IOException;
 
   String getClusterName() throws IOException;
