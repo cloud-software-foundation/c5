@@ -51,7 +51,7 @@ public class HRegionBridge implements Region {
   }
 
 
-  final HRegion theRegion;
+  private final HRegion theRegion;
 
   public HRegionBridge(final HRegion theRegion) {
     this.theRegion = theRegion;
