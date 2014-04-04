@@ -37,9 +37,9 @@ public class NioFileConfigDirectory implements ConfigDirectory {
 
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  final Path baseConfigPath;
-  public final Path nodeIdPath;
-  public final Path clusterNamePath;
+  private final Path baseConfigPath;
+  private final Path nodeIdPath;
+  private final Path clusterNamePath;
 
   public NioFileConfigDirectory(Path baseConfigPath) throws Exception {
     this.baseConfigPath = baseConfigPath;
@@ -122,7 +122,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
     try {
       return Files.readAllLines(filePath, UTF_8);
     } catch (NoSuchFileException ex) {
-      // file doesnt exist, return empty:
+      // file doesn't exist, return empty:
       return new ArrayList<>();
     }
   }
