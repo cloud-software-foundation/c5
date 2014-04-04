@@ -73,9 +73,8 @@ public interface TabletModule extends C5Module {
 
       if (optError != null ? !optError.equals(that.optError) : that.optError != null) return false;
       if (state != that.state) return false;
-      if (!tablet.equals(that.tablet)) return false;
+      return tablet.equals(that.tablet);
 
-      return true;
     }
 
     @Override
