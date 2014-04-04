@@ -49,6 +49,7 @@ public class MiniClusterBase {
   public static int getRegionServerPort() throws InterruptedException {
     return regionServerPort;
   }
+
   static C5Server server;
 
   @Before
@@ -62,17 +63,17 @@ public class MiniClusterBase {
     ImmutableMap<ModuleType, C5Module> modules = server.getModules();
 
     List<ListenableFuture<Service.State>> states = new ArrayList<>();
-    for (C5Module module: modules.values()){
+    for (C5Module module : modules.values()) {
       ListenableFuture<Service.State> future = module.stop();
       states.add(future);
     }
 
-    for (ListenableFuture<Service.State> state: states){
-     try {
-       state.get(10000, TimeUnit.MILLISECONDS);
-     } catch (Exception e){
-       e.printStackTrace();
-     }
+    for (ListenableFuture<Service.State> state : states) {
+      try {
+        state.get(10000, TimeUnit.MILLISECONDS);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     server.stopAndWait();
