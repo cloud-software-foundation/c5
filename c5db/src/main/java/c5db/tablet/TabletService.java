@@ -70,7 +70,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
-  public static final int INITIALIZATION_TIME = 1000;
+  private static final int INITIALIZATION_TIME = 1000;
 
   private final PoolFiberFactory fiberFactory;
     private final Fiber fiber;
@@ -118,70 +118,64 @@ public class TabletService extends AbstractService implements TabletModule {
     protected void doStart() {
         fiber.start();
 
-        fiber.execute(new Runnable() {
-            @Override
-            public void run() {
+        fiber.execute(() -> {
 
-                ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
-                try {
-                    discoveryModule = (DiscoveryModule) discoveryService.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    notifyFailed(e);
-                    return;
-                }
+            ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
+            try {
+                discoveryModule = (DiscoveryModule) discoveryService.get();
+            } catch (InterruptedException | ExecutionException e) {
+                notifyFailed(e);
+                return;
+            }
 
-                ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
-                Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
-                    @Override
-                    public void onSuccess(C5Module result) {
-                        replicationModule = (ReplicationModule) result;
-                        fiber.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Path path = server.getConfigDirectory().getBaseConfigPath();
+            ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
+            Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
+                @Override
+                public void onSuccess(C5Module result) {
+                    replicationModule = (ReplicationModule) result;
+                    fiber.execute(() -> {
+                        try {
+                            Path path = server.getConfigDirectory().getBaseConfigPath();
 
 
 //                                    RegistryFile registryFile = new RegistryFile(path);
 
 //                                    int startCount = startRegions(registryFile);
 
-                                    // if no regions were started, we need to bootstrap once we have
-                                    // enough online regions.
+                            // if no regions were started, we need to bootstrap once we have
+                            // enough online regions.
 //                                    if (startCount == 0) {
 
 
 // TODO start ROOT region instead of boot-strapping root region.
-                                    startBootstrap();
+                            startBootstrap();
 
 
 //                                    }
 
 //                                    logReplay(path);
 
-                                    notifyStarted();
-                                } catch (Exception e) {
-                                    notifyFailed(e);
-                                }
-                            }
-                        });
-                    }
+                            notifyStarted();
+                        } catch (Exception e) {
+                            notifyFailed(e);
+                        }
+                    });
+                }
 
-                    @Override
-                    public void onFailure(Throwable t) {
-                        notifyFailed(t);
-                    }
-                }, fiber);
-            }
+                @Override
+                public void onFailure(Throwable t) {
+                    notifyFailed(t);
+                }
+            }, fiber);
         });
 
     }
 
-    Disposable newNodeWatcher = null;
+    private Disposable newNodeWatcher = null;
 
 
     @FiberOnly
-    private void startBootstrap() throws IOException {
+    private void startBootstrap() {
         LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
 
         final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
@@ -382,7 +376,7 @@ public class TabletService extends AbstractService implements TabletModule {
             r.waitForFlushesAndCompactions();
         }
 
-        //TODO WE SHOULDN"T BE ONLINE TIL THIS HAPPENS
+        //TODO WE SHOULDN'T BE ONLINE TIL THIS HAPPENS
     }
 
     private void processLogFile(FileInputStream rif) throws IOException {
