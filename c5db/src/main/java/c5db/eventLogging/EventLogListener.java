@@ -38,68 +38,69 @@ import org.slf4j.LoggerFactory;
  * Created by ryan on 1/30/14.
  */
 public class EventLogListener extends AbstractService {
-    private static final Logger LOG = LoggerFactory.getLogger(EventLogListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EventLogListener.class);
 
-    private final int port;
-    private final NioEventLoopGroup nioEventLoopGroup;
+  private final int port;
+  private final NioEventLoopGroup nioEventLoopGroup;
 
-    private Channel channel;
+  private Channel channel;
 
-    public EventLogListener(int port, NioEventLoopGroup nioEventLoopGroup) {
-        this.port = port;
-        this.nioEventLoopGroup = nioEventLoopGroup;
-    }
+  public EventLogListener(int port, NioEventLoopGroup nioEventLoopGroup) {
+    this.port = port;
+    this.nioEventLoopGroup = nioEventLoopGroup;
+  }
 
-    private class MsgHandler extends SimpleChannelInboundHandler<EventLogEntry> {
-
-        @Override
-        protected void channelRead0(ChannelHandlerContext ctx, EventLogEntry msg) throws Exception {
-            LOG.info("Event: {}", msg);
-        }
-    }
-    @Override
-    protected void doStart() {
-        nioEventLoopGroup.next().execute(() -> {
-
-            Bootstrap bootstrap = new Bootstrap();
-            try {
-                bootstrap.group(nioEventLoopGroup)
-                        .channel(NioDatagramChannel.class)
-                        .option(ChannelOption.SO_BROADCAST, true)
-                        .option(ChannelOption.SO_REUSEADDR, true)
-                        .handler(new ChannelInitializer<DatagramChannel>() {
-                            @Override
-                            protected void initChannel(DatagramChannel ch) throws Exception {
-                                ChannelPipeline p = ch.pipeline();
-                                p.addLast("protostuffDecoder",
-                                        new UdpProtostuffDecoder<>(EventLogEntry.getSchema(), false));
-                                p.addLast("logger",
-                                        new MsgHandler());
-                            }
-                        });
-
-                bootstrap.bind(port).addListener(new GenericFutureListener<ChannelFuture>() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        channel = future.channel();
-                    }
-                });
-
-
-                notifyStarted();
-            } catch (Throwable t) {
-                notifyFailed(t);
-            }
-        });
-    }
+  private class MsgHandler extends SimpleChannelInboundHandler<EventLogEntry> {
 
     @Override
-    protected void doStop() {
-            nioEventLoopGroup.next().execute(() -> {
-                if (channel != null)
-                    channel.close();
+    protected void channelRead0(ChannelHandlerContext ctx, EventLogEntry msg) throws Exception {
+      LOG.info("Event: {}", msg);
+    }
+  }
 
-                notifyStopped();
+  @Override
+  protected void doStart() {
+    nioEventLoopGroup.next().execute(() -> {
+
+      Bootstrap bootstrap = new Bootstrap();
+      try {
+        bootstrap.group(nioEventLoopGroup)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_BROADCAST, true)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .handler(new ChannelInitializer<DatagramChannel>() {
+              @Override
+              protected void initChannel(DatagramChannel ch) throws Exception {
+                ChannelPipeline p = ch.pipeline();
+                p.addLast("protostuffDecoder",
+                    new UdpProtostuffDecoder<>(EventLogEntry.getSchema(), false));
+                p.addLast("logger",
+                    new MsgHandler());
+              }
             });
-    }
+
+        bootstrap.bind(port).addListener(new GenericFutureListener<ChannelFuture>() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            channel = future.channel();
+          }
+        });
+
+
+        notifyStarted();
+      } catch (Throwable t) {
+        notifyFailed(t);
+      }
+    });
+  }
+
+  @Override
+  protected void doStop() {
+    nioEventLoopGroup.next().execute(() -> {
+      if (channel != null)
+        channel.close();
+
+      notifyStopped();
+    });
+  }
 }

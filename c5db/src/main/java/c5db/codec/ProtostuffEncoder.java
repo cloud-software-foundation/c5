@@ -32,20 +32,20 @@ import java.util.List;
  * The replication library uses this class to decode replication messages over the wire.
  */
 public class ProtostuffEncoder<T extends Message<T>> extends MessageToMessageEncoder<Message<T>> {
-    @Override
-    protected void encode(ChannelHandlerContext ctx, Message<T> msg, List<Object> out) throws Exception {
-        Schema<T> schema = msg.cachedSchema();
+  @Override
+  protected void encode(ChannelHandlerContext ctx, Message<T> msg, List<Object> out) throws Exception {
+    Schema<T> schema = msg.cachedSchema();
 
-        LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
-        schema.writeTo(lcpo, (T) msg);
+    LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
+    schema.writeTo(lcpo, (T) msg);
 
-        List<ByteBuffer> buffers = lcpo.buffer.finish();
+    List<ByteBuffer> buffers = lcpo.buffer.finish();
 
-        long size = lcpo.buffer.size();
-        if (size > Integer.MAX_VALUE) {
-            throw new EncoderException("Serialized form was too large, actual size: " + size);
-        }
-
-        out.add(Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[]{})));
+    long size = lcpo.buffer.size();
+    if (size > Integer.MAX_VALUE) {
+      throw new EncoderException("Serialized form was too large, actual size: " + size);
     }
+
+    out.add(Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[]{})));
+  }
 }

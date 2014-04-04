@@ -78,7 +78,9 @@ public class NioFileConfigDirectory implements ConfigDirectory {
     }
   }
 
-  /** Get the contents of the node id config file */
+  /**
+   * Get the contents of the node id config file
+   */
   @Override
   public String getNodeId() throws IOException {
     return getFirstLineOfFile(nodeIdPath);
@@ -147,6 +149,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
   public void setNodeIdFile(String data) throws IOException {
     setFile(data, nodeIdPath);
   }
+
   @Override
   public void setClusterNameFile(String data) throws IOException {
     setFile(data, clusterNamePath);

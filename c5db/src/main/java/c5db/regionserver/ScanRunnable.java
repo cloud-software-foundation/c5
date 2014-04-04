@@ -90,7 +90,7 @@ public class ScanRunnable implements Callback<Integer> {
           // If we are not the first one and we are a different row than the previous
           cells.add(ReverseProtobufUtil.toCell(cell));
 
-        if (!(previousRow == null ||  previousRow.compareTo(cellBufferRow) == 0 )) {
+          if (!(previousRow == null || previousRow.compareTo(cellBufferRow) == 0)) {
             cellsPerResult.add(cells.size());
             scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
             cells = new ArrayList<>();

@@ -26,14 +26,14 @@ import java.nio.file.Path;
 
 /**
  * Our interface to a region.
- *
+ * <p>
  * While seemingly silly, this provides us a test hook for TDD.
  */
 public interface Region {
   /**
    * Creates instances of Region.  This exists to make mocking and testing
    * easier.
-   *
+   * <p>
    * Mock out the creator interface - then create/return mock region interfaces.
    */
   public interface Creator {

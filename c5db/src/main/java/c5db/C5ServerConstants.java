@@ -21,7 +21,7 @@ public class C5ServerConstants {
   public static final String LOG_NAME = "log";
   public static final String WAL_DIR = "wal";
   public static final String ARCHIVE_DIR = "old_wal";
-  public static final int  MAX_CALL_SIZE = Integer.MAX_VALUE;
+  public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
   public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
   public static final String LOCALHOST = "localhost";

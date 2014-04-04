@@ -30,18 +30,19 @@ import java.util.List;
  * The replication library uses this class to decode replication messages over the wire.
  */
 public class ProtostuffDecoder<T extends Message<T>> extends MessageToMessageDecoder<ByteBuf> {
-    final Schema<T> schema;
-    public ProtostuffDecoder(Schema<T> schema) {
-        this.schema = schema;
-    }
+  final Schema<T> schema;
+
+  public ProtostuffDecoder(Schema<T> schema) {
+    this.schema = schema;
+  }
 
 
-    @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        ByteBufferInput input = new ByteBufferInput(in.nioBuffer(), false);
-        T newMsg = schema.newMessage();
+  @Override
+  protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    ByteBufferInput input = new ByteBufferInput(in.nioBuffer(), false);
+    T newMsg = schema.newMessage();
 
-        schema.mergeFrom(input, newMsg);
-        out.add(newMsg);
-    }
+    schema.mergeFrom(input, newMsg);
+    out.add(newMsg);
+  }
 }

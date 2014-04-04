@@ -42,103 +42,103 @@ import java.net.InetSocketAddress;
  *
  */
 public class EventLogService extends AbstractService implements EventLogModule {
-    private static final Logger LOG = LoggerFactory.getLogger(EventLogService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EventLogService.class);
 
-    private final int port;
-    private final Fiber fiber;
-    private final NioEventLoopGroup nioEventLoopGroup;
-    private final Channel<EventLogEntry> eventLogChannel = new MemoryChannel<>();
+  private final int port;
+  private final Fiber fiber;
+  private final NioEventLoopGroup nioEventLoopGroup;
+  private final Channel<EventLogEntry> eventLogChannel = new MemoryChannel<>();
 
-    private io.netty.channel.Channel broadcastChannel;
-    private final InetSocketAddress sendAddress;
+  private io.netty.channel.Channel broadcastChannel;
+  private final InetSocketAddress sendAddress;
 
-    public EventLogService(int port,
-                           Fiber fiber,
-                           NioEventLoopGroup nioEventLoopGroup
-    ) {
-        this.port = port;
-        this.fiber = fiber;
-        this.nioEventLoopGroup = nioEventLoopGroup;
+  public EventLogService(int port,
+                         Fiber fiber,
+                         NioEventLoopGroup nioEventLoopGroup
+  ) {
+    this.port = port;
+    this.fiber = fiber;
+    this.nioEventLoopGroup = nioEventLoopGroup;
 
-        sendAddress = new InetSocketAddress("255.255.255.255", port);
-    }
+    sendAddress = new InetSocketAddress("255.255.255.255", port);
+  }
 
 
-    @Override
-    protected void doStart() {
-        nioEventLoopGroup.next().execute(() -> {
-            Bootstrap bootstrap = new Bootstrap();
-            try {
-                bootstrap.group(nioEventLoopGroup)
-                        .channel(NioDatagramChannel.class)
-                        .option(ChannelOption.SO_BROADCAST, true)
-                        .option(ChannelOption.SO_REUSEADDR, true)
-                        .handler(new ChannelInitializer<DatagramChannel>() {
-                            @Override
-                            protected void initChannel(DatagramChannel ch) throws Exception {
-                                ChannelPipeline p = ch.pipeline();
-                                p.addLast("protostuffEncoder",
-                                        new UdpProtostuffEncoder<>(EventLogEntry.getSchema(), false));
-                            }
-                        });
+  @Override
+  protected void doStart() {
+    nioEventLoopGroup.next().execute(() -> {
+      Bootstrap bootstrap = new Bootstrap();
+      try {
+        bootstrap.group(nioEventLoopGroup)
+            .channel(NioDatagramChannel.class)
+            .option(ChannelOption.SO_BROADCAST, true)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .handler(new ChannelInitializer<DatagramChannel>() {
+              @Override
+              protected void initChannel(DatagramChannel ch) throws Exception {
+                ChannelPipeline p = ch.pipeline();
+                p.addLast("protostuffEncoder",
+                    new UdpProtostuffEncoder<>(EventLogEntry.getSchema(), false));
+              }
+            });
 
-                bootstrap.bind(port).addListener(new GenericFutureListener<ChannelFuture>() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
-                        broadcastChannel = future.channel();
-                    }
-                });
-
-                eventLogChannel.subscribe(fiber, msg -> {
-                    if (broadcastChannel == null) {
-                        LOG.debug("Broadcast channel isn't read yet, dropped message");
-                        return;
-                    }
-
-                    LOG.trace("Sending event {}", msg);
-                    broadcastChannel.writeAndFlush(
-                            new UdpProtostuffEncoder.UdpProtostuffMessage<>(sendAddress, msg));
-                });
-
-                fiber.start();
-                
-                notifyStarted();
-            } catch (Throwable t) {
-                fiber.dispose();
-
-                notifyFailed(t);
-            }
+        bootstrap.bind(port).addListener(new GenericFutureListener<ChannelFuture>() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            broadcastChannel = future.channel();
+          }
         });
-    }
 
-    @Override
-    protected void doStop() {
-        nioEventLoopGroup.next().execute(() -> {
-            fiber.dispose();
-            if (broadcastChannel != null)
-                broadcastChannel.close();
+        eventLogChannel.subscribe(fiber, msg -> {
+          if (broadcastChannel == null) {
+            LOG.debug("Broadcast channel isn't read yet, dropped message");
+            return;
+          }
 
-            notifyStopped();
+          LOG.trace("Sending event {}", msg);
+          broadcastChannel.writeAndFlush(
+              new UdpProtostuffEncoder.UdpProtostuffMessage<>(sendAddress, msg));
         });
-    }
 
-    @Override
-    public Channel<EventLogEntry> eventLogChannel() {
-        return eventLogChannel;
-    }
+        fiber.start();
 
-    @Override
-    public ModuleType getModuleType() {
-        return ModuleType.EventLog;
-    }
+        notifyStarted();
+      } catch (Throwable t) {
+        fiber.dispose();
 
-    @Override
-    public boolean hasPort() {
-        return true;
-    }
+        notifyFailed(t);
+      }
+    });
+  }
 
-    @Override
-    public int port() {
-        return port;
-    }
+  @Override
+  protected void doStop() {
+    nioEventLoopGroup.next().execute(() -> {
+      fiber.dispose();
+      if (broadcastChannel != null)
+        broadcastChannel.close();
+
+      notifyStopped();
+    });
+  }
+
+  @Override
+  public Channel<EventLogEntry> eventLogChannel() {
+    return eventLogChannel;
+  }
+
+  @Override
+  public ModuleType getModuleType() {
+    return ModuleType.EventLog;
+  }
+
+  @Override
+  public boolean hasPort() {
+    return true;
+  }
+
+  @Override
+  public int port() {
+    return port;
+  }
 }

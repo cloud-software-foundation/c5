@@ -1,5 +1,5 @@
 {
- "name" : "C5DB", 
- "main" : "c5db.C5DB",
- "args" : []
+    "name": "C5DB",
+    "main": "c5db.C5DB",
+    "args": []
 }

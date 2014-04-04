@@ -24,37 +24,38 @@ import java.nio.ByteBuffer;
  *
  */
 public class ByteBufferOutputStream extends OutputStream {
-    protected ByteBuffer bb;
+  protected ByteBuffer bb;
 
-    public ByteBufferOutputStream(int size) {
-        bb = ByteBuffer.allocate(size);
-    }
+  public ByteBufferOutputStream(int size) {
+    bb = ByteBuffer.allocate(size);
+  }
 
-    public ByteBufferOutputStream(ByteBuffer useMe) {
-        bb = useMe.duplicate();
-    }
+  public ByteBufferOutputStream(ByteBuffer useMe) {
+    bb = useMe.duplicate();
+  }
 
-    @Override
-    public void write(int b) throws IOException {
-        bb.put((byte)b);
-    }
+  @Override
+  public void write(int b) throws IOException {
+    bb.put((byte) b);
+  }
 
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        bb.put(b, off, len);
-    }
+  @Override
+  public void write(byte[] b, int off, int len) throws IOException {
+    bb.put(b, off, len);
+  }
 
-    /**
-     * Duplicate and flips the internal byte buffer
-     * @return a duplicate, and flipped byte buffer (ready for writing elsewhere)
-     */
-    public ByteBuffer getByteBuffer() {
-        ByteBuffer copy = bb.duplicate();
-        copy.flip();
-        return copy;  // all because flip has the wrong return type
-    }
+  /**
+   * Duplicate and flips the internal byte buffer
+   *
+   * @return a duplicate, and flipped byte buffer (ready for writing elsewhere)
+   */
+  public ByteBuffer getByteBuffer() {
+    ByteBuffer copy = bb.duplicate();
+    copy.flip();
+    return copy;  // all because flip has the wrong return type
+  }
 
-    public void reset() {
-        bb.rewind();
-    }
+  public void reset() {
+    bb.rewind();
+  }
 }

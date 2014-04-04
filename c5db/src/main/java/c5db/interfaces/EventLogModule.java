@@ -28,5 +28,5 @@ import org.jetlang.channels.Channel;
 @ModuleTypeBinding(ModuleType.EventLog)
 public interface EventLogModule extends C5Module {
 
-    Channel<EventLogEntry> eventLogChannel();
+  Channel<EventLogEntry> eventLogChannel();
 }

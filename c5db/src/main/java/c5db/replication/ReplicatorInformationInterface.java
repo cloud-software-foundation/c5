@@ -20,25 +20,28 @@ package c5db.replication;
  *
  */
 public interface ReplicatorInformationInterface {
-    public long currentTimeMillis();
+  public long currentTimeMillis();
 
-    /**
-     * How often to check if the election needs to be rerun.
-     *
-     * TODO revisit this to see if necessary or can be set to another derivative value.
-     * @return
-     */
-    public long electionCheckRate();
+  /**
+   * How often to check if the election needs to be rerun.
+   * <p>
+   * TODO revisit this to see if necessary or can be set to another derivative value.
+   *
+   * @return
+   */
+  public long electionCheckRate();
 
-    /**
-     * The election timeout (straight from the paper).
-     * @return
-     */
-    public long electionTimeout();
+  /**
+   * The election timeout (straight from the paper).
+   *
+   * @return
+   */
+  public long electionTimeout();
 
-    /**
-     * How frequently we should check the append queue, and send RPCs to the clients.
-     * @return
-     */
-    public long groupCommitDelay();
+  /**
+   * How frequently we should check the append queue, and send RPCs to the clients.
+   *
+   * @return
+   */
+  public long groupCommitDelay();
 }

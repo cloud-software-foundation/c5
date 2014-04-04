@@ -147,11 +147,12 @@ public class TestableInRamSim {
   final Channel<RpcWireReply> replyChannel = new MemoryChannel<>();
 
 
-  /** Set up the simulation (but don't actually start it yet).
+  /**
+   * Set up the simulation (but don't actually start it yet).
    *
-   * @param peerSize The number of nodes in the simulation
+   * @param peerSize              The number of nodes in the simulation
    * @param electionTimeoutOffset the time offset, in milliseconds, between different instances' clocks.
-   * @param batchExecutor The jetlang batch executor for the simulation's fibers to use.
+   * @param batchExecutor         The jetlang batch executor for the simulation's fibers to use.
    */
   public TestableInRamSim(final int peerSize, long electionTimeoutOffset, BatchExecutor batchExecutor) {
     this.peerSize = peerSize;

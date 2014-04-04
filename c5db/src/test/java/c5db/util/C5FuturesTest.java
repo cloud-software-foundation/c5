@@ -34,10 +34,11 @@ import java.util.function.Consumer;
  */
 public class C5FuturesTest {
   public static class RunARunnableAction implements Action {
-    public RunARunnableAction() {}
+    public RunARunnableAction() {
+    }
 
     public Object invoke(Invocation invocation) throws Throwable {
-      ((Runnable)invocation.getParameter(0)).run();
+      ((Runnable) invocation.getParameter(0)).run();
       return null;
     }
 
@@ -46,11 +47,13 @@ public class C5FuturesTest {
       description.appendText("runs the runnable");
     }
   }
+
   public static Action runTheRunnable() {
     return new RunARunnableAction();
   }
 
-  @Rule public final JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public final JUnitRuleMockery context = new JUnitRuleMockery();
   Consumer<Integer> success = context.mock(Consumer.class, "success");
   Consumer<Throwable> failure = context.mock(Consumer.class, "failure");
   ListenableFuture<Integer> mockFuture = context.mock(ListenableFuture.class, "mockFuture");
@@ -70,8 +73,9 @@ public class C5FuturesTest {
   public void testC5FutureCallback_Success() throws Exception {
     Integer futureValue = 12;
 
-    context.checking(new Expectations(){{
-      oneOf(mockFuture).get(); will(returnValue(futureValue));
+    context.checking(new Expectations() {{
+      oneOf(mockFuture).get();
+      will(returnValue(futureValue));
 
       oneOf(success).accept(futureValue);
     }});
@@ -84,7 +88,8 @@ public class C5FuturesTest {
     Exception error = new ExecutionException(new Exception());
 
     context.checking(new Expectations() {{
-      oneOf(mockFuture).get(); will(throwException(error));
+      oneOf(mockFuture).get();
+      will(throwException(error));
 
       oneOf(failure).accept(error);
     }});

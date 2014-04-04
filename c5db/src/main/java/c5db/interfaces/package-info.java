@@ -29,4 +29,4 @@ package c5db.interfaces;
  central binding service that all other services may depend on for "global" resources, config,
  cross module discovery/binding at runtime and any other mechanisms in which a module
  might have to do server wide things.
-*/
+ */

@@ -25,115 +25,113 @@ import com.dyuproject.protostuff.Message;
 
 /**
  * Wrap a rpc message, this could/should get serialized to the wire (eg: ReplicationWireMessage)
- *
+ * <p>
  * The subclasses exist so we can properly type the Jetlang channels and be clear about our intentions.
- *
+ * <p>
  * There is 4 subclasses in 2 categories:
  * * Wire   -- for messages off the wire from other folks
  * * Non-wire  -- for messages to be sent to other folks
- *
- *
  */
 public class RpcMessage {
-    public final long to;
-    public final long from;
-    public final String quorumId;
+  public final long to;
+  public final long from;
+  public final String quorumId;
 
-    public final Message message;
+  public final Message message;
 
-    protected RpcMessage(long to, long from, String quorumId, Message message) {
-        this.to = to;
-        this.from = from;
-        this.quorumId = quorumId;
+  protected RpcMessage(long to, long from, String quorumId, Message message) {
+    this.to = to;
+    this.from = from;
+    this.quorumId = quorumId;
 
-        this.message = message;
-    }
+    this.message = message;
+  }
 
-    protected RpcMessage(ReplicationWireMessage wireMessage) {
-        this(wireMessage.getReceiverId(),
-                wireMessage.getSenderId(),
-                wireMessage.getQuorumId(),
-                getSubMsg(wireMessage));
-    }
+  protected RpcMessage(ReplicationWireMessage wireMessage) {
+    this(wireMessage.getReceiverId(),
+        wireMessage.getSenderId(),
+        wireMessage.getQuorumId(),
+        getSubMsg(wireMessage));
+  }
 
-    static Message getSubMsg(ReplicationWireMessage wireMessage) {
-        if (wireMessage.getAppendEntries() != null)
-            return wireMessage.getAppendEntries();
+  static Message getSubMsg(ReplicationWireMessage wireMessage) {
+    if (wireMessage.getAppendEntries() != null)
+      return wireMessage.getAppendEntries();
 
-        if (wireMessage.getAppendEntriesReply() != null)
-            return wireMessage.getAppendEntriesReply();
+    if (wireMessage.getAppendEntriesReply() != null)
+      return wireMessage.getAppendEntriesReply();
 
-        if (wireMessage.getRequestVote() != null)
-            return wireMessage.getRequestVote();
+    if (wireMessage.getRequestVote() != null)
+      return wireMessage.getRequestVote();
 
-        if (wireMessage.getRequestVoteReply() != null)
-            return wireMessage.getRequestVoteReply();
+    if (wireMessage.getRequestVoteReply() != null)
+      return wireMessage.getRequestVoteReply();
 
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public String toString() {
-        return String.format("From: %d to: %d message: %s contents: %s", from, to, quorumId, message);
-    }
+  @Override
+  public String toString() {
+    return String.format("From: %d to: %d message: %s contents: %s", from, to, quorumId, message);
+  }
 
-    public ReplicationWireMessage getWireMessage(
-            long messageId,
-            long from,
-            long to,
-            boolean inReply
-    ) {
-        return new ReplicationWireMessage(
-                messageId,
-                from,
-                to,
-                quorumId,
-                inReply,
-                getRequestVoteMessage(),
-                getRequestVoteReplyMessage(),
-                getAppendMessage(),
-                getAppendReplyMessage()
-        );
-    }
+  public ReplicationWireMessage getWireMessage(
+      long messageId,
+      long from,
+      long to,
+      boolean inReply
+  ) {
+    return new ReplicationWireMessage(
+        messageId,
+        from,
+        to,
+        quorumId,
+        inReply,
+        getRequestVoteMessage(),
+        getRequestVoteReplyMessage(),
+        getAppendMessage(),
+        getAppendReplyMessage()
+    );
+  }
 
 
-    public boolean isAppendMessage() {
-        return message instanceof AppendEntries;
-    }
+  public boolean isAppendMessage() {
+    return message instanceof AppendEntries;
+  }
 
-    public boolean isRequestVoteMessage() {
-        return message instanceof RequestVote;
-    }
+  public boolean isRequestVoteMessage() {
+    return message instanceof RequestVote;
+  }
 
-    public boolean isAppendReplyMessage() {
-        return message instanceof AppendEntriesReply;
-    }
+  public boolean isAppendReplyMessage() {
+    return message instanceof AppendEntriesReply;
+  }
 
-    public boolean isRequestVoteReplyMessage() {
-        return message instanceof RequestVoteReply;
-    }
+  public boolean isRequestVoteReplyMessage() {
+    return message instanceof RequestVoteReply;
+  }
 
-    public AppendEntries getAppendMessage() {
-        if (isAppendMessage())
-            return (AppendEntries) message;
-        return null;
-    }
+  public AppendEntries getAppendMessage() {
+    if (isAppendMessage())
+      return (AppendEntries) message;
+    return null;
+  }
 
-    public AppendEntriesReply getAppendReplyMessage() {
-        if (isAppendReplyMessage())
-            return (AppendEntriesReply) message;
-        return null;
-    }
+  public AppendEntriesReply getAppendReplyMessage() {
+    if (isAppendReplyMessage())
+      return (AppendEntriesReply) message;
+    return null;
+  }
 
-    public RequestVote getRequestVoteMessage() {
-        if (isRequestVoteMessage())
-            return (RequestVote) message;
-        return null;
-    }
+  public RequestVote getRequestVoteMessage() {
+    if (isRequestVoteMessage())
+      return (RequestVote) message;
+    return null;
+  }
 
-    public RequestVoteReply getRequestVoteReplyMessage() {
-        if (isRequestVoteReplyMessage())
-            return (RequestVoteReply) message;
-        return null;
-    }
+  public RequestVoteReply getRequestVoteReplyMessage() {
+    if (isRequestVoteReplyMessage())
+      return (RequestVoteReply) message;
+    return null;
+  }
 }

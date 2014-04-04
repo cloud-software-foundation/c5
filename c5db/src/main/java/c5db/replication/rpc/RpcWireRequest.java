@@ -24,12 +24,12 @@ import com.dyuproject.protostuff.Message;
  */
 public class RpcWireRequest extends RpcMessage {
 
-    public RpcWireRequest(long from, String quorumId, Message message) {
-        super(0, from, quorumId, message);
-    }
+  public RpcWireRequest(long from, String quorumId, Message message) {
+    super(0, from, quorumId, message);
+  }
 
-    public RpcWireRequest(ReplicationWireMessage wireMessage) {
-        super(wireMessage);
-    }
+  public RpcWireRequest(ReplicationWireMessage wireMessage) {
+    super(wireMessage);
+  }
 }
 

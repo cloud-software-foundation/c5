@@ -28,17 +28,17 @@ import static org.junit.Assert.assertTrue;
 
  */
 public class RpcWireRequestTest {
-    @Test
-    public void testGetSubMsg() throws Exception {
-        ReplicationWireMessage wireMessage = new ReplicationWireMessage(
-                1, 42, 42, "quorum", false,
-                new RequestVote(33, 1, 22, 33),
-                null, null, null
-        );
+  @Test
+  public void testGetSubMsg() throws Exception {
+    ReplicationWireMessage wireMessage = new ReplicationWireMessage(
+        1, 42, 42, "quorum", false,
+        new RequestVote(33, 1, 22, 33),
+        null, null, null
+    );
 
-        RpcWireRequest rpcMsg = new RpcWireRequest(wireMessage);
-        assertTrue(rpcMsg.message instanceof RequestVote);
-        assertEquals(42, rpcMsg.to);
-        assertEquals(42, rpcMsg.from);
-    }
+    RpcWireRequest rpcMsg = new RpcWireRequest(wireMessage);
+    assertTrue(rpcMsg.message instanceof RequestVote);
+    assertEquals(42, rpcMsg.to);
+    assertEquals(42, rpcMsg.from);
+  }
 }

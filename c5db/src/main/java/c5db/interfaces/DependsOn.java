@@ -28,5 +28,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DependsOn {
-    Class<? extends C5Module>[] value();
+  Class<? extends C5Module>[] value();
 }

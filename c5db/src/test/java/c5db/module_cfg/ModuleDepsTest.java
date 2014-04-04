@@ -30,26 +30,26 @@ import java.util.List;
  */
 public class ModuleDepsTest {
 
-    @Test
-    public void testTrans() throws Exception {
+  @Test
+  public void testTrans() throws Exception {
 //        ImmutableList<ImmutableList<ModuleType>> lst = ModuleDeps.getTransDeps(ImmutableList.of(ModuleType.Management, ModuleType.Client, ModuleType.Discovery));
 //        for (ImmutableList<ModuleType> l : lst) {
 //            System.out.println(l);
 //        }
 //        System.out.println(lst);
 
-        ModuleDeps.doTarjan(ImmutableList.of(ModuleType.Management, ModuleType.RegionServer, ModuleType.Discovery));
+    ModuleDeps.doTarjan(ImmutableList.of(ModuleType.Management, ModuleType.RegionServer, ModuleType.Discovery));
 
 
-    }
+  }
 
-    @Test
-    public void testFoo() throws Exception {
+  @Test
+  public void testFoo() throws Exception {
 
-        List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph ("c5db.interfaces.RegionServerModule");
+    List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph("c5db.interfaces.RegionServerModule");
 
-        Joiner joiner = Joiner.on("\n");
+    Joiner joiner = Joiner.on("\n");
 
-        System.out.println(joiner.join(result));
-    }
+    System.out.println(joiner.join(result));
+  }
 }

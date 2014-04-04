@@ -22,12 +22,12 @@ import com.dyuproject.protostuff.Message;
  * An rpc reply in response to a 'wire request'.
  */
 public class RpcReply extends RpcMessage {
-     /**
-      *  Invert the to/from and quote the messageId.
-      *
-      * @param message the reply message
-      */
-    public RpcReply(Message message) {
-        super(0, 0, null, message);
-    }
+  /**
+   * Invert the to/from and quote the messageId.
+   *
+   * @param message the reply message
+   */
+  public RpcReply(Message message) {
+    super(0, 0, null, message);
+  }
 }

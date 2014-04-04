@@ -29,35 +29,35 @@ import java.util.List;
 
 
 public class Mooring implements ReplicatorLogAbstraction {
-    final OLog log;
-    final String quorumId;
-    HashMap<String, Long> latestTombstones = new HashMap<>();
-    long currentTerm = 0;
-    long lastIndex = 0;
+  final OLog log;
+  final String quorumId;
+  HashMap<String, Long> latestTombstones = new HashMap<>();
+  long currentTerm = 0;
+  long lastIndex = 0;
 
-    Mooring(OLog log, String quorumId) {
-        this.quorumId = quorumId;
-        this.log = log;
-    }
+  Mooring(OLog log, String quorumId) {
+    this.quorumId = quorumId;
+    this.log = log;
+  }
 
-    @Override
-    public ListenableFuture<Boolean> logEntries(List<LogEntry> entries) {
-        List<Log.OLogEntry> oLogEntries = new ArrayList<>();
-        for (LogEntry entry : entries) {
-            long idx = getNextIdxGreaterThan(0);
-            oLogEntries.add(Log.OLogEntry
-                    .newBuilder()
-                    .setTombStone(false)
-                    .setTerm(entry.getTerm())
-                    .setIndex(idx)
-                    .setQuorumId(quorumId)
-                    .setValue(ByteString.copyFrom(entry.getData())).build());
-        }
-        if (oLogEntries.size() > 0) {
-            currentTerm = oLogEntries.get(oLogEntries.size() - 1).getTerm();
-        }
-        return this.log.logEntry(oLogEntries, quorumId);
+  @Override
+  public ListenableFuture<Boolean> logEntries(List<LogEntry> entries) {
+    List<Log.OLogEntry> oLogEntries = new ArrayList<>();
+    for (LogEntry entry : entries) {
+      long idx = getNextIdxGreaterThan(0);
+      oLogEntries.add(Log.OLogEntry
+          .newBuilder()
+          .setTombStone(false)
+          .setTerm(entry.getTerm())
+          .setIndex(idx)
+          .setQuorumId(quorumId)
+          .setValue(ByteString.copyFrom(entry.getData())).build());
     }
+    if (oLogEntries.size() > 0) {
+      currentTerm = oLogEntries.get(oLogEntries.size() - 1).getTerm();
+    }
+    return this.log.logEntry(oLogEntries, quorumId);
+  }
 
   @Override
   public ListenableFuture<LogEntry> getLogEntry(long index) {
@@ -80,44 +80,44 @@ public class Mooring implements ReplicatorLogAbstraction {
     return future;
   }
 
-    @Override
-    public long getLogTerm(long index) {
-        return this.log.getLogTerm(index, quorumId);
-    }
+  @Override
+  public long getLogTerm(long index) {
+    return this.log.getLogTerm(index, quorumId);
+  }
 
-    @Override
-    public long getLastTerm() {
-        return currentTerm;
-    }
+  @Override
+  public long getLastTerm() {
+    return currentTerm;
+  }
 
-    @Override
-    public long getLastIndex() {
-        return lastIndex;
-    }
+  @Override
+  public long getLastIndex() {
+    return lastIndex;
+  }
 
-    @Override
-    public ListenableFuture<Boolean> truncateLog(long entryIndex) {
-        updateInMemoryTombstone(quorumId, entryIndex);
-        return this.log.truncateLog(entryIndex, quorumId);
-    }
+  @Override
+  public ListenableFuture<Boolean> truncateLog(long entryIndex) {
+    updateInMemoryTombstone(quorumId, entryIndex);
+    return this.log.truncateLog(entryIndex, quorumId);
+  }
 
-    private void updateInMemoryTombstone(String quorumId, long entryIndex) {
-        if (!this.latestTombstones.containsKey(quorumId)) {
-            this.latestTombstones.put(quorumId, entryIndex);
-        } else {
-            long latestIndex = this.latestTombstones.get(quorumId);
-            if (latestIndex < entryIndex) {
-                this.latestTombstones.put(quorumId, entryIndex);
-            }
-        }
+  private void updateInMemoryTombstone(String quorumId, long entryIndex) {
+    if (!this.latestTombstones.containsKey(quorumId)) {
+      this.latestTombstones.put(quorumId, entryIndex);
+    } else {
+      long latestIndex = this.latestTombstones.get(quorumId);
+      if (latestIndex < entryIndex) {
+        this.latestTombstones.put(quorumId, entryIndex);
+      }
     }
+  }
 
-    public long getNextIdxGreaterThan(long min) {
-        if (lastIndex < min) {
-            lastIndex = min;
-        } else {
-            lastIndex++;
-        }
-        return lastIndex;
+  public long getNextIdxGreaterThan(long min) {
+    if (lastIndex < min) {
+      lastIndex = min;
+    } else {
+      lastIndex++;
     }
+    return lastIndex;
+  }
 }

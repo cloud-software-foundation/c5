@@ -83,12 +83,15 @@ public class TabletTest {
     context.checking(new Expectations() {{
       States state = context.states("start");
 
-      allowing(replicator).getQuorumId(); will(returnValue(regionName));
+      allowing(replicator).getQuorumId();
+      will(returnValue(regionName));
 
       oneOf(replicationModule).createReplicator(regionName, peerList);
-      will(returnValue(future)); then(state.is("opening"));
+      will(returnValue(future));
+      then(state.is("opening"));
 
-      oneOf(replicator).start(); when(state.is("opening"));
+      oneOf(replicator).start();
+      when(state.is("opening"));
 
       oneOf(regionCreator).getHRegion(
           with(any(Path.class)),
@@ -96,7 +99,8 @@ public class TabletTest {
           with(equal(tableDescriptor)),
           with(any(HLog.class)),
           with(same(conf)));
-      will(returnValue(region)); then(state.is("opened"));
+      will(returnValue(region));
+      then(state.is("opened"));
     }});
 
     Fiber tabletFiber = new ThreadFiber();

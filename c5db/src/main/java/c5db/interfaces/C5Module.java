@@ -32,8 +32,8 @@ import com.google.common.util.concurrent.Service;
  * <p>
  * Other features that we need to support in the future (that arent explicit here right now)
  * <ul>
- *   <li>Module startup-dependencies (eg: module A needs module B to be running)</li>
- *   <li>Module startup configuration (eg: what port should this module bind to?)</li>
+ * <li>Module startup-dependencies (eg: module A needs module B to be running)</li>
+ * <li>Module startup configuration (eg: what port should this module bind to?)</li>
  * </ul>
  * </p>
  */

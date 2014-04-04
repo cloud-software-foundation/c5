@@ -28,7 +28,8 @@ public enum ScannerManager {
 
   private ConcurrentHashMap<Long, Channel<Integer>> scannerMap = new ConcurrentHashMap<>();
 
-  ScannerManager() {  }
+  ScannerManager() {
+  }
 
   public Channel<Integer> getChannel(long scannerId) {
     return scannerMap.get(scannerId);

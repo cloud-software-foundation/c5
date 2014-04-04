@@ -24,11 +24,11 @@ import com.dyuproject.protostuff.Message;
  */
 public class RpcWireReply extends RpcMessage {
 
-    public RpcWireReply(long from, String quorumId, Message message) {
-        super(0, from, quorumId, message);
-    }
+  public RpcWireReply(long from, String quorumId, Message message) {
+    super(0, from, quorumId, message);
+  }
 
-    public RpcWireReply(ReplicationWireMessage msg) {
-        super(msg);
-    }
+  public RpcWireReply(ReplicationWireMessage msg) {
+    super(msg);
+  }
 }
