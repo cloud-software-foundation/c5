@@ -40,6 +40,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
@@ -58,13 +59,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
 /**
- * The main entry point for the service which manages the tablet level lifecycle. 
+ * The main entry point for the service which manages the tablet level lifecycle.
  */
 public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
@@ -101,8 +103,16 @@ public class TabletService extends AbstractService implements TabletModule {
             e.printStackTrace();
           }
         }
-        return onlineRegions.values().iterator().next();
+
+      HRegion region = onlineRegions.get(tabletName);
+      // TODO remove
+      if (region == null){
+          Iterator<HRegion> iterator = onlineRegions.values().iterator();
+          iterator.next();
+          region = iterator.next();
       }
+      return region;
+    }
 
     @Override
     protected void doStart() {
@@ -207,7 +217,8 @@ public class TabletService extends AbstractService implements TabletModule {
         if (rootStarted) return;
         rootStarted = true;
         bootstrapRoot(ImmutableList.copyOf(peers));
-
+        // TODO REMOVE. Temp table while we have no meta infrastructure
+        bootstrapTempTable(ImmutableList.copyOf(peers));
 //        // bootstrap the frickin thing.
 //        LOG.debug("Bootstrapping empty region");
 //        // simple bootstrap, only bootstrap my own ID:
@@ -234,7 +245,17 @@ public class TabletService extends AbstractService implements TabletModule {
         }
     }
 
-    // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
+    private void bootstrapTempTable(ImmutableList<Long> peers) {
+        TableName tableName = TableName.valueOf("1");
+        HTableDescriptor desc = new HTableDescriptor(tableName);
+        desc.addFamily(new HColumnDescriptor("cf"));
+
+        HRegionInfo region = new HRegionInfo(tableName);
+        openRegion0(region, desc, ImmutableList.copyOf(peers));
+
+    }
+
+  // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
     // how to bootstrap?
     private void bootstrapRoot(List<Long> peers) {
         HTableDescriptor rootDesc = HTableDescriptor.ROOT_TABLEDESC;
@@ -243,9 +264,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
         // ok we have enough to start a region up now:
 
-        openRegion0(rootRegion,
-                rootDesc,
-                ImmutableList.copyOf(peers));
+        openRegion0(rootRegion, rootDesc, ImmutableList.copyOf(peers));
     }
 
 
@@ -303,9 +322,19 @@ public class TabletService extends AbstractService implements TabletModule {
                     serverConfigDir.writeBinaryData(quorumId, regionInfo.toDelimitedByteArray());
                     serverConfigDir.writePeersToFile(quorumId, peers);
                     LOG.debug("Moving region to opened status: {}", regionInfo);
-//                    getTabletStateChanges().publish(new TabletStateChange(regionInfo,
-//                            region,
-//                            1, null));
+
+
+                    c5db.tablet.Tablet tablet = new c5db.tablet.Tablet(regionInfo,
+                        tableDescriptor,
+                        peers,
+                        null,
+                        null,
+                        null,
+                        replicationModule,
+                        new HRegionBridge.Creator());
+                        getTabletStateChanges().publish(new TabletStateChange(tablet,
+                                                                              Tablet.State.Open,
+                                                                              null));
 
                 } catch (IOException e) {
                     LOG.error("Error opening OLogShim for {}, err: {}", regionInfo, e);
