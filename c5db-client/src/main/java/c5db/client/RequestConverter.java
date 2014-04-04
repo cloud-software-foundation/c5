@@ -55,7 +55,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-/***
+/**
  * A utility class responsible for generating requests to c5.
  */
 public final class RequestConverter {

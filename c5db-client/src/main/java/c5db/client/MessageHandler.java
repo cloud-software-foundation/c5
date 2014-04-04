@@ -28,7 +28,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-/***
+/**
  * A simple handler to handle inbound responses from the C5 server.
  */
 public class MessageHandler extends SimpleChannelInboundHandler<Response> {

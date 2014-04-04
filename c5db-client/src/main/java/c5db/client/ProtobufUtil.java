@@ -166,7 +166,7 @@ public class ProtobufUtil {
    * @return the converted protocol buffer Filter
    */
   public static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
-    if (filter == null){
+    if (filter == null) {
       return new c5db.client.generated.Filter();
     }
     return new c5db.client.generated.Filter(filter.getClass().getName(), ByteBuffer.wrap(filter.toByteArray()));
@@ -263,7 +263,7 @@ public class ProtobufUtil {
     long maxResultSize = scan.getMaxResultSize();
 
     Boolean loadColumnFamiliesOnDemand = scan.getLoadColumnFamiliesOnDemandValue();
-    if (loadColumnFamiliesOnDemand == null){
+    if (loadColumnFamiliesOnDemand == null) {
       loadColumnFamiliesOnDemand = false;
     }
     int maxVersions = scan.getMaxVersions();
@@ -324,19 +324,19 @@ public class ProtobufUtil {
   }
 
   public static Call getGetCall(long commandId, GetRequest get) {
-    return new Call(Call.Command.GET, commandId, get, null,  null, null);
+    return new Call(Call.Command.GET, commandId, get, null, null, null);
   }
 
   public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
-    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest,  null, null);
+    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null);
   }
 
   public static Call getScanCall(long commandId, ScanRequest scanRequest) {
-    return new Call(Call.Command.SCAN, commandId, null, null,  scanRequest, null);
+    return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
   }
 
   public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
-    return new Call(Call.Command.MULTI, commandId, null, null,  null, multiRequest);
+    return new Call(Call.Command.MULTI, commandId, null, null, null, multiRequest);
   }
 }
 

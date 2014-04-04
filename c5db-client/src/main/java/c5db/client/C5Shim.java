@@ -27,7 +27,7 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import java.io.IOException;
 import java.util.List;
 
-/***
+/**
  * A shim for unsupported options to allow C5Table to implement TableInterface
  */
 public abstract class C5Shim implements TableInterface {
@@ -68,7 +68,8 @@ public abstract class C5Shim implements TableInterface {
   }
 
   @Override
-  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException { }
+  public void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException {
+  }
 
   @Override
   public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
@@ -77,7 +78,8 @@ public abstract class C5Shim implements TableInterface {
 
   @Override
   public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
-      throws IOException, InterruptedException {  }
+      throws IOException, InterruptedException {
+  }
 
   @Override
   public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
