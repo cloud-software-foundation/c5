@@ -56,11 +56,11 @@ public class Tablet implements TabletModule.Tablet {
 
 
   // Config type info:
-  final HRegionInfo regionInfo;
-  final HTableDescriptor tableDescriptor;
-  final List<Long> peers;
-  final Configuration conf;
-  final Path basePath;
+  private final HRegionInfo regionInfo;
+  private final HTableDescriptor tableDescriptor;
+  private final List<Long> peers;
+  private final Configuration conf;
+  private final Path basePath;
 
   // Finals
   private final Fiber tabletFiber;
@@ -79,7 +79,7 @@ public class Tablet implements TabletModule.Tablet {
     this.stateChangeChannel = stateChangeChannel;
   }
 
-  Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
+  private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
 
 
   public Tablet(final HRegionInfo regionInfo,
