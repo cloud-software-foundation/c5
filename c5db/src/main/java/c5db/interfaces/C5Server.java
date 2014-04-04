@@ -43,7 +43,7 @@ public interface C5Server extends Service {
    * Every server has a persistent id that is independent of it's (in some cases temporary)
    * network or host identification.  Normally this would be persisted in a configuration
    * file, and generated randomly (64 bits is enough for everyone, right?).  There may be
-   * provisions to allow adminstrators to assign node ids.
+   * provisions to allow administrators to assign node ids.
    * <p>
    * @return THE node id for this server.
    */
