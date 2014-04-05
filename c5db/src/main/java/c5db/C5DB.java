@@ -28,7 +28,7 @@ import c5db.regionserver.RegionServerService;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.FiberOnly;
-import com.dyuproject.protostuff.Message;
+import io.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ListenableFuture;
