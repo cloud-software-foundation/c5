@@ -175,7 +175,7 @@ public class InRamSim {
     final RpcRequest request = origMsg.getRequest();
 //        final OutgoingRpcRequest request = origMsg.getRequest();
 //        msgSize.update(request.message.getSerializedSize());
-    final long dest = request.to;
+    final long dest = request.recipientNodeId;
     final ReplicatorInstance repl = replicators.get(dest);
     if (repl == null) {
       // boo
@@ -187,7 +187,7 @@ public class InRamSim {
     messages.mark();
     messageTxn.inc();
 
-    final RpcWireRequest newRequest = new RpcWireRequest(request.from, request.quorumId, request.message);
+    final RpcWireRequest newRequest = new RpcWireRequest(request.sendingNodeId, request.quorumId, request.message);
     AsyncRequest.withOneReply(rpcFiber, repl.getIncomingChannel(), newRequest, new Callback<RpcReply>() {
       @Override
       public void onMessage(RpcReply msg) {
@@ -195,7 +195,7 @@ public class InRamSim {
         messageTxn.dec();
 //                msgSize.update(msg.message.getSerializedSize());
         // Note that 'RpcReply' has an empty from/to/messageId.  We must know from our context (and so we do)
-        RpcWireReply newReply = new RpcWireReply(request.to, request.quorumId, msg.message);
+        RpcWireReply newReply = new RpcWireReply(request.recipientNodeId, request.quorumId, msg.message);
         origMsg.reply(newReply);
       }
     });

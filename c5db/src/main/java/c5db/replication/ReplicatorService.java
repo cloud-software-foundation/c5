@@ -329,7 +329,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
   @FiberOnly
   private void handleOutgoingMessage(final Request<RpcRequest, RpcWireReply> message) {
     final RpcRequest request = message.getRequest();
-    final long to = request.to;
+    final long to = request.recipientNodeId;
 
     if (to == server.getNodeId()) {
       handleLoopBackMessage(message);
@@ -407,7 +407,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
       public void run() {
 
         RpcRequest request = message.getRequest();
-        long to = request.to;
+        long to = request.recipientNodeId;
         long messageId = messageIdGen++;
 
         outstandingRPCs.put(messageId, message);

@@ -234,7 +234,7 @@ public class TestableInRamSim {
   }
 
   private boolean shouldDropRequest(RpcRequest request) {
-    long peerId = request.to;
+    long peerId = request.recipientNodeId;
 
     if (!wireObstructions.containsKey(peerId)) {
       return false;
@@ -295,7 +295,7 @@ public class TestableInRamSim {
   private void messageForwarder(final Request<RpcRequest, RpcWireReply> origMsg) {
 
     final RpcRequest request = origMsg.getRequest();
-    final long dest = request.to;
+    final long dest = request.recipientNodeId;
     final ReplicatorInstance repl = replicators.get(dest);
     if (repl == null) {
       // boo
@@ -310,10 +310,10 @@ public class TestableInRamSim {
       return;
     }
 
-    final RpcWireRequest newRequest = new RpcWireRequest(request.from, request.quorumId, request.message);
+    final RpcWireRequest newRequest = new RpcWireRequest(request.sendingNodeId, request.quorumId, request.message);
     AsyncRequest.withOneReply(rpcFiber, repl.getIncomingChannel(), newRequest, msg -> {
       // Note that 'RpcReply' has an empty from/to/messageId.  We must know from our context (and so we do)
-      RpcWireReply newReply = new RpcWireReply(request.to, request.quorumId, msg.message);
+      RpcWireReply newReply = new RpcWireReply(request.recipientNodeId, request.quorumId, msg.message);
       LOG.info("Reply {}", newReply);
       replyChannel.publish(newReply);
       origMsg.reply(newReply);

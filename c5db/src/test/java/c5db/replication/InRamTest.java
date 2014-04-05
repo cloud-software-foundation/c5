@@ -100,7 +100,7 @@ public class InRamTest {
     } else if (appendEntriesMessage != null) {
       term = appendEntriesMessage.getTerm();
       if (term >= currentTerm && currentLeader == 0) {
-        currentLeader = request.getRequest().from;
+        currentLeader = request.getRequest().sendingNodeId;
         statusChange = true;
       }
     }
@@ -178,7 +178,7 @@ public class InRamTest {
   // Blocks until the peer at peerId sends an AppendEntriesReply.
   // Throws TimeoutException if no reply occurs within the time limit.
   private void waitForAppendReply(long peerId) throws Exception {
-    getAppendReplyFuture((reply) -> reply.from == peerId).get(TEST_TIMEOUT, TimeUnit.SECONDS);
+    getAppendReplyFuture((reply) -> reply.sendingNodeId == peerId).get(TEST_TIMEOUT, TimeUnit.SECONDS);
   }
 
   // Blocks until a leader is elected during some term >= minimumTerm.
@@ -321,7 +321,7 @@ public class InRamTest {
     SettableFuture<Long> commitIndexFuture = SettableFuture.create();
     sim.getRpcChannel().subscribe(fiber, (request) -> {
       RpcRequest msg = request.getRequest();
-      if (msg.from == secondLeader) {
+      if (msg.sendingNodeId == secondLeader) {
         AppendEntries appendMessage = msg.getAppendMessage();
         if (appendMessage == null) {
           commitIndexFuture.setException(new AssertionError());

@@ -22,7 +22,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 /**
- * Created by ryan on 3/28/14.
+ * Helps match against {@link c5db.interfaces.TabletModule.TabletStateChange} instances
  */
 public class TabletMatchers {
   public static Matcher<TabletModule.TabletStateChange> hasStateEqualTo(TabletModule.Tablet.State state) {

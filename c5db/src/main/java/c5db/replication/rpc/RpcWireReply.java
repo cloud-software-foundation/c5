@@ -20,12 +20,13 @@ import c5db.replication.generated.ReplicationWireMessage;
 import com.dyuproject.protostuff.Message;
 
 /**
- * A reply from the wire - a remote agent - replying to a request.
+ * A reply from the wire - a remote agent - replying to a request. The recipient node id is implied by the jetlang
+ * RequestChannel Request object.
  */
 public class RpcWireReply extends RpcMessage {
 
-  public RpcWireReply(long from, String quorumId, Message message) {
-    super(0, from, quorumId, message);
+  public RpcWireReply(long sendingNodeId, String quorumId, Message message) {
+    super(0, sendingNodeId, quorumId, message);
   }
 
   public RpcWireReply(ReplicationWireMessage msg) {

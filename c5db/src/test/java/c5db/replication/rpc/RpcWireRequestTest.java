@@ -38,7 +38,7 @@ public class RpcWireRequestTest {
 
     RpcWireRequest rpcMsg = new RpcWireRequest(wireMessage);
     assertTrue(rpcMsg.message instanceof RequestVote);
-    assertEquals(42, rpcMsg.to);
-    assertEquals(42, rpcMsg.from);
+    assertEquals(42, rpcMsg.recipientNodeId);
+    assertEquals(42, rpcMsg.sendingNodeId);
   }
 }

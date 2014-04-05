@@ -298,8 +298,8 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
   @FiberOnly
   private void onIncomingMessage(Request<RpcWireRequest, RpcReply> message) {
     RpcWireRequest req = message.getRequest();
-    if (!peers.contains(req.from)) {
-      LOG.debug("{} Got message from peer {} who I don't recognize, ignoring", myId, req.from);
+    if (!peers.contains(req.sendingNodeId)) {
+      LOG.debug("{} Got message from peer {} who I don't recognize, ignoring", myId, req.sendingNodeId);
       return;
     }
 
@@ -352,14 +352,14 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
       // we can vote for this because the candidate's log is at least as
       // complete as the local log.
 
-      if (votedFor == 0 || votedFor == message.getRequest().from) {
-        setVotedFor(message.getRequest().from);
+      if (votedFor == 0 || votedFor == message.getRequest().sendingNodeId) {
+        setVotedFor(message.getRequest().sendingNodeId);
         lastRPC = info.currentTimeMillis();
         vote = true;
       }
     }
 
-    LOG.debug("{} sending vote reply to {} vote = {}, voted = {}", myId, message.getRequest().from, votedFor, vote);
+    LOG.debug("{} sending vote reply to {} vote = {}, voted = {}", myId, message.getRequest().sendingNodeId, votedFor, vote);
     RequestVoteReply m = new RequestVoteReply(currentTerm, vote);
     RpcReply reply = new RpcReply(m);
     message.reply(reply);
@@ -638,7 +638,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
         return;
       }
 
-      LOG.trace("{} request vote timeout to {}, resending RPC", myId, request.to);
+      LOG.trace("{} request vote timeout to {}, resending RPC", myId, request.recipientNodeId);
 
       // Note we are using 'this' as the recursive timeout.
       AsyncRequest.withOneReply(fiber, sendRpcChannel, request, new Callback<RpcWireReply>() {
@@ -660,7 +660,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
     }
 
     if (currentTerm > termBeingVotedFor) {
-      LOG.warn("{} election reply from {}, but currentTerm {} > vote term {}", myId, message.from,
+      LOG.warn("{} election reply from {}, but currentTerm {} > vote term {}", myId, message.sendingNodeId,
           currentTerm, termBeingVotedFor);
       return;
     }
@@ -668,7 +668,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
     // if we are no longer a Candidate, election was over, these replies are stale.
     if (myState != State.CANDIDATE) {
       // we became not, ignore
-      LOG.warn("{} election reply from {} ignored -> in state {}", myId, message.from, myState);
+      LOG.warn("{} election reply from {} ignored -> in state {}", myId, message.sendingNodeId, myState);
       return;
     }
 
@@ -677,7 +677,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
 
     if (reply.getTerm() > currentTerm) {
       LOG.warn("{} election reply from {}, but term {} was not my term {}, updating currentTerm", myId,
-          message.from, reply.getTerm(), currentTerm);
+          message.sendingNodeId, reply.getTerm(), currentTerm);
 
       setCurrentTerm(reply.getTerm());
       return;
@@ -689,7 +689,7 @@ public class ReplicatorInstance implements ReplicationModule.Replicator {
     // did you vote for me?
     if (reply.getVoteGranted()) {
       // yes!
-      votes.add(message.from);
+      votes.add(message.sendingNodeId);
     }
 
     if (votes.size() >= majority) {

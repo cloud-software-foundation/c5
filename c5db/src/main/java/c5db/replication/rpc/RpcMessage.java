@@ -33,15 +33,15 @@ import com.dyuproject.protostuff.Message;
  * * Non-wire  -- for messages to be sent to other folks
  */
 public class RpcMessage {
-  public final long to;
-  public final long from;
+  public final long recipientNodeId;
+  public final long sendingNodeId;
   public final String quorumId;
 
   public final Message message;
 
-  protected RpcMessage(long to, long from, String quorumId, Message message) {
-    this.to = to;
-    this.from = from;
+  protected RpcMessage(long recipientNodeId, long sendingNodeId, String quorumId, Message message) {
+    this.recipientNodeId = recipientNodeId;
+    this.sendingNodeId = sendingNodeId;
     this.quorumId = quorumId;
 
     this.message = message;
@@ -72,19 +72,20 @@ public class RpcMessage {
 
   @Override
   public String toString() {
-    return String.format("From: %d to: %d message: %s contents: %s", from, to, quorumId, message);
+    return String.format("SendingNodeId: %d RecipientNodeId: %d message: %s contents: %s",
+        sendingNodeId, recipientNodeId, quorumId, message);
   }
 
   public ReplicationWireMessage getWireMessage(
       long messageId,
-      long from,
-      long to,
+      long sendingNodeId,
+      long recipientNodeId,
       boolean inReply
   ) {
     return new ReplicationWireMessage(
         messageId,
-        from,
-        to,
+        sendingNodeId,
+        recipientNodeId,
         quorumId,
         inReply,
         getRequestVoteMessage(),
