@@ -17,7 +17,7 @@
 package c5db.codec;
 
 import c5db.client.generated.Call;
-import com.dyuproject.protostuff.ByteBufferInput;
+import io.protostuff.ByteBufferInput;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;

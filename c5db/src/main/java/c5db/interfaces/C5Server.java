@@ -19,7 +19,7 @@ package c5db.interfaces;
 import c5db.NioFileConfigDirectory;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
-import com.dyuproject.protostuff.Message;
+import io.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
