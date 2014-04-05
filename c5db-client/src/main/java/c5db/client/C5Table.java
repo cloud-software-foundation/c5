@@ -29,7 +29,7 @@ import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScannerManager;
-import com.dyuproject.protostuff.ByteString;
+import io.protostuff.ByteString;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
