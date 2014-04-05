@@ -103,16 +103,17 @@ public class TabletService extends AbstractService implements TabletModule {
             e.printStackTrace();
           }
         }
-
-      HRegion region = onlineRegions.get(tabletName);
-      // TODO remove
-      if (region == null){
+        HRegion region = onlineRegions.get(tabletName);
+        // TODO remove
+        if (region == null) {
           Iterator<HRegion> iterator = onlineRegions.values().iterator();
-          iterator.next();
-          region = iterator.next();
-      }
-      return region;
-    }
+          do {
+            region = iterator.next();
+          } while (region.getTableDesc().getTableName().getNameAsString().contains("root"));
+
+        }
+        return region;
+        }
 
     @Override
     protected void doStart() {
