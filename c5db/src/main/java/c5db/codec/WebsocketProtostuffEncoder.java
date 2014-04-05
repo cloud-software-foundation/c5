@@ -18,7 +18,7 @@ package c5db.codec;
 
 import c5db.C5ServerConstants;
 import c5db.client.generated.Response;
-import com.dyuproject.protostuff.LowCopyProtobufOutput;
+import io.protostuff.LowCopyProtobufOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
