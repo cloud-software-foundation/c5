@@ -16,14 +16,29 @@
  */
 package c5db;
 
-public class C5ServerConstants {
-  public static final int MSG_SIZE = 100;
-  public static final String LOG_NAME = "log";
-  public static final String WAL_DIR = "wal";
-  public static final String ARCHIVE_DIR = "old_wal";
-  public static final int  MAX_CALL_SIZE = Integer.MAX_VALUE;
-  public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
-  public static final String LOCALHOST = "localhost";
-  public static final int WAL_THREAD_POOL_SIZE = 1;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+
+import java.util.List;
+
+public class CollectionMatchers {
+  public static <T extends Comparable<T>> Matcher<List<T>> isNondecreasing() {
+    return new TypeSafeMatcher<List<T>>() {
+      @Override
+      protected boolean matchesSafely(List<T> list) {
+        for (int i = 1; i < list.size(); i++) {
+          if (list.get(i).compareTo(list.get(i - 1)) < 0) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("a list whose elements are nondecreasing");
+      }
+    };
+  }
 }

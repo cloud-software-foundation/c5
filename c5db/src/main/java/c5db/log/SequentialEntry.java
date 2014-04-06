@@ -14,16 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db;
 
-public class C5ServerConstants {
-  public static final int MSG_SIZE = 100;
-  public static final String LOG_NAME = "log";
-  public static final String WAL_DIR = "wal";
-  public static final String ARCHIVE_DIR = "old_wal";
-  public static final int  MAX_CALL_SIZE = Integer.MAX_VALUE;
-  public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
-  public static final String LOCALHOST = "localhost";
-  public static final int WAL_THREAD_POOL_SIZE = 1;
+package c5db.log;
+
+/**
+ * A log entry with a sequence and an associated election term.
+ */
+public interface SequentialEntry {
+  long getSeqNum();
+
+  long getElectionTerm();
 }
