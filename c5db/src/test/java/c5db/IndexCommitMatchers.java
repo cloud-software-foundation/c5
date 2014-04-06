@@ -16,36 +16,32 @@
  */
 package c5db;
 
-import c5db.interfaces.TabletModule;
+import c5db.interfaces.ReplicationModule;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-/**
- * Matchers for instances of {@link c5db.interfaces.TabletModule.TabletStateChange}
- */
-public class TabletMatchers {
-  public static Matcher<TabletModule.TabletStateChange> hasStateEqualTo(TabletModule.Tablet.State state) {
-    return new StateMatcher(state);
+public class IndexCommitMatchers {
+  public static IndexCommitNoticeMatcher hasCommitNoticeIndexValueAtLeast(long indexValue) {
+    return new IndexCommitNoticeMatcher(indexValue);
   }
 
-  public static class StateMatcher extends TypeSafeMatcher<TabletModule.TabletStateChange> {
+  public static class IndexCommitNoticeMatcher extends TypeSafeMatcher<ReplicationModule.IndexCommitNotice> {
+    private final long minimumIndexValue;
 
-    private final TabletModule.Tablet.State state;
-
-    public StateMatcher(TabletModule.Tablet.State state) {
-      this.state = state;
+    public IndexCommitNoticeMatcher(long minimumIndexValue) {
+      this.minimumIndexValue = minimumIndexValue;
     }
 
     @Override
-    protected boolean matchesSafely(TabletModule.TabletStateChange item) {
-      return item.state.equals(state);
+    protected boolean matchesSafely(ReplicationModule.IndexCommitNotice item) {
+      return item.committedIndex >= minimumIndexValue;
     }
 
     @Override
     public void describeTo(Description description) {
-      description.appendText("a state that is")
-          .appendValue(state);
+      description.appendText("a index that is")
+          .appendValue(minimumIndexValue);
     }
   }
+
 }
