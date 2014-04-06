@@ -14,16 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db;
+package c5db.util;
 
-public class C5ServerConstants {
-  public static final int MSG_SIZE = 100;
-  public static final String LOG_NAME = "log";
-  public static final String WAL_DIR = "wal";
-  public static final String ARCHIVE_DIR = "old_wal";
-  public static final int  MAX_CALL_SIZE = Integer.MAX_VALUE;
-  public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
-  public static final String LOCALHOST = "localhost";
-  public static final int WAL_THREAD_POOL_SIZE = 1;
+/**
+ * Interface to permit the use of a lambda that supplies a result, and also throws a checked exception.
+ *
+ * @param <T>   Type supplied by the supplier; analogous to {@code Supplier<T>}
+ * @param <E>   Type of the exception thrown
+ */
+public interface CheckedSupplier<T, E extends Throwable>  {
+
+  T get() throws E;
 }

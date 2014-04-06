@@ -16,11 +16,12 @@
  */
 package c5db.log;
 
-import c5db.generated.Log;
+import c5db.generated.RegionWalEntry;
 import c5db.interfaces.ReplicationModule;
 import c5db.replication.ReplicatorInfoPersistence;
 import c5db.replication.ReplicatorInformationInterface;
-import com.google.protobuf.ByteString;
+import io.protostuff.LinkBuffer;
+import io.protostuff.LowCopyProtostuffOutput;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -203,24 +205,28 @@ public class OLogShim implements Syncable, HLog {
         //ReplicatorInstance replicator = getReplicator(info);
 
         for (KeyValue edit : edits.getKeyValues()) {
-            Log.Entry entry = Log
-                    .Entry
-                    .newBuilder()
-                    .setRegionInfo(info.getRegionNameAsString())
-                    .setKey(ByteString.copyFrom(edit.getRow()))
-                    .setFamily(ByteString.copyFrom(edit.getFamily()))
-                    .setColumn(ByteString.copyFrom(edit.getQualifier()))
-                    .setTs(edit.getTimestamp())
-                    .setValue(ByteString.copyFrom(edit.getValue()))
-                    .build();
+            RegionWalEntry entry = new RegionWalEntry(
+                    info.getRegionNameAsString(),
+                    ByteBuffer.wrap(edit.getRow()),
+                    ByteBuffer.wrap(edit.getFamily()),
+                    ByteBuffer.wrap(edit.getQualifier()),
+                    ByteBuffer.wrap(edit.getValue()),
+                    edit.getTimestamp());
             try {
                 // our replicator knows what quorumId/tabletId we are.
-                replicatorInstance.logData(entry.toByteArray());
+                replicatorInstance.logData(serializeEntry(entry));
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
         }
         return 0;
+    }
+
+    private static List<ByteBuffer> serializeEntry(RegionWalEntry entry) throws IOException {
+      LinkBuffer linkBuffer = new LinkBuffer();
+      LowCopyProtostuffOutput lcpo = new LowCopyProtostuffOutput(linkBuffer);
+      RegionWalEntry.getSchema().writeTo(lcpo, entry);
+      return linkBuffer.finish();
     }
 
     private Channel<ReplicationModule.ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
