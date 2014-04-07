@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.codec;
 
 import c5db.C5ServerConstants;
 import c5db.client.generated.Response;
-import io.protostuff.LowCopyProtobufOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,6 +26,7 @@ import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.protostuff.LowCopyProtobufOutput;
 
 import java.nio.ByteBuffer;
 import java.util.List;

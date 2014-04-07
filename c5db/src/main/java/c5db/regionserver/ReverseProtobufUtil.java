@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.regionserver;
 
 
@@ -111,17 +112,22 @@ public class ReverseProtobufUtil {
    * @throws IOException
    */
   public static Get toGet(final c5db.client.generated.Get proto) throws IOException {
-    if (proto == null) return null;
+    if (proto == null) {
+      return null;
+    }
     byte[] row = proto.getRow().array();
     Get get = new Get(row);
     get.setCacheBlocks(proto.getCacheBlocks());
     // TODO we probably need a better way of managing these.
-    if (proto.getMaxVersions() != 0)
+    if (proto.getMaxVersions() != 0) {
       get.setMaxVersions(proto.getMaxVersions());
-    if (proto.getStoreLimit() != 0)
+    }
+    if (proto.getStoreLimit() != 0) {
       get.setMaxResultsPerColumnFamily(proto.getStoreLimit());
-    if (proto.getStoreOffset() != 0)
+    }
+    if (proto.getStoreOffset() != 0) {
       get.setRowOffsetPerColumnFamily(proto.getStoreOffset());
+    }
     if (proto.getTimeRange() != null) {
       c5db.client.generated.TimeRange timeRange = proto.getTimeRange();
 

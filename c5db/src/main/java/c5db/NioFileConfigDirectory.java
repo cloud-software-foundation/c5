@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db;
 
 import com.google.common.collect.Lists;
@@ -78,7 +79,9 @@ public class NioFileConfigDirectory implements ConfigDirectory {
     }
   }
 
-  /** Get the contents of the node id config file */
+  /**
+   * Get the contents of the node id config file
+   */
   @Override
   public String getNodeId() throws IOException {
     return getFirstLineOfFile(nodeIdPath);
@@ -136,8 +139,9 @@ public class NioFileConfigDirectory implements ConfigDirectory {
       } catch (NoSuchFileException ex) {
         return null;
       }
-      if (allLines.isEmpty())
+      if (allLines.isEmpty()) {
         return null;
+      }
       return allLines.get(0);
     }
     return null;
@@ -147,6 +151,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
   public void setNodeIdFile(String data) throws IOException {
     setFile(data, nodeIdPath);
   }
+
   @Override
   public void setClusterNameFile(String data) throws IOException {
     setFile(data, clusterNamePath);

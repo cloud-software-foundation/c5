@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.testing;
 
 import org.apache.hadoop.hbase.util.Bytes;
@@ -23,8 +24,8 @@ import org.hamcrest.TypeSafeMatcher;
 import java.util.Arrays;
 
 /**
-* A Hamcrest matcher for comparing byte arrays.
-*/
+ * A Hamcrest matcher for comparing byte arrays.
+ */
 public class BytesEqualMatcher extends TypeSafeMatcher<byte[]> {
   private final byte[] precond;
 
@@ -35,7 +36,7 @@ public class BytesEqualMatcher extends TypeSafeMatcher<byte[]> {
   public static String printFirstBytes(byte[] bytes, int firstXBytes) {
     String rep = Bytes.toStringBinary(bytes, 0, Math.min(firstXBytes, bytes.length));
     if (bytes.length > firstXBytes) {
-      return rep + "...(" + (bytes.length-firstXBytes) + " more)";
+      return rep + "...(" + (bytes.length - firstXBytes) + " more)";
     }
     return rep;
   }

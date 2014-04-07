@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.util;
 
 import com.google.protobuf.CodedInputStream;
@@ -26,35 +27,35 @@ import java.nio.ByteBuffer;
 
 public class EncodeTest {
 
-    @Test
-    public void testVarInt() throws Exception {
-        //byte[] thingy = new byte[50];
+  @Test
+  public void testVarInt() throws Exception {
+    //byte[] thingy = new byte[50];
 
-        long[] lengths = {1, 20, 200, 1024, 2048, 4000, 10000, 50000,
-                100000, 1024*1024,
-                ((long)Integer.MAX_VALUE)*100,
-                -1, -200, -5000};
+    long[] lengths = {1, 20, 200, 1024, 2048, 4000, 10000, 50000,
+        100000, 1024 * 1024,
+        ((long) Integer.MAX_VALUE) * 100,
+        -1, -200, -5000};
 
 
-        for (long value: lengths) {
-            // do the test:
-            ByteBufferOutputStream bbos = new ByteBufferOutputStream(12);
-            CodedOutputStream cos = CodedOutputStream.newInstance(bbos);
-            long newvalue = (value << 4 )| 8;
-            //cos.writeRawVarint64(newvalue);
-            cos.writeSInt64NoTag(newvalue);
-            cos.flush();
+    for (long value : lengths) {
+      // do the test:
+      ByteBufferOutputStream bbos = new ByteBufferOutputStream(12);
+      CodedOutputStream cos = CodedOutputStream.newInstance(bbos);
+      long newvalue = (value << 4) | 8;
+      //cos.writeRawVarint64(newvalue);
+      cos.writeSInt64NoTag(newvalue);
+      cos.flush();
 
-            ByteBuffer bb = bbos.getByteBuffer();
-            System.out.println("value: " + value + ", length: " + bb.remaining());
+      ByteBuffer bb = bbos.getByteBuffer();
+      System.out.println("value: " + value + ", length: " + bb.remaining());
 
-            ByteBufferInputStream bbis = new ByteBufferInputStream(bb);
-            CodedInputStream cis = CodedInputStream.newInstance(bbis);
-            long outval = cis.readSInt64();
-            long actual = outval >> 4;
-            long tag = outval & 0x0F;
-            System.out.println("  transformed we are: " + outval + " actual: " + actual + " tag: " + tag);
-        }
+      ByteBufferInputStream bbis = new ByteBufferInputStream(bb);
+      CodedInputStream cis = CodedInputStream.newInstance(bbis);
+      long outval = cis.readSInt64();
+      long actual = outval >> 4;
+      long tag = outval & 0x0F;
+      System.out.println("  transformed we are: " + outval + " actual: " + actual + " tag: " + tag);
     }
+  }
 
 }

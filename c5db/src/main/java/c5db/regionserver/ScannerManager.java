@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.regionserver;
 
 import org.jetlang.channels.Channel;
@@ -28,7 +29,8 @@ public enum ScannerManager {
 
   private ConcurrentHashMap<Long, Channel<Integer>> scannerMap = new ConcurrentHashMap<>();
 
-  ScannerManager() {  }
+  ScannerManager() {
+  }
 
   public Channel<Integer> getChannel(long scannerId) {
     return scannerMap.get(scannerId);

@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.interfaces;
 
 import c5db.NioFileConfigDirectory;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
-import io.protostuff.Message;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
+import io.protostuff.Message;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
@@ -47,11 +48,12 @@ public interface C5Server extends Service {
    * file, and generated randomly (64 bits is enough for everyone, right?).  There may be
    * provisions to allow administrators to assign node ids.
    * <p>
+   *
    * @return THE node id for this server.
    */
-    public long getNodeId();
+  public long getNodeId();
 
-    // TODO this could be generified if we used an interface instead of ModuleType
+  // TODO this could be generified if we used an interface instead of ModuleType
 
   /**
    * This is primary mechanism via which modules with compile time binding via interfaces
@@ -66,6 +68,7 @@ public interface C5Server extends Service {
    * <p>
    * Right now modules are specified via an enum, in the future perhaps we should
    * use a Java interface type?
+   *
    * @param moduleType the specific module type you wish to retrieve
    * @return a future that will be set when the module is running
    */
@@ -83,6 +86,7 @@ public interface C5Server extends Service {
    * This allows administration-via tooling, and avoids the need to have something like
    * password-less ssh set up (which not all wish to do).
    * <p>
+   *
    * @return The jetlang channel to submit command messages
    */
   public Channel<Message<?>> getCommandChannel();
@@ -91,65 +95,66 @@ public interface C5Server extends Service {
    * Similar to {@link #getCommandChannel()} except providing a feedback message with information
    * on the status and success of commands.
    * <p>
+   *
    * @return The jetlang request channel to submit requests
    */
   public RequestChannel<Message<?>, CommandReply> getCommandRequests();
 
-    public Channel<ModuleStateChange> getModuleStateChangeChannel();
+  public Channel<ModuleStateChange> getModuleStateChangeChannel();
 
-    public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException;
+  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException;
 
-    public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
+  public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
 
-    public NioFileConfigDirectory getConfigDirectory();
+  public NioFileConfigDirectory getConfigDirectory();
 
-    public boolean isSingleNodeMode();
+  public boolean isSingleNodeMode();
 
-    /**
-     * Return a C5FiberFactory using the passed exception handler, which will be run on the fiber
-     * that throws an uncaught exception.
-     *
-     * @param throwableHandler Exception handler for pool fibers to use.
-     * @return C5FiberFactory instance.
-     */
-    public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableHandler);
+  /**
+   * Return a C5FiberFactory using the passed exception handler, which will be run on the fiber
+   * that throws an uncaught exception.
+   *
+   * @param throwableHandler Exception handler for pool fibers to use.
+   * @return C5FiberFactory instance.
+   */
+  public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableHandler);
 
-    public static class ModuleStateChange {
-        public final C5Module module;
-        public final State state;
+  public static class ModuleStateChange {
+    public final C5Module module;
+    public final State state;
 
-        @Override
-        public String toString() {
-            return "ModuleStateChange{" +
-                    "module=" + module +
-                    ", state=" + state +
-                    '}';
-        }
-
-        public ModuleStateChange(C5Module module, State state) {
-            this.module = module;
-            this.state = state;
-        }
+    @Override
+    public String toString() {
+      return "ModuleStateChange{" +
+          "module=" + module +
+          ", state=" + state +
+          '}';
     }
 
-    public Channel<ConfigKeyUpdated> getConfigUpdateChannel();
-
-    public static class ConfigKeyUpdated {
-        public final String configKey;
-        public final Object configValue;
-
-        public ConfigKeyUpdated(String configKey, Object configValue) {
-            this.configKey = configKey;
-            this.configValue = configValue;
-        }
-
-        @Override
-        public String toString() {
-            return "ConfigKeyUpdated{" +
-                    "configKey='" + configKey + '\'' +
-                    ", configValue=" + configValue +
-                    '}';
-        }
-
+    public ModuleStateChange(C5Module module, State state) {
+      this.module = module;
+      this.state = state;
     }
+  }
+
+  public Channel<ConfigKeyUpdated> getConfigUpdateChannel();
+
+  public static class ConfigKeyUpdated {
+    public final String configKey;
+    public final Object configValue;
+
+    public ConfigKeyUpdated(String configKey, Object configValue) {
+      this.configKey = configKey;
+      this.configValue = configValue;
+    }
+
+    @Override
+    public String toString() {
+      return "ConfigKeyUpdated{" +
+          "configKey='" + configKey + '\'' +
+          ", configValue=" + configValue +
+          '}';
+    }
+
+  }
 }

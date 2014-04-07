@@ -18,6 +18,7 @@
 /*
 The codec package is a collection of netty encoders and decoders across c5db.
  */
+
 package c5db.codec;
 
 
