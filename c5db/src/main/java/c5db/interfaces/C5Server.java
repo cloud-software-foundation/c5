@@ -18,6 +18,7 @@
 package c5db.interfaces;
 
 import c5db.ConfigDirectory;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
@@ -98,7 +99,7 @@ public interface C5Server extends Service {
    *
    * @return The jetlang request channel to submit requests
    */
-  public RequestChannel<Message<?>, CommandReply> getCommandRequests();
+  public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests();
 
   public Channel<ModuleStateChange> getModuleStateChangeChannel();
 

@@ -364,6 +364,11 @@ public class TabletService extends AbstractService implements TabletModule {
     return 0;
   }
 
+  @Override
+  public String acceptCommand(String commandString) {
+    return null;
+  }
+
   public int getMinQuorumSize() {
     if (server.isSingleNodeMode()) {
       return 1;
