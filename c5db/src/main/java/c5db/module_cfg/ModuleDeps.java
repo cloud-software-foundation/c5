@@ -100,8 +100,8 @@ public class ModuleDeps {
       }
     }
 
-    Joiner joiner = Joiner.on("\n");
-    System.out.println(joiner.join(typeClassMap.entrySet()));
+    //Joiner joiner = Joiner.on("\n");
+    //System.out.println(joiner.join(typeClassMap.entrySet()));
     return Graph.doTarjan(allNodes.values());
   }
 

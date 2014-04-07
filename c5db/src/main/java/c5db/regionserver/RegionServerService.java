@@ -146,6 +146,11 @@ public class RegionServerService extends AbstractService implements RegionServer
     return port;
   }
 
+  @Override
+  public String acceptCommand(String commandString) {
+    return null;
+  }
+
   public HRegion getOnlineRegion(String regionName) {
     // TODO REMOVE ME!
 

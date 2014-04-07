@@ -21,8 +21,10 @@ import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.log.LogFileService;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.log.LogService;
 import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
 import c5db.messages.generated.StopModule;
@@ -161,16 +163,15 @@ public class C5DB extends AbstractService implements C5Server {
     return future;
   }
 
+  public RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+  @Override
+  public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests() {
+    return commandRequests;
+  }
+
   @Override
   public Channel<Message<?>> getCommandChannel() {
     return commandChannel;
-  }
-
-  private final RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
-
-  @Override
-  public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
-    return commandRequests;
   }
 
   private final Channel<ModuleStateChange> serviceRegisteredChannel = new MemoryChannel<>();
@@ -253,33 +254,58 @@ public class C5DB extends AbstractService implements C5Server {
     if (msg instanceof StartModule) {
       StartModule message = (StartModule) msg;
       startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
-    } else if (msg instanceof StopModule) {
-      StopModule message = (StopModule) msg;
+    }
+    else if (msg instanceof StopModule) {
+      StopModule message = (StopModule)msg;
       stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
     }
   }
 
   @FiberOnly
-  private void processCommandRequest(Request<Message<?>, CommandReply> request) {
-    Message<?> r = request.getRequest();
+  private void processCommandRequest(Request<CommandRpcRequest<?>, CommandReply> request) {
+    CommandRpcRequest<?> r = request.getRequest();
+    Message<?> subMessage = r.message;
+    long receipentNodeId = r.receipientNodeId;
+
     try {
       String stdout;
 
-      if (r instanceof StartModule) {
-        StartModule message = (StartModule) r;
+      if (subMessage instanceof StartModule) {
+        StartModule message = (StartModule)subMessage;
         startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
 
         stdout = String.format("Module %s started", message.getModule());
-      } else if (r instanceof StopModule) {
-        StopModule message = (StopModule) r;
+      } else if (subMessage instanceof StopModule) {
+        StopModule message = (StopModule)subMessage;
 
         stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
 
         stdout = String.format("Module %s started", message.getModule());
+      } else if (subMessage instanceof ModuleSubCommand) {
+        // how this works:
+        // - pluck out the module
+        // - call the thingy
+        // - collect the reply
+        // reply.
+        stdout = "";
+        ModuleSubCommand moduleSubCommand = (ModuleSubCommand)subMessage;
+        ModuleType moduleTypeToIssueCommandTo = moduleSubCommand.getModule();
+        C5Module module = this.allModules.get(moduleTypeToIssueCommandTo);
+        if (module == null) {
+          stdout = "Module type " + moduleTypeToIssueCommandTo + " is not running!";
+        } else {
+          String result = module.acceptCommand(moduleSubCommand.getSubCommand());
+          if (result == null) {
+            stdout = "(null) - module doesnt support commands";
+          } else {
+            stdout = result;
+          }
+        }
       } else {
         CommandReply reply = new CommandReply(false,
             "",
             String.format("Unknown message type: %s", r.getClass()));
+
         request.reply(reply);
         return;
       }
