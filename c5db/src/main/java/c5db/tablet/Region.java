@@ -17,9 +17,13 @@
 
 package c5db.tablet;
 
+import c5db.client.generated.TableName;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
 import java.io.IOException;
@@ -37,6 +41,11 @@ public interface Region {
    * <p>
    * Mock out the creator interface - then create/return mock region interfaces.
    */
+
+  Result get(Get get) throws IOException;
+
+  void put(Put put) throws IOException;
+
   public interface Creator {
     Region getHRegion(
         Path basePath,

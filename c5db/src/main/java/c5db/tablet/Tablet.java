@@ -190,4 +190,9 @@ public class Tablet implements TabletModule.Tablet {
   public List<Long> getPeers() {
     return peers;
   }
+
+  @Override
+  public Region getRegion() {
+    return region;
+  }
 }
