@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.interfaces;
 
 import c5db.messages.generated.ModuleType;
@@ -66,12 +67,18 @@ public interface TabletModule extends C5Module {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
 
       TabletStateChange that = (TabletStateChange) o;
 
-      if (optError != null ? !optError.equals(that.optError) : that.optError != null) return false;
+      if (optError != null ? !optError.equals(that.optError) : that.optError != null) {
+        return false;
+      }
       return state == that.state && tablet.equals(that.tablet);
 
     }

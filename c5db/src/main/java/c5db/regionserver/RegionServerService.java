@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.regionserver;
 
 import c5db.C5ServerConstants;
 import c5db.codec.WebsocketProtostuffDecoder;
 import c5db.codec.WebsocketProtostuffEncoder;
-import c5db.util.C5FiberFactory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
 import c5db.messages.generated.ModuleType;
+import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;

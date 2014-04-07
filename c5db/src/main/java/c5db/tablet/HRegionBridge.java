@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import org.apache.hadoop.conf.Configuration;
@@ -27,7 +28,7 @@ import java.nio.file.Path;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
- *
+ * <p>
  * Provides an abstraction and test point, and lessons in how to abstract
  * and extract HRegion functionality.
  */
@@ -36,10 +37,10 @@ public class HRegionBridge implements Region {
   public static class Creator implements Region.Creator {
     @Override
     public Region getHRegion(Path basePath,
-                              HRegionInfo regionInfo,
-                              HTableDescriptor tableDescriptor,
-                              HLog log,
-                              Configuration conf) throws IOException {
+                             HRegionInfo regionInfo,
+                             HTableDescriptor tableDescriptor,
+                             HLog log,
+                             Configuration conf) throws IOException {
       return new HRegionBridge(HRegion.openHRegion(
           new org.apache.hadoop.fs.Path(basePath.toString()),
           regionInfo,

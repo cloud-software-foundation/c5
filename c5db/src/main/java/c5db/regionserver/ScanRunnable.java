@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.regionserver;
 
 
@@ -90,7 +91,7 @@ public class ScanRunnable implements Callback<Integer> {
           // If we are not the first one and we are a different row than the previous
           cells.add(ReverseProtobufUtil.toCell(cell));
 
-        if (!(previousRow == null ||  previousRow.compareTo(cellBufferRow) == 0 )) {
+          if (!(previousRow == null || previousRow.compareTo(cellBufferRow) == 0)) {
             cellsPerResult.add(cells.size());
             scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
             cells = new ArrayList<>();
