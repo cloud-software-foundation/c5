@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.interfaces;
 
 import c5db.eventLogging.generated.EventLogEntry;
@@ -28,5 +29,5 @@ import org.jetlang.channels.Channel;
 @ModuleTypeBinding(ModuleType.EventLog)
 public interface EventLogModule extends C5Module {
 
-    Channel<EventLogEntry> eventLogChannel();
+  Channel<EventLogEntry> eventLogChannel();
 }

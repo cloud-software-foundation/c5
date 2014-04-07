@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.discovery;
 
 import io.netty.buffer.ByteBuf;
@@ -23,13 +24,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import java.net.SocketAddress;
 
 public class InboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-        SocketAddress remoteAddress = ctx.channel().remoteAddress();
-        SocketAddress localAddress = ctx.channel().localAddress();
+  @Override
+  protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+    SocketAddress remoteAddress = ctx.channel().remoteAddress();
+    SocketAddress localAddress = ctx.channel().localAddress();
 
-        System.out.println("Got message from " + remoteAddress + " to me at: " + localAddress);
-        System.out.println("  It was SOOO big: " + msg.readableBytes());
+    System.out.println("Got message from " + remoteAddress + " to me at: " + localAddress);
+    System.out.println("  It was SOOO big: " + msg.readableBytes());
 
-    }
+  }
 }
