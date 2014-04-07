@@ -25,13 +25,9 @@ import org.junit.Test;
 
 import java.util.List;
 
-
-/**
- *
- */
 public class ModuleDepsTest {
 
-  @Test
+  //@Test
   public void testTrans() throws Exception {
 //        ImmutableList<ImmutableList<ModuleType>> lst = ModuleDeps.getTransDeps(ImmutableList.of(ModuleType.Management, ModuleType.Client, ModuleType.Discovery));
 //        for (ImmutableList<ModuleType> l : lst) {
@@ -47,10 +43,11 @@ public class ModuleDepsTest {
   @Test
   public void testFoo() throws Exception {
 
-    List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph("c5db.interfaces.RegionServerModule");
+    List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph ("c5db.interfaces.RegionServerModule", "c5db.interfaces.EventLogModule");
 
     Joiner joiner = Joiner.on("\n");
 
+    System.out.println("result joined:");
     System.out.println(joiner.join(result));
   }
 }

@@ -143,4 +143,9 @@ public class EventLogService extends AbstractService implements EventLogModule {
   public int port() {
     return port;
   }
+
+  @Override
+  public String acceptCommand(String commandString) {
+    return null;
+  }
 }
