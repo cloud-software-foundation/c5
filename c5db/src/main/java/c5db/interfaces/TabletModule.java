@@ -18,6 +18,7 @@
 package c5db.interfaces;
 
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.Region;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.regionserver.HRegion;
@@ -104,6 +105,8 @@ public interface TabletModule extends C5Module {
     HTableDescriptor getTableDescriptor();
 
     List<Long> getPeers();
+
+    Region getRegion();
 
     enum State {
       Initialized, // Initial state, nothing done yet.

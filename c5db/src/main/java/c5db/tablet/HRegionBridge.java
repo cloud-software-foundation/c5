@@ -20,6 +20,9 @@ package c5db.tablet;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
@@ -33,6 +36,23 @@ import java.nio.file.Path;
  * and extract HRegion functionality.
  */
 public class HRegionBridge implements Region {
+
+  private final HRegion theRegion;
+
+
+  public HRegionBridge(final HRegion theRegion) {
+    this.theRegion = theRegion;
+  }
+
+  @Override
+  public Result get(final Get get) throws IOException {
+    return theRegion.get(get);
+  }
+
+  @Override
+  public void put(final Put put) throws IOException {
+    theRegion.put(put);
+  }
 
   public static class Creator implements Region.Creator {
     @Override
@@ -51,10 +71,4 @@ public class HRegionBridge implements Region {
     }
   }
 
-
-  private final HRegion theRegion;
-
-  public HRegionBridge(final HRegion theRegion) {
-    this.theRegion = theRegion;
-  }
 }
