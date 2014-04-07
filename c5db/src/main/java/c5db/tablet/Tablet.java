@@ -127,6 +127,9 @@ public class Tablet implements TabletModule.Tablet {
     assert tabletState == State.CreatingReplicator;
 
     this.replicator = replicator;
+    Channel<ReplicationModule.Replicator.State> replicatorStateChannel = replicator.getStateChannel();
+    replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
+
     this.replicator.start();
 
     OLogShim shim = new OLogShim(replicator);
@@ -142,6 +145,13 @@ public class Tablet implements TabletModule.Tablet {
       handleFail(e);
     }
   }
+
+  private void tabletStateChangeCallback(ReplicationModule.Replicator.State state) {
+    if (state.equals(ReplicationModule.Replicator.State.LEADER)) {
+      this.setTabletState(State.Leader);
+    }
+  }
+
 
   private void publishEvent(State newState) {
     getStateChangeChannel().publish(new TabletStateChange(this, newState, null));
