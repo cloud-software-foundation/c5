@@ -27,4 +27,12 @@ public class C5ServerConstants {
   public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
   public static final String LOCALHOST = "localhost";
   public static final int WAL_THREAD_POOL_SIZE = 1;
+  public static final byte[] META_INFO_CF = {1, 2, 3, 4};
+  public static final byte[] META_ROW = {1, 2, 3, 4, 5};
+  public static final byte[] META_INFO_CQ = {1, 2, 3, 4};
+  public static final byte[] INTERNAL_NAMESPACE = {1, 2, 3, 4};
+  public static final byte[] META_TABLE_NAME = {1, 2, 3, 4};
+  public static final byte[] META_START_KEY = {0x00};
+
+  public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 }

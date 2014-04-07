@@ -79,10 +79,13 @@ message ColumnFamilySchema {
 message RegionInfo {
   required uint64 region_id = 1;
   required TableName table_name = 2;
-  optional bytes start_key = 3;
-  optional bytes end_key = 4;
-  optional bool offline = 5;
-  optional bool split = 6;
+  repeated int64 peers = 3;
+  required int64 leader = 4;
+  optional bytes start_key = 5;
+  optional bytes end_key = 6;
+  optional bool offline = 7;
+  optional bool split = 8;
+
 }
 
 /**
