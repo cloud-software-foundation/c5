@@ -113,6 +113,7 @@ public interface TabletModule extends C5Module {
       CreatingReplicator, // Waiting for replication instance to be created
       Open,   // Ready to service requests.
       Failed,
+      Leader,
     }
   }
 }
