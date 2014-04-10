@@ -17,7 +17,7 @@
 
 package c5db.interfaces;
 
-import c5db.NioFileConfigDirectory;
+import c5db.ConfigDirectory;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
@@ -106,7 +106,7 @@ public interface C5Server extends Service {
 
   public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
 
-  public NioFileConfigDirectory getConfigDirectory();
+  public ConfigDirectory getConfigDirectory();
 
   public boolean isSingleNodeMode();
 

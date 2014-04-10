@@ -17,7 +17,7 @@
 
 package c5db.tablet;
 
-import c5db.NioFileConfigDirectory;
+import c5db.ConfigDirectory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -263,7 +263,7 @@ public class TabletService extends AbstractService implements TabletModule {
     LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
     String quorumId = regionInfo.getRegionNameAsString();
-    NioFileConfigDirectory serverConfigDir = server.getConfigDirectory();
+    ConfigDirectory serverConfigDir = server.getConfigDirectory();
 
     ListenableFuture<ReplicationModule.Replicator> future =
         replicationModule.createReplicator(quorumId, peers);
