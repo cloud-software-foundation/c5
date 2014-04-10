@@ -17,9 +17,7 @@
 
 package c5db.tablet;
 
-import c5db.C5ServerConstants;
 import c5db.NioFileConfigDirectory;
-import c5db.generated.Log;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -27,7 +25,6 @@ import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.log.OLogShim;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.RegistryFile;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableList;
@@ -42,8 +39,6 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Durability;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -52,11 +47,8 @@ import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -265,27 +257,6 @@ public class TabletService extends AbstractService implements TabletModule {
     openRegion0(rootRegion, rootDesc, ImmutableList.copyOf(peers));
   }
 
-
-  @FiberOnly
-  private int startRegions(RegistryFile registryFile) throws IOException {
-    RegistryFile.Registry registry = registryFile.getRegistry();
-    int cnt = 0;
-    for (HRegionInfo regionInfo : registry.regions.keySet()) {
-      HTableDescriptor tableDescriptor =
-          new HTableDescriptor(regionInfo.getTableName());
-      for (HColumnDescriptor cf : registry.regions.get(regionInfo)) {
-        tableDescriptor.addFamily(cf);
-      }
-      // we have a table now.
-      ImmutableList<Long> peers = registry.peers.get(regionInfo);
-
-      // open a region async.
-      openRegion0(regionInfo, tableDescriptor, peers);
-      cnt++;
-    }
-    return cnt;
-  }
-
   private void openRegion0(final HRegionInfo regionInfo,
                            final HTableDescriptor tableDescriptor,
                            final ImmutableList<Long> peers) {
@@ -356,56 +327,6 @@ public class TabletService extends AbstractService implements TabletModule {
       }
     }, fiber);
   }
-
-  private void logReplay(final Path path) throws IOException {
-    java.nio.file.Path archiveLogPath = Paths.get(path.toString(), C5ServerConstants.ARCHIVE_DIR);
-    File[] archiveLogs = archiveLogPath.toFile().listFiles();
-
-    if (archiveLogs == null) {
-      return;
-    }
-
-    for (File log : archiveLogs) {
-      FileInputStream rif = new FileInputStream(log);
-      processLogFile(rif);
-      for (HRegion r : onlineRegions.values()) {
-        r.flushcache();
-      }
-    }
-    for (HRegion r : onlineRegions.values()) {
-      r.compactStores();
-    }
-
-    for (HRegion r : onlineRegions.values()) {
-      r.waitForFlushesAndCompactions();
-    }
-
-    //TODO WE SHOULDN'T BE ONLINE TIL THIS HAPPENS
-  }
-
-  private void processLogFile(FileInputStream rif) throws IOException {
-    Log.OLogEntry entry;
-    Log.Entry edit;
-    do {
-      entry = Log.OLogEntry.parseDelimitedFrom(rif);
-      // if ! at EOF                      z
-      if (entry != null) {
-        edit = Log.Entry.parseFrom(entry.getValue());
-        HRegion recoveryRegion = onlineRegions.get(edit.getRegionInfo());
-
-        if (recoveryRegion.getLastFlushTime() >= edit.getTs()) {
-          Put put = new Put(edit.getKey().toByteArray());
-          put.add(edit.getFamily().toByteArray(),
-              edit.getColumn().toByteArray(),
-              edit.getTs(),
-              edit.getValue().toByteArray());
-          put.setDurability(Durability.SKIP_WAL);
-          recoveryRegion.put(put);
-        }
-      }
-    } while (entry != null);
-  }
-
 
   @Override
   protected void doStop() {

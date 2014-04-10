@@ -20,8 +20,8 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.12</version>
-		    <configuration>
-		        <excludes>**/generated/**/*</excludes>
+                    <configuration>
+                        <excludes>**/generated/**/*</excludes>
                         <configLocation>checkstyle_checks.xml</configLocation>
                         <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                         <suppressionsLocation>suppressions.xml</suppressionsLocation>
@@ -68,11 +68,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>io.protostuff</groupId>
-                <artifactId>protostuff-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>com.theoryinpractise</groupId>
@@ -145,11 +140,6 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
