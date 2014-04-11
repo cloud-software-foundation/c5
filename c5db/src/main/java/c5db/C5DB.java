@@ -216,7 +216,6 @@ public class C5DB extends AbstractService implements C5Server {
       notifyFailed(e);
     }
 
-
     try {
       serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
       fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
