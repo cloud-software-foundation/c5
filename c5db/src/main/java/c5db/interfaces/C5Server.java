@@ -119,6 +119,8 @@ public interface C5Server extends Service {
    */
   public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableHandler);
 
+  ListenableFuture<Void> getShutdownFuture();
+
   public static class ModuleStateChange {
     public final C5Module module;
     public final State state;
