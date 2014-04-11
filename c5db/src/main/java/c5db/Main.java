@@ -37,8 +37,8 @@ public class Main {
     String username = System.getProperty("user.name");
 
     // nodeId is random initially.  Then if provided on args, we take that.
-    Random rnd0 = new Random();
-    long nodeId = rnd0.nextLong();
+    Random nodeIdRandomizer = new Random();
+    long nodeId = nodeIdRandomizer.nextLong();
 
     if (args.length > 0) {
       nodeId = Long.parseLong(args[0]);
@@ -58,13 +58,13 @@ public class Main {
 
     C5Server instance = new C5DB(cfgDir);
     instance.start();
-    Random rnd = new Random();
+    Random portRandomizer = new Random();
 
     int regionServerPort;
     if (System.getProperties().containsKey("regionServerPort")) {
       regionServerPort = Integer.parseInt(System.getProperty("regionServerPort"));
     } else {
-      regionServerPort = 8080 + rnd.nextInt(1000);
+      regionServerPort = 8080 + portRandomizer.nextInt(1000);
     }
 
     // issue startup commands here that are common/we always want:
@@ -75,7 +75,7 @@ public class Main {
     instance.getCommandChannel().publish(startBeacon);
 
 
-    StartModule startReplication = new StartModule(ModuleType.Replication, rnd.nextInt(30000) + 1024, "");
+    StartModule startReplication = new StartModule(ModuleType.Replication, portRandomizer.nextInt(30000) + 1024, "");
     instance.getCommandChannel().publish(startReplication);
 
     StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
