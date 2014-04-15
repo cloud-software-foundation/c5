@@ -35,4 +35,9 @@ public class C5ServerConstants {
   public static final byte[] META_START_KEY = {0x00};
 
   public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+  public static final int DEFAULT_REGION_SERVER_PORT_MIN = 8080;
+  public static final int REGION_SERVER_PORT_RANGE = 1000;
+  public static final int DISCOVERY_PORT = 54333;
+  public static final int REPLICATOR_PORT_MIN = 1024;
+  public static final int REPLICATOR_PORT_RANGE = 30000;
 }

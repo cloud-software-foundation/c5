@@ -27,6 +27,7 @@ import java.util.Random;
  * CLI Entry point for the C5DB server.
  */
 public class Main {
+
   public static void main(String[] args) throws Exception {
     C5Server instance = startC5Server(args);
 
@@ -64,18 +65,20 @@ public class Main {
     if (System.getProperties().containsKey("regionServerPort")) {
       regionServerPort = Integer.parseInt(System.getProperty("regionServerPort"));
     } else {
-      regionServerPort = 8080 + portRandomizer.nextInt(1000);
+      regionServerPort = C5ServerConstants.DEFAULT_REGION_SERVER_PORT_MIN
+          + portRandomizer.nextInt(C5ServerConstants.REGION_SERVER_PORT_RANGE);
     }
 
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
     instance.getCommandChannel().publish(startLog);
 
-    StartModule startBeacon = new StartModule(ModuleType.Discovery, 54333, "");
+    StartModule startBeacon = new StartModule(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT, "");
     instance.getCommandChannel().publish(startBeacon);
 
-
-    StartModule startReplication = new StartModule(ModuleType.Replication, portRandomizer.nextInt(30000) + 1024, "");
+    StartModule startReplication = new StartModule(ModuleType.Replication,
+        portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
+        + C5ServerConstants.REPLICATOR_PORT_MIN, "");
     instance.getCommandChannel().publish(startReplication);
 
     StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
