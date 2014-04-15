@@ -72,7 +72,8 @@ public final class WebSocketServerIndexPage {
             "<textarea id=\"responseText\" style=\"width:500px;height:300px;\"></textarea>" + NEWLINE +
             "</form>" + NEWLINE +
             "</body>" + NEWLINE +
-            "</html>" + NEWLINE, CharsetUtil.US_ASCII);
+            "</html>" + NEWLINE, CharsetUtil.US_ASCII
+    );
   }
 
   private WebSocketServerIndexPage() {
