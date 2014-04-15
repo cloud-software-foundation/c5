@@ -54,14 +54,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-
 
 /**
  * Holds information about all other modules, can start/stop other modules, etc.
@@ -71,65 +68,23 @@ import java.util.function.Consumer;
  */
 public class C5DB extends AbstractService implements C5Server {
   private static final Logger LOG = LoggerFactory.getLogger(C5DB.class);
-  private String clusterName;
 
-  public static void main(String[] args) throws Exception {
+  private final String clusterName;
+  private final long nodeId;
+  private final ConfigDirectory configDirectory;
 
-    String username = System.getProperty("user.name");
+  private final Channel<Message<?>> commandChannel = new MemoryChannel<>();
+  private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
 
-    // nodeId is random initially.  Then if provided on args, we take that.
-    Random rnd0 = new Random();
-    long nodeId = rnd0.nextLong();
+  private Fiber serverFiber;
+  private PoolFiberFactory fiberPool;
+  private NioEventLoopGroup bossGroup;
+  private NioEventLoopGroup workerGroup;
 
-    if (args.length > 0) {
-      nodeId = Long.parseLong(args[0]);
-    }
-
-    String cfgPath = "/tmp/" + username + "/c5-" + Long.toString(nodeId);
-
-    // use system properties for other config so we don't end up writing a whole command line
-    // parse framework.
-    String reqCfgPath = System.getProperty("c5.cfgPath");
-    if (reqCfgPath != null) {
-      cfgPath = reqCfgPath;
-    }
-
-    NioFileConfigDirectory cfgDir = new NioFileConfigDirectory(Paths.get(cfgPath));
-    cfgDir.setNodeIdFile(Long.toString(nodeId));
-
-    instance = new C5DB(cfgDir);
-    instance.start();
-    Random rnd = new Random();
-
-    int regionServerPort;
-    if (System.getProperties().containsKey("regionServerPort")) {
-      regionServerPort = Integer.parseInt(System.getProperty("regionServerPort"));
-    } else {
-      regionServerPort = 8080 + rnd.nextInt(1000);
-    }
-
-    // issue startup commands here that are common/we always want:
-    StartModule startLog = new StartModule(ModuleType.Log, 0, "");
-    instance.getCommandChannel().publish(startLog);
-
-    StartModule startBeacon = new StartModule(ModuleType.Discovery, 54333, "");
-    instance.getCommandChannel().publish(startBeacon);
+  private final Map<ModuleType, C5Module> allModules = new HashMap<>();
 
 
-    StartModule startReplication = new StartModule(ModuleType.Replication, rnd.nextInt(30000) + 1024, "");
-    instance.getCommandChannel().publish(startReplication);
-
-    StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
-    instance.getCommandChannel().publish(startTablet);
-
-    StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
-    instance.getCommandChannel().publish(startRegionServer);
-  }
-
-  private static C5Server instance = null;
-
-
-  public C5DB(NioFileConfigDirectory configDirectory) throws IOException {
+  public C5DB(ConfigDirectory configDirectory) throws IOException {
     this.configDirectory = configDirectory;
 
     String data = configDirectory.getNodeId();
@@ -153,24 +108,6 @@ public class C5DB extends AbstractService implements C5Server {
     } else {
       this.clusterName = C5ServerConstants.LOCALHOST;
     }
-
-
-//        String clusterNameData = configDirectory.getClusterName();
-//        if (clusterNameData == null) {
-//            clusterNameData = "the-cluster";
-//            configDirectory.setClusterNameFile(clusterNameData);
-//        }
-//        this.clusterName = clusterNameData;
-
-  }
-
-  /**
-   * Returns the server, but it will be null if you aren't running inside one.
-   *
-   * @return return a static instance of C5DB.
-   */
-  public static C5Server getServer() {
-    return instance;
   }
 
   @Override
@@ -183,8 +120,8 @@ public class C5DB extends AbstractService implements C5Server {
     final SettableFuture<C5Module> future = SettableFuture.create();
     serverFiber.execute(() -> {
 
-      // What happens iff the moduleRegistry has EMPTY?
-      if (!moduleRegistry.containsKey(moduleType)) {
+      // What happens iff the allModules has EMPTY?
+      if (!allModules.containsKey(moduleType)) {
         // listen to the registration stream:
         final Disposable[] d = new Disposable[]{null};
         d[0] = getModuleStateChangeChannel().subscribe(serverFiber, message -> {
@@ -201,7 +138,7 @@ public class C5DB extends AbstractService implements C5Server {
         });
       }
 
-      future.set(moduleRegistry.get(moduleType));
+      future.set(allModules.get(moduleType));
     });
     return future;
   }
@@ -210,7 +147,7 @@ public class C5DB extends AbstractService implements C5Server {
   public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
     serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(moduleRegistry));
+      future.set(ImmutableMap.copyOf(allModules));
     });
     return future.get();
   }
@@ -219,36 +156,17 @@ public class C5DB extends AbstractService implements C5Server {
   public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
     serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(moduleRegistry));
+      future.set(ImmutableMap.copyOf(allModules));
     });
     return future;
   }
-
-  /**
-   * * Implementation ***
-   */
-
-
-  private Fiber serverFiber;
-  private final NioFileConfigDirectory configDirectory;
-
-  // The mapping between module name and the instance.
-  private final Map<ModuleType, C5Module> moduleRegistry = new HashMap<>();
-
-  private final long nodeId;
-
-  private final Channel<Message<?>> commandChannel = new MemoryChannel<>();
-
-  private PoolFiberFactory fiberPool;
-  private NioEventLoopGroup bossGroup;
-  private NioEventLoopGroup workerGroup;
 
   @Override
   public Channel<Message<?>> getCommandChannel() {
     return commandChannel;
   }
 
-  public RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+  private final RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   @Override
   public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
@@ -263,7 +181,7 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public NioFileConfigDirectory getConfigDirectory() {
+  public ConfigDirectory getConfigDirectory() {
     return configDirectory;
   }
 
@@ -274,7 +192,6 @@ public class C5DB extends AbstractService implements C5Server {
 
   @Override
   public Channel<ConfigKeyUpdated> getConfigUpdateChannel() {
-
     // TODO this
     return null;
   }
@@ -283,6 +200,52 @@ public class C5DB extends AbstractService implements C5Server {
   public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
     return new PoolFiberFactoryWithExecutor(fiberPool,
         new ExceptionHandlingBatchExecutor(throwableConsumer));
+  }
+
+  @Override
+  public ListenableFuture<Void> getShutdownFuture() {
+    return shutdownFuture;
+  }
+
+  @Override
+  protected void doStart() {
+    try {
+      // TODO this should be done as part of the log file service startup, if at all.
+      new LogFileService(configDirectory.getBaseConfigPath()).clearOldArchivedLogs(0);
+    } catch (IOException e) {
+      notifyFailed(e);
+    }
+
+    try {
+      serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
+      fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+      bossGroup = new NioEventLoopGroup(1);
+      workerGroup = new NioEventLoopGroup();
+
+      commandChannel.subscribe(serverFiber, message -> {
+        try {
+          processCommandMessage(message);
+        } catch (Exception e) {
+          LOG.warn("exception during message processing", e);
+        }
+      });
+
+      commandRequests.subscribe(serverFiber, this::processCommandRequest);
+
+      serverFiber.start();
+
+      notifyStarted();
+    } catch (Exception e) {
+      notifyFailed(e);
+    }
+  }
+
+  @Override
+  protected void doStop() {
+    serverFiber.dispose();
+    fiberPool.dispose();
+
+    notifyStopped();
   }
 
   @FiberOnly
@@ -330,56 +293,9 @@ public class C5DB extends AbstractService implements C5Server {
     }
   }
 
-  private class ModuleListenerPublisher implements Listener {
-    private final C5Module module;
-
-    private ModuleListenerPublisher(C5Module module) {
-      this.module = module;
-    }
-
-    @Override
-    public void starting() {
-      LOG.debug("Starting module {}", module);
-      publishEvent(State.STARTING);
-    }
-
-    @Override
-    public void running() {
-      LOG.debug("Running module {}", module);
-      publishEvent(State.RUNNING);
-    }
-
-    @Override
-    public void stopping(State from) {
-      LOG.debug("Stopping module {}", module);
-      publishEvent(State.STOPPING);
-    }
-
-    @Override
-    public void terminated(State from) {
-      // TODO move this into a subscriber of ourselves?
-      LOG.debug("Terminated module {}", module);
-      moduleRegistry.remove(module.getModuleType());
-      publishEvent(State.TERMINATED);
-    }
-
-    @Override
-    public void failed(State from, Throwable failure) {
-      LOG.debug("Failed module " + module, failure);
-      publishEvent(State.FAILED);
-    }
-
-    private void publishEvent(State state) {
-      ModuleStateChange p = new ModuleStateChange(module, state);
-      getModuleStateChangeChannel().publish(p);
-    }
-
-  }
-
   @FiberOnly
   private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
-    if (moduleRegistry.containsKey(moduleType)) {
-      // already running, don't start twice?
+    if (allModules.containsKey(moduleType)) {
       LOG.warn("Module {} already running", moduleType);
       throw new Exception("Cant start, running, module: " + moduleType);
     }
@@ -387,8 +303,8 @@ public class C5DB extends AbstractService implements C5Server {
     switch (moduleType) {
       case Discovery: {
         Map<ModuleType, Integer> l = new HashMap<>();
-        for (ModuleType name : moduleRegistry.keySet()) {
-          l.put(name, moduleRegistry.get(name).port());
+        for (ModuleType name : allModules.keySet()) {
+          l.put(name, allModules.get(name).port());
         }
 
         C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
@@ -428,15 +344,15 @@ public class C5DB extends AbstractService implements C5Server {
 
   private void startServiceModule(C5Module module) {
     LOG.info("Starting service {}", module.getModuleType());
-    module.addListener(new ModuleListenerPublisher(module), serverFiber);
+    module.addListener(new ModuleStatePublisher(module), serverFiber);
 
     module.start();
-    moduleRegistry.put(module.getModuleType(), module);
+    allModules.put(module.getModuleType(), module);
   }
 
   @FiberOnly
   private void stopModule(ModuleType moduleType, boolean hardStop, String stopReason) {
-    Service theModule = moduleRegistry.get(moduleType);
+    Service theModule = allModules.get(moduleType);
     if (theModule == null) {
       LOG.debug("Cant stop module {}, not in registry", moduleType);
       return;
@@ -445,63 +361,52 @@ public class C5DB extends AbstractService implements C5Server {
     theModule.stop();
   }
 
-  @Override
-  protected void doStart() {
-//        Path path;
-//        path = Paths.get(getRandomPath());
-//        RegistryFile registryFile;
-    try {
-//            registryFile = new RegistryFile(configDirectory.baseConfigPath);
+  /**
+   * Publishes state changes for the given module. It is up to the caller
+   * to properly register an instance of this class and pass the SAME module
+   * into the constructor (also on the server fiber too).
+   */
+  private class ModuleStatePublisher implements Listener {
+    private final C5Module module;
 
-      // TODO this should probably be done somewhere else.
-      new LogFileService(configDirectory.getBaseConfigPath()).clearOldArchivedLogs(0);
-
-//            if (existingRegister(registryFile)) {
-//                recoverC5Server(conf, path, registryFile);
-//            } else {
-//                bootStrapRegions(conf, path, registryFile);
-//            }
-    } catch (IOException e) {
-      notifyFailed(e);
+    private ModuleStatePublisher(C5Module module) {
+      this.module = module;
     }
 
+    @Override
+    public void starting() {
+      LOG.debug("Starting module {}", module);
+      publishEvent(State.STARTING);
+    }
 
-    try {
-      serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
-      fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-      bossGroup = new NioEventLoopGroup(1);
-      workerGroup = new NioEventLoopGroup();
+    @Override
+    public void running() {
+      LOG.debug("Running module {}", module);
+      publishEvent(State.RUNNING);
+    }
 
-      commandChannel.subscribe(serverFiber, message -> {
-        try {
-          processCommandMessage(message);
-        } catch (Exception e) {
-          LOG.warn("exception during message processing", e);
-        }
-      });
+    @Override
+    public void stopping(State from) {
+      LOG.debug("Stopping module {}", module);
+      publishEvent(State.STOPPING);
+    }
 
-      commandRequests.subscribe(serverFiber, this::processCommandRequest);
+    @Override
+    public void terminated(State from) {
+      LOG.debug("Terminated module {}", module);
+      allModules.remove(module.getModuleType());
+      publishEvent(State.TERMINATED);
+    }
 
-      serverFiber.start();
+    @Override
+    public void failed(State from, Throwable failure) {
+      LOG.debug("Failed module " + module, failure);
+      publishEvent(State.FAILED);
+    }
 
-      notifyStarted();
-    } catch (Exception e) {
-      notifyFailed(e);
+    private void publishEvent(State state) {
+      ModuleStateChange p = new ModuleStateChange(module, state);
+      getModuleStateChangeChannel().publish(p);
     }
   }
-
-
-  @Override
-  protected void doStop() {
-    // stop module set.
-
-    // TODO write any last minute persistent data to disk (is there any?)
-    // note: guava docs recommend doing long-acting operations in separate thread
-
-    serverFiber.dispose();
-    fiberPool.dispose();
-
-    notifyStopped();
-  }
-
 }
