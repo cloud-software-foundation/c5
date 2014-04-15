@@ -78,7 +78,8 @@ public class Main {
 
     StartModule startReplication = new StartModule(ModuleType.Replication,
         portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
-        + C5ServerConstants.REPLICATOR_PORT_MIN, "");
+            + C5ServerConstants.REPLICATOR_PORT_MIN, ""
+    );
     instance.getCommandChannel().publish(startReplication);
 
     StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
