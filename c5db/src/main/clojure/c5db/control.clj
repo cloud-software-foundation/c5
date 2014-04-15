@@ -16,7 +16,7 @@
 ;
 
 (ns c5db.control
-    (:import (c5db C5DB NioFileConfigDirectory)
+    (:import (c5db Main NioFileConfigDirectory)
              (java.nio.file Paths))
     (:use [clojure.java.shell :only [sh]]
           [clojure.java.io :only [file]]))
@@ -25,7 +25,7 @@
 (def inherited-class-path (System/getProperty "java.class.path"))
 (def java-home (System/getProperty "java.home"))
 (def java-bin (.getPath (file java-home "bin" "java")))
-(def c5main-class (.getName C5DB))
+(def c5main-class (.getName Main))
 (def os-x (.contains (System/getProperty "os.name") "OS X"))
 (def linux (.contains (System/getProperty "os.name") "Linux"))
 
