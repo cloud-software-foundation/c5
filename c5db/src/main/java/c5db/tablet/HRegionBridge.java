@@ -31,7 +31,7 @@ import java.nio.file.Path;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
- * <p>
+ * <p/>
  * Provides an abstraction and test point, and lessons in how to abstract
  * and extract HRegion functionality.
  */
