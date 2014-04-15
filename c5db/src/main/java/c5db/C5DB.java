@@ -166,7 +166,7 @@ public class C5DB extends AbstractService implements C5Server {
     return commandChannel;
   }
 
-  public RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+  private final RequestChannel<Message<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   @Override
   public RequestChannel<Message<?>, CommandReply> getCommandRequests() {
