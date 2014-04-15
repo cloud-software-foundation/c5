@@ -94,18 +94,18 @@ public class RegionServerService extends AbstractService implements RegionServer
               .childOption(ChannelOption.TCP_NODELAY, true)
               .channel(NioServerSocketChannel.class)
               .childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(SocketChannel ch) throws Exception {
-                  ChannelPipeline p = ch.pipeline();
-                  p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
-                  p.addLast("http-server-codec", new HttpServerCodec());
-                  p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                  p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                  p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
-                  p.addLast("encoder", new WebsocketProtostuffEncoder());
-                  p.addLast("handler", new C5ServerHandler(RegionServerService.this));
-                }
-              }
+                              @Override
+                              protected void initChannel(SocketChannel ch) throws Exception {
+                                ChannelPipeline p = ch.pipeline();
+                                p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
+                                p.addLast("http-server-codec", new HttpServerCodec());
+                                p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
+                                p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
+                                p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
+                                p.addLast("encoder", new WebsocketProtostuffEncoder());
+                                p.addLast("handler", new C5ServerHandler(RegionServerService.this));
+                              }
+                            }
               );
 
           bootstrap.bind(port).addListener(future -> {

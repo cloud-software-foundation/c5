@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 /**
  * Holds information about all other modules, can start/stop other modules, etc.
  * Knows the 'root' information about this server as well, such as NodeId, etc.
- * <p>
+ * <p/>
  * To shut down the 'server' module is to shut down the server.
  */
 public class C5DB extends AbstractService implements C5Server {
