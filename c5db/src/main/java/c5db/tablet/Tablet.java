@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.log.OLogShim;
@@ -35,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import static c5db.interfaces.TabletModule.TabletStateChange;
 
@@ -43,6 +46,7 @@ import static c5db.interfaces.TabletModule.TabletStateChange;
  */
 public class Tablet implements TabletModule.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(Tablet.class);
+  private final C5Server server;
 
 
   public void setTabletState(State tabletState) {
@@ -82,17 +86,16 @@ public class Tablet implements TabletModule.Tablet {
 
   private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
 
-
-  public Tablet(final HRegionInfo regionInfo,
+  public Tablet(final C5Server server,
+                final HRegionInfo regionInfo,
                 final HTableDescriptor tableDescriptor,
                 final List<Long> peers,
                 final Path basePath,
                 final Configuration conf,
-
                 Fiber tabletFiber,
-
                 ReplicationModule replicationModule,
                 Region.Creator regionCreator) {
+    this.server = server;
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
     this.peers = peers;
@@ -135,23 +138,36 @@ public class Tablet implements TabletModule.Tablet {
     OLogShim shim = new OLogShim(replicator);
 
     try {
-      regionCreator.getHRegion(basePath,
-          regionInfo, tableDescriptor, shim, conf);
-
-
+      regionCreator.getHRegion(basePath,regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
-
     } catch (IOException e) {
       handleFail(e);
     }
   }
 
+
+
   private void tabletStateChangeCallback(ReplicationModule.Replicator.State state) {
     if (state.equals(ReplicationModule.Replicator.State.LEADER)) {
-      this.setTabletState(State.Leader);
+      if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")){
+        Channel<String> bootStrapChannel = new MemoryChannel<>();
+        Fiber rootFiber = server.getFiberFactory(new Consumer<Throwable>() {
+          @Override
+          public void accept(Throwable throwable) {
+
+          }
+        }).create();
+        RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(rootFiber,
+            this,
+            server,
+            bootStrapChannel);
+        rootTabletLeaderBehavior.start();
+        this.setTabletState(State.Leader);
+      } else {
+        this.setTabletState(State.Leader);
+      }
     }
   }
-
 
   private void publishEvent(State newState) {
     getStateChangeChannel().publish(new TabletStateChange(this, newState, null));

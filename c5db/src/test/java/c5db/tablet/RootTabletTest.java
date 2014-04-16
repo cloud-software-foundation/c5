@@ -18,7 +18,6 @@
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
-import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
@@ -44,6 +43,8 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -52,7 +53,7 @@ import static c5db.TabletMatchers.hasStateEqualTo;
 /**
  * TDD/unit test for tablet.
  */
-public class TabletTest {
+public class RootTabletTest {
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
@@ -65,14 +66,13 @@ public class TabletTest {
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
   final Region region = context.mock(Region.class);
   final C5Server server= context.mock(C5Server.class);
-
   final SettableFuture<ReplicationModule.Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
   final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
-  final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("tablename"));
+  final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("hbase", "root"));
   final String regionName = regionInfo.getRegionNameAsString();
-  final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("tablename"));
+  final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("hbase", "root"));
 
   final Path path = Paths.get("/");
   final Configuration conf = new Configuration();
@@ -130,6 +130,7 @@ public class TabletTest {
             with(same(conf)));
         will(returnValue(region));
         then(state.is("opened"));
+
         channel = new MemoryChannel<>();
       }
     });
@@ -154,6 +155,9 @@ public class TabletTest {
 
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
+    context.checking(new Expectations(){{
+      oneOf(server).getFiberFactory(with(any(Consumer.class))); // Proof that we hit the RootTableLeaderBehavior
+    }});
     tablet.start();
     assertEventually(listener, hasStateEqualTo(TabletModule.Tablet.State.Open));
     channel.publish(ReplicationModule.Replicator.State.LEADER);

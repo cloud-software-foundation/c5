@@ -292,15 +292,17 @@ public class TabletService extends AbstractService implements TabletModule {
           serverConfigDir.writePeersToFile(quorumId, peers);
           LOG.debug("Moving region to opened status: {}", regionInfo);
 
-
-          c5db.tablet.Tablet tablet = new c5db.tablet.Tablet(regionInfo,
+          Fiber tabletFiber = fiberFactory.create();
+          c5db.tablet.Tablet tablet = new c5db.tablet.Tablet(server,
+              regionInfo,
               tableDescriptor,
               peers,
               null,
-              null,
-              null,
+              conf,
+              tabletFiber,
               replicationModule,
               new HRegionBridge.Creator());
+          tablet.start();
           getTabletStateChanges().publish(new TabletStateChange(tablet,
               Tablet.State.Open,
               null));

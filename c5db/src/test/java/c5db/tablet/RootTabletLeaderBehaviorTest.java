@@ -67,7 +67,7 @@ public class RootTabletLeaderBehaviorTest {
     c5Server = context.mock(C5Server.class, "mockC5Server");
   }
 
-  @Test
+  @Test(timeout = 1000)
   public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws IOException, InterruptedException {
     List<Long> fakePeers = Arrays.asList(0l);
     Channel<String> memoryChannel = new MemoryChannel<>();
@@ -81,7 +81,7 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
 
-      oneOf(c5Server).isSingleNodeMode();
+      exactly(2).of(c5Server).isSingleNodeMode();
       will(returnValue(true));
 
       oneOf(region).put(with(any(Put.class)));
@@ -99,7 +99,7 @@ public class RootTabletLeaderBehaviorTest {
     latch.await();
   }
 
-  @Test
+  @Test(timeout = 1000)
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws IOException, InterruptedException {
     Channel<String> memoryChannel = new MemoryChannel<>();
     Cell bonkCell = new KeyValue(Bytes.toBytes("123"), 0l);
