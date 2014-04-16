@@ -81,7 +81,6 @@ public class TabletService extends AbstractService implements TabletModule {
     this.fiber = fiberFactory.create();
     this.server = server;
     this.conf = HBaseConfiguration.create();
-
   }
 
   @Override
@@ -296,11 +295,12 @@ public class TabletService extends AbstractService implements TabletModule {
           c5db.tablet.Tablet tablet = new c5db.tablet.Tablet(regionInfo,
               tableDescriptor,
               peers,
-              null,
-              null,
-              null,
+              null /*basePath*/,
+              conf,
+              null /*tableFiber*/,
               replicationModule,
-              new HRegionBridge.Creator());
+              HRegionBridge::new);
+
           getTabletStateChanges().publish(new TabletStateChange(tablet,
               Tablet.State.Open,
               null));
