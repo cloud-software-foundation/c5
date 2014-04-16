@@ -28,6 +28,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.jetlang.channels.Channel;
 import org.jetlang.fibers.Fiber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -39,6 +41,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private final Fiber fiber;
   private final TabletModule.Tablet tablet;
   private final C5Server server;
+  private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
 
   public RootTabletLeaderBehavior(final Fiber fiber,
                                   final TabletModule.Tablet tablet,
@@ -86,14 +89,24 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private long pickLeader(List<Long> pickedPeers) {
     if (server.isSingleNodeMode()) {
-      return 1;
+      if (pickedPeers.size() > 1){
+        LOG.error("W are in single mode but we have multiple peers");
+      }
+      return pickedPeers.iterator().next();
     } else {
       throw new UnsupportedOperationException("we only support single node currently");
     }
   }
 
   private List<Long> pickPeers(List<Long> peers) {
-    return Arrays.asList(1l);
+    if (server.isSingleNodeMode()) {
+      if (peers.size() > 1){
+        LOG.error("W are in single mode but we have multiple peers");
+      }
+      return Arrays.asList(peers.iterator().next());
+    } else {
+      throw new UnsupportedOperationException("we only support single node currently");
+    }
   }
 
   boolean getExists(Region region, Get get) throws IOException {
