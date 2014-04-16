@@ -30,6 +30,7 @@ public interface ConfigDirectory {
   String quorumsSubDir = "repl";
   String peerIdsFile = "peerIds";
   String regionInfoFile = "region-info";
+  String htableDescriptorFile = "htable-descriptor";
   String persisterFile = "replication-data";
 
   /**
@@ -49,11 +50,28 @@ public interface ConfigDirectory {
 
   void setClusterNameFile(String data) throws IOException;
 
-  Path getQuorumRelPath(String quorumId);
+  // TODO refactor and remove this, replace it with more specific methods.
+  Path getQuorumRelPath(String quorumId) throws IOException;
+
+
+  /* Quorum config persistence methods */
+
+  List<Long> readPeers(String quorumId) throws IOException;
 
   void writePeersToFile(String quorumId, List<Long> peers) throws IOException;
 
-  void writeBinaryData(String quorumId, byte[] data) throws IOException;
+  void writeBinaryData(String quorumId, String type, byte[] data) throws IOException;
+
+  byte[] readBinaryData(String quorumId, String type) throws IOException;
+
+  /**
+   * Returns an enumeration of the readable quorums on disk.  Each quorum is configured as a
+   * directory, and this just returns the list of all directories in the quorum config dir.
+   *
+   * @return the list of quorums configured for this ConfigDirectory
+   * @throws IOException underlying IO errors
+   */
+  List<String> configuredQuorums() throws IOException;
 
   // TODO reduce the number of callers who can call this
   Path getBaseConfigPath();
