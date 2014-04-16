@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -164,8 +165,23 @@ public class NioFileConfigDirectory implements ConfigDirectory {
   }
 
   @Override
-  public Path getQuorumRelPath(String quorumId) {
-    return Paths.get(quorumsSubDir, quorumId);
+  public Path getQuorumRelPath(String quorumId) throws IOException {
+    Path quorumRelPath = Paths.get(quorumsSubDir, quorumId);
+    createSubDir(quorumRelPath);
+    return quorumRelPath;
+  }
+
+  @Override
+  public List<Long> readPeers(String quorumId) throws IOException {
+    List<String> peersFromFile = readFile(getQuorumRelPath(quorumId), peerIdsFile);
+
+    try {
+      //noinspection Convert2MethodRef
+      return Lists.transform(peersFromFile, lineOfFile -> Long.parseLong(lineOfFile));
+    } catch (NumberFormatException e) {
+      // if the file contains garbage, we can't just sub in an empty list.
+      throw new IOException("Unparsable peer file", e);
+    }
   }
 
   @Override
@@ -176,11 +192,31 @@ public class NioFileConfigDirectory implements ConfigDirectory {
   }
 
   @Override
-  public void writeBinaryData(String quorumId, byte[] data) throws IOException {
+  public void writeBinaryData(String quorumId, String type, byte[] data) throws IOException {
     Path quorumRelPath = getQuorumRelPath(quorumId);
-    createSubDir(quorumRelPath);
-    Path filePath = getBaseConfigPath().resolve(quorumRelPath).resolve(regionInfoFile);
+    Path filePath = getBaseConfigPath().resolve(quorumRelPath).resolve(type);
     Files.write(filePath, data);
+  }
+
+  @Override
+  public byte[] readBinaryData(String quorumId, String type) throws IOException {
+    Path quorumPath = getQuorumRelPath(quorumId);
+    Path binaryDataPath = getBaseConfigPath().resolve(quorumPath).resolve(type);
+    return Files.readAllBytes(binaryDataPath);
+  }
+
+  @Override
+  public List<String> configuredQuorums() throws IOException {
+    Path quorumsPath = getBaseConfigPath().resolve(quorumsSubDir);
+    List<String> quorumNames = new ArrayList<>();
+    try (DirectoryStream<Path> allQuorums = Files.newDirectoryStream(quorumsPath)) {
+      for( Path pathQuorum : allQuorums) {
+        if (Files.isDirectory(pathQuorum)) {
+          quorumNames.add(pathQuorum.getFileName().toString());
+        }
+      }
+    }
+    return quorumNames;
   }
 
   @Override

@@ -48,7 +48,6 @@ public class Tablet implements TabletModule.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(Tablet.class);
   private final C5Server server;
 
-
   public void setTabletState(State tabletState) {
     this.tabletState = tabletState;
     publishEvent(tabletState);
