@@ -108,6 +108,7 @@ public class Tablet implements TabletModule.Tablet {
     this.tabletState = State.Initialized;
   }
 
+  @Override
   public void start() {
     this.tabletFiber.start();
     this.tabletFiber.execute(this::createReplicator);
