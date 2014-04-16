@@ -30,8 +30,8 @@ import java.nio.file.Path;
 
 /**
  * Our interface to a region.
- * <p/>
- * While seemingly silly, this provides us a test hook for TDD.
+ * <p>
+ * Provides our abstraction to HRegion.
  */
 public interface Region {
   /**
@@ -45,6 +45,9 @@ public interface Region {
 
   void put(Put put) throws IOException;
 
+  /**
+   * Constructor arguments basically.
+   */
   public interface Creator {
     Region getHRegion(
         Path basePath,
