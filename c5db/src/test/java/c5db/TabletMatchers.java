@@ -26,7 +26,7 @@ import org.hamcrest.TypeSafeMatcher;
  * Matchers for instances of {@link c5db.interfaces.TabletModule.TabletStateChange}
  */
 public class TabletMatchers {
-  public static Matcher<TabletModule.TabletStateChange> hasStateEqualTo(TabletModule.Tablet.State state) {
+  public static Matcher<TabletModule.TabletStateChange> hasMessageWithState(TabletModule.Tablet.State state) {
     return new StateMatcher(state);
   }
 
