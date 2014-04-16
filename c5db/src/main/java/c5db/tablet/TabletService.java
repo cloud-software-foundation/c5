@@ -288,7 +288,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
           onlineRegions.put(quorumId, region);
 
-          serverConfigDir.writeBinaryData(quorumId, regionInfo.toDelimitedByteArray());
+          serverConfigDir.writeBinaryData(quorumId, "regionInfo", regionInfo.toDelimitedByteArray());
           serverConfigDir.writePeersToFile(quorumId, peers);
           LOG.debug("Moving region to opened status: {}", regionInfo);
 
