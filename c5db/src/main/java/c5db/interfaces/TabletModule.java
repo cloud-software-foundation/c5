@@ -94,6 +94,8 @@ public interface TabletModule extends C5Module {
   }
 
   interface Tablet {
+    void start();
+
     Channel<TabletStateChange> getStateChangeChannel();
 
     boolean isOpen();
