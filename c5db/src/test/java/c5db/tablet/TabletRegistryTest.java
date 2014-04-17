@@ -17,6 +17,7 @@
 package c5db.tablet;
 
 import c5db.ConfigDirectory;
+import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.util.C5FiberFactory;
@@ -30,7 +31,6 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,14 +45,14 @@ import static c5db.util.PoolFiberFactoryWithExecutor.factoryWithExceptionHandler
  *
  */
 public class TabletRegistryTest {
-  private static final String ROOT_QUORUM_NAME = "root";
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery();
   @Rule
   public JUnitRuleFiberExceptions fiberExceptionRule = new JUnitRuleFiberExceptions();
-  final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(3));
+  final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(1));
   final C5FiberFactory c5FiberFactory = factoryWithExceptionHandler(poolFiberFactory, fiberExceptionRule);
 
+  final C5Server c5server = context.mock(C5Server.class);
   final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
   final TabletFactory tabletFactory = context.mock(TabletFactory.class);
   final TabletModule.Tablet rootTablet = context.mock(TabletModule.Tablet.class);
@@ -61,8 +61,8 @@ public class TabletRegistryTest {
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
 
   final Configuration legacyConf = HBaseConfiguration.create();
-  /**** value types ****/
 
+  /**** value types ****/
   final HRegionInfo rootRegionInfo = MetaTableNames.rootRegionInfo();
   final byte[] regionInfoBytes = rootRegionInfo.toByteArray();
 
@@ -71,13 +71,43 @@ public class TabletRegistryTest {
 
   final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
 
+  final String ROOT_QUORUM_NAME = rootRegionInfo.getRegionNameAsString();
+
   /*** object under test ***/
   TabletRegistry tabletRegistry;
-
 
   @Before
   public void before() throws IOException {
     context.checking(new Expectations(){{
+      oneOf(tabletFactory).create(
+          with(equal(c5server)),
+          with(equal(rootRegionInfo)),
+          with(equal(rootTableDescriptor)),
+          with(peerList),
+          with.is(anything()), /* base path */
+          with.is(anything()), /* legacy conf */
+          with.is(anything()), /* tablet fiber */
+          with(same(replicationModule)),
+          with(same(regionCreator)));
+      will(returnValue(rootTablet));
+
+      oneOf(rootTablet).start();
+    }});
+
+    tabletRegistry = new TabletRegistry(
+        c5server,
+        configDirectory,
+        legacyConf,
+        c5FiberFactory,
+        tabletFactory,
+        replicationModule,
+        regionCreator);
+  }
+
+  @Test
+  public void shouldReadFilesFromDiskThenStartTabletsDescribedTherin() throws Exception {
+    context.checking(new Expectations(){{
+      // Base configuration directory information
       allowing(configDirectory).readBinaryData(with(any(String.class)), with(equal(ConfigDirectory.regionInfoFile)));
       will(returnValue(regionInfoBytes));
 
@@ -92,34 +122,20 @@ public class TabletRegistryTest {
 
       allowing(configDirectory).getBaseConfigPath();
 
-      oneOf(tabletFactory).create(with(equal(rootRegionInfo)),
-          with(equal(rootTableDescriptor)),
-          with(peerList),
-          with.is(anything()), /* base path */
-          with.is(anything()), /* legacy conf */
-          with.is(anything()), /* tablet fiber */
-          with(same(replicationModule)),
-          with(same(regionCreator)));
-      will(returnValue(rootTablet));
-
-      oneOf(rootTablet).start();
     }});
-
-    tabletRegistry = new TabletRegistry(
-        configDirectory,
-        legacyConf,
-        c5FiberFactory,
-        tabletFactory,
-        replicationModule,
-        regionCreator);
-  }
-
-  @After
-  public void after() {
+    tabletRegistry.startOnDiskRegions();
   }
 
   @Test
-  public void shouldReadFilesFromDiskThenStartTabletsDescribedTherin() throws Exception {
-    tabletRegistry.startOnDiskRegions();
+  public void shouldStartTabletWhenRequestedTo() throws Exception {
+   context.checking(new Expectations(){{
+     oneOf(configDirectory).writePeersToFile(ROOT_QUORUM_NAME, peerList);
+     oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.htableDescriptorFile,
+         rootTableDescriptorBytes);
+     oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.regionInfoFile, regionInfoBytes);
+     allowing(configDirectory).getBaseConfigPath();
+   }});
+
+    tabletRegistry.startTablet(rootRegionInfo, rootTableDescriptor, peerList);
   }
 }
