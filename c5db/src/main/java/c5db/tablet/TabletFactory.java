@@ -16,6 +16,7 @@
  */
 package c5db.tablet;
 
+import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import org.apache.hadoop.conf.Configuration;
@@ -34,6 +35,7 @@ import java.util.List;
  */
 public interface TabletFactory {
   TabletModule.Tablet create(
+      C5Server server,
       HRegionInfo regionInfo,
       HTableDescriptor tableDescriptor,
       List<Long> peers,

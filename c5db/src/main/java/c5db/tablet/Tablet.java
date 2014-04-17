@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 import static c5db.interfaces.TabletModule.TabletStateChange;
@@ -144,8 +143,6 @@ public class Tablet implements TabletModule.Tablet {
       handleFail(e);
     }
   }
-
-
 
   private void tabletStateChangeCallback(ReplicationModule.Replicator.State state) {
     if (state.equals(ReplicationModule.Replicator.State.LEADER)) {

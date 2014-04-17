@@ -17,6 +17,7 @@
 package c5db.tablet;
 
 import c5db.ConfigDirectory;
+import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.util.C5FiberFactory;
@@ -34,7 +35,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO document me here
+ * Handles the logic of starting quorums, restoring them from disk, etc.
+ * <p>
+ * Totally NOT thread safe!
  */
 public class TabletRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(TabletRegistry.class);
@@ -45,15 +48,18 @@ public class TabletRegistry {
   private final Region.Creator regionCreator;
 
   private final Map<String, TabletModule.Tablet> tablets = new HashMap<>();
+  private C5Server c5server;
   private ConfigDirectory configDirectory;
   private Configuration legacyConf;
 
-  public TabletRegistry(ConfigDirectory configDirectory,
+  public TabletRegistry(C5Server c5server,
+                        ConfigDirectory configDirectory,
                         Configuration legacyConf,
                         C5FiberFactory fiberFactory,
                         TabletFactory tabletFactory,
                         ReplicationModule replicationModule,
                         Region.Creator regionCreator) {
+    this.c5server = c5server;
     this.configDirectory = configDirectory;
     this.legacyConf = legacyConf;
     this.fiberFactory = fiberFactory;
@@ -78,6 +84,7 @@ public class TabletRegistry {
         Path basePath = configDirectory.getBaseConfigPath();
 
         TabletModule.Tablet tablet = tabletFactory.create(
+            c5server,
             regionInfo, tableDescriptor, peers, basePath, legacyConf,
             fiberFactory.create(), replicationModule, regionCreator);
 
@@ -88,5 +95,35 @@ public class TabletRegistry {
         LOG.error("Unable to start quorum, due to config error: " + quorum, e);
       }
     }
+  }
+
+  public void startTablet(HRegionInfo regionInfo,
+                          HTableDescriptor tableDescriptor,
+                          List<Long> peerList) throws IOException {
+    Path basePath = configDirectory.getBaseConfigPath();
+
+    // quorum name - ?
+    String quorumName = regionInfo.getRegionNameAsString();
+    if (tablets.containsKey(quorumName)) {
+      // cant start, already started:
+      LOG.warn("Trying to start tablet {} already started!", quorumName);
+      return;
+    }
+
+    // write the stuff to disk first:
+    configDirectory.writeBinaryData(quorumName, ConfigDirectory.regionInfoFile,
+        regionInfo.toByteArray());
+    configDirectory.writeBinaryData(quorumName, ConfigDirectory.htableDescriptorFile,
+        tableDescriptor.toByteArray());
+    configDirectory.writePeersToFile(quorumName, peerList);
+
+    TabletModule.Tablet newTablet = tabletFactory.create(
+        c5server,
+        regionInfo, tableDescriptor, peerList, basePath, legacyConf,
+        fiberFactory.create(), replicationModule, regionCreator);
+
+    tablets.put(quorumName, newTablet);
+
+    newTablet.start();
   }
 }
