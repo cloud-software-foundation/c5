@@ -44,11 +44,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.TabletMatchers.hasStateEqualTo;
+import static c5db.TabletMatchers.hasMessageWithState;
 
 /**
  * TDD/unit test for tablet.
@@ -150,7 +149,7 @@ public class RootTabletTest {
   @Test
   public void basicTest() throws Throwable {
     tablet.start();
-    assertEventually(listener, hasStateEqualTo(TabletModule.Tablet.State.Open));
+    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Open));
   }
 
   @Test
@@ -159,8 +158,8 @@ public class RootTabletTest {
       oneOf(server).getFiberFactory(with(any(Consumer.class))); // Proof that we hit the RootTableLeaderBehavior
     }});
     tablet.start();
-    assertEventually(listener, hasStateEqualTo(TabletModule.Tablet.State.Open));
+    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Open));
     channel.publish(ReplicationModule.Replicator.State.LEADER);
-    assertEventually(listener, hasStateEqualTo(TabletModule.Tablet.State.Leader));
+    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Leader));
   }
 }
