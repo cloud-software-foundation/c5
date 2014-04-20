@@ -18,16 +18,23 @@
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
+import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.protobuf.generated.CellProtos;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
@@ -42,6 +49,8 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -68,7 +77,7 @@ public class RootTabletTest {
   final SettableFuture<ReplicationModule.Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
-  final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
+  final List<Long> peerList = ImmutableList.of(1L);
   final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("hbase", "root"));
   final String regionName = regionInfo.getRegionNameAsString();
   final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("hbase", "root"));
@@ -130,7 +139,16 @@ public class RootTabletTest {
         will(returnValue(region));
         then(state.is("opened"));
 
-        channel = new MemoryChannel<>();
+        // Return 0 entries from the root table for Meta
+        oneOf(region).get(with(any(Get.class)));
+        will(returnValue(org.apache.hadoop.hbase.client.Result.create(new ArrayList<>())));
+
+        exactly(2).of(server).isSingleNodeMode();
+        will(returnValue(true));
+
+        // Return 0 entries from the root table for Meta
+        oneOf(region).put(with(any(Put.class)));
+
       }
     });
 
@@ -147,16 +165,7 @@ public class RootTabletTest {
   }
 
   @Test
-  public void basicTest() throws Throwable {
-    tablet.start();
-    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Open));
-  }
-
-  @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
-    context.checking(new Expectations(){{
-      oneOf(server).getFiberFactory(with(any(Consumer.class))); // Proof that we hit the RootTableLeaderBehavior
-    }});
     tablet.start();
     assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Open));
     channel.publish(ReplicationModule.Replicator.State.LEADER);
