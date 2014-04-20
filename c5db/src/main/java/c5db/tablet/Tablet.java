@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static c5db.interfaces.TabletModule.TabletStateChange;
 
@@ -72,7 +71,6 @@ public class Tablet implements TabletModule.Tablet {
 
   // State
   private State tabletState;
-
 
   private Region region;
 
@@ -137,7 +135,7 @@ public class Tablet implements TabletModule.Tablet {
     OLogShim shim = new OLogShim(replicator);
 
     try {
-      regionCreator.getHRegion(basePath,regionInfo, tableDescriptor, shim, conf);
+      region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
     } catch (IOException e) {
       handleFail(e);
@@ -146,19 +144,13 @@ public class Tablet implements TabletModule.Tablet {
 
   private void tabletStateChangeCallback(ReplicationModule.Replicator.State state) {
     if (state.equals(ReplicationModule.Replicator.State.LEADER)) {
-      if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")){
-        Channel<String> bootStrapChannel = new MemoryChannel<>();
-        Fiber rootFiber = server.getFiberFactory(new Consumer<Throwable>() {
-          @Override
-          public void accept(Throwable throwable) {
-
-          }
-        }).create();
-        RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(rootFiber,
-            this,
-            server,
-            bootStrapChannel);
-        rootTabletLeaderBehavior.start();
+      if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+        RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
+        try {
+          rootTabletLeaderBehavior.start();
+        } catch (IOException e) {
+          throw new RuntimeException("Bad bootstrap failing:" + e.getStackTrace());
+        }
         this.setTabletState(State.Leader);
       } else {
         this.setTabletState(State.Leader);
