@@ -70,7 +70,6 @@ public class RootTabletLeaderBehaviorTest {
   @Test(timeout = 1000)
   public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws IOException, InterruptedException {
     List<Long> fakePeers = Arrays.asList(0l);
-    Channel<String> memoryChannel = new MemoryChannel<>();
     context.checking(new Expectations() {{
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
@@ -87,21 +86,13 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(region).put(with(any(Put.class)));
     }});
 
-    final CountDownLatch latch = new CountDownLatch(1);
-    Callback<String> onMsg = message -> latch.countDown();
-    memoryChannel.subscribe(fiber, onMsg);
-
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(fiber,
-        hRegionTablet,
-        c5Server,
-        memoryChannel);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
+        c5Server);
     rootTabletLeaderBehavior.start();
-    latch.await();
   }
 
   @Test(timeout = 1000)
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws IOException, InterruptedException {
-    Channel<String> memoryChannel = new MemoryChannel<>();
     Cell bonkCell = new KeyValue(Bytes.toBytes("123"), 0l);
     Result results = Result.create(new Cell[]{bonkCell});
 
@@ -117,15 +108,9 @@ public class RootTabletLeaderBehaviorTest {
       never(region).put(with(any(Put.class)));
 
     }});
-    final CountDownLatch latch = new CountDownLatch(1);
-    Callback<String> onMsg = message -> latch.countDown();
-    memoryChannel.subscribe(fiber, onMsg);
 
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(fiber,
-        hRegionTablet,
-        c5Server,
-        memoryChannel);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
     rootTabletLeaderBehavior.start();
-    latch.await();
+
   }
 }
