@@ -25,10 +25,13 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
+import io.protostuff.Message;
 import io.protostuff.ProtobufIOUtil;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.jetlang.channels.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +62,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, C5ServerConstants.START_META);
     CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
-    server.getCommandChannel().publish(moduleSubCommand);
+    Channel<Message<?>> channel = server.getCommandChannel();
+    channel.publish(commandRpcRequest.message);
 
   }
 
@@ -75,8 +79,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
         ByteBuffer.wrap(C5ServerConstants.META_END_KEY),
         true,
         false);
-    put.add(C5ServerConstants.META_INFO_CF,
-        C5ServerConstants.META_INFO_CQ,
+    put.add(HConstants.CATALOG_FAMILY,
+        HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
     region.put(put);
   }
