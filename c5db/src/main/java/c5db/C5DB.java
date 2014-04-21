@@ -265,7 +265,7 @@ public class C5DB extends AbstractService implements C5Server {
   private void processCommandRequest(Request<CommandRpcRequest<?>, CommandReply> request) {
     CommandRpcRequest<?> r = request.getRequest();
     Message<?> subMessage = r.message;
-    long receipentNodeId = r.receipientNodeId;
+    long receiptNodeId = r.receipientNodeId;
 
     try {
       String stdout;
