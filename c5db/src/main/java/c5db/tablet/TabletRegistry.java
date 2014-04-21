@@ -97,9 +97,9 @@ public class TabletRegistry {
     }
   }
 
-  public void startTablet(HRegionInfo regionInfo,
-                          HTableDescriptor tableDescriptor,
-                          List<Long> peerList) throws IOException {
+  public TabletModule.Tablet startTablet(HRegionInfo regionInfo,
+                                         HTableDescriptor tableDescriptor,
+                                         List<Long> peerList) throws IOException {
     Path basePath = configDirectory.getBaseConfigPath();
 
     // quorum name - ?
@@ -107,7 +107,7 @@ public class TabletRegistry {
     if (tablets.containsKey(quorumName)) {
       // cant start, already started:
       LOG.warn("Trying to start tablet {} already started!", quorumName);
-      return;
+      return tablets.get(quorumName);
     }
 
     // write the stuff to disk first:
@@ -125,5 +125,6 @@ public class TabletRegistry {
     tablets.put(quorumName, newTablet);
 
     newTablet.start();
+    return newTablet;
   }
 }
