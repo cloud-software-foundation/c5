@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * Handles the logic of starting quorums, restoring them from disk, etc.
- * <p>
+ * <p/>
  * Totally NOT thread safe!
  */
 public class TabletRegistry {
@@ -91,7 +91,7 @@ public class TabletRegistry {
         tablet.start();
 
         tablets.put(quorum, tablet);
-      } catch (IOException|DeserializationException e) {
+      } catch (IOException | DeserializationException e) {
         LOG.error("Unable to start quorum, due to config error: " + quorum, e);
       }
     }

@@ -21,13 +21,14 @@ import c5db.client.generated.RegionInfo;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.server.CommandRpcRequest;
+import c5db.messages.generated.ModuleSubCommand;
+import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
-import org.jetlang.channels.Channel;
-import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,38 +39,31 @@ import java.util.List;
 
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
-  private final Fiber fiber;
+  private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
   private final TabletModule.Tablet tablet;
   private final C5Server server;
-  private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
 
-  public RootTabletLeaderBehavior(final Fiber fiber,
-                                  final TabletModule.Tablet tablet,
-                                  final C5Server server,
-                                  final Channel<String> onComplete) {
-    this.fiber = fiber;
+  public RootTabletLeaderBehavior(final TabletModule.Tablet tablet,
+                                  final C5Server server) {
     this.tablet = tablet;
     this.server = server;
-    fiber.execute(() -> {
-      Region region = tablet.getRegion();
-      try {
-        if (!metaExists(region)) {
-          List<Long> peers = tablet.getPeers();
-          bootStrapMeta(region, peers);
-        }
-      } catch (IOException e) {
-        //TODO Throwing in an exception is evil, but this will never happen
-        // unit you start the fiber.
-        throw new RuntimeException("Unable To bootstrap meta");
-      }
-    });
-
-    onComplete.publish("Complete");
   }
 
   private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
     List<Long> pickedPeers = pickPeers(peers);
     long leader = pickLeader(pickedPeers);
+    createMetaEntryInRoot(region, pickedPeers, leader);
+    requestMetaCommandCreated(pickedPeers, leader);
+  }
+
+  private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
+    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, C5ServerConstants.START_META);
+    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
+    server.getCommandChannel().publish(moduleSubCommand);
+
+  }
+
+  private void createMetaEntryInRoot(Region region, List<Long> pickedPeers, long leader) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
     TableName tableName = new TableName(ByteBuffer.wrap(C5ServerConstants.INTERNAL_NAMESPACE),
         ByteBuffer.wrap(C5ServerConstants.META_TABLE_NAME));
@@ -89,8 +83,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private long pickLeader(List<Long> pickedPeers) {
     if (server.isSingleNodeMode()) {
-      if (pickedPeers.size() > 1){
-        LOG.error("W are in single mode but we have multiple peers");
+      if (pickedPeers.size() > 1) {
+        LOG.error("We are in single mode but we have multiple peers");
       }
       return pickedPeers.iterator().next();
     } else {
@@ -100,8 +94,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private List<Long> pickPeers(List<Long> peers) {
     if (server.isSingleNodeMode()) {
-      if (peers.size() > 1){
-        LOG.error("W are in single mode but we have multiple peers");
+      if (peers.size() > 1) {
+        LOG.error("We are in single mode but we have multiple peers");
       }
       return Arrays.asList(peers.iterator().next());
     } else {
@@ -111,7 +105,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   boolean getExists(Region region, Get get) throws IOException {
     Result result = region.get(get);
-    return result.size() > 0;
+    return !(result == null) && result.size() > 0;
   }
 
   boolean metaExists(Region region) throws IOException {
@@ -120,9 +114,11 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     return getExists(region, get);
   }
 
-  public void start() {
-    fiber.start();
+  public void start() throws IOException {
+    Region region = tablet.getRegion();
+    if (!metaExists(region)) {
+      List<Long> peers = tablet.getPeers();
+      bootStrapMeta(region, peers);
+    }
   }
-
-
 }
