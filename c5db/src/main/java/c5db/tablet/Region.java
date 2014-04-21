@@ -30,7 +30,7 @@ import java.nio.file.Path;
 
 /**
  * Our interface to a region.
- * <p>
+ * <p/>
  * Provides our abstraction to HRegion.
  */
 public interface Region {

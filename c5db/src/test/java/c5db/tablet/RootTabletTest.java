@@ -18,23 +18,18 @@
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
-import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.protobuf.generated.CellProtos;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
@@ -50,9 +45,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -73,7 +66,7 @@ public class RootTabletTest {
   final ReplicationModule.Replicator replicator = context.mock(ReplicationModule.Replicator.class);
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
   final Region region = context.mock(Region.class);
-  final C5Server server= context.mock(C5Server.class);
+  final C5Server server = context.mock(C5Server.class);
   final SettableFuture<ReplicationModule.Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
