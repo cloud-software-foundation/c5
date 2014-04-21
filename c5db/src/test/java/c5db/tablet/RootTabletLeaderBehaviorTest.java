@@ -16,14 +16,23 @@
  */
 package c5db.tablet;
 
+import c5db.AsyncChannelAsserts;
+import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
+import c5db.messages.generated.ModuleSubCommand;
+import c5db.messages.generated.ModuleType;
+import io.protostuff.Message;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
@@ -38,6 +47,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static c5db.AsyncChannelAsserts.assertEventually;
+import static c5db.AsyncChannelAsserts.listenTo;
+
 public class RootTabletLeaderBehaviorTest {
 
   @Rule
@@ -48,6 +60,9 @@ public class RootTabletLeaderBehaviorTest {
   private Region region;
   private C5Server c5Server;
   private Fiber fiber;
+  private MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
+  AsyncChannelAsserts.ChannelListener commandListener;
+
 
   @After
   public void tearDown() {
@@ -63,8 +78,8 @@ public class RootTabletLeaderBehaviorTest {
     c5Server = context.mock(C5Server.class, "mockC5Server");
   }
 
-  @Test(timeout = 1000)
-  public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws IOException, InterruptedException {
+  @Test
+  public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws Throwable {
     List<Long> fakePeers = Arrays.asList(0l);
     context.checking(new Expectations() {{
       oneOf(hRegionTablet).getRegion();
@@ -80,15 +95,22 @@ public class RootTabletLeaderBehaviorTest {
       will(returnValue(true));
 
       oneOf(region).put(with(any(Put.class)));
+
+      // Post put we send a command over the command channel
+      exactly(2).of(c5Server).getCommandChannel();
+      will(returnValue(commandMemoryChannel));
+
     }});
 
+    commandListener = listenTo(c5Server.getCommandChannel());
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
         c5Server);
     rootTabletLeaderBehavior.start();
+    assertEventually(commandListener, hasMessageWithRPC(C5ServerConstants.START_META));
   }
 
-  @Test(timeout = 1000)
-  public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws IOException, InterruptedException {
+  @Test
+  public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws Throwable {
     Cell bonkCell = new KeyValue(Bytes.toBytes("123"), 0l);
     Result results = Result.create(new Cell[]{bonkCell});
 
@@ -108,5 +130,29 @@ public class RootTabletLeaderBehaviorTest {
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
     rootTabletLeaderBehavior.start();
 
+  }
+
+
+  private Matcher<ModuleSubCommand> hasMessageWithRPC(String s) {
+    return new MessageMatcher(s);
+  }
+
+  private class MessageMatcher extends TypeSafeMatcher<ModuleSubCommand> {
+    private final String s;
+
+    public MessageMatcher(String s) {
+      this.s = s;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("a command which is: ").appendValue(s);
+    }
+
+    @Override
+    protected boolean matchesSafely(ModuleSubCommand message) {
+      return message.getModule().equals(ModuleType.Tablet) &&
+          message.getSubCommand().equals(C5ServerConstants.START_META);
+    }
   }
 }

@@ -21,6 +21,9 @@ import c5db.client.generated.RegionInfo;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.server.CommandRpcRequest;
+import c5db.messages.generated.ModuleSubCommand;
+import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.hadoop.hbase.client.Get;
@@ -49,6 +52,18 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
     List<Long> pickedPeers = pickPeers(peers);
     long leader = pickLeader(pickedPeers);
+    createMetaEntryInRoot(region, pickedPeers, leader);
+    requestMetaCommandCreated(pickedPeers, leader);
+  }
+
+  private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
+    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, C5ServerConstants.START_META);
+    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
+    server.getCommandChannel().publish(moduleSubCommand);
+
+  }
+
+  private void createMetaEntryInRoot(Region region, List<Long> pickedPeers, long leader) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
     TableName tableName = new TableName(ByteBuffer.wrap(C5ServerConstants.INTERNAL_NAMESPACE),
         ByteBuffer.wrap(C5ServerConstants.META_TABLE_NAME));
