@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,12 +70,13 @@ public class TabletService extends AbstractService implements TabletModule {
   // TODO bring this into this class, and not have an external class.
   //private final OnlineRegions onlineRegions = OnlineRegions.INSTANCE;
   private final Map<String, HRegion> onlineRegions = new HashMap<>();
+  private final Configuration conf;
+  private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
   private ReplicationModule replicationModule = null;
   private DiscoveryModule discoveryModule = null;
-  private final Configuration conf;
   private boolean rootStarted = false;
   private TabletRegistry tabletRegistry;
-
+  private Disposable newNodeWatcher = null;
 
   public TabletService(C5Server server) {
     this.fiberFactory = server.getFiberFactory(this::notifyFailed);
@@ -136,26 +136,7 @@ public class TabletService extends AbstractService implements TabletModule {
           replicationModule = (ReplicationModule) result;
           fiber.execute(() -> {
             try {
-              Path path = server.getConfigDirectory().getBaseConfigPath();
-
-
-//                                    RegistryFile registryFile = new RegistryFile(path);
-
-//                                    int startCount = startRegions(registryFile);
-
-              // if no regions were started, we need to bootstrap once we have
-              // enough online regions.
-//                                    if (startCount == 0) {
-
-
-// TODO start ROOT region instead of boot-strapping root region.
               startBootstrap();
-
-
-//                                    }
-
-//                                    logReplay(path);
-
               notifyStarted();
             } catch (Exception e) {
               notifyFailed(e);
@@ -171,9 +152,6 @@ public class TabletService extends AbstractService implements TabletModule {
     });
 
   }
-
-  private Disposable newNodeWatcher = null;
-
 
   @FiberOnly
   private void startBootstrap() {
@@ -203,7 +181,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
   @FiberOnly
   private void maybeStartBootstrap(ImmutableMap<Long, DiscoveryModule.NodeInfo> nodes,
-      final TabletRegistry tabletRegistry) {
+                                   final TabletRegistry tabletRegistry) {
     List<Long> peers = new ArrayList<>(nodes.keySet());
 
     LOG.debug("Found a bunch of peers: {}", peers);
@@ -219,26 +197,6 @@ public class TabletService extends AbstractService implements TabletModule {
     bootstrapRoot(ImmutableList.copyOf(peers), tabletRegistry);
     // TODO REMOVE. Temp table while we have no meta infrastructure
     bootstrapTempTable(ImmutableList.copyOf(peers), tabletRegistry);
-//        // bootstrap the frickin thing.
-//        LOG.debug("Bootstrapping empty region");
-//        // simple bootstrap, only bootstrap my own ID:
-//        byte[] startKey = {0};
-//        byte[] endKey = {};
-//        TableName tableName = TableName.valueOf("tableName");
-//        HRegionInfo hRegionInfo = new HRegionInfo(tableName,
-//                startKey, endKey, false, 0);
-//        HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
-//        tableDescriptor.addFamily(new HColumnDescriptor("cf"));
-//
-//        try {
-//            registryFile.addEntry(hRegionInfo, new HColumnDescriptor("cf"), peers);
-//        } catch (IOException e) {
-//            LOG.error("Cant append to registryFile, not bootstrapping!!!", e);
-//            return;
-//        }
-//
-//        openRegion0(hRegionInfo, tableDescriptor, ImmutableList.copyOf(peers));
-
     if (newNodeWatcher != null) {
       newNodeWatcher.dispose();
       newNodeWatcher = null;
@@ -333,9 +291,6 @@ public class TabletService extends AbstractService implements TabletModule {
     this.fiber.dispose();
     notifyStopped();
   }
-
-  private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
-
 
   @Override
   public void startTablet(List<Long> peers, String tabletName) {
