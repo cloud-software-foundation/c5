@@ -65,10 +65,10 @@ public class TabletRegistryTest {
   /**
    * * value types ***
    */
-  final HRegionInfo rootRegionInfo = MetaTableNames.rootRegionInfo();
+  final HRegionInfo rootRegionInfo = SystemTableNames.rootRegionInfo();
   final byte[] regionInfoBytes = rootRegionInfo.toByteArray();
 
-  final HTableDescriptor rootTableDescriptor = MetaTableNames.rootTableDescriptor();
+  final HTableDescriptor rootTableDescriptor = SystemTableNames.rootTableDescriptor();
   final byte[] rootTableDescriptorBytes = rootTableDescriptor.toByteArray();
 
   final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
