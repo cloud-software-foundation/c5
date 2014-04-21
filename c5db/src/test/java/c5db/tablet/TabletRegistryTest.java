@@ -62,7 +62,9 @@ public class TabletRegistryTest {
 
   final Configuration legacyConf = HBaseConfiguration.create();
 
-  /**** value types ****/
+  /**
+   * * value types ***
+   */
   final HRegionInfo rootRegionInfo = MetaTableNames.rootRegionInfo();
   final byte[] regionInfoBytes = rootRegionInfo.toByteArray();
 
@@ -73,12 +75,14 @@ public class TabletRegistryTest {
 
   final String ROOT_QUORUM_NAME = rootRegionInfo.getRegionNameAsString();
 
-  /*** object under test ***/
+  /**
+   * object under test **
+   */
   TabletRegistry tabletRegistry;
 
   @Before
   public void before() throws IOException {
-    context.checking(new Expectations(){{
+    context.checking(new Expectations() {{
       oneOf(tabletFactory).create(
           with(equal(c5server)),
           with(equal(rootRegionInfo)),
@@ -106,7 +110,7 @@ public class TabletRegistryTest {
 
   @Test
   public void shouldReadFilesFromDiskThenStartTabletsDescribedTherin() throws Exception {
-    context.checking(new Expectations(){{
+    context.checking(new Expectations() {{
       // Base configuration directory information
       allowing(configDirectory).readBinaryData(with(any(String.class)), with(equal(ConfigDirectory.regionInfoFile)));
       will(returnValue(regionInfoBytes));
@@ -128,13 +132,13 @@ public class TabletRegistryTest {
 
   @Test
   public void shouldStartTabletWhenRequestedTo() throws Exception {
-   context.checking(new Expectations(){{
-     oneOf(configDirectory).writePeersToFile(ROOT_QUORUM_NAME, peerList);
-     oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.htableDescriptorFile,
-         rootTableDescriptorBytes);
-     oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.regionInfoFile, regionInfoBytes);
-     allowing(configDirectory).getBaseConfigPath();
-   }});
+    context.checking(new Expectations() {{
+      oneOf(configDirectory).writePeersToFile(ROOT_QUORUM_NAME, peerList);
+      oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.htableDescriptorFile,
+          rootTableDescriptorBytes);
+      oneOf(configDirectory).writeBinaryData(ROOT_QUORUM_NAME, ConfigDirectory.regionInfoFile, regionInfoBytes);
+      allowing(configDirectory).getBaseConfigPath();
+    }});
 
     tabletRegistry.startTablet(rootRegionInfo, rootTableDescriptor, peerList);
   }

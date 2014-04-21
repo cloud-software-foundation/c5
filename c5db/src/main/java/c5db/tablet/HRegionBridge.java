@@ -39,20 +39,20 @@ public class HRegionBridge implements Region {
 
   private final HRegion theRegion;
 
-public HRegionBridge(
-    Path basePath,
-    HRegionInfo regionInfo,
-    HTableDescriptor tableDescriptor,
-    HLog log,
-    Configuration conf) throws IOException {
-  theRegion = HRegion.openHRegion(
-      new org.apache.hadoop.fs.Path(basePath.toString()),
-      regionInfo,
-      tableDescriptor,
-      log,
-      conf,
-      null, null);
-}
+  public HRegionBridge(
+      Path basePath,
+      HRegionInfo regionInfo,
+      HTableDescriptor tableDescriptor,
+      HLog log,
+      Configuration conf) throws IOException {
+    theRegion = HRegion.openHRegion(
+        new org.apache.hadoop.fs.Path(basePath.toString()),
+        regionInfo,
+        tableDescriptor,
+        log,
+        conf,
+        null, null);
+  }
 
 
   public HRegionBridge(final HRegion theRegion) {

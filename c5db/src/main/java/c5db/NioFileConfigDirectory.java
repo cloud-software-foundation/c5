@@ -210,7 +210,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
     Path quorumsPath = getBaseConfigPath().resolve(quorumsSubDir);
     List<String> quorumNames = new ArrayList<>();
     try (DirectoryStream<Path> allQuorums = Files.newDirectoryStream(quorumsPath)) {
-      for( Path pathQuorum : allQuorums) {
+      for (Path pathQuorum : allQuorums) {
         if (Files.isDirectory(pathQuorum)) {
           quorumNames.add(pathQuorum.getFileName().toString());
         }
