@@ -25,7 +25,6 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
-import io.protostuff.Message;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Get;
@@ -62,8 +61,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, C5ServerConstants.START_META);
     CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
-    Channel<Message<?>> channel = server.getCommandChannel();
-    channel.publish(commandRpcRequest.message);
+    Channel<CommandRpcRequest<?>> channel = server.getCommandChannel();
+    channel.publish(commandRpcRequest);
 
   }
 

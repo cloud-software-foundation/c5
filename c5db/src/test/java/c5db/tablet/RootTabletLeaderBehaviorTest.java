@@ -20,6 +20,7 @@ import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import io.protostuff.Message;
@@ -133,11 +134,11 @@ public class RootTabletLeaderBehaviorTest {
   }
 
 
-  private Matcher<ModuleSubCommand> hasMessageWithRPC(String s) {
+  private Matcher<CommandRpcRequest<ModuleSubCommand>> hasMessageWithRPC(String s) {
     return new MessageMatcher(s);
   }
 
-  private class MessageMatcher extends TypeSafeMatcher<ModuleSubCommand> {
+  private class MessageMatcher extends TypeSafeMatcher<CommandRpcRequest<ModuleSubCommand>> {
     private final String s;
 
     public MessageMatcher(String s) {
@@ -150,9 +151,10 @@ public class RootTabletLeaderBehaviorTest {
     }
 
     @Override
-    protected boolean matchesSafely(ModuleSubCommand message) {
-      return message.getModule().equals(ModuleType.Tablet) &&
-          message.getSubCommand().equals(C5ServerConstants.START_META);
+    protected boolean matchesSafely(CommandRpcRequest<ModuleSubCommand> moduleSubCommandCommandRpcRequest) {
+      return moduleSubCommandCommandRpcRequest.message.getModule().equals(ModuleType.Tablet) &&
+          moduleSubCommandCommandRpcRequest.message.getSubCommand().equals(C5ServerConstants.START_META);
+
     }
   }
 }
