@@ -75,7 +75,7 @@ public class C5DB extends AbstractService implements C5Server {
   private final long nodeId;
   private final ConfigDirectory configDirectory;
 
-  private final Channel<Message<?>> commandChannel = new MemoryChannel<>();
+  private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
 
   private Fiber serverFiber;
@@ -171,7 +171,7 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public Channel<Message<?>> getCommandChannel() {
+  public Channel<CommandRpcRequest<?>> getCommandChannel() {
     return commandChannel;
   }
 
@@ -250,8 +250,12 @@ public class C5DB extends AbstractService implements C5Server {
     notifyStopped();
   }
 
+  private void processCommandMessage(CommandRpcRequest<?> msg) throws Exception {
+    processCommandSubMessage(msg.message);
+  }
+
   @FiberOnly
-  private void processCommandMessage(Message<?> msg) throws Exception {
+  private void processCommandSubMessage(Message<?> msg) throws Exception {
     if (msg instanceof StartModule) {
       StartModule message = (StartModule) msg;
       startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());

@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.interfaces.C5Server;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
 
@@ -71,22 +72,22 @@ public class Main {
 
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
-    instance.getCommandChannel().publish(startLog);
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startLog));
 
     StartModule startBeacon = new StartModule(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT, "");
-    instance.getCommandChannel().publish(startBeacon);
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startBeacon));
 
     StartModule startReplication = new StartModule(ModuleType.Replication,
         portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
             + C5ServerConstants.REPLICATOR_PORT_MIN, ""
     );
-    instance.getCommandChannel().publish(startReplication);
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startReplication));
 
     StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
-    instance.getCommandChannel().publish(startTablet);
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startTablet));
 
     StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
-    instance.getCommandChannel().publish(startRegionServer);
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
     return instance;
   }
 }
