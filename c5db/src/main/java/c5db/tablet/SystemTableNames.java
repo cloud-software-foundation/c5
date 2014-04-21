@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.TableName;
 /**
  * Helper functionality to make various value type/objects.
  */
-public class MetaTableNames {
+public class SystemTableNames {
   public static HTableDescriptor rootTableDescriptor() {
     return HTableDescriptor.ROOT_TABLEDESC;
   }

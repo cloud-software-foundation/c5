@@ -83,13 +83,6 @@ public class TabletService extends AbstractService implements TabletModule {
     this.fiber = fiberFactory.create();
     this.server = server;
     this.conf = HBaseConfiguration.create();
-    tabletRegistry = new TabletRegistry(server,
-        server.getConfigDirectory(),
-        conf,
-        fiberFactory,
-        c5db.tablet.Tablet::new,
-        replicationModule,
-        HRegionBridge::new);
   }
 
   @Override
@@ -137,6 +130,14 @@ public class TabletService extends AbstractService implements TabletModule {
           fiber.execute(() -> {
             try {
               startBootstrap();
+              tabletRegistry = new TabletRegistry(server,
+                  server.getConfigDirectory(),
+                  conf,
+                  fiberFactory,
+                  c5db.tablet.Tablet::new,
+                  replicationModule,
+                  HRegionBridge::new);
+
               notifyStarted();
             } catch (Exception e) {
               notifyFailed(e);
@@ -243,7 +244,6 @@ public class TabletService extends AbstractService implements TabletModule {
         try {
           // TODO subscribe to the replicator's broadcasts.
 
-          result.start();
           OLogShim shim = new OLogShim(result);
 
           // default place for a region is....
@@ -253,7 +253,8 @@ public class TabletService extends AbstractService implements TabletModule {
               tableDescriptor,
               shim,
               conf,
-              null, null);
+              null,
+              null);
 
           onlineRegions.put(quorumId, region);
           Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
