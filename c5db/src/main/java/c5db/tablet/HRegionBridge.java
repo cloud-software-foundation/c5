@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.regionserver.HRegionServicesBridge;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -51,7 +52,8 @@ public class HRegionBridge implements Region {
         tableDescriptor,
         log,
         conf,
-        null, null);
+        new HRegionServicesBridge(conf),
+        null);
   }
 
 
@@ -67,5 +69,9 @@ public class HRegionBridge implements Region {
   @Override
   public void put(final Put put) throws IOException {
     theRegion.put(put);
+  }
+
+  HRegion getTheRegion() {
+    return theRegion;
   }
 }
