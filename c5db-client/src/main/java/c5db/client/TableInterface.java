@@ -50,7 +50,7 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import java.io.IOException;
 import java.util.List;
 
-/***
+/**
  * A shared interface so that a user can interchange HTable and C5Table.
  */
 public interface TableInterface {
