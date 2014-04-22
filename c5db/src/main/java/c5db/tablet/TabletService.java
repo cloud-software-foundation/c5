@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -158,18 +159,19 @@ public class TabletService extends AbstractService implements TabletModule {
   private void startBootstrap() {
     LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
 
-    final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback = new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
-      @Override
-      @FiberOnly
-      public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
-        maybeStartBootstrap(result, tabletRegistry);
-      }
+    final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback =
+        new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
+          @Override
+          @FiberOnly
+          public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
+            maybeStartBootstrap(result, tabletRegistry);
+          }
 
-      @Override
-      public void onFailure(Throwable t) {
-        LOG.warn("failed to get discovery state", t);
-      }
-    };
+          @Override
+          public void onFailure(Throwable t) {
+            LOG.warn("failed to get discovery state", t);
+          }
+        };
 
     newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, message -> {
       ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
@@ -320,7 +322,21 @@ public class TabletService extends AbstractService implements TabletModule {
 
   @Override
   public String acceptCommand(String commandString) {
-    return null;
+    if (commandString.startsWith(C5ServerConstants.START_META)) {
+      HTableDescriptor metaDesc = HTableDescriptor.META_TABLEDESC;
+      HRegionInfo metaRegion = new HRegionInfo(
+          metaDesc.getTableName(), new byte[]{0}, new byte[]{}, false, 1);
+
+      // ok we have enough to start a region up now:
+      String peerString = commandString.substring(commandString.indexOf(":") + 1);
+      List<Long> peers = new ArrayList<>();
+      for (String s : peerString.split(",")) {
+        peers.add(new Long(s));
+      }
+      openRegion0(metaRegion, metaDesc, ImmutableList.copyOf(peers), tabletRegistry);
+      return "OK";
+    }
+    return "NOTOK";
   }
 
   public int getMinQuorumSize() {
