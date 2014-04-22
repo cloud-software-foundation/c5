@@ -18,6 +18,7 @@
 package c5db.regionserver;
 
 import c5db.C5ServerConstants;
+import c5db.client.generated.RegionSpecifier;
 import c5db.codec.WebsocketProtostuffDecoder;
 import c5db.codec.WebsocketProtostuffEncoder;
 import c5db.interfaces.C5Module;
@@ -43,6 +44,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,9 +153,9 @@ public class RegionServerService extends AbstractService implements RegionServer
     return null;
   }
 
-  public HRegion getOnlineRegion(String regionName) {
-    // TODO REMOVE ME!
-
-    return tabletModule.getTablet(regionName);
+  public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
+    String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
+    LOG.debug("get online region:" + stringifiedRegion);
+    return tabletModule.getTablet(stringifiedRegion);
   }
 }

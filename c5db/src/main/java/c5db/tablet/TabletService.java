@@ -18,13 +18,11 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
-import c5db.ConfigDirectory;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
-import c5db.log.OLogShim;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
@@ -34,12 +32,12 @@ import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -47,13 +45,15 @@ import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Decoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 
@@ -84,6 +84,7 @@ public class TabletService extends AbstractService implements TabletModule {
     this.fiber = fiberFactory.create();
     this.server = server;
     this.conf = HBaseConfiguration.create();
+
   }
 
   @Override
@@ -100,21 +101,27 @@ public class TabletService extends AbstractService implements TabletModule {
     HRegion region = onlineRegions.get(tabletName);
     // TODO remove
     if (region == null) {
-      Iterator<HRegion> iterator = onlineRegions.values().iterator();
-      do {
-        region = iterator.next();
-      } while (region.getTableDesc().getTableName().getNameAsString().contains("root"));
-
+      // Always return the first region which matches
+      Optional<String> maybeFoundRegion = onlineRegions
+          .keySet()
+          .stream()
+          .filter(s -> s.startsWith(tabletName))
+          .findFirst();
+      if (maybeFoundRegion.isPresent()) {
+        return onlineRegions.get(maybeFoundRegion.get());
+      } else {
+        LOG.error("Region not found: " + tabletName);
+        return null;
+      }
     }
+
     return region;
   }
 
   @Override
   protected void doStart() {
     fiber.start();
-
     fiber.execute(() -> {
-
       ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
       try {
         discoveryModule = (DiscoveryModule) discoveryService.get();
@@ -128,22 +135,22 @@ public class TabletService extends AbstractService implements TabletModule {
         @Override
         public void onSuccess(C5Module result) {
           replicationModule = (ReplicationModule) result;
+          tabletRegistry = new TabletRegistry(server,
+              server.getConfigDirectory(),
+              conf,
+              fiberFactory,
+              replicationModule,
+              c5db.tablet.Tablet::new,
+              HRegionBridge::new);
           fiber.execute(() -> {
             try {
               startBootstrap();
-              tabletRegistry = new TabletRegistry(server,
-                  server.getConfigDirectory(),
-                  conf,
-                  fiberFactory,
-                  c5db.tablet.Tablet::new,
-                  replicationModule,
-                  HRegionBridge::new);
-
               notifyStarted();
             } catch (Exception e) {
               notifyFailed(e);
             }
           });
+
         }
 
         @Override
@@ -198,22 +205,10 @@ public class TabletService extends AbstractService implements TabletModule {
     rootStarted = true;
 
     bootstrapRoot(ImmutableList.copyOf(peers), tabletRegistry);
-    // TODO REMOVE. Temp table while we have no meta infrastructure
-    bootstrapTempTable(ImmutableList.copyOf(peers), tabletRegistry);
     if (newNodeWatcher != null) {
       newNodeWatcher.dispose();
       newNodeWatcher = null;
     }
-  }
-
-  private void bootstrapTempTable(final ImmutableList<Long> peers, final TabletRegistry tabletRegistry) {
-    TableName tableName = TableName.valueOf("1");
-    HTableDescriptor desc = new HTableDescriptor(tableName);
-    desc.addFamily(new HColumnDescriptor("cf"));
-
-    HRegionInfo region = new HRegionInfo(tableName);
-    openRegion0(region, desc, ImmutableList.copyOf(peers), tabletRegistry);
-
   }
 
   // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
@@ -235,57 +230,19 @@ public class TabletService extends AbstractService implements TabletModule {
     LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
     String quorumId = regionInfo.getRegionNameAsString();
-    ConfigDirectory serverConfigDir = server.getConfigDirectory();
-
-    ListenableFuture<ReplicationModule.Replicator> future =
-        replicationModule.createReplicator(quorumId, peers);
-    Futures.addCallback(future, new FutureCallback<ReplicationModule.Replicator>() {
-      @Override
-      @FiberOnly
-      public void onSuccess(ReplicationModule.Replicator result) {
-        try {
-          // TODO subscribe to the replicator's broadcasts.
-
-          OLogShim shim = new OLogShim(result);
-
-          // default place for a region is....
-          // tableName/encodedName.
-          HRegion region = HRegion.openHRegion(new org.apache.hadoop.fs.Path(serverConfigDir.getBaseConfigPath().toString()),
-              regionInfo,
-              tableDescriptor,
-              shim,
-              conf,
-              null,
-              null);
-
-          onlineRegions.put(quorumId, region);
-          Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
-
-          getTabletStateChanges().publish(new TabletStateChange(tablet,
-              Tablet.State.Open,
-              null));
-
-        } catch (IOException e) {
-          LOG.error("Error opening OLogShim for {}, err: {}", regionInfo, e);
-//                    getTabletStateChanges().publish(new TabletStateChange(
-//                            regionInfo,
-//                            null,
-//                            0,
-//                            e));
-        }
-      }
-
-      @Override
-      public void onFailure(Throwable t) {
-        LOG.error("Unable to open replicator instance for region {}, err: {}",
-            regionInfo, t);
-//                getTabletStateChanges().publish(new TabletStateChange(
-//                        regionInfo,
-//                        null,
-//                        0,
-//                        t));
-      }
-    }, fiber);
+    Tablet tablet;
+    try {
+      tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
+      HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
+      onlineRegions.put(quorumId, hregion);
+      getTabletStateChanges().publish(new TabletStateChange(tablet, Tablet.State.Open, null));
+    } catch (IOException | InterruptedException e) {
+      LOG.error("Error opening OLogShim for {}, err: {}", regionInfo, e);
+      getTabletStateChanges().publish(new TabletStateChange(
+          null,
+          null,
+          e));
+    }
   }
 
   @Override
@@ -335,11 +292,30 @@ public class TabletService extends AbstractService implements TabletModule {
       }
       openRegion0(metaRegion, metaDesc, ImmutableList.copyOf(peers), tabletRegistry);
       return "OK";
+    } else if (commandString.startsWith(C5ServerConstants.CREATE_TABLE)) {
+      BASE64Decoder decoder = new BASE64Decoder();
+      String createString = commandString.substring(commandString.indexOf(":") + 1);
+      String[] tableCreationStrings = createString.split(",");
+
+      try {
+        HTableDescriptor hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
+        HRegionInfo hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
+        List<Long> peers = new ArrayList<>();
+        for (String s : Arrays.copyOfRange(tableCreationStrings, 2, tableCreationStrings.length)) {
+          s = StringUtils.strip(s);
+          peers.add(new Long(s));
+        }
+        openRegion0(hRegionInfo, hTableDescriptor, ImmutableList.copyOf(peers), tabletRegistry);
+        return "OK";
+      } catch (IOException | DeserializationException e) {
+        e.printStackTrace();
+        System.exit(0);
+      }
     }
     return "NOTOK";
   }
 
-  public int getMinQuorumSize() {
+  int getMinQuorumSize() {
     if (server.isSingleNodeMode()) {
       return 1;
     } else {

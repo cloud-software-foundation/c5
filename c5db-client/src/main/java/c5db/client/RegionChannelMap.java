@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/***
+/**
  * A helper singleton to store all of the regions that the client jvm is connected to.
  */
 public enum RegionChannelMap {

@@ -49,36 +49,36 @@ public class TabletRegistryTest {
   public JUnitRuleMockery context = new JUnitRuleMockery();
   @Rule
   public JUnitRuleFiberExceptions fiberExceptionRule = new JUnitRuleFiberExceptions();
-  final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(1));
-  final C5FiberFactory c5FiberFactory = factoryWithExceptionHandler(poolFiberFactory, fiberExceptionRule);
+  private final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(1));
+  private final C5FiberFactory c5FiberFactory = factoryWithExceptionHandler(poolFiberFactory, fiberExceptionRule);
 
-  final C5Server c5server = context.mock(C5Server.class);
-  final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
-  final TabletFactory tabletFactory = context.mock(TabletFactory.class);
-  final TabletModule.Tablet rootTablet = context.mock(TabletModule.Tablet.class);
+  private final C5Server c5server = context.mock(C5Server.class);
+  private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
+  private final TabletFactory tabletFactory = context.mock(TabletFactory.class);
+  private final TabletModule.Tablet rootTablet = context.mock(TabletModule.Tablet.class);
 
-  final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
-  final Region.Creator regionCreator = context.mock(Region.Creator.class);
+  private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
+  private final Region.Creator regionCreator = context.mock(Region.Creator.class);
 
-  final Configuration legacyConf = HBaseConfiguration.create();
+  private final Configuration legacyConf = HBaseConfiguration.create();
 
   /**
    * * value types ***
    */
-  final HRegionInfo rootRegionInfo = SystemTableNames.rootRegionInfo();
-  final byte[] regionInfoBytes = rootRegionInfo.toByteArray();
+  private final HRegionInfo rootRegionInfo = SystemTableNames.rootRegionInfo();
+  private final byte[] regionInfoBytes = rootRegionInfo.toByteArray();
 
-  final HTableDescriptor rootTableDescriptor = SystemTableNames.rootTableDescriptor();
-  final byte[] rootTableDescriptorBytes = rootTableDescriptor.toByteArray();
+  private final HTableDescriptor rootTableDescriptor = SystemTableNames.rootTableDescriptor();
+  private final byte[] rootTableDescriptorBytes = rootTableDescriptor.toByteArray();
 
-  final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
+  private final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
 
-  final String ROOT_QUORUM_NAME = rootRegionInfo.getRegionNameAsString();
+  private final String ROOT_QUORUM_NAME = rootRegionInfo.getRegionNameAsString();
 
   /**
    * object under test **
    */
-  TabletRegistry tabletRegistry;
+  private TabletRegistry tabletRegistry;
 
   @Before
   public void before() throws IOException {
@@ -103,13 +103,12 @@ public class TabletRegistryTest {
         configDirectory,
         legacyConf,
         c5FiberFactory,
-        tabletFactory,
-        replicationModule,
+        replicationModule, tabletFactory,
         regionCreator);
   }
 
   @Test
-  public void shouldReadFilesFromDiskThenStartTabletsDescribedTherin() throws Exception {
+  public void shouldReadFilesFromDiskThenStartTabletsDescribedThereIn() throws Exception {
     context.checking(new Expectations() {{
       // Base configuration directory information
       allowing(configDirectory).readBinaryData(with(any(String.class)), with(equal(ConfigDirectory.regionInfoFile)));
