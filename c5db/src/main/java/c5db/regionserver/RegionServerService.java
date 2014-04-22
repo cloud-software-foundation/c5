@@ -18,12 +18,15 @@
 package c5db.regionserver;
 
 import c5db.C5ServerConstants;
+import c5db.client.generated.RegionSpecifier;
 import c5db.codec.WebsocketProtostuffDecoder;
 import c5db.codec.WebsocketProtostuffEncoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.server.CommandRpcRequest;
+import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
@@ -40,12 +43,17 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.protostuff.ByteString;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Encoder;
 
 /**
  * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
@@ -97,7 +105,6 @@ public class RegionServerService extends AbstractService implements RegionServer
                               @Override
                               protected void initChannel(SocketChannel ch) throws Exception {
                                 ChannelPipeline p = ch.pipeline();
-                                p.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
                                 p.addLast("http-server-codec", new HttpServerCodec());
                                 p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
                                 p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
@@ -116,6 +123,33 @@ public class RegionServerService extends AbstractService implements RegionServer
               notifyFailed(future.cause());
             }
           });
+
+          if (System.getProperties().containsKey("testTable")) {
+            ByteString tableNameBytes = ByteString.copyFrom(Bytes.toBytes("testTable"));
+            TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
+            HTableDescriptor testDesc = new HTableDescriptor(tableName);
+            testDesc.addFamily(new HColumnDescriptor("cf"));
+            HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
+            String peerString = String.valueOf(server.getNodeId());
+            BASE64Encoder encoder = new BASE64Encoder();
+
+            String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
+            String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
+
+            String createString = C5ServerConstants.CREATE_TABLE
+                + ":"
+                + hTableDesc
+                + ","
+                + hRegionInfo
+                + ","
+                + peerString;
+
+
+            ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
+            CommandRpcRequest commandRpcRequest = new CommandRpcRequest(server.getNodeId(), moduleSubCommand);
+            server.getCommandChannel().publish(commandRpcRequest);
+            LOG.warn("Creating test table");
+          }
         }
 
         @Override
@@ -151,9 +185,9 @@ public class RegionServerService extends AbstractService implements RegionServer
     return null;
   }
 
-  public HRegion getOnlineRegion(String regionName) {
-    // TODO REMOVE ME!
-
-    return tabletModule.getTablet(regionName);
+  public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
+    String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
+    LOG.debug("get online region:" + stringifiedRegion);
+    return tabletModule.getTablet(stringifiedRegion);
   }
 }
