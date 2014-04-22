@@ -21,11 +21,16 @@ import c5db.client.generated.RegionInfo;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.server.CommandRpcRequest;
+import c5db.messages.generated.ModuleSubCommand;
+import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.jetlang.channels.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +54,19 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
     List<Long> pickedPeers = pickPeers(peers);
     long leader = pickLeader(pickedPeers);
+    createMetaEntryInRoot(region, pickedPeers, leader);
+    requestMetaCommandCreated(pickedPeers, leader);
+  }
+
+  private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
+    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, C5ServerConstants.START_META);
+    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
+    Channel<CommandRpcRequest<?>> channel = server.getCommandChannel();
+    channel.publish(commandRpcRequest);
+
+  }
+
+  private void createMetaEntryInRoot(Region region, List<Long> pickedPeers, long leader) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
     TableName tableName = new TableName(ByteBuffer.wrap(C5ServerConstants.INTERNAL_NAMESPACE),
         ByteBuffer.wrap(C5ServerConstants.META_TABLE_NAME));
@@ -60,8 +78,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
         ByteBuffer.wrap(C5ServerConstants.META_END_KEY),
         true,
         false);
-    put.add(C5ServerConstants.META_INFO_CF,
-        C5ServerConstants.META_INFO_CQ,
+    put.add(HConstants.CATALOG_FAMILY,
+        HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
     region.put(put);
   }
