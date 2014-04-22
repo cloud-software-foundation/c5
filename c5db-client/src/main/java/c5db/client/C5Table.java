@@ -29,10 +29,10 @@ import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScannerManager;
-import io.protostuff.ByteString;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -140,7 +140,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
     final SettableFuture<Long> future = SettableFuture.create();
     final RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        getRegion(scan.getStartRow()));
+        ByteBuffer.wrap(getTableName()));
 
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier,
         ProtobufUtil.toScan(scan),
@@ -241,9 +241,10 @@ public class C5Table extends C5Shim implements AutoCloseable {
       regionActions.add(regionAction);
 
       handler.call(ProtobufUtil.getMultiCall(commandId.incrementAndGet(),
-          new MultiRequest(regionActions)),
+              new MultiRequest(regionActions)),
           resultFuture,
-          channel);
+          channel
+      );
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | IOException | ExecutionException | TimeoutException e) {
       throw new IOException(e);

@@ -20,6 +20,8 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
 import java.util.Random;
@@ -28,6 +30,7 @@ import java.util.Random;
  * CLI Entry point for the C5DB server.
  */
 public class Main {
+  private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
   public static void main(String[] args) throws Exception {
     C5Server instance = startC5Server(args);

@@ -41,4 +41,5 @@ public class C5ServerConstants {
   public static final int REPLICATOR_PORT_MIN = 1024;
   public static final int REPLICATOR_PORT_RANGE = 30000;
   public static final String START_META = "Start Meta";
+  public static final String CREATE_TABLE = "Create Table";
 }
