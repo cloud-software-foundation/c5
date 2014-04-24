@@ -262,6 +262,16 @@ public class C5DB extends AbstractService implements C5Server {
     } else if (msg instanceof StopModule) {
       StopModule message = (StopModule) msg;
       stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
+    } else if (msg instanceof ModuleSubCommand) {
+      processModuleSubCommand((ModuleSubCommand) msg);
+    }
+  }
+
+  private void processModuleSubCommand(ModuleSubCommand msg) {
+    if (msg.getModule().equals(ModuleType.Tablet)) {
+      C5Module module = this.allModules.get(msg.getModule());
+      String result = module.acceptCommand(msg.getSubCommand());
+      LOG.debug("accept command: " + result);
     }
   }
 
@@ -300,7 +310,7 @@ public class C5DB extends AbstractService implements C5Server {
         } else {
           String result = module.acceptCommand(moduleSubCommand.getSubCommand());
           if (result == null) {
-            stdout = "(null) - module doesnt support commands";
+            stdout = "(null) - module doesn't support commands";
           } else {
             stdout = result;
           }
