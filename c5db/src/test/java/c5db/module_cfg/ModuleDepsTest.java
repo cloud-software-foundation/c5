@@ -43,7 +43,7 @@ public class ModuleDepsTest {
   @Test
   public void testFoo() throws Exception {
 
-    List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph ("c5db.interfaces.RegionServerModule", "c5db.interfaces.EventLogModule");
+    List<ImmutableList<Graph.Node<ModuleType>>> result = ModuleDeps.createGraph("c5db.interfaces.RegionServerModule", "c5db.interfaces.EventLogModule");
 
     Joiner joiner = Joiner.on("\n");
 

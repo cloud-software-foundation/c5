@@ -18,23 +18,19 @@
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
-import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
+import io.protostuff.Message;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.protobuf.generated.CellProtos;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
@@ -50,9 +46,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -67,13 +61,15 @@ public class RootTabletTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private MemoryChannel<ReplicationModule.Replicator.State> channel;
+  private MemoryChannel<Message<?>> commandMemoryChannel;
+
+  private MemoryChannel<ReplicationModule.Replicator.State> stateMemoryChannel;
 
   final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
   final ReplicationModule.Replicator replicator = context.mock(ReplicationModule.Replicator.class);
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
   final Region region = context.mock(Region.class);
-  final C5Server server= context.mock(C5Server.class);
+  final C5Server server = context.mock(C5Server.class);
   final SettableFuture<ReplicationModule.Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
@@ -96,7 +92,7 @@ public class RootTabletTest {
       replicationModule,
       regionCreator);
 
-  AsyncChannelAsserts.ChannelListener<TabletModule.TabletStateChange> listener;
+  AsyncChannelAsserts.ChannelListener<TabletModule.TabletStateChange> stateChangeChannelListener;
 
   @Before
   public void setup() throws Exception {
@@ -110,11 +106,10 @@ public class RootTabletTest {
         tabletFiber,
         replicationModule,
         regionCreator);
-    listener = listenTo(tablet.getStateChangeChannel());
-
     future.set(replicator);
-    listener = listenTo(tablet.getStateChangeChannel());
-    channel = new MemoryChannel<>();
+    stateChangeChannelListener = listenTo(tablet.getStateChangeChannel());
+    stateMemoryChannel = new MemoryChannel<>();
+    commandMemoryChannel = new MemoryChannel<>();
 
     context.checking(new Expectations() {
       {
@@ -149,26 +144,31 @@ public class RootTabletTest {
         // Return 0 entries from the root table for Meta
         oneOf(region).put(with(any(Put.class)));
 
+        // Post put we send a command over the command channel
+        oneOf(server).getCommandChannel();
+        will(returnValue(commandMemoryChannel));
       }
     });
 
     context.checking(new Expectations() {{
       allowing(replicator).getStateChannel();
-      will(returnValue(channel));
+      will(returnValue(stateMemoryChannel));
     }});
   }
 
   @After
   public void after() {
     tabletFiber.dispose();
-    listener.dispose();
+    stateChangeChannelListener.dispose();
   }
 
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
     tablet.start();
-    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Open));
-    channel.publish(ReplicationModule.Replicator.State.LEADER);
-    assertEventually(listener, hasMessageWithState(TabletModule.Tablet.State.Leader));
+    assertEventually(stateChangeChannelListener, hasMessageWithState(TabletModule.Tablet.State.Open));
+    stateMemoryChannel.publish(ReplicationModule.Replicator.State.LEADER);
+    assertEventually(stateChangeChannelListener, hasMessageWithState(TabletModule.Tablet.State.Leader));
+
+
   }
 }
