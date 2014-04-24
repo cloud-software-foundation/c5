@@ -20,8 +20,8 @@ package c5db;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
-import c5db.log.LogFileService;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.log.LogFileService;
 import c5db.log.LogService;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
@@ -75,7 +75,7 @@ public class C5DB extends AbstractService implements C5Server {
   private final long nodeId;
   private final ConfigDirectory configDirectory;
 
-  private final Channel<Message<?>> commandChannel = new MemoryChannel<>();
+  private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
 
   private Fiber serverFiber;
@@ -164,13 +164,14 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   public RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+
   @Override
   public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests() {
     return commandRequests;
   }
 
   @Override
-  public Channel<Message<?>> getCommandChannel() {
+  public Channel<CommandRpcRequest<?>> getCommandChannel() {
     return commandChannel;
   }
 
@@ -249,14 +250,17 @@ public class C5DB extends AbstractService implements C5Server {
     notifyStopped();
   }
 
+  private void processCommandMessage(CommandRpcRequest<?> msg) throws Exception {
+    processCommandSubMessage(msg.message);
+  }
+
   @FiberOnly
-  private void processCommandMessage(Message<?> msg) throws Exception {
+  private void processCommandSubMessage(Message<?> msg) throws Exception {
     if (msg instanceof StartModule) {
       StartModule message = (StartModule) msg;
       startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
-    }
-    else if (msg instanceof StopModule) {
-      StopModule message = (StopModule)msg;
+    } else if (msg instanceof StopModule) {
+      StopModule message = (StopModule) msg;
       stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
     }
   }
@@ -265,18 +269,18 @@ public class C5DB extends AbstractService implements C5Server {
   private void processCommandRequest(Request<CommandRpcRequest<?>, CommandReply> request) {
     CommandRpcRequest<?> r = request.getRequest();
     Message<?> subMessage = r.message;
-    long receipentNodeId = r.receipientNodeId;
+    long receiptNodeId = r.receipientNodeId;
 
     try {
       String stdout;
 
       if (subMessage instanceof StartModule) {
-        StartModule message = (StartModule)subMessage;
+        StartModule message = (StartModule) subMessage;
         startModule(message.getModule(), message.getModulePort(), message.getModuleArgv());
 
         stdout = String.format("Module %s started", message.getModule());
       } else if (subMessage instanceof StopModule) {
-        StopModule message = (StopModule)subMessage;
+        StopModule message = (StopModule) subMessage;
 
         stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
 
@@ -288,7 +292,7 @@ public class C5DB extends AbstractService implements C5Server {
         // - collect the reply
         // reply.
         stdout = "";
-        ModuleSubCommand moduleSubCommand = (ModuleSubCommand)subMessage;
+        ModuleSubCommand moduleSubCommand = (ModuleSubCommand) subMessage;
         ModuleType moduleTypeToIssueCommandTo = moduleSubCommand.getModule();
         C5Module module = this.allModules.get(moduleTypeToIssueCommandTo);
         if (module == null) {

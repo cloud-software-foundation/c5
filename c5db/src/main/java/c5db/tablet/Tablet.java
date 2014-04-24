@@ -149,7 +149,8 @@ public class Tablet implements TabletModule.Tablet {
         try {
           rootTabletLeaderBehavior.start();
         } catch (IOException e) {
-          throw new RuntimeException("Bad bootstrap failing:" + e.getStackTrace());
+          e.printStackTrace();
+          System.exit(0);
         }
         this.setTabletState(State.Leader);
       } else {

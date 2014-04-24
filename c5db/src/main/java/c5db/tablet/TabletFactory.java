@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Essentially the constructor parameters for a tablet, as an interface. This exists primarily
  * to provide testability for those who manage the lifecycle of Tablets.
- * <p>
+ * <p/>
  * In production code, one can just type Tablet::new !!
  */
 public interface TabletFactory {

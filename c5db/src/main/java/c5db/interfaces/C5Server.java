@@ -25,7 +25,6 @@ import c5db.util.C5FiberFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
-import io.protostuff.Message;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
@@ -90,7 +89,7 @@ public interface C5Server extends Service {
    *
    * @return The jetlang channel to submit command messages
    */
-  public Channel<Message<?>> getCommandChannel();
+  public Channel<CommandRpcRequest<?>> getCommandChannel();
 
   /**
    * Similar to {@link #getCommandChannel()} except providing a feedback message with information
