@@ -28,7 +28,6 @@ import c5db.messages.generated.ModuleType;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.Graph;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
