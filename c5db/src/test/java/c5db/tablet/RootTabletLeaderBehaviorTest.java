@@ -153,7 +153,7 @@ public class RootTabletLeaderBehaviorTest {
     @Override
     protected boolean matchesSafely(CommandRpcRequest<ModuleSubCommand> moduleSubCommandCommandRpcRequest) {
       return moduleSubCommandCommandRpcRequest.message.getModule().equals(ModuleType.Tablet) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().equals(C5ServerConstants.START_META);
+          moduleSubCommandCommandRpcRequest.message.getSubCommand().startsWith(C5ServerConstants.START_META);
 
     }
   }
