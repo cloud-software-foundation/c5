@@ -25,6 +25,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
+import org.jetlang.channels.Channel;
+import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Handles the logic of starting quorums, restoring them from disk, etc.
@@ -44,27 +47,28 @@ public class TabletRegistry {
 
   private final C5FiberFactory fiberFactory;
   private final TabletFactory tabletFactory;
-  private final ReplicationModule replicationModule;
+
   private final Region.Creator regionCreator;
 
   private final Map<String, TabletModule.Tablet> tablets = new HashMap<>();
-  private C5Server c5server;
-  private ConfigDirectory configDirectory;
-  private Configuration legacyConf;
+  private final ReplicationModule replicationModule;
+  private final C5Server c5server;
+  private final ConfigDirectory configDirectory;
+  private final Configuration legacyConf;
 
   public TabletRegistry(C5Server c5server,
                         ConfigDirectory configDirectory,
                         Configuration legacyConf,
                         C5FiberFactory fiberFactory,
-                        TabletFactory tabletFactory,
                         ReplicationModule replicationModule,
+                        TabletFactory tabletFactory,
                         Region.Creator regionCreator) {
     this.c5server = c5server;
     this.configDirectory = configDirectory;
     this.legacyConf = legacyConf;
     this.fiberFactory = fiberFactory;
-    this.tabletFactory = tabletFactory;
     this.replicationModule = replicationModule;
+    this.tabletFactory = tabletFactory;
     this.regionCreator = regionCreator;
   }
 
@@ -85,8 +89,14 @@ public class TabletRegistry {
 
         TabletModule.Tablet tablet = tabletFactory.create(
             c5server,
-            regionInfo, tableDescriptor, peers, basePath, legacyConf,
-            fiberFactory.create(), replicationModule, regionCreator);
+            regionInfo,
+            tableDescriptor,
+            peers,
+            basePath,
+            legacyConf,
+            fiberFactory.create(),
+            replicationModule,
+            regionCreator);
 
         tablet.start();
 
@@ -99,7 +109,7 @@ public class TabletRegistry {
 
   public TabletModule.Tablet startTablet(HRegionInfo regionInfo,
                                          HTableDescriptor tableDescriptor,
-                                         List<Long> peerList) throws IOException {
+                                         List<Long> peerList) throws IOException, InterruptedException {
     Path basePath = configDirectory.getBaseConfigPath();
 
     // quorum name - ?
@@ -117,14 +127,33 @@ public class TabletRegistry {
         tableDescriptor.toByteArray());
     configDirectory.writePeersToFile(quorumName, peerList);
 
+    Fiber tabletFiber = fiberFactory.create();
     TabletModule.Tablet newTablet = tabletFactory.create(
         c5server,
-        regionInfo, tableDescriptor, peerList, basePath, legacyConf,
-        fiberFactory.create(), replicationModule, regionCreator);
-
+        regionInfo,
+        tableDescriptor,
+        peerList,
+        basePath,
+        legacyConf,
+        tabletFiber,
+        replicationModule,
+        regionCreator);
     tablets.put(quorumName, newTablet);
 
+    final CountDownLatch latch = new CountDownLatch(1);
+    Channel<TabletModule.TabletStateChange> channel = newTablet.getStateChangeChannel();
+    channel.subscribe(tabletFiber, message -> {
+      if (message.state.equals(TabletModule.Tablet.State.Open)) {
+        latch.countDown();
+      }
+    });
+
     newTablet.start();
+    latch.await();
     return newTablet;
+  }
+
+  Map<String, TabletModule.Tablet> getTablets() {
+    return tablets;
   }
 }

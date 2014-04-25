@@ -17,13 +17,13 @@
 package c5db.client.codec;
 
 import c5db.client.generated.Response;
-import io.protostuff.ByteBufferInput;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.protostuff.ByteBufferInput;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;

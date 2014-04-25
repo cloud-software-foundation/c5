@@ -88,9 +88,9 @@ public class Tablet implements TabletModule.Tablet {
                 final List<Long> peers,
                 final Path basePath,
                 final Configuration conf,
-                Fiber tabletFiber,
-                ReplicationModule replicationModule,
-                Region.Creator regionCreator) {
+                final Fiber tabletFiber,
+                final ReplicationModule replicationModule,
+                final Region.Creator regionCreator) {
     this.server = server;
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
