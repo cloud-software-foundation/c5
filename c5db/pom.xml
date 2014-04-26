@@ -80,6 +80,28 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+          <version>0.8.14</version>
+        </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>9.1.4.v20140401</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>9.1.4.v20140401</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlet</artifactId>
+        <version>9.1.4.v20140401</version>
+      </dependency>
+
+
+      <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
             <version>${clojure.version}</version>
