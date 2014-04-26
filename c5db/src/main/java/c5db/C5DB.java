@@ -35,6 +35,7 @@ import c5db.util.C5FiberFactory;
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberOnly;
 import c5db.util.PoolFiberFactoryWithExecutor;
+import c5db.webadmin.WebAdminService;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -370,6 +371,12 @@ public class C5DB extends AbstractService implements C5Server {
       }
       case RegionServer: {
         C5Module module = new RegionServerService(bossGroup, workerGroup, modulePort, this);
+        startServiceModule(module);
+
+        break;
+      }
+      case WebAdmin: {
+        C5Module module = new WebAdminService(modulePort);
         startServiceModule(module);
 
         break;

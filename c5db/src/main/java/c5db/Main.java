@@ -63,8 +63,8 @@ public class Main {
     Random portRandomizer = new Random();
 
     int regionServerPort;
-    if (System.getProperties().containsKey("regionServerPort")) {
-      regionServerPort = Integer.parseInt(System.getProperty("regionServerPort"));
+    if (hasPropertyPortSet()) {
+      regionServerPort = getPropertyPort();
     } else {
       regionServerPort = C5ServerConstants.DEFAULT_REGION_SERVER_PORT_MIN
           + portRandomizer.nextInt(C5ServerConstants.REGION_SERVER_PORT_RANGE);
@@ -88,6 +88,23 @@ public class Main {
 
     StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
+
+    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, 31337, "");
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
     return instance;
+  }
+
+  private static int getPropertyPort() {
+    String regionServerPort = System.getProperty("regionServerPort");
+
+    if (regionServerPort != null) {
+      return Integer.parseInt(regionServerPort);
+    }
+
+    return Integer.parseInt(System.getProperty("port"));
+  }
+
+  private static boolean hasPropertyPortSet() {
+    return System.getProperties().containsKey("regionServerPort") || System.getProperties().containsKey("port");
   }
 }
