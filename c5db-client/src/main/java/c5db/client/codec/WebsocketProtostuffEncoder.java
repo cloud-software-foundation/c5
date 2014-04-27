@@ -18,7 +18,6 @@ package c5db.client.codec;
 
 import c5db.client.C5Constants;
 import c5db.client.generated.Call;
-import io.protostuff.LowCopyProtobufOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,6 +26,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.protostuff.LowCopyProtobufOutput;
 
 import java.nio.ByteBuffer;
 import java.util.List;

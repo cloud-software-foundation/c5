@@ -68,4 +68,8 @@ public class HRegionBridge implements Region {
   public void put(final Put put) throws IOException {
     theRegion.put(put);
   }
+
+  HRegion getTheRegion() {
+    return theRegion;
+  }
 }

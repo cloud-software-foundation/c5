@@ -120,7 +120,7 @@ public class C5ServerHandler extends SimpleChannelInboundHandler<Call> {
             );
         }
       }
-      final HRegion region = regionServerService.getOnlineRegion("1");
+      final HRegion region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
       region.mutateRow(rm);
     }
     final Response response = new Response(Response.Command.MULTI,
@@ -137,7 +137,7 @@ public class C5ServerHandler extends SimpleChannelInboundHandler<Call> {
     final MutateRequest mutateIn = call.getMutate();
     MutateResponse mutateResponse;
     try {
-      final HRegion region = regionServerService.getOnlineRegion("1");
+      final HRegion region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
       final MutationProto.MutationType type = mutateIn.getMutation().getMutateType();
       switch (type) {
         case PUT:
@@ -248,7 +248,7 @@ public class C5ServerHandler extends SimpleChannelInboundHandler<Call> {
       channel = new MemoryChannel<>();
 
       final ScanRunnable scanRunnable = new ScanRunnable(ctx, call, scannerId,
-          regionServerService.getOnlineRegion("1"));
+          regionServerService.getOnlineRegion(call.getScan().getRegion()));
       channel.subscribe(fiber, scanRunnable);
       scanManager.addChannel(scannerId, channel);
     }
@@ -271,7 +271,7 @@ public class C5ServerHandler extends SimpleChannelInboundHandler<Call> {
   private void get(ChannelHandlerContext ctx, Call call) throws IOException {
     final Get getIn = call.getGet().getGet();
 
-    final HRegion region = regionServerService.getOnlineRegion("1");
+    final HRegion region = regionServerService.getOnlineRegion(call.getGet().getRegion());
     final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(getIn);
     final Result regionResult = region.get(serverGet);
     final c5db.client.generated.Result result;

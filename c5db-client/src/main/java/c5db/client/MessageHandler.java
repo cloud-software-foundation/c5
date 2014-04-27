@@ -25,10 +25,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-/***
+/**
  * A simple handler to handle inbound responses from the C5 server.
  */
 public class MessageHandler extends SimpleChannelInboundHandler<Response> {
@@ -42,7 +41,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Response> {
     switch (msg.getCommand()) {
       case MUTATE:
         final SettableFuture<Response> f = futures.get(msg.getCommandId());
-        f.set(msg) ;
+        f.set(msg);
         break;
       case SCAN:
         final long scannerId = msg.getScan().getScannerId();

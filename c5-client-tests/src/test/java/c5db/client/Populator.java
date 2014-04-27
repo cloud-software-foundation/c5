@@ -28,10 +28,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class Populator extends MiniClusterBase {
-  static ByteString tableName = ByteString.copyFrom(Bytes.toBytes("tableName"));
+
+
+  private static ByteString tableName;
 
   public Populator() throws IOException, InterruptedException {
+
   }
+
 
   public static void main(String[] args)
       throws IOException, InterruptedException {
@@ -103,6 +107,8 @@ public class Populator extends MiniClusterBase {
   @Test
   public void testPopulator() throws IOException, InterruptedException {
     Populator populator = new Populator();
+    tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
+
     populator.main(new String[]{String.valueOf(getRegionServerPort())});
   }
 }
