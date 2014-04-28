@@ -268,7 +268,7 @@ public class C5DB extends AbstractService implements C5Server {
     }
   }
 
-  private void processModuleSubCommand(ModuleSubCommand msg) {
+  private void processModuleSubCommand(ModuleSubCommand msg) throws InterruptedException {
     if (msg.getModule().equals(ModuleType.Tablet)) {
       C5Module module = this.allModules.get(msg.getModule());
       String result = module.acceptCommand(msg.getSubCommand());

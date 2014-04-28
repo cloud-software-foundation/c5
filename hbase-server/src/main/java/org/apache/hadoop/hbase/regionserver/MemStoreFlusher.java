@@ -63,7 +63,7 @@ import org.cloudera.htrace.TraceScope;
  * @see FlushRequester
  */
 @InterfaceAudience.Private
-class MemStoreFlusher implements FlushRequester {
+public class MemStoreFlusher implements FlushRequester {
   static final Log LOG = LogFactory.getLog(MemStoreFlusher.class);
   // These two data members go together.  Any entry in the one must have
   // a corresponding entry in the other.
