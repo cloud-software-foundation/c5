@@ -17,15 +17,15 @@
 
 package c5db.interfaces;
 
+import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.tablet.Region;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Manages the lifecycle of tablets - the individual chunks of tables.  Each tablet is
@@ -47,4 +47,5 @@ public interface TabletModule extends C5Module {
 
   public Channel<TabletStateChange> getTabletStateChanges();
 
+  public Collection<Tablet> getTablets() throws ExecutionException, InterruptedException;
 }

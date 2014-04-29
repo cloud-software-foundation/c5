@@ -24,16 +24,19 @@ import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.discovery.NodeInfo;
+import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -52,6 +55,7 @@ import sun.misc.BASE64Decoder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -273,6 +277,20 @@ public class TabletService extends AbstractService implements TabletModule {
   @Override
   public Channel<TabletStateChange> getTabletStateChanges() {
     return tabletStateChangeChannel;
+  }
+
+  @Override
+  public Collection<Tablet> getTablets() throws ExecutionException, InterruptedException {
+    SettableFuture<Collection<Tablet>> future = SettableFuture.create();
+    fiber.execute(() -> {
+      Map<String, Tablet> tablets = tabletRegistry.getTablets();
+      // make defensive copy:
+      future.set(
+          Lists.newArrayList(tablets.values())
+      );
+    });
+
+    return future.get();
   }
 
   @Override

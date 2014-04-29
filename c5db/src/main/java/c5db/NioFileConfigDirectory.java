@@ -215,6 +215,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
           quorumNames.add(pathQuorum.getFileName().toString());
         }
       }
+    } catch (NoSuchFileException ignored) {
     }
     return quorumNames;
   }
