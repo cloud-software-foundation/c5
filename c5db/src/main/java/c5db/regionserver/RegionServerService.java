@@ -190,4 +190,9 @@ public class RegionServerService extends AbstractService implements RegionServer
     LOG.debug("get online region:" + stringifiedRegion);
     return tabletModule.getTablet(stringifiedRegion);
   }
+
+  public String toString() {
+
+    return super.toString()+ '{' + "port = " + port + '}';
+  }
 }
