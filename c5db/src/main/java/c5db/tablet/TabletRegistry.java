@@ -48,7 +48,7 @@ public class TabletRegistry {
 
   private final Region.Creator regionCreator;
 
-  private final Map<String, c5db.interfaces.tablet.Tablet> tablets = new HashMap<>();
+  private final Map<String, Tablet> tablets = new HashMap<>();
   private final ReplicationModule replicationModule;
   private final C5Server c5server;
   private final ConfigDirectory configDirectory;
