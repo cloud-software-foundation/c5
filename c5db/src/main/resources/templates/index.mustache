@@ -26,20 +26,17 @@
           </div>
         </div>
 
-
         {{#configDirectory}}
-
           {{#clusterName}}
             <div class="row">
               <div id="cluster-name"><span class="small">Cluster Name:</span> {{clusterName}}</div>
             </div>
           {{/clusterName}}
 
-      <!--  <div class="panel panel-primary">
+          <!--  <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Configured quorum ids</h3>
           </div>
-
           <div class="panel-body">
             <table class="table table-striped table-bordered">
               <tbody class="">
@@ -52,111 +49,104 @@
         {{/configDirectory}}
       {{/server}}
     </div>
-</div>
+  </div>
 
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <h3 class="panel-title">Tablet Status</h3>
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped table-bordered">
-            <thead>
-            <tr>
-              <td>Tablet name</td>
-              <td>State</td>
-              <td>Peers</td>
-
-            </tr>
-            </thead>
-            <tbody>
-            {{#tablets}}
-              <tr>
-                <td>{{regionInfo.regionNameAsString}}</td>
-                <td>{{tabletState}}</td>
-                <td>
-                  {{#peers}}
-                    <span class="text-primary">{{toString}}</span>
-                  {{/peers}}
-                </td>
-              </tr>
-            {{/tablets}}
-            </tbody>
-          </table>
-
-
-        </div>
-      </div>
-
-
-      <div id="modules" class="panel panel-info">
-        <div class="panel-heading">
-          <h3 class="panel-title">Server Module Status</h3>
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped table-bordered">
-            <thead>
-            <tr>
-              <td>Module type</td>
-              <td>Module Status</td>
-              <td>Module Port</td>
-            </tr>
-            </thead>
-            <tbody>
-            {{#modules}}
-              <tr>
-                <td>{{key}}</td>
-                <td>{{value.state}}</td>
-                <td>
-                  {{#value.hasPort}}
-                    {{value.port}}
-                  {{/value.hasPort}}
-                </td>
-              </tr>
-            {{/modules}}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Cluster node information</h3>
-      </div>
-      <div class="panel-body">
-        <table class="table table-striped table-bordered">
-          <thead>
-          <tr>
-            <td>NodeId</td>
-            <td>Node Addresses</td>
-            <td>Node Modules/Ports</td>
-          </tr>
-          </thead>
-          <tbody>
-          {{#nodes}}
-            <tr>
-              {{#availability}}
-                <td>{{nodeId}}</td>
-                <td>{{#addressesList}}
-                  <small>{{toString}}</small>
-                {{/addressesList}}</td>
-                <td>
-                  <ul class="list-inline">
-                  {{#modulesList}}
-                     <li>{{module}} <small>port:</small> {{modulePort}}</li>
-                  {{/modulesList}}
-                  </ul>
-                </td>
-              {{/availability}}
-            </tr>
-
-          {{/nodes}}
-          </tbody>
-
-        </table>
-
-
-      </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Tablet Status</h3>
     </div>
+    <div class="panel-body">
+      <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+          <td>Tablet name</td>
+          <td>State</td>
+          <td>Peers</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#tablets}}
+          <tr>
+            <td>{{regionInfo.regionNameAsString}}</td>
+            <td>{{tabletState}}</td>
+            <td>
+              {{#peers}}
+                <span class="text-primary">{{toString}}</span>
+              {{/peers}}
+            </td>
+          </tr>
+        {{/tablets}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="modules" class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Server Module Status</h3>
+    </div>
+    <div class="panel-body">
+      <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+          <td>Module type</td>
+          <td>Module Status</td>
+          <td>Module Port</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#modules}}
+          <tr>
+            <td>{{key}}</td>
+            <td>{{value.state}}</td>
+            <td>
+              {{#value.hasPort}}
+                {{value.port}}
+              {{/value.hasPort}}
+            </td>
+          </tr>
+        {{/modules}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Cluster node information</h3>
+    </div>
+    <div class="panel-body">
+      <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+          <td>NodeId</td>
+          <td>Node Addresses</td>
+          <td>Node Modules/Ports</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#nodes}}
+          <tr>
+            {{#availability}}
+              <td>{{nodeId}}</td>
+              <td>{{#addressesList}}
+                <small>{{toString}}</small>
+              {{/addressesList}}</td>
+              <td>
+                <ul class="list-inline">
+                  {{#modulesList}}
+                    <li>{{module}} <small>port:</small> {{modulePort}}</li>
+                  {{/modulesList}}
+                </ul>
+              </td>
+            {{/availability}}
+          </tr>
+        {{/nodes}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 {{/content}}
 
