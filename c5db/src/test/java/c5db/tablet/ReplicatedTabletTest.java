@@ -52,7 +52,7 @@ import static c5db.TabletMatchers.hasMessageWithState;
 /**
  * TDD/unit test for tablet.
  */
-public class TabletTest {
+public class ReplicatedTabletTest {
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
@@ -78,7 +78,7 @@ public class TabletTest {
   final Configuration conf = new Configuration();
 
   final Fiber tabletFiber = new ThreadFiber();
-  Tablet tablet = new Tablet(server,
+  ReplicatedTablet replicatedTablet = new ReplicatedTablet(server,
       regionInfo,
       tableDescriptor,
       peerList,
@@ -93,7 +93,7 @@ public class TabletTest {
   @Before
   public void setup() throws Exception {
     Fiber tabletFiber = new ThreadFiber();
-    this.tablet = new Tablet(server,
+    this.replicatedTablet = new ReplicatedTablet(server,
         regionInfo,
         tableDescriptor,
         peerList,
@@ -102,10 +102,10 @@ public class TabletTest {
         tabletFiber,
         replicationModule,
         regionCreator);
-    listener = listenTo(tablet.getStateChangeChannel());
+    listener = listenTo(replicatedTablet.getStateChangeChannel());
 
     future.set(replicator);
-    listener = listenTo(tablet.getStateChangeChannel());
+    listener = listenTo(replicatedTablet.getStateChangeChannel());
     channel = new MemoryChannel<>();
 
     context.checking(new Expectations() {
@@ -148,13 +148,13 @@ public class TabletTest {
 
   @Test
   public void basicTest() throws Throwable {
-    tablet.start();
+    replicatedTablet.start();
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
   }
 
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
-    tablet.start();
+    replicatedTablet.start();
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
     channel.publish(Replicator.State.LEADER);
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));

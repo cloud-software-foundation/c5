@@ -142,7 +142,7 @@ public class TabletService extends AbstractService implements TabletModule {
               conf,
               fiberFactory,
               replicationModule,
-              c5db.tablet.Tablet::new,
+              ReplicatedTablet::new,
               HRegionBridge::new);
           fiber.execute(() -> {
             try {
