@@ -4,7 +4,30 @@
 
 {{$content}}
 
-Real test content!!!!
+<div id="server">
+{{#server}}
+  <div id="node-id"><span>{{nodeId}}</span></div>
+  <div id="state"><span>{{state}}</span></div>
+  <div id="config-directory">
+      {{#configDirectory}}
+        <div id="cluster-name"><span>{{clusterName}}</span></div>
+        <div id="configured-quorums">
+            <ul>
+            {{#configuredQuorums}}
+              <li><span>{{toString}}</span></li>
+            {{/configuredQuorums}}
+            </ul>
+        </div>
+      {{/configDirectory}}
+  </div>
+{{/server}}
+</div>
+
+<div id="modules">
+    {{#modules}}
+      <div><span>{{key}}</span> <span>{{value}}</span></div>
+    {{/modules}}
+</div>
 
 {{/content}}
 

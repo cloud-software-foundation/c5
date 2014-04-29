@@ -378,7 +378,7 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case WebAdmin: {
-        C5Module module = new WebAdminService(modulePort);
+        C5Module module = new WebAdminService(this, modulePort);
         startServiceModule(module);
 
         break;
