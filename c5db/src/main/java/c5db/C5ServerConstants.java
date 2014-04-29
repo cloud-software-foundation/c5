@@ -42,4 +42,7 @@ public class C5ServerConstants {
   public static final int REPLICATOR_PORT_RANGE = 30000;
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
+  public static final int DEFAULT_WEB_SERVER_PORT = 31337;
+  public static final String WEB_SERVER_PORT = "webServerPort";
+  public static final String REGION_SERVER_PORT = "regionServerPort";
 }
