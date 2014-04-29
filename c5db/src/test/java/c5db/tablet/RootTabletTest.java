@@ -20,7 +20,8 @@ package c5db.tablet;
 import c5db.AsyncChannelAsserts;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
+import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.tablet.TabletStateChange;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.Message;
@@ -63,14 +64,14 @@ public class RootTabletTest {
 
   private MemoryChannel<Message<?>> commandMemoryChannel;
 
-  private MemoryChannel<ReplicationModule.Replicator.State> stateMemoryChannel;
+  private MemoryChannel<Replicator.State> stateMemoryChannel;
 
   final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
-  final ReplicationModule.Replicator replicator = context.mock(ReplicationModule.Replicator.class);
+  final Replicator replicator = context.mock(Replicator.class);
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
   final Region region = context.mock(Region.class);
   final C5Server server = context.mock(C5Server.class);
-  final SettableFuture<ReplicationModule.Replicator> future = SettableFuture.create();
+  final SettableFuture<Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
   final List<Long> peerList = ImmutableList.of(1L);
@@ -92,7 +93,7 @@ public class RootTabletTest {
       replicationModule,
       regionCreator);
 
-  AsyncChannelAsserts.ChannelListener<TabletModule.TabletStateChange> stateChangeChannelListener;
+  AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
 
   @Before
   public void setup() throws Exception {
@@ -165,9 +166,9 @@ public class RootTabletTest {
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
     tablet.start();
-    assertEventually(stateChangeChannelListener, hasMessageWithState(TabletModule.Tablet.State.Open));
-    stateMemoryChannel.publish(ReplicationModule.Replicator.State.LEADER);
-    assertEventually(stateChangeChannelListener, hasMessageWithState(TabletModule.Tablet.State.Leader));
+    assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+    stateMemoryChannel.publish(Replicator.State.LEADER);
+    assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
 
 
   }

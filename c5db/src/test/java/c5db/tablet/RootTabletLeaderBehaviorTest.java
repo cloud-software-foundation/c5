@@ -19,8 +19,8 @@ package c5db.tablet;
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import io.protostuff.Message;
@@ -57,7 +57,7 @@ public class RootTabletLeaderBehaviorTest {
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
-  private TabletModule.Tablet hRegionTablet;
+  private c5db.interfaces.tablet.Tablet hRegionTablet;
   private Region region;
   private C5Server c5Server;
   private Fiber fiber;
@@ -74,7 +74,7 @@ public class RootTabletLeaderBehaviorTest {
   public void before() throws IOException {
     fiber = new ThreadFiber();
 
-    hRegionTablet = context.mock(TabletModule.Tablet.class, "mockHRegionTablet");
+    hRegionTablet = context.mock(Tablet.class, "mockHRegionTablet");
     region = context.mock(Region.class, "mockRegion");
     c5Server = context.mock(C5Server.class, "mockC5Server");
   }

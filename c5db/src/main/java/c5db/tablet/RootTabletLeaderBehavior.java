@@ -20,8 +20,8 @@ import c5db.C5ServerConstants;
 import c5db.client.generated.RegionInfo;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import io.protostuff.LinkedBuffer;
@@ -43,10 +43,10 @@ import java.util.List;
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
-  private final TabletModule.Tablet tablet;
+  private final c5db.interfaces.tablet.Tablet tablet;
   private final C5Server server;
 
-  public RootTabletLeaderBehavior(final TabletModule.Tablet tablet,
+  public RootTabletLeaderBehavior(final Tablet tablet,
                                   final C5Server server) {
     this.tablet = tablet;
     this.server = server;

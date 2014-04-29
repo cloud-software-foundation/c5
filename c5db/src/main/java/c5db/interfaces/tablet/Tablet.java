@@ -14,24 +14,40 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package c5db.interfaces.tablet;
 
-package c5db.interfaces;
+import c5db.tablet.Region;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.jetlang.channels.Channel;
 
-import c5db.log.Mooring;
-import c5db.log.OLog;
-import c5db.messages.generated.ModuleType;
-
-import java.io.IOException;
+import java.util.List;
 
 /**
- * The log module is responsible for running all the threads and IO for write-ahead-logging.
- * <p/>
- * The write-ahead-log is responsible for maintaining persistence in the face of node or machine
- * failure.
+ * A tablet object
  */
-@ModuleTypeBinding(ModuleType.Log)
-public interface LogModule extends C5Module {
-  public OLog getOLogInstance();
+public interface Tablet {
+  void start();
 
-  public Mooring getMooring(String quorumId) throws IOException;
+  Channel<TabletStateChange> getStateChangeChannel();
+
+  boolean isOpen();
+
+  State getTabletState();
+
+  HRegionInfo getRegionInfo();
+
+  HTableDescriptor getTableDescriptor();
+
+  List<Long> getPeers();
+
+  Region getRegion();
+
+  enum State {
+    Initialized, // Initial state, nothing done yet.
+    CreatingReplicator, // Waiting for replication instance to be created
+    Open,   // Ready to service requests.
+    Failed,
+    Leader,
+  }
 }

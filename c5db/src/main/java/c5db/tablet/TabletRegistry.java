@@ -19,7 +19,7 @@ package c5db.tablet;
 import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
+import c5db.interfaces.tablet.Tablet;
 import c5db.util.C5FiberFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -48,7 +48,7 @@ public class TabletRegistry {
 
   private final Region.Creator regionCreator;
 
-  private final Map<String, TabletModule.Tablet> tablets = new HashMap<>();
+  private final Map<String, c5db.interfaces.tablet.Tablet> tablets = new HashMap<>();
   private final ReplicationModule replicationModule;
   private final C5Server c5server;
   private final ConfigDirectory configDirectory;
@@ -85,7 +85,7 @@ public class TabletRegistry {
 
         Path basePath = configDirectory.getBaseConfigPath();
 
-        TabletModule.Tablet tablet = tabletFactory.create(
+        Tablet tablet = tabletFactory.create(
             c5server,
             regionInfo,
             tableDescriptor,
@@ -105,7 +105,7 @@ public class TabletRegistry {
     }
   }
 
-  public TabletModule.Tablet startTablet(HRegionInfo regionInfo,
+  public Tablet startTablet(HRegionInfo regionInfo,
                                          HTableDescriptor tableDescriptor,
                                          List<Long> peerList) throws IOException, InterruptedException {
     Path basePath = configDirectory.getBaseConfigPath();
@@ -126,7 +126,7 @@ public class TabletRegistry {
     configDirectory.writePeersToFile(quorumName, peerList);
 
     Fiber tabletFiber = fiberFactory.create();
-    TabletModule.Tablet newTablet = tabletFactory.create(
+    Tablet newTablet = tabletFactory.create(
         c5server,
         regionInfo,
         tableDescriptor,
@@ -142,7 +142,7 @@ public class TabletRegistry {
     return newTablet;
   }
 
-  Map<String, TabletModule.Tablet> getTablets() {
+  Map<String, Tablet> getTablets() {
     return tablets;
   }
 }

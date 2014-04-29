@@ -23,6 +23,8 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.discovery.NodeInfo;
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
@@ -166,11 +168,11 @@ public class TabletService extends AbstractService implements TabletModule {
   private void startBootstrap() {
     LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
 
-    final FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>> callback =
-        new FutureCallback<ImmutableMap<Long, DiscoveryModule.NodeInfo>>() {
+    final FutureCallback<ImmutableMap<Long, NodeInfo>> callback =
+        new FutureCallback<ImmutableMap<Long, NodeInfo>>() {
           @Override
           @FiberOnly
-          public void onSuccess(ImmutableMap<Long, DiscoveryModule.NodeInfo> result) {
+          public void onSuccess(ImmutableMap<Long, NodeInfo> result) {
             try {
               maybeStartBootstrap(result);
             } catch (IOException | InterruptedException e) {
@@ -185,16 +187,16 @@ public class TabletService extends AbstractService implements TabletModule {
         };
 
     newNodeWatcher = discoveryModule.getNewNodeNotifications().subscribe(fiber, message -> {
-      ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+      ListenableFuture<ImmutableMap<Long, NodeInfo>> f = discoveryModule.getState();
       Futures.addCallback(f, callback, fiber);
     });
 
-    ListenableFuture<ImmutableMap<Long, DiscoveryModule.NodeInfo>> f = discoveryModule.getState();
+    ListenableFuture<ImmutableMap<Long, NodeInfo>> f = discoveryModule.getState();
     Futures.addCallback(f, callback, fiber);
   }
 
   @FiberOnly
-  private void maybeStartBootstrap(ImmutableMap<Long, DiscoveryModule.NodeInfo> nodes)
+  private void maybeStartBootstrap(ImmutableMap<Long, NodeInfo> nodes)
       throws IOException, InterruptedException {
     List<Long> peers = new ArrayList<>(nodes.keySet());
 
@@ -235,24 +237,24 @@ public class TabletService extends AbstractService implements TabletModule {
 
     String quorumId = regionInfo.getRegionNameAsString();
 
-    final Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
+    final c5db.interfaces.tablet.Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
     Channel<TabletStateChange> tabletChannel = tablet.getStateChangeChannel();
     Fiber tabletCallbackFiber = fiberFactory.create();
     tabletCallbackFiber.start();
     tabletChannel.subscribe(tabletCallbackFiber, message -> {
       getTabletStateChanges().publish(message);
-      if (message.state.equals(Tablet.State.Open) || message.state.equals(Tablet.State.Leader)) {
+      if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open) || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
         HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
         onlineRegions.put(quorumId, hregion);
         tabletCallbackFiber.dispose();
       }
     });
-    if (tablet.getTabletState().equals(Tablet.State.Open)
-        || tablet.getTabletState().equals(Tablet.State.Leader)) {
+    if (tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Open)
+        || tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
       tabletCallbackFiber.dispose();
       HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
       onlineRegions.put(quorumId, hregion);
-      getTabletStateChanges().publish(new TabletStateChange(tablet, Tablet.State.Open, null));
+      getTabletStateChanges().publish(new TabletStateChange(tablet, c5db.interfaces.tablet.Tablet.State.Open, null));
     }
   }
 
