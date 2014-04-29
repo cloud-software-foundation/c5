@@ -16,6 +16,7 @@
  */
 package c5db.webadmin;
 
+import c5db.interfaces.C5Server;
 import c5db.interfaces.WebAdminModule;
 import c5db.messages.generated.ModuleType;
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -35,10 +36,13 @@ import java.net.URL;
  */
 public class WebAdminService extends AbstractService implements WebAdminModule {
 
-  private int port;
+  private final C5Server server;
+  private final int port;
   private Server jettyHttpServer;
 
-  public WebAdminService(int port) {
+  public WebAdminService(C5Server server,
+                         int port) {
+    this.server = server;
     this.port = port;
   }
 
@@ -84,6 +88,10 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
       notifyFailed(e);
     }
     notifyStopped();
+  }
+
+  public C5Server getServer() {
+    return this.server;
   }
 
   @Override
