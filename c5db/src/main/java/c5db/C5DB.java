@@ -21,6 +21,8 @@ import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.interfaces.server.ConfigKeyUpdated;
+import c5db.interfaces.server.ModuleStateChange;
 import c5db.log.LogFileService;
 import c5db.log.LogService;
 import c5db.messages.generated.CommandReply;

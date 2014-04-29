@@ -19,6 +19,8 @@ package c5db.interfaces;
 
 import c5db.ConfigDirectory;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.interfaces.server.ConfigKeyUpdated;
+import c5db.interfaces.server.ModuleStateChange;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
@@ -121,42 +123,5 @@ public interface C5Server extends Service {
 
   ListenableFuture<Void> getShutdownFuture();
 
-  public static class ModuleStateChange {
-    public final C5Module module;
-    public final State state;
-
-    @Override
-    public String toString() {
-      return "ModuleStateChange{" +
-          "module=" + module +
-          ", state=" + state +
-          '}';
-    }
-
-    public ModuleStateChange(C5Module module, State state) {
-      this.module = module;
-      this.state = state;
-    }
-  }
-
   public Channel<ConfigKeyUpdated> getConfigUpdateChannel();
-
-  public static class ConfigKeyUpdated {
-    public final String configKey;
-    public final Object configValue;
-
-    public ConfigKeyUpdated(String configKey, Object configValue) {
-      this.configKey = configKey;
-      this.configValue = configValue;
-    }
-
-    @Override
-    public String toString() {
-      return "ConfigKeyUpdated{" +
-          "configKey='" + configKey + '\'' +
-          ", configValue=" + configValue +
-          '}';
-    }
-
-  }
 }

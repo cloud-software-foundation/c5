@@ -14,24 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package c5db.interfaces;
-
-import c5db.log.Mooring;
-import c5db.log.OLog;
-import c5db.messages.generated.ModuleType;
-
-import java.io.IOException;
+package c5db.interfaces.server;
 
 /**
- * The log module is responsible for running all the threads and IO for write-ahead-logging.
- * <p/>
- * The write-ahead-log is responsible for maintaining persistence in the face of node or machine
- * failure.
+ * WIP on a dynamic configuration system
  */
-@ModuleTypeBinding(ModuleType.Log)
-public interface LogModule extends C5Module {
-  public OLog getOLogInstance();
+public class ConfigKeyUpdated {
+  public final String configKey;
+  public final Object configValue;
 
-  public Mooring getMooring(String quorumId) throws IOException;
+  public ConfigKeyUpdated(String configKey, Object configValue) {
+    this.configKey = configKey;
+    this.configValue = configValue;
+  }
+
+  @Override
+  public String toString() {
+    return "ConfigKeyUpdated{" +
+        "configKey='" + configKey + '\'' +
+        ", configValue=" + configValue +
+        '}';
+  }
+
 }

@@ -20,7 +20,8 @@ import c5db.AsyncChannelAsserts;
 import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
+import c5db.interfaces.tablet.*;
+import c5db.interfaces.tablet.Tablet;
 import c5db.util.C5FiberFactory;
 import c5db.util.JUnitRuleFiberExceptions;
 import com.google.common.collect.ImmutableList;
@@ -56,7 +57,7 @@ public class TabletRegistryTest {
   private final C5Server c5server = context.mock(C5Server.class);
   private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
   private final TabletFactory tabletFactory = context.mock(TabletFactory.class);
-  private final TabletModule.Tablet rootTablet = context.mock(TabletModule.Tablet.class);
+  private final c5db.interfaces.tablet.Tablet rootTablet = context.mock(Tablet.class);
 
   private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
   private final Region.Creator regionCreator = context.mock(Region.Creator.class);
@@ -130,7 +131,7 @@ public class TabletRegistryTest {
     tabletRegistry.startOnDiskRegions();
   }
 
-  AsyncChannelAsserts.ChannelListener<TabletModule.TabletStateChange> stateChangeChannelListener;
+  AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
 
   @Test
   public void shouldStartTabletWhenRequestedTo() throws Throwable {
