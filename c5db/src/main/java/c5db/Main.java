@@ -73,6 +73,14 @@ public class Main {
           + portRandomizer.nextInt(C5ServerConstants.REGION_SERVER_PORT_RANGE);
     }
 
+    int webServerPort;
+    if (hasWebServerPropertyPortSet()) {
+      webServerPort = getWebServerPropertyPort();
+    } else {
+      webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
+    }
+
+
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startLog));
@@ -92,22 +100,24 @@ public class Main {
     StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
 
-    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, 31337, "");
+    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
     return instance;
   }
 
   private static int getPropertyPort() {
-    String regionServerPort = System.getProperty("regionServerPort");
+    return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT));
+  }
 
-    if (regionServerPort != null) {
-      return Integer.parseInt(regionServerPort);
-    }
-
-    return Integer.parseInt(System.getProperty("port"));
+  private static int getWebServerPropertyPort() {
+    return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT));
   }
 
   private static boolean hasPropertyPortSet() {
-    return System.getProperties().containsKey("regionServerPort") || System.getProperties().containsKey("port");
+    return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT);
+  }
+
+  private static boolean hasWebServerPropertyPortSet() {
+    return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT);
   }
 }
