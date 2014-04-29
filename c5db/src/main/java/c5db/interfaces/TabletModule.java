@@ -17,6 +17,7 @@
 
 package c5db.interfaces;
 
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -46,76 +47,4 @@ public interface TabletModule extends C5Module {
 
   public Channel<TabletStateChange> getTabletStateChanges();
 
-  public static class TabletStateChange {
-    public final Tablet tablet;
-    public final Tablet.State state;
-    public final Throwable optError;
-
-    public TabletStateChange(Tablet tablet, Tablet.State state, Throwable optError) {
-      this.tablet = tablet;
-      this.state = state;
-      this.optError = optError;
-    }
-
-    @Override
-    public String toString() {
-      return "TabletStateChange{" +
-          "tablet=" + tablet +
-          ", state=" + state +
-          ", optError=" + optError +
-          '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-
-      TabletStateChange that = (TabletStateChange) o;
-
-      if (optError != null ? !optError.equals(that.optError) : that.optError != null) {
-        return false;
-      }
-      return state == that.state && tablet.equals(that.tablet);
-
-    }
-
-    @Override
-    public int hashCode() {
-      int result = tablet.hashCode();
-      result = 31 * result + state.hashCode();
-      result = 31 * result + (optError != null ? optError.hashCode() : 0);
-      return result;
-    }
-  }
-
-  interface Tablet {
-    void start();
-
-    Channel<TabletStateChange> getStateChangeChannel();
-
-    boolean isOpen();
-
-    c5db.tablet.Tablet.State getTabletState();
-
-    HRegionInfo getRegionInfo();
-
-    HTableDescriptor getTableDescriptor();
-
-    List<Long> getPeers();
-
-    Region getRegion();
-
-    enum State {
-      Initialized, // Initial state, nothing done yet.
-      CreatingReplicator, // Waiting for replication instance to be created
-      Open,   // Ready to service requests.
-      Failed,
-      Leader,
-    }
-  }
 }

@@ -18,7 +18,6 @@ package c5db.tablet;
 
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -34,7 +33,7 @@ import java.util.List;
  * In production code, one can just type Tablet::new !!
  */
 public interface TabletFactory {
-  TabletModule.Tablet create(
+  c5db.interfaces.tablet.Tablet create(
       C5Server server,
       HRegionInfo regionInfo,
       HTableDescriptor tableDescriptor,

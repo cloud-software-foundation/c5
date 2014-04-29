@@ -18,7 +18,9 @@
 package c5db.log;
 
 import c5db.generated.RegionWalEntry;
-import c5db.interfaces.ReplicationModule;
+import c5db.interfaces.replication.IndexCommitNotice;
+import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.replication.ReplicatorInfoPersistence;
 import c5db.replication.ReplicatorInformationInterface;
 import io.protostuff.LinkBuffer;
@@ -50,10 +52,10 @@ public class OLogShim implements Syncable, HLog {
   private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final UUID uuid;
-  private final ReplicationModule.Replicator replicatorInstance;
+  private final Replicator replicatorInstance;
   private final String tabletId;
 
-  public OLogShim(ReplicationModule.Replicator replicatorInstance) {
+  public OLogShim(Replicator replicatorInstance) {
     this.uuid = UUID.randomUUID();
     this.replicatorInstance = replicatorInstance;
     this.tabletId = replicatorInstance.getQuorumId();
@@ -230,8 +232,8 @@ public class OLogShim implements Syncable, HLog {
     return linkBuffer.finish();
   }
 
-  private Channel<ReplicationModule.ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
-  private Channel<ReplicationModule.IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
+  private Channel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
+  private Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
 
 //    private ReplicatorInstance getReplicator(HRegionInfo info) {
 //        if (replicatorLookup.containsKey(info.getRegionNameAsString())) {

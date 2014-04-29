@@ -19,7 +19,8 @@ package c5db.tablet;
 
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
+import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
@@ -37,12 +38,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import static c5db.interfaces.TabletModule.TabletStateChange;
-
 /**
  * A tablet, responsible for lifecycle of a tablet, creation of said tablet, etc.
  */
-public class Tablet implements TabletModule.Tablet {
+public class Tablet implements c5db.interfaces.tablet.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(Tablet.class);
   private final C5Server server;
 
@@ -74,7 +73,7 @@ public class Tablet implements TabletModule.Tablet {
 
   private Region region;
 
-  private ReplicationModule.Replicator replicator;
+  private Replicator replicator;
 
   public void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel) {
     this.stateChangeChannel = stateChangeChannel;
@@ -115,7 +114,7 @@ public class Tablet implements TabletModule.Tablet {
   private void createReplicator() {
     assert tabletState == State.Initialized;
 
-    ListenableFuture<ReplicationModule.Replicator> future =
+    ListenableFuture<Replicator> future =
         replicationModule.createReplicator(regionInfo.getRegionNameAsString(), peers);
 
     C5Futures.addCallback(future, this::replicatorCreated, this::handleFail, tabletFiber);
@@ -123,11 +122,11 @@ public class Tablet implements TabletModule.Tablet {
     setTabletState(State.CreatingReplicator);
   }
 
-  private void replicatorCreated(ReplicationModule.Replicator replicator) {
+  private void replicatorCreated(Replicator replicator) {
     assert tabletState == State.CreatingReplicator;
 
     this.replicator = replicator;
-    Channel<ReplicationModule.Replicator.State> replicatorStateChannel = replicator.getStateChannel();
+    Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
 
     this.replicator.start();
@@ -142,8 +141,8 @@ public class Tablet implements TabletModule.Tablet {
     }
   }
 
-  private void tabletStateChangeCallback(ReplicationModule.Replicator.State state) {
-    if (state.equals(ReplicationModule.Replicator.State.LEADER)) {
+  private void tabletStateChangeCallback(Replicator.State state) {
+    if (state.equals(Replicator.State.LEADER)) {
       if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
         RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
         try {
