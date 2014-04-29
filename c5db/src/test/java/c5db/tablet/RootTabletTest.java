@@ -83,7 +83,7 @@ public class RootTabletTest {
   final Configuration conf = new Configuration();
 
   final Fiber tabletFiber = new ThreadFiber();
-  Tablet tablet = new Tablet(server,
+  ReplicatedTablet replicatedTablet = new ReplicatedTablet(server,
       regionInfo,
       tableDescriptor,
       peerList,
@@ -98,7 +98,7 @@ public class RootTabletTest {
   @Before
   public void setup() throws Exception {
     Fiber tabletFiber = new ThreadFiber();
-    this.tablet = new Tablet(server,
+    this.replicatedTablet = new ReplicatedTablet(server,
         regionInfo,
         tableDescriptor,
         peerList,
@@ -108,7 +108,7 @@ public class RootTabletTest {
         replicationModule,
         regionCreator);
     future.set(replicator);
-    stateChangeChannelListener = listenTo(tablet.getStateChangeChannel());
+    stateChangeChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
     stateMemoryChannel = new MemoryChannel<>();
     commandMemoryChannel = new MemoryChannel<>();
 
@@ -165,7 +165,7 @@ public class RootTabletTest {
 
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
-    tablet.start();
+    replicatedTablet.start();
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));

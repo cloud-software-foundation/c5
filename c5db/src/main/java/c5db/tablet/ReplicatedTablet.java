@@ -39,10 +39,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * A tablet, responsible for lifecycle of a tablet, creation of said tablet, etc.
+ * A tablet, backed by a replicator that keeps values replicated across multiple servers.
  */
-public class Tablet implements c5db.interfaces.tablet.Tablet {
-  private static final Logger LOG = LoggerFactory.getLogger(Tablet.class);
+public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
+  private static final Logger LOG = LoggerFactory.getLogger(ReplicatedTablet.class);
   private final C5Server server;
 
   public void setTabletState(State tabletState) {
@@ -81,15 +81,15 @@ public class Tablet implements c5db.interfaces.tablet.Tablet {
 
   private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
 
-  public Tablet(final C5Server server,
-                final HRegionInfo regionInfo,
-                final HTableDescriptor tableDescriptor,
-                final List<Long> peers,
-                final Path basePath,
-                final Configuration conf,
-                final Fiber tabletFiber,
-                final ReplicationModule replicationModule,
-                final Region.Creator regionCreator) {
+  public ReplicatedTablet(final C5Server server,
+                          final HRegionInfo regionInfo,
+                          final HTableDescriptor tableDescriptor,
+                          final List<Long> peers,
+                          final Path basePath,
+                          final Configuration conf,
+                          final Fiber tabletFiber,
+                          final ReplicationModule replicationModule,
+                          final Region.Creator regionCreator) {
     this.server = server;
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
