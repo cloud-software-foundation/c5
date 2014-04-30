@@ -53,6 +53,8 @@ public class ClientHttpProtostuffEncoder extends MessageToMessageEncoder<Message
         messageType.getName());
     httpRequest.headers().set(HttpHeaders.Names.CONTENT_TYPE,
         "application/octet-stream");
+    httpRequest.headers().set(HttpHeaders.Names.CONTENT_LENGTH,
+        requestContent.readableBytes());
 
     out.add(httpRequest);
   }
