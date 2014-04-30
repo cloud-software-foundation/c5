@@ -1,0 +1,12 @@
+package c5db.webadmin;
+
+option java_package = "c5db.webadmin.generated";
+option optimize_for = SPEED;
+
+message TabletStateNotification {
+  optional string encodedName = 1;
+  optional string regionNameAsString = 2;
+  optional string tabletState = 3;
+  repeated int64 peers = 4;
+  optional int64 leader_node_id = 5;
+}

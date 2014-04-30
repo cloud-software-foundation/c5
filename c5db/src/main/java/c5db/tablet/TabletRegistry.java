@@ -20,11 +20,13 @@ import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.util.C5FiberFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
+import org.jetlang.channels.Channel;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ public class TabletRegistry {
   private final Region.Creator regionCreator;
 
   private final Map<String, Tablet> tablets = new HashMap<>();
+  private final Channel<TabletStateChange> commonStateChangeChannel;
   private final ReplicationModule replicationModule;
   private final C5Server c5server;
   private final ConfigDirectory configDirectory;
@@ -58,6 +61,7 @@ public class TabletRegistry {
                         ConfigDirectory configDirectory,
                         Configuration legacyConf,
                         C5FiberFactory fiberFactory,
+                        Channel<TabletStateChange> commonStateChangeChannel,
                         ReplicationModule replicationModule,
                         TabletFactory tabletFactory,
                         Region.Creator regionCreator) {
@@ -65,6 +69,7 @@ public class TabletRegistry {
     this.configDirectory = configDirectory;
     this.legacyConf = legacyConf;
     this.fiberFactory = fiberFactory;
+    this.commonStateChangeChannel = commonStateChangeChannel;
     this.replicationModule = replicationModule;
     this.tabletFactory = tabletFactory;
     this.regionCreator = regionCreator;
@@ -95,6 +100,7 @@ public class TabletRegistry {
             fiberFactory.create(),
             replicationModule,
             regionCreator);
+        tablet.setStateChangeChannel(commonStateChangeChannel);
 
         tablet.start();
 
@@ -136,6 +142,7 @@ public class TabletRegistry {
         tabletFiber,
         replicationModule,
         regionCreator);
+    newTablet.setStateChangeChannel(commonStateChangeChannel);
     tablets.put(quorumName, newTablet);
 
     newTablet.start();
