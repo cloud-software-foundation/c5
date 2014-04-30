@@ -22,11 +22,15 @@ import c5db.messages.generated.ModuleType;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.util.concurrent.AbstractService;
+import org.eclipse.jetty.rewrite.handler.RewriteHandler;
+import org.eclipse.jetty.rewrite.handler.RewriteRegexRule;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 
 import java.net.URL;
@@ -57,23 +61,37 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     jettyHttpServer = new Server(port);
 
     try {
+      ServletContextHandler indexServlet = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+      indexServlet.setContextPath("/index");
+      indexServlet.setAllowNullPathInfo(true);
+      indexServlet.addServlet(new ServletHolder(new StatusServlet(this)), "/");
+
+      ContextHandlerCollection servletContexts = new ContextHandlerCollection();
+      servletContexts.addHandler(indexServlet);
+
       URL webResourcesUrl = getClass().getClassLoader().getResource("web");
       ResourceHandler resources = new ResourceHandler();
       resources.setDirectoriesListed(false);
-
       resources.setBaseResource(Resource.newResource(webResourcesUrl));
 
-      HandlerList handlerList = new HandlerList();
-      handlerList.setHandlers(new Handler[]{
-          new StatusHandler(this),
-          resources,
-          new DefaultHandler()
+      HandlerList topHandlerList = new HandlerList();
+      topHandlerList.setHandlers(new Handler[] {
+          servletContexts,
+          resources
       });
 
-      jettyHttpServer.setHandler(handlerList);
+      RewriteHandler rewriteRoot = new RewriteHandler();
+      rewriteRoot.setRewriteRequestURI(true);
+      rewriteRoot.setRewritePathInfo(true);
+      rewriteRoot.setOriginalPathAttribute("requestedPath");
+      RewriteRegexRule rule = new RewriteRegexRule();
+      rule.setRegex("/");
+      rule.setReplacement("/index");
+      rewriteRoot.addRule(rule);
+      rewriteRoot.setHandler(topHandlerList);
 
+      jettyHttpServer.setHandler(rewriteRoot);
       jettyHttpServer.start();
-
     } catch (Exception e) {
       notifyFailed(e);
     }
