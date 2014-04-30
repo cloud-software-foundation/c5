@@ -24,7 +24,11 @@ public class C5ServerConstants {
   public static final String ARCHIVE_DIR = "old_wal";
   public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
+
   public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
+  public static final String WEB_SERVER_PORT_PROPERTY_NAME = "webServerPort";
+  public static final String REGION_SERVER_PORT_PROPERTY_NAME = "regionServerPort";
+
   public static final String LOCALHOST = "localhost";
   public static final int WAL_THREAD_POOL_SIZE = 1;
 
@@ -43,6 +47,5 @@ public class C5ServerConstants {
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
   public static final int DEFAULT_WEB_SERVER_PORT = 31337;
-  public static final String WEB_SERVER_PORT = "webServerPort";
-  public static final String REGION_SERVER_PORT = "regionServerPort";
+
 }
