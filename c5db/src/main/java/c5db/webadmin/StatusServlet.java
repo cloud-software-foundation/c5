@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * TODO document me here
+ * Handles the base page display
  */
 @WebServlet(urlPatterns = { "/" })
 public class StatusServlet extends HttpServlet {
