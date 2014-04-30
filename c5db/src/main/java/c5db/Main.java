@@ -106,18 +106,18 @@ public class Main {
   }
 
   private static int getPropertyPort() {
-    return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT));
+    return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME));
   }
 
   private static int getWebServerPropertyPort() {
-    return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT));
+    return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME));
   }
 
   private static boolean hasPropertyPortSet() {
-    return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT);
+    return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME);
   }
 
   private static boolean hasWebServerPropertyPortSet() {
-    return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT);
+    return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME);
   }
 }
