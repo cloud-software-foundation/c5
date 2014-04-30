@@ -145,6 +145,7 @@ public class TabletService extends AbstractService implements TabletModule {
               server.getConfigDirectory(),
               conf,
               fiberFactory,
+              getTabletStateChanges(),
               replicationModule,
               ReplicatedTablet::new,
               HRegionBridge::new);
@@ -246,7 +247,7 @@ public class TabletService extends AbstractService implements TabletModule {
     Fiber tabletCallbackFiber = fiberFactory.create();
     tabletCallbackFiber.start();
     tabletChannel.subscribe(tabletCallbackFiber, message -> {
-      getTabletStateChanges().publish(message);
+      //getTabletStateChanges().publish(message);
       if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open) || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
         HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
         onlineRegions.put(quorumId, hregion);
@@ -258,7 +259,7 @@ public class TabletService extends AbstractService implements TabletModule {
       tabletCallbackFiber.dispose();
       HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
       onlineRegions.put(quorumId, hregion);
-      getTabletStateChanges().publish(new TabletStateChange(tablet, c5db.interfaces.tablet.Tablet.State.Open, null));
+      //getTabletStateChanges().publish(new TabletStateChange(tablet, c5db.interfaces.tablet.Tablet.State.Open, null));
     }
   }
 

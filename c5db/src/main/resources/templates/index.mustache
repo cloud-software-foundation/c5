@@ -2,6 +2,40 @@
 
 {{$title}}C5 Server Status{{/title}}
 
+{{$extraScript}}
+
+<script>
+  var ws = $.websocket("ws://localhost:31337/push/", {
+          events: {
+            newNode: function(e) {
+              //$('#push-content').append("<p>" + JSON.stringify(e.data) + "</p>");
+            },
+            tablet: function(e) {
+              var tabletId = e.data.encodedName;
+              var existingRow = $('#' + tabletId);
+              if (existingRow.length != 0) {
+                var stateTR = existingRow.find(".tablet-state");
+                stateTR.fadeOut(100, function() {
+                  stateTR.text(e.data.tabletState);
+                  stateTR.fadeIn();
+                });
+              } else {
+                $('#tablet-list').append(
+                    '<tr style="display: none;" id=' + tabletId + '><td>' + e.data.regionNameAsString +
+                        '</td><td class="tablet-state">' +
+                        e.data.tabletState + '</td><td>' +
+                        JSON.stringify(e.data.peers) + '</td></tr>');
+                $('#' + tabletId).fadeIn();
+              }
+
+              //$('#push-content').append("<p>" + JSON.stringify(e.data) + "</p>");
+            }
+          }
+      }
+  );
+</script>
+{{/extraScript}}
+
 {{$content}}
 <div class="container theme-showcase">
 
@@ -62,13 +96,14 @@
           <td>Tablet name</td>
           <td>State</td>
           <td>Peers</td>
+
         </tr>
         </thead>
-        <tbody>
+        <tbody id="tablet-list">
         {{#tablets}}
-          <tr>
+          <tr id="{{regionInfo.encodedName}}">
             <td>{{regionInfo.regionNameAsString}}</td>
-            <td>{{tabletState}}</td>
+            <td class="tablet-state">{{tabletState}}</td>
             <td>
               {{#peers}}
                 <span class="text-primary">{{toString}}</span>
@@ -76,6 +111,42 @@
             </td>
           </tr>
         {{/tablets}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Cluster node information</h3>
+    </div>
+    <div class="panel-body">
+      <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+          <td>NodeId</td>
+          <td>Node Addresses</td>
+          <td>Node Modules/Ports</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#nodes}}
+          {{#availability}}
+            <tr id="{{nodeId}}">
+            <td>{{nodeId}}</td>
+            <td>{{#addressesList}}
+              <small>{{toString}}</small>
+            {{/addressesList}}</td>
+            <td>
+              <ul class="list-inline">
+                {{#modulesList}}
+                  <li>{{module}} <small>port:</small> {{modulePort}}</li>
+                {{/modulesList}}
+              </ul>
+            </td>
+            </tr>
+          {{/availability}}
+        {{/nodes}}
         </tbody>
       </table>
     </div>
@@ -110,44 +181,6 @@
       </table>
     </div>
   </div>
-
-  <div class="panel panel-info">
-    <div class="panel-heading">
-      <h3 class="panel-title">Cluster node information</h3>
-    </div>
-    <div class="panel-body">
-      <table class="table table-striped table-bordered">
-        <thead>
-        <tr>
-          <td>NodeId</td>
-          <td>Node Addresses</td>
-          <td>Node Modules/Ports</td>
-        </tr>
-        </thead>
-        <tbody>
-        {{#nodes}}
-          <tr>
-            {{#availability}}
-              <td>{{nodeId}}</td>
-              <td>{{#addressesList}}
-                <small>{{toString}}</small>
-              {{/addressesList}}</td>
-              <td>
-                <ul class="list-inline">
-                  {{#modulesList}}
-                    <li>{{module}} <small>port:</small> {{modulePort}}</li>
-                  {{/modulesList}}
-                </ul>
-              </td>
-            {{/availability}}
-          </tr>
-        {{/nodes}}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 {{/content}}
 
 {{/html}}

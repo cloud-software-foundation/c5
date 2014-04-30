@@ -43,6 +43,8 @@ public interface Tablet {
 
   Region getRegion();
 
+  void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel);
+
   enum State {
     Initialized, // Initial state, nothing done yet.
     CreatingReplicator, // Waiting for replication instance to be created

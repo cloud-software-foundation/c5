@@ -16,12 +16,24 @@
  */
 package c5db.webadmin;
 
+import c5db.discovery.generated.Availability;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.DiscoveryModule;
+import c5db.interfaces.TabletModule;
 import c5db.interfaces.WebAdminModule;
+import c5db.interfaces.discovery.NewNodeVisible;
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
+import c5db.util.C5FiberFactory;
+import c5db.util.C5Futures;
+import c5db.util.FiberOnly;
+import c5db.webadmin.generated.TabletStateNotification;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.ListenableFuture;
+import io.protostuff.JsonIOUtil;
 import org.eclipse.jetty.rewrite.handler.RewriteHandler;
 import org.eclipse.jetty.rewrite.handler.RewriteRegexRule;
 import org.eclipse.jetty.server.Handler;
@@ -31,23 +43,44 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.jetlang.fibers.Fiber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 
 /**
  *
  */
 public class WebAdminService extends AbstractService implements WebAdminModule {
+  private static final Logger LOG = LoggerFactory.getLogger(WebAdminService.class);
 
   private final C5Server server;
   private final int port;
+  private final C5FiberFactory fiberFactory;
+  private final Fiber fiber;
   private Server jettyHttpServer;
+
+  private DiscoveryModule discoveryModule = null;
+  private TabletModule tabletModule = null;
 
   public WebAdminService(C5Server server,
                          int port) {
     this.server = server;
     this.port = port;
+
+    fiberFactory = server.getFiberFactory(this::handleThrowable);
+    fiber = fiberFactory.create();
+  }
+
+  private void handleThrowable(Throwable fiberError) {
+    // TODO do nothing for now!
+    LOG.error("Got fiber exception", fiberError);
   }
 
   public MustacheFactory getMustacheFactory() {
@@ -55,8 +88,34 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     return new DefaultMustacheFactory();
   }
 
+  public TabletModule getTabletModule() {
+    return tabletModule;
+  }
+
+  public DiscoveryModule getDiscoveryModule() {
+    return discoveryModule;
+  }
+
   @Override
   protected void doStart() {
+    fiber.start();
+    fiber.execute(() -> {
+      ListenableFuture<C5Module> future = server.getModule(ModuleType.Discovery);
+      C5Futures.addCallback(future, module -> {
+        discoveryModule = (DiscoveryModule)module;
+
+        discoveryModule.getNewNodeNotifications().subscribe(fiber, this::newNodeVisible);
+      }, this::handleThrowable, fiber);
+    });
+    fiber.execute(() -> {
+      ListenableFuture<C5Module> future = server.getModule(ModuleType.Tablet);
+      C5Futures.addCallback(future, module -> {
+        tabletModule = (TabletModule)module;
+
+        tabletModule.getTabletStateChanges().subscribe(fiber, this::tabletStateChanges);
+      }, this::handleThrowable, fiber);
+    });
+
     // TODO do this in a thread or whatever
     jettyHttpServer = new Server(port);
 
@@ -66,8 +125,13 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
       indexServlet.setAllowNullPathInfo(true);
       indexServlet.addServlet(new ServletHolder(new StatusServlet(this)), "/");
 
+      ServletContextHandler pushServlet = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+      pushServlet.setContextPath("/push");
+      pushServlet.addServlet(new ServletHolder(new WebsocketServlet(this)), "/");
+
       ContextHandlerCollection servletContexts = new ContextHandlerCollection();
       servletContexts.addHandler(indexServlet);
+      servletContexts.addHandler(pushServlet);
 
       URL webResourcesUrl = getClass().getClassLoader().getResource("web");
       ResourceHandler resources = new ResourceHandler();
@@ -98,9 +162,65 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     notifyStarted();
   }
 
+  public ConcurrentHashSet<WebsocketClient> websocketClients = new ConcurrentHashSet<>();
+
+  @FiberOnly
+  private void tabletStateChanges(TabletStateChange tabletStateChange) {
+    System.out.println("Tablet state change: " + tabletStateChange);
+    // TODO send to the websockets
+    TabletStateNotification note = new TabletStateNotification(
+        tabletStateChange.tablet.getRegionInfo().getEncodedName(),
+        tabletStateChange.tablet.getRegionInfo().getRegionNameAsString(),
+        tabletStateChange.state.toString(),
+        tabletStateChange.tablet.getPeers(),
+        0
+    );
+    ByteArrayOutputStream jsonBytes = new ByteArrayOutputStream();
+    try {
+      JsonIOUtil.writeTo(jsonBytes, note, note, false);
+
+      String jsonString = jsonBytes.toString();
+      String finalString = "{\"type\":\"tablet\", \"data\": " + jsonString + "}";
+      System.out.println(finalString);
+
+      for (WebsocketClient client : websocketClients) {
+        RemoteEndpoint wsRemote = client.getRemote();
+        if (wsRemote != null) {
+          client.getRemote().sendString(finalString);
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Processing tablet message", e);
+    }
+
+  }
+
+  @FiberOnly
+  private void newNodeVisible(NewNodeVisible nodeVisibilityMessage) {
+    Availability availability = nodeVisibilityMessage.nodeInfo.availability;
+    ByteArrayOutputStream jsonBytes = new ByteArrayOutputStream();
+    try {
+      JsonIOUtil.writeTo(jsonBytes, availability, availability, false);
+
+      String jsonString = jsonBytes.toString();
+      String finalString = "{\"type\":\"newNode\", \"data\": " + jsonString + "}";
+      System.out.println(finalString);
+
+      for (WebsocketClient client : websocketClients) {
+        RemoteEndpoint wsRemote = client.getRemote();
+        if (wsRemote != null) {
+          client.getRemote().sendString(finalString);
+        }
+      }
+    } catch (IOException e) {
+      LOG.error("Processing new node visible message", e);
+    }
+  }
+
   @Override
   protected void doStop() {
     try {
+      fiber.dispose();
       jettyHttpServer.stop();
     } catch (Exception e) {
       notifyFailed(e);
