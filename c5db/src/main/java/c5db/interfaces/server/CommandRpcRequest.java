@@ -30,4 +30,12 @@ public class CommandRpcRequest<T extends Message> {
     this.receipientNodeId = receipientNodeId;
     this.message = message;
   }
+
+  @Override
+  public String toString() {
+    return "CommandRpcRequest{" +
+        "receipientNodeId=" + receipientNodeId +
+        ", message=" + message +
+        '}';
+  }
 }
