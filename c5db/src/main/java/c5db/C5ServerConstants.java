@@ -48,4 +48,6 @@ public class C5ServerConstants {
   public static final String CREATE_TABLE = "Create Table";
   public static final int DEFAULT_WEB_SERVER_PORT = 31337;
 
+  public static final java.lang.String MIN_CLUSTER_SIZE = "minClusterSize";
+  public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
 }
