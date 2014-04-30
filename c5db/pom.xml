@@ -133,6 +133,11 @@
             <artifactId>protostuff-collectionschema</artifactId>
             <version>${protostuff.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-json</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>io.protostuff</groupId>

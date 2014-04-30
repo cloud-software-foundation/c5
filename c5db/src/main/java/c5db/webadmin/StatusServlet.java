@@ -46,32 +46,23 @@ public class StatusServlet extends HttpServlet {
   private WebAdminService service;
 
   public StatusServlet(WebAdminService service) {
-
     this.service = service;
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
-
-
     try {
-
       response.setContentType("text/html");
       response.setStatus(HttpServletResponse.SC_OK);
-//      baseRequest.setHandled(true);
 
       Mustache template = service.getMustacheFactory().compile("templates/index.mustache");
       Writer writer = response.getWriter();
 
       // Collect server status objects from around this place.
       ImmutableMap<ModuleType, C5Module> modules = service.getServer().getModules();
-      DiscoveryModule discoveryModule = (DiscoveryModule) service.getServer().getModule(ModuleType.Discovery).get();
-      ListenableFuture<ImmutableMap<Long, NodeInfo>> nodeFuture =
-          discoveryModule.getState();
-      ImmutableMap<Long,NodeInfo> nodes = nodeFuture.get();
 
-      TabletModule tabletModule = (TabletModule) service.getServer().getModule(ModuleType.Tablet).get();
-      Collection<Tablet> tablets = tabletModule.getTablets();
+      ImmutableMap<Long, NodeInfo> nodes = getNodes();
+      Collection<Tablet> tablets = getTablets();
 
       TopLevelHolder templateContext = new TopLevelHolder(service.getServer(), modules, nodes, tablets);
       template.execute(writer, templateContext);
@@ -80,6 +71,25 @@ public class StatusServlet extends HttpServlet {
     } catch (ExecutionException |InterruptedException e) {
       throw new IOException("Getting status", e);
     }
+  }
+
+  private Collection<Tablet> getTablets() throws ExecutionException, InterruptedException {
+    TabletModule tabletModule = service.getTabletModule();
+    if (tabletModule == null) {
+      return null;
+    }
+    return tabletModule.getTablets();
+  }
+
+  private ImmutableMap<Long, NodeInfo> getNodes() throws InterruptedException, ExecutionException {
+    DiscoveryModule discoveryModule = service.getDiscoveryModule();
+    if (discoveryModule == null) {
+      return null;
+    }
+
+    ListenableFuture<ImmutableMap<Long, NodeInfo>> nodeFuture =
+        discoveryModule.getState();
+    return nodeFuture.get();
   }
 
 
@@ -98,9 +108,11 @@ public class StatusServlet extends HttpServlet {
       this.tablets = tablets;
     }
     public Collection<Map.Entry<ModuleType, C5Module>> getModules() {
+      if (modules == null) return null;
       return modules.entrySet();
     }
     public Collection<NodeInfo> getNodes() {
+      if (nodes == null) return null;
       return nodes.values();
     }
   }

@@ -30,6 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.jetlang.channels.Channel;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -47,6 +48,7 @@ import static c5db.util.PoolFiberFactoryWithExecutor.factoryWithExceptionHandler
  *
  */
 public class TabletRegistryTest {
+  private static final Channel<TabletStateChange> DONT_CARE_STATE_CHANGE_CHANNEL = null;
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery();
   @Rule
@@ -97,6 +99,7 @@ public class TabletRegistryTest {
           with(same(regionCreator)));
       will(returnValue(rootTablet));
 
+      oneOf(rootTablet).setStateChangeChannel(DONT_CARE_STATE_CHANGE_CHANNEL);
       oneOf(rootTablet).start();
     }});
 
@@ -105,6 +108,7 @@ public class TabletRegistryTest {
         configDirectory,
         legacyConf,
         c5FiberFactory,
+        DONT_CARE_STATE_CHANGE_CHANNEL,
         replicationModule, tabletFactory,
         regionCreator);
   }
@@ -126,7 +130,6 @@ public class TabletRegistryTest {
       will(returnValue(Lists.newArrayList(ROOT_QUORUM_NAME)));
 
       allowing(configDirectory).getBaseConfigPath();
-
     }});
     tabletRegistry.startOnDiskRegions();
   }
