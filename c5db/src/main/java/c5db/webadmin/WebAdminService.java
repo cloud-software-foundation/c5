@@ -129,9 +129,14 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
       pushServlet.setContextPath("/push");
       pushServlet.addServlet(new ServletHolder(new WebsocketServlet(this)), "/");
 
+      ServletContextHandler createTableServlet = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+      createTableServlet.setContextPath("/create-table");
+      createTableServlet.addServlet(new ServletHolder(new CreateTableServlet(server)), "/");
+
       ContextHandlerCollection servletContexts = new ContextHandlerCollection();
       servletContexts.addHandler(indexServlet);
       servletContexts.addHandler(pushServlet);
+      servletContexts.addHandler(createTableServlet);
 
       URL webResourcesUrl = getClass().getClassLoader().getResource("web");
       ResourceHandler resources = new ResourceHandler();
