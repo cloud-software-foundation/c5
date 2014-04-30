@@ -40,10 +40,13 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.core.Disposable;
@@ -70,6 +73,7 @@ import java.util.concurrent.ExecutionException;
 public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
   private static final int INITIALIZATION_TIME = 1000;
+  private static final byte[] HTABLE_DESCRIPTOR_QUALIFIER = Bytes.toBytes("HTABLE_QUAL");
 
   private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
@@ -247,7 +251,6 @@ public class TabletService extends AbstractService implements TabletModule {
     Fiber tabletCallbackFiber = fiberFactory.create();
     tabletCallbackFiber.start();
     tabletChannel.subscribe(tabletCallbackFiber, message -> {
-      //getTabletStateChanges().publish(message);
       if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open) || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
         HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
         onlineRegions.put(quorumId, hregion);
@@ -259,7 +262,7 @@ public class TabletService extends AbstractService implements TabletModule {
       tabletCallbackFiber.dispose();
       HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
       onlineRegions.put(quorumId, hregion);
-      //getTabletStateChanges().publish(new TabletStateChange(tablet, c5db.interfaces.tablet.Tablet.State.Open, null));
+
     }
   }
 
@@ -334,24 +337,41 @@ public class TabletService extends AbstractService implements TabletModule {
       String createString = commandString.substring(commandString.indexOf(":") + 1);
       String[] tableCreationStrings = createString.split(",");
 
-      HTableDescriptor hTableDescriptor = null;
-      try {
-        hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
-        HRegionInfo hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
+      HTableDescriptor hTableDescriptor;
+      HRegionInfo hRegionInfo;
+      List<Long> peers = new ArrayList<>();
 
-        List<Long> peers = new ArrayList<>();
+      try {
         for (String s : Arrays.copyOfRange(tableCreationStrings, 2, tableCreationStrings.length)) {
           s = StringUtils.strip(s);
           peers.add(new Long(s));
         }
-        openRegion0(hRegionInfo, hTableDescriptor, ImmutableList.copyOf(peers));
-      } catch (IOException | DeserializationException e) {
+        hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
+        hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
+        return createUserTable(peers, hTableDescriptor, hRegionInfo);
+      } catch (DeserializationException | IOException e) {
         e.printStackTrace();
         System.exit(1);
       }
-      return "OK";
     }
     return "NOTOK";
+  }
+
+  private String createUserTable(List<Long> peers,
+                                 HTableDescriptor hTableDescriptor,
+                                 HRegionInfo hRegionInfo) throws IOException, InterruptedException {
+    openRegion0(hRegionInfo, hTableDescriptor, ImmutableList.copyOf(peers));
+    addEntryToMeta(hRegionInfo, hTableDescriptor);
+    return "OK";
+  }
+
+  private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor) throws IOException {
+    HRegion hRegion = this.getTablet("hbase:meta");
+    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
+
+    put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
+    put.add(HConstants.CATALOG_FAMILY, HTABLE_DESCRIPTOR_QUALIFIER, hTableDescriptor.toByteArray());
+    hRegion.put(put);
   }
 
   int getMinQuorumSize() {
