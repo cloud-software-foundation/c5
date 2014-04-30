@@ -105,13 +105,13 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     peersToReturn.add(server.getNodeId());
 
     int counter = 0;
-    while (peersToReturn.size() < 1 && counter < peersCopy.size()) {
+    while (peersToReturn.size() < C5ServerConstants.DEFAULT_QUORUM_SIZE && counter < peersCopy.size()) {
       if (!peersToReturn.contains(peersCopy.get(counter))) {
         peersToReturn.add(peersCopy.get(counter));
       }
       counter++;
     }
-    if (peersToReturn.size() == 1) {
+    if (peersToReturn.size() == C5ServerConstants.DEFAULT_QUORUM_SIZE) {
       return peersToReturn;
     } else {
       throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
