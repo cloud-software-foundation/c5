@@ -5,10 +5,37 @@
 {{$extraScript}}
 
 <script>
+  function listToSmall(list) {
+    var str = "";
+    for (var i = 0; i < list.length; i++) {
+      str += '<small>' + list[i] + '</small>';
+    }
+    return str;
+  }
+  function modulesToInlineUL(modules) {
+    var str = '<ul class="list-inline">';
+    for (var i = 0; i < modules.length; i++) {
+      str += '<li>' + modules[i].module + ' <small>port:</small> ' + modules[i].modulePort +
+          '</li>';
+    }
+    str += '</ul>';
+    return str;
+  }
   var ws = $.websocket("ws://localhost:31337/push/", {
           events: {
             newNode: function(e) {
               //$('#push-content').append("<p>" + JSON.stringify(e.data) + "</p>");
+              var nodeId = e.data.nodeId;
+              var existingRow = $('#' + nodeId);
+              if (existingRow.length != 0) {
+                // already exists, uh ignore it for now.
+              } else {
+                var a = e.data;
+                $('#node-list').append(
+                    '<tr id="' + a.nodeId + '"><td>' + a.nodeId +
+                        '</td><td>' + listToSmall(a.addresses) + '</td><td>' +
+                        modulesToInlineUL(a.modules) + '</td></tr>');
+              }
             },
             tablet: function(e) {
               var tabletId = e.data.encodedName;
@@ -34,6 +61,17 @@
           }
       }
   );
+
+  $(document).ready(function() {
+    console.log('decorate this place!');
+
+    $('#new-table-button').click(function() {
+      console.log('POST!');
+
+      var tableName = $('#new-table-name').val();
+      $.post("/create-table/", {tablename: tableName});
+    });
+  });
 </script>
 {{/extraScript}}
 
@@ -86,6 +124,15 @@
     </div>
   </div>
 
+  <div id="create-new-table" class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Create new table</h3>
+    </div>
+    <div class="panel-body">
+      <div class="col-md-8"><input type="text" class="form-control" id="new-table-name" placeholder="New table name"></div>
+      <div class="col-md-4"><button id="new-table-button" type="button" class="btn btn-danger">Create!</button></div>
+    </div>
+  </div>
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title">Tablet Status</h3>
@@ -130,7 +177,7 @@
           <td>Node Modules/Ports</td>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="node-list">
         {{#nodes}}
           {{#availability}}
             <tr id="{{nodeId}}">
