@@ -55,7 +55,7 @@
                   existingRow.removeClass('info');
                 }, 400);
               } else {
-                $('#tablet-list').append(
+                $('#tablet-list').prepend(
                     '<tr style="display: none;" id=' + tabletId + '><td>' + e.data.regionNameAsString +
                         '</td><td class="tablet-state">' +
                         e.data.tabletState + '</td><td>' +
