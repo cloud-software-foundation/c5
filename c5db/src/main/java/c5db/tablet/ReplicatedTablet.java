@@ -142,19 +142,27 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   private void tabletStateChangeCallback(Replicator.State state) {
-    if (state.equals(Replicator.State.LEADER)) {
-      if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-        RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
-        try {
-          rootTabletLeaderBehavior.start();
-        } catch (IOException e) {
-          e.printStackTrace();
-          System.exit(0);
+    switch (state) {
+      case INIT:
+        break;
+      case FOLLOWER:
+        this.setTabletState(State.Open);
+        break;
+      case CANDIDATE:
+        this.setTabletState(State.Open);
+        break;
+      case LEADER:
+        if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+          RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
+          try {
+            rootTabletLeaderBehavior.start();
+          } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+          }
         }
         this.setTabletState(State.Leader);
-      } else {
-        this.setTabletState(State.Leader);
-      }
+        break;
     }
   }
 
