@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -100,34 +99,22 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   private List<Long> pickPeers(List<Long> peers) {
-    if (server.isSingleNodeMode()) {
-      if (peers.size() > 1) {
-        LOG.error("We are in single mode but we have multiple peers");
-        throw new UnsupportedOperationException("We are in single mode but we have multiple peers");
-      }
-      return Arrays.asList(peers.iterator().next());
-    } else {
-      if (peers.size() >= 3){
-        List<Long> peersCopy = new ArrayList(peers);
-        Collections.shuffle(peersCopy);
-        List<Long> peersToReturn = new ArrayList<>();
-        peersToReturn.add(server.getNodeId());
+    List<Long> peersCopy = new ArrayList<>(peers);
+    Collections.shuffle(peersCopy);
+    List<Long> peersToReturn = new ArrayList<>();
+    peersToReturn.add(server.getNodeId());
 
-        int counter = 0;
-        while (peersToReturn.size() < 3 && counter < peersCopy.size() ){
-          if (!peersToReturn.contains(peersCopy.get(counter))){
-            peersToReturn.add(peersCopy.get(counter));
-          }
-          counter++;
-        }
-        if (peersToReturn.size() == 3) {
-          return peersToReturn;
-        } else {
-          throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
-        }
-      } else{
-        throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
+    int counter = 0;
+    while (peersToReturn.size() < 1 && counter < peersCopy.size()) {
+      if (!peersToReturn.contains(peersCopy.get(counter))) {
+        peersToReturn.add(peersCopy.get(counter));
       }
+      counter++;
+    }
+    if (peersToReturn.size() == 1) {
+      return peersToReturn;
+    } else {
+      throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
     }
   }
 
