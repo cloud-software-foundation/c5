@@ -15,10 +15,11 @@
               var existingRow = $('#' + tabletId);
               if (existingRow.length != 0) {
                 var stateTR = existingRow.find(".tablet-state");
-                stateTR.fadeOut(100, function() {
-                  stateTR.text(e.data.tabletState);
-                  stateTR.fadeIn();
-                });
+                stateTR.text(e.data.tabletState);
+                existingRow.addClass('info');
+                window.setTimeout(function() {
+                  existingRow.removeClass('info');
+                }, 400);
               } else {
                 $('#tablet-list').append(
                     '<tr style="display: none;" id=' + tabletId + '><td>' + e.data.regionNameAsString +
