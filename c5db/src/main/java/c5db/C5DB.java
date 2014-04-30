@@ -80,6 +80,7 @@ public class C5DB extends AbstractService implements C5Server {
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
+  private final int minQuorumSize;
 
   private Fiber serverFiber;
   private PoolFiberFactory fiberPool;
@@ -113,6 +114,13 @@ public class C5DB extends AbstractService implements C5Server {
     } else {
       this.clusterName = C5ServerConstants.LOCALHOST;
     }
+
+    if (System.getProperties().containsKey(C5ServerConstants.MIN_CLUSTER_SIZE)) {
+      this.minQuorumSize = Integer.parseInt(System.getProperty(C5ServerConstants.MIN_CLUSTER_SIZE));
+    } else {
+      this.minQuorumSize = C5ServerConstants.MINIMUM_DEFAULT_QUORUM_SIZE;
+    }
+
   }
 
   @Override
@@ -193,6 +201,11 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   public boolean isSingleNodeMode() {
     return this.clusterName.equals(C5ServerConstants.LOCALHOST);
+  }
+
+  @Override
+  public int getMinQuorumSize(){
+    return this.minQuorumSize;
   }
 
   @Override

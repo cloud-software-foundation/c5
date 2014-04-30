@@ -358,7 +358,7 @@ public class TabletService extends AbstractService implements TabletModule {
     if (server.isSingleNodeMode()) {
       return 1;
     } else {
-      return 3;
+      return server.getMinQuorumSize();
     }
   }
 }
