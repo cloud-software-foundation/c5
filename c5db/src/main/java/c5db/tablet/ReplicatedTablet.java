@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -153,13 +154,13 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         break;
       case LEADER:
         if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-          RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
-          try {
-            rootTabletLeaderBehavior.start();
-          } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(0);
-          }
+            try {
+              RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
+              rootTabletLeaderBehavior.start();
+            } catch (IOException e) {
+              e.printStackTrace();
+              System.exit(0);
+            }
         }
         this.setTabletState(State.Leader);
         break;
