@@ -21,6 +21,13 @@
     str += '</ul>';
     return str;
   }
+  function peersToSpans(peers) {
+    var str = "";
+    for (var i = 0; i < peers.length; i++) {
+      str += '<span class="text-primary">' + peers[i] + '</span>';
+    }
+    return str;
+  }
   var ws = $.websocket("ws://localhost:31337/push/", {
           events: {
             newNode: function(e) {
@@ -52,7 +59,7 @@
                     '<tr style="display: none;" id=' + tabletId + '><td>' + e.data.regionNameAsString +
                         '</td><td class="tablet-state">' +
                         e.data.tabletState + '</td><td>' +
-                        JSON.stringify(e.data.peers) + '</td></tr>');
+                        peersToSpans(e.data.peers) + '</td></tr>');
                 $('#' + tabletId).fadeIn();
               }
 
