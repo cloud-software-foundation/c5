@@ -20,11 +20,13 @@ import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
 import c5db.interfaces.DiscoveryModule;
+import c5db.interfaces.discovery.NodeInfoReply;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5Futures;
 import com.google.common.util.concurrent.AbstractService;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -39,8 +41,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.protostuff.Message;
 import org.jetlang.channels.AsyncRequest;
 import org.jetlang.channels.Request;
@@ -48,6 +48,9 @@ import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,11 +79,42 @@ public class ControlService extends AbstractService implements ControlModule {
     this.acceptConnectionGroup = acceptConnectionGroup;
     this.ioWorkerGroup = ioWorkerGroup;
     this.modulePort = modulePort;
+
+    controlClient = new SimpleControlClient(ioWorkerGroup);
   }
+
+  private SimpleControlClient controlClient;
 
   @Override
   public void doMessage(Request<CommandRpcRequest<?>, CommandReply> request) {
+    ListenableFuture<NodeInfoReply> nodeInfoFuture = discoveryModule.getNodeInfo(request.getRequest().receipientNodeId,
+        ModuleType.ControlRpc);
+    C5Futures.addCallback(nodeInfoFuture, nodeInfo -> {
+      String firstAddress = nodeInfo.addresses.get(0);
+      int port = nodeInfo.port;
+      InetSocketAddress socketAddress = null;
+      try {
+        socketAddress = new InetSocketAddress(
+            InetAddress.getByName(firstAddress), port);
 
+        C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
+            replyResult -> {
+              request.reply(replyResult);
+            }, exception -> {
+              CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
+              request.reply(reply);
+            }, serviceFiber);
+      } catch (UnknownHostException e) {
+        LOG.error("Bad address", e);
+        CommandReply reply = new CommandReply(false, "", "Bad remote address:" + e);
+        request.reply(reply);
+      }
+    }, exception -> {
+      LOG.error("Unable to find nodeId! {}", request.getRequest().receipientNodeId);
+
+      CommandReply reply = new CommandReply(false, "", "Unable to find NodeId!");
+      request.reply(reply);
+    }, serviceFiber);
   }
 
   @Override
@@ -108,6 +142,11 @@ public class ControlService extends AbstractService implements ControlModule {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CommandRpcRequest<? extends Message> msg) throws Exception {
       System.out.println("Server read off: " + msg);
+      // this should match our local node id!
+      if (msg.receipientNodeId != server.getNodeId()) {
+        sendErrorReply(ctx.channel(), new Exception("Bad nodeId!"));
+        return;
+      }
       AsyncRequest.withOneReply(serviceFiber, server.getCommandRequests(), msg, reply -> {
         // got reply!
         System.out.println("Reply to client: " + reply);
@@ -122,6 +161,7 @@ public class ControlService extends AbstractService implements ControlModule {
   private void sendErrorReply(Channel channel, Exception ex) {
     CommandReply reply = new CommandReply(false, "", ex.toString());
     channel.writeAndFlush(reply);
+    channel.close();
   }
 
   @Override
@@ -152,7 +192,7 @@ public class ControlService extends AbstractService implements ControlModule {
             protected void initChannel(SocketChannel ch) throws Exception {
               ChannelPipeline pipeline = ch.pipeline();
 
-              pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
+//              pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
               pipeline.addLast("http-server", new HttpServerCodec());
               pipeline.addLast("aggregator", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
 
