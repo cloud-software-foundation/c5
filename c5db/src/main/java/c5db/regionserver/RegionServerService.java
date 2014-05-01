@@ -28,6 +28,7 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.HRegionBridge;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
@@ -188,7 +189,7 @@ public class RegionServerService extends AbstractService implements RegionServer
   public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
     String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
     LOG.debug("get online region:" + stringifiedRegion);
-    return tabletModule.getTablet(stringifiedRegion);
+    return tabletModule.getTablet(stringifiedRegion).getTheRegion();
   }
 
   public String toString() {
