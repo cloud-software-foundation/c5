@@ -53,7 +53,7 @@ public class Main {
 
     // use system properties for other config so we don't end up writing a whole command line
     // parse framework.
-    String reqCfgPath = System.getProperty("c5.cfgPath");
+    String reqCfgPath = System.getProperty(C5ServerConstants.C5_CFG_PATH);
     if (reqCfgPath != null) {
       cfgPath = reqCfgPath;
     }
