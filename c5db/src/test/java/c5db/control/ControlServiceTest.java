@@ -52,6 +52,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -204,7 +205,7 @@ public class ControlServiceTest {
     System.out.println(reply);
   }
 
-  @Test
+  @Test(timeout = 3000)
   public void embeddedClientWasGivenAnIncorrectPort() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
@@ -218,6 +219,30 @@ public class ControlServiceTest {
 
     assertThat(reply.getCommandSuccess(), is(false));
     System.out.println(reply);
+  }
+
+  @Test(timeout = 3000)
+  public void embeddedClientGotExceptionFromDiscoveryModule() throws ExecutionException, InterruptedException {
+    context.checking(new Expectations() {{
+      allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
+      will(returnFutureWithException(new Exception()));
+    }});
+    ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
+
+    controlService.doMessage(waiter);
+
+    CommandReply reply = waiter.repliedFuture.get();
+
+    assertThat(reply.getCommandSuccess(), is(false));
+    System.out.println(reply);
+  }
+
+  @Test
+  public void fudgeCodeCoverage() throws InterruptedException {
+    assertThat(controlService.getModuleType(), is(ModuleType.ControlRpc));
+    assertThat(controlService.hasPort(), is(true));
+    assertThat(controlService.port(), is(modulePortUnderTest));
+    assertThat(controlService.acceptCommand(null), is(nullValue()));
   }
 
   public static ModuleSubCommand subCommand() {
@@ -287,12 +312,16 @@ public class ControlServiceTest {
     }
   }
 
+  /**** Future actions *****/
   public static Action returnFutureWithValue(NodeInfoReplyBuilder builder) {
     return returnFutureWithValue(builder.build());
   }
 
   public static Action returnFutureWithValue(Object futureValue) {
     return new ReturnFutureWithValueAction(futureValue);
+  }
+  public static Action returnFutureWithException(Throwable exception) {
+    return new ReturnFutureWithException(exception);
   }
 
   public static class ReturnFutureWithValueAction implements Action {
@@ -312,5 +341,21 @@ public class ControlServiceTest {
     }
   }
 
+  public static class ReturnFutureWithException implements Action {
+    private Throwable exception;
+    public ReturnFutureWithException(Throwable exception) {
+      this.exception = exception;
+    }
+
+    public Object invoke(Invocation invocation) {
+      SettableFuture<Object> future = SettableFuture.create();
+      future.setException(exception);
+      return future;
+    }
+    public void describeTo(Description description) {
+      description.appendText("returns a future with exception ");
+      description.appendValue(exception);
+    }
+  }
 
 }
