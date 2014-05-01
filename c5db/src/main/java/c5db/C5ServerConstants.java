@@ -51,4 +51,5 @@ public class C5ServerConstants {
   public static final java.lang.String MIN_CLUSTER_SIZE = "minClusterSize";
   public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
   public static final int DEFAULT_QUORUM_SIZE = 1;
+  public static final String C5_CFG_PATH = "c5.cfgPath";
 }
