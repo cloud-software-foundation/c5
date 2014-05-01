@@ -90,23 +90,29 @@ public class ControlService extends AbstractService implements ControlModule {
     ListenableFuture<NodeInfoReply> nodeInfoFuture = discoveryModule.getNodeInfo(request.getRequest().receipientNodeId,
         ModuleType.ControlRpc);
     C5Futures.addCallback(nodeInfoFuture, nodeInfo -> {
-      String firstAddress = nodeInfo.addresses.get(0);
-      int port = nodeInfo.port;
-      InetSocketAddress socketAddress = null;
-      try {
-        socketAddress = new InetSocketAddress(
-            InetAddress.getByName(firstAddress), port);
+      if (nodeInfo.found) {
+        String firstAddress = nodeInfo.addresses.get(0);
+        int port = nodeInfo.port;
+        InetSocketAddress socketAddress = null;
+        try {
+          socketAddress = new InetSocketAddress(
+              InetAddress.getByName(firstAddress), port);
 
-        C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
-            replyResult -> {
-              request.reply(replyResult);
-            }, exception -> {
-              CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
-              request.reply(reply);
-            }, serviceFiber);
-      } catch (UnknownHostException e) {
-        LOG.error("Bad address", e);
-        CommandReply reply = new CommandReply(false, "", "Bad remote address:" + e);
+          C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
+              replyResult -> {
+                request.reply(replyResult);
+              }, exception -> {
+                CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
+                request.reply(reply);
+              }, serviceFiber
+          );
+        } catch (UnknownHostException e) {
+          LOG.error("Bad address", e);
+          CommandReply reply = new CommandReply(false, "", "Bad remote address:" + e);
+          request.reply(reply);
+        }
+      } else {
+        CommandReply reply = new CommandReply(false, "", "Bad node id " + request.getRequest().receipientNodeId);
         request.reply(reply);
       }
     }, exception -> {
