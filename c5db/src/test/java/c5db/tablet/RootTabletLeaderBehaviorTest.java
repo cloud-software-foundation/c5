@@ -92,7 +92,7 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
 
-      exactly(2).of(c5Server).isSingleNodeMode();
+      oneOf(c5Server).isSingleNodeMode();
       will(returnValue(true));
 
       oneOf(region).put(with(any(Put.class)));
@@ -101,6 +101,8 @@ public class RootTabletLeaderBehaviorTest {
       exactly(2).of(c5Server).getCommandChannel();
       will(returnValue(commandMemoryChannel));
 
+      exactly(2).of(c5Server).getNodeId();
+      will(returnValue(1l));
     }});
 
     commandListener = listenTo(c5Server.getCommandChannel());
