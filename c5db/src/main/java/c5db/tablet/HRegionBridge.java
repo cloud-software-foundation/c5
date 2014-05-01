@@ -71,7 +71,8 @@ public class HRegionBridge implements Region {
     theRegion.put(put);
   }
 
-  HRegion getTheRegion() {
+  @Override
+  public HRegion getTheRegion() {
     return theRegion;
   }
 }

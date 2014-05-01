@@ -139,7 +139,7 @@ public class RootTabletTest {
         oneOf(region).get(with(any(Get.class)));
         will(returnValue(org.apache.hadoop.hbase.client.Result.create(new ArrayList<>())));
 
-        exactly(2).of(server).isSingleNodeMode();
+        oneOf(server).isSingleNodeMode();
         will(returnValue(true));
 
         // Return 0 entries from the root table for Meta
@@ -148,13 +148,14 @@ public class RootTabletTest {
         // Post put we send a command over the command channel
         oneOf(server).getCommandChannel();
         will(returnValue(commandMemoryChannel));
+
+        allowing(replicator).getStateChannel();
+        will(returnValue(stateMemoryChannel));
+
+        exactly(2).of(server).getNodeId();
+        will(returnValue(1l));
       }
     });
-
-    context.checking(new Expectations() {{
-      allowing(replicator).getStateChannel();
-      will(returnValue(stateMemoryChannel));
-    }});
   }
 
   @After
