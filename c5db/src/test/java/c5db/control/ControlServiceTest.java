@@ -16,26 +16,16 @@
  */
 package c5db.control;
 
-import c5db.C5ServerConstants;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
@@ -51,16 +41,25 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Test control service.
  */
 public class ControlServiceTest {
 
+  private static final String DONT_CARE_PAYLOAD = "hi there";
+  private static final String DONT_CARE_REPLY_PAYLOAD = "yay!";
+  private static final String DONT_CARE_EMPTY = "";
+  private static final long LOCAL_NODE_ID = 1;
+  private static final long NOT_LOCAL_NODE_ID = LOCAL_NODE_ID + 1;
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
@@ -70,27 +69,37 @@ public class ControlServiceTest {
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
   private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(2));
   private final C5Server server = context.mock(C5Server.class);
+  private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
+  private final SettableFuture<C5Module> getModuleFuture = SettableFuture.create();
 
   private ControlService controlService ;
-  private int modulePortUnderTest;
+  private SimpleControlClient controlClient;
 
-  private final Bootstrap client = new Bootstrap();
+  private int modulePortUnderTest;
 
   private final RequestChannel<CommandRpcRequest<?>, CommandReply> serverRequests = new MemoryRequestChannel<>();
   private final Fiber ourFiber = new ThreadFiber();
 
   @Before
   public void before() {
+    getModuleFuture.set(discoveryModule);
+    Random portRandomizer = new Random();
+    modulePortUnderTest = 3000 + portRandomizer.nextInt(3000);
+
     context.checking(new Expectations() {{
       allowing(server).getCommandRequests();
       will(returnValue(serverRequests));
+
+      allowing(server).getModule(with(equal(ModuleType.Discovery)));
+      will(returnValue(getModuleFuture));
+
+      allowing(server).getNodeId();
+      will(returnValue(LOCAL_NODE_ID));
     }});
 
     ourFiber.start();
     serverRequests.subscribe(ourFiber, this::handleServerRequests);
 
-    Random portRandomizer = new Random();
-    modulePortUnderTest = 3000 + portRandomizer.nextInt(3000);
 
     controlService = new ControlService(
         server,
@@ -100,32 +109,15 @@ public class ControlServiceTest {
         modulePortUnderTest
     );
 
-    client.group(ioWorkerGroup)
-        .channel(NioSocketChannel.class)
-        .option(ChannelOption.SO_REUSEADDR, true)
-        .option(ChannelOption.TCP_NODELAY, true)
-        .handler(new ChannelInitializer<SocketChannel>() {
-          @Override
-          protected void initChannel(SocketChannel ch) throws Exception {
-            ChannelPipeline pipeline = ch.pipeline();
-            pipeline.addLast("logger", new LoggingHandler(LogLevel.WARN));
-            pipeline.addLast("http-client", new HttpClientCodec());
-            pipeline.addLast("aggregator", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
-
-            pipeline.addLast("encode", new ClientHttpProtostuffEncoder());
-            pipeline.addLast("decode", new ClientHttpProtostuffDecoder());
-
-            pipeline.addLast("translate", new ClientEncodeCommandRequest());
-
-            pipeline.addLast(new MessageHandler());
-          }
-        });
+    controlClient = new SimpleControlClient(ioWorkerGroup);
   }
+
+  private final CommandReply serverReply = new CommandReply(true, DONT_CARE_REPLY_PAYLOAD, DONT_CARE_EMPTY);
 
   private void handleServerRequests(Request<CommandRpcRequest<?>, CommandReply>  msg) {
     System.out.println("Handle server requests: " + msg.getRequest());
 
-    msg.reply(new CommandReply(true, "yay!", ""));
+    msg.reply(serverReply);
   }
 
   @After
@@ -138,27 +130,32 @@ public class ControlServiceTest {
     ioWorkerGroup.shutdownGracefully();
   }
 
-  @Test(timeout = 6000)
-  public void shouldOpenAHTTPSocketAndAcceptAConnection() throws UnknownHostException, InterruptedException {
-
+  @Test(timeout = 3000)
+  public void shouldOpenAHTTPSocketAndAcceptAValidRequest() throws UnknownHostException, InterruptedException, ExecutionException {
     controlService.startAndWait();
 
-    Channel remote = client.connect(InetAddress.getByName("localhost"), modulePortUnderTest).sync().channel();
-    // send some messages:
-    CommandRpcRequest cmd = new CommandRpcRequest<>(1, new ModuleSubCommand(ModuleType.Tablet, "hi there"));
-    remote.writeAndFlush(cmd);
+    CommandRpcRequest cmd = new CommandRpcRequest<>(LOCAL_NODE_ID, new ModuleSubCommand(ModuleType.Tablet, DONT_CARE_PAYLOAD));
+    ListenableFuture<CommandReply> future = controlClient.sendRequest(cmd,
+        new InetSocketAddress(InetAddress.getByName("localhost"), modulePortUnderTest));
 
-    // we should wait for a reply probably, right?
-    latch.await();
+    CommandReply reply = future.get();
+    //assertThat(reply, is(serverReply));
+    // TODO make it so that protostuff messages compare via .equals properly
+    assertThat(reply.getCommandStdout(), is(serverReply.getCommandStdout()));
+    System.out.println("reply is: " + reply);
   }
 
-  final CountDownLatch latch = new CountDownLatch(1);
+  @Test(timeout = 3000)
+  public void shouldReturnAnErrorWithInvalidNodeId() throws UnknownHostException, ExecutionException, InterruptedException {
+    controlService.startAndWait();
 
-  private class MessageHandler extends SimpleChannelInboundHandler<CommandReply> {
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, CommandReply msg) throws Exception {
-      System.out.println("Got message: " + msg);
-      latch.countDown();
-    }
+    CommandRpcRequest cmd = new CommandRpcRequest<>(NOT_LOCAL_NODE_ID, new ModuleSubCommand(ModuleType.Tablet, DONT_CARE_PAYLOAD));
+    ListenableFuture<CommandReply> future = controlClient.sendRequest(cmd,
+        new InetSocketAddress(InetAddress.getByName("localhost"), modulePortUnderTest));
+
+    CommandReply reply = future.get();
+
+    assertThat(reply.getCommandSuccess(), is(false));
+    System.out.println("reply is: " + reply);
   }
 }
