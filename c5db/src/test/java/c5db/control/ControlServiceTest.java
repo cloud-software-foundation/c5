@@ -26,7 +26,6 @@ import c5db.messages.generated.ModuleType;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.nio.NioEventLoopGroup;
-import org.hamcrest.Description;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
@@ -36,7 +35,6 @@ import org.jetlang.fibers.PoolFiberFactory;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.api.Action;
-import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.After;
@@ -51,6 +49,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+import static c5db.FutureActions.returnFutureWithException;
+import static c5db.FutureActions.returnFutureWithValue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -159,7 +159,7 @@ public class ControlServiceTest {
   public void shouldHaveEmbededClientCalledByDoMessageCallItself() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
-      will(returnFutureWithValue(nodeInfo().withPort(modulePortUnderTest)));
+      will(returnFutureWithNodeInfo(nodeInfo().withPort(modulePortUnderTest)));
     }});
 
     ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
@@ -177,7 +177,7 @@ public class ControlServiceTest {
   public void embededClientHandlesCantFindNode() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
-      will(returnFutureWithValue(nodeInfo().failedToLookupNode()));
+      will(returnFutureWithNodeInfo(nodeInfo().failedToLookupNode()));
     }});
     ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
 
@@ -193,7 +193,7 @@ public class ControlServiceTest {
   public void embeddedClientBadDNSLoopup() throws ExecutionException, InterruptedException {
     context.checking(new Expectations(){{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
-      will(returnFutureWithValue(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME")));
+      will(returnFutureWithNodeInfo(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME")));
     }});
     ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
 
@@ -209,7 +209,7 @@ public class ControlServiceTest {
   public void embeddedClientWasGivenAnIncorrectPort() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
-      will(returnFutureWithValue(nodeInfo().withPort(modulePortUnderTest+1)));
+      will(returnFutureWithNodeInfo(nodeInfo().withPort(modulePortUnderTest + 1)));
     }});
     ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
 
@@ -311,51 +311,7 @@ public class ControlServiceTest {
       return new NodeInfoReply(successFlag, Lists.newArrayList(address), port);
     }
   }
-
-  /**** Future actions *****/
-  public static Action returnFutureWithValue(NodeInfoReplyBuilder builder) {
+  public static Action returnFutureWithNodeInfo(NodeInfoReplyBuilder builder) {
     return returnFutureWithValue(builder.build());
   }
-
-  public static Action returnFutureWithValue(Object futureValue) {
-    return new ReturnFutureWithValueAction(futureValue);
-  }
-  public static Action returnFutureWithException(Throwable exception) {
-    return new ReturnFutureWithException(exception);
-  }
-
-  public static class ReturnFutureWithValueAction implements Action {
-    private Object futureResult;
-    public ReturnFutureWithValueAction(Object futureResult) {
-      this.futureResult = futureResult;
-    }
-
-    public Object invoke(Invocation invocation) {
-      SettableFuture<Object> future = SettableFuture.create();
-      future.set(futureResult);
-      return future;
-    }
-    public void describeTo(Description description) {
-      description.appendText("returns a future with value ");
-      description.appendValue(futureResult);
-    }
-  }
-
-  public static class ReturnFutureWithException implements Action {
-    private Throwable exception;
-    public ReturnFutureWithException(Throwable exception) {
-      this.exception = exception;
-    }
-
-    public Object invoke(Invocation invocation) {
-      SettableFuture<Object> future = SettableFuture.create();
-      future.setException(exception);
-      return future;
-    }
-    public void describeTo(Description description) {
-      description.appendText("returns a future with exception ");
-      description.appendValue(exception);
-    }
-  }
-
 }
