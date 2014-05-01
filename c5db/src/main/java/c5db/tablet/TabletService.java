@@ -80,7 +80,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private final C5Server server;
   // TODO bring this into this class, and not have an external class.
   //private final OnlineRegions onlineRegions = OnlineRegions.INSTANCE;
-  private final Map<String, HRegion> onlineRegions = new HashMap<>();
+  final Map<String, Region> onlineRegions = new HashMap<>();
   private final Configuration conf;
   private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
   private ReplicationModule replicationModule = null;
@@ -98,7 +98,7 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public HRegion getTablet(String tabletName) {
+  public Region getTablet(String tabletName) {
     // TODO ugly hack fix eventually
     while (onlineRegions.size() == 0) {
       try {
@@ -108,7 +108,7 @@ public class TabletService extends AbstractService implements TabletModule {
         e.printStackTrace();
       }
     }
-    HRegion region = onlineRegions.get(tabletName);
+    Region region = onlineRegions.get(tabletName);
     // TODO remove
     if (region == null) {
       // Always return the first region which matches
@@ -251,18 +251,16 @@ public class TabletService extends AbstractService implements TabletModule {
     Fiber tabletCallbackFiber = fiberFactory.create();
     tabletCallbackFiber.start();
     tabletChannel.subscribe(tabletCallbackFiber, message -> {
-      if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open) || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
-        HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
-        onlineRegions.put(quorumId, hregion);
+      if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open)
+          || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
+        onlineRegions.put(quorumId, tablet.getRegion());
         tabletCallbackFiber.dispose();
       }
     });
     if (tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Open)
         || tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
       tabletCallbackFiber.dispose();
-      HRegion hregion = ((HRegionBridge) tablet.getRegion()).getTheRegion();
-      onlineRegions.put(quorumId, hregion);
-
+      onlineRegions.put(quorumId, tablet.getRegion());
     }
   }
 
@@ -366,12 +364,12 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor) throws IOException {
-    HRegion hRegion = this.getTablet("hbase:meta");
+    Region region = this.getTablet("hbase:meta");
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
     put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
     put.add(HConstants.CATALOG_FAMILY, HTABLE_DESCRIPTOR_QUALIFIER, hTableDescriptor.toByteArray());
-    hRegion.put(put);
+    region.put(put);
   }
 
   int getMinQuorumSize() {
