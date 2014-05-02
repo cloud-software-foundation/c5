@@ -74,7 +74,7 @@ public class RootTabletTest {
   final SettableFuture<Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
-  final List<Long> peerList = ImmutableList.of(1L);
+  final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
   final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("hbase", "root"));
   final String regionName = regionInfo.getRegionNameAsString();
   final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("hbase", "root"));
@@ -151,9 +151,6 @@ public class RootTabletTest {
 
         allowing(replicator).getStateChannel();
         will(returnValue(stateMemoryChannel));
-
-        exactly(2).of(server).getNodeId();
-        will(returnValue(1l));
       }
     });
   }
@@ -170,7 +167,6 @@ public class RootTabletTest {
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
-
-
+    Thread.sleep(10000);
   }
 }
