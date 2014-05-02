@@ -159,18 +159,14 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-    serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(allModules));
-    });
+    serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
     return future.get();
   }
 
   @Override
   public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-    serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(allModules));
-    });
+    serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
     return future;
   }
 

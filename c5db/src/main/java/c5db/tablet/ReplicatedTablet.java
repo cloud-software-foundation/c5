@@ -127,10 +127,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
-
     OLogShim shim = new OLogShim(replicator);
-
-
     region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
     setTabletState(State.Open);
 
@@ -147,16 +144,20 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         this.setTabletState(State.Open);
         break;
       case LEADER:
-        if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-            try {
-              RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
-              rootTabletLeaderBehavior.start();
-            } catch (IOException e) {
-              e.printStackTrace();
-              System.exit(0);
-            }
-        }
         this.setTabletState(State.Leader);
+        if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+          try {
+            long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
+            RootTabletLeaderBehavior rootTabletLeaderBehavior =
+                new RootTabletLeaderBehavior(this, server, numberOfMetaPeers );
+            rootTabletLeaderBehavior.start();
+          } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+          }
+        } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
+          // Have the meta leader update the root region with it being marked as the leader
+        }
         break;
     }
   }
@@ -170,7 +171,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   private void handleFail(Throwable t) {
-
     tabletFiber.dispose();
     setTabletStateFailed(t);
   }

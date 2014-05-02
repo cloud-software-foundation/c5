@@ -83,7 +83,7 @@ public class ControlService extends AbstractService implements ControlModule {
     controlClient = new SimpleControlClient(ioWorkerGroup);
   }
 
-  private final SimpleControlClient controlClient;
+  private SimpleControlClient controlClient;
 
   @Override
   public void doMessage(Request<CommandRpcRequest<?>, CommandReply> request) {
