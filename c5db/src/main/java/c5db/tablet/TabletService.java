@@ -86,7 +86,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private ReplicationModule replicationModule = null;
   private DiscoveryModule discoveryModule = null;
   private boolean rootStarted = false;
-  private TabletRegistry tabletRegistry;
+  protected TabletRegistry tabletRegistry;
   private Disposable newNodeWatcher = null;
 
   public TabletService(C5Server server) {
@@ -109,23 +109,33 @@ public class TabletService extends AbstractService implements TabletModule {
       }
     }
     Region region = onlineRegions.get(tabletName);
+
     // TODO remove
     if (region == null) {
-      // Always return the first region which matches
-      Optional<String> maybeFoundRegion = onlineRegions
-          .keySet()
-          .stream()
-          .filter(s -> s.startsWith(tabletName))
-          .findFirst();
-      if (maybeFoundRegion.isPresent()) {
-        return onlineRegions.get(maybeFoundRegion.get());
-      } else {
-        LOG.error("Region not found: " + tabletName);
-        return null;
+      Tablet tablet = getRegionWithJustTableName(tabletName);
+      if (tablet != null) {
+        return tablet.getRegion();
       }
     }
 
     return region;
+  }
+
+  // TODO remove
+  private Tablet getRegionWithJustTableName(String tableName) {
+    // Always return the first region which matches
+    Optional<String> maybeFoundRegion = tabletRegistry
+        .getTablets()
+        .keySet()
+        .stream()
+        .filter(s -> s.startsWith(tableName))
+        .findFirst();
+    if (maybeFoundRegion.isPresent()) {
+      return tabletRegistry.getTablets().get(maybeFoundRegion.get());
+    } else {
+      LOG.error("Region not found: " + tableName);
+      return null;
+    }
   }
 
   @Override
