@@ -60,9 +60,9 @@ import static org.junit.Assert.assertThat;
  */
 public class ControlServiceTest {
 
-  private static final String DONT_CARE_PAYLOAD = "hi there";
-  private static final String DONT_CARE_REPLY_PAYLOAD = "yay!";
-  private static final String DONT_CARE_EMPTY = "";
+  private static final String DO_NOT_CARE_PAYLOAD = "hi there";
+  private static final String DO_NOT_CARE_REPLY_PAYLOAD = "yay!";
+  private static final String DO_NOT_CARE_EMPTY = "";
   private static final long LOCAL_NODE_ID = 1;
   private static final long NOT_LOCAL_NODE_ID = LOCAL_NODE_ID + 1;
   @Rule
@@ -116,7 +116,7 @@ public class ControlServiceTest {
     controlService.startAndWait();
   }
 
-  private final CommandReply serverReply = new CommandReply(true, DONT_CARE_REPLY_PAYLOAD, DONT_CARE_EMPTY);
+  private final CommandReply serverReply = new CommandReply(true, DO_NOT_CARE_REPLY_PAYLOAD, DO_NOT_CARE_EMPTY);
 
   private void handleServerRequests(Request<CommandRpcRequest<?>, CommandReply>  msg) {
     System.out.println("Handle server requests: " + msg.getRequest());
@@ -245,22 +245,22 @@ public class ControlServiceTest {
     assertThat(controlService.acceptCommand(null), is(nullValue()));
   }
 
-  public static ModuleSubCommand subCommand() {
-    return new ModuleSubCommand(ModuleType.Tablet, DONT_CARE_PAYLOAD);
+  private static ModuleSubCommand subCommand() {
+    return new ModuleSubCommand(ModuleType.Tablet, DO_NOT_CARE_PAYLOAD);
   }
 
-  public static CommandRpcRequest<ModuleSubCommand> rpcRequest() {
+  private static CommandRpcRequest<ModuleSubCommand> rpcRequest() {
     return new CommandRpcRequest<>(LOCAL_NODE_ID, subCommand());
   }
 
-  public static CommandRpcRequest<ModuleSubCommand> rpcRequestWithWrongNodeId() {
+  private static CommandRpcRequest<ModuleSubCommand> rpcRequestWithWrongNodeId() {
     return new CommandRpcRequest<>(NOT_LOCAL_NODE_ID, subCommand());
   }
 
   public static class ReplyWaiter<R, V> implements Request<R, V> {
 
     private final R requestValue;
-    public SettableFuture<V> repliedFuture = SettableFuture.create();
+    public final SettableFuture<V> repliedFuture = SettableFuture.create();
 
     public ReplyWaiter(R requestValue) {
 
@@ -283,7 +283,7 @@ public class ControlServiceTest {
     }
   }
 
-  public static NodeInfoReplyBuilder nodeInfo() {
+  private static NodeInfoReplyBuilder nodeInfo() {
     return new NodeInfoReplyBuilder();
   }
 

@@ -57,6 +57,6 @@ public interface Region {
         HRegionInfo regionInfo,
         HTableDescriptor tableDescriptor,
         HLog log,
-        Configuration conf) throws IOException;
+        Configuration conf);
   }
 }
