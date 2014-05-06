@@ -21,18 +21,13 @@ import c5db.TestHelpers;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.discovery.NewNodeVisible;
-import c5db.interfaces.replication.Replicator;
-import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.messages.generated.ModuleType;
-import c5db.replication.ReplicatorService;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
@@ -56,23 +51,23 @@ public class BasicTableCreationTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private final int QUORUM_SIZE =100;
+  private final int QUORUM_SIZE = 100;
   private final SettableFuture nodeNotificationsCallback = SettableFuture.create();
 
-  C5Server c5Server = context.mock(C5Server.class);
-  C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
-  DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
-  ReplicationModule replicationModule = context.mock(ReplicationModule.class);
-  ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
-  Channel<NewNodeVisible> nodeNotifications = context.mock(Channel.class);
-  Region region = context.mock(Region.class);
-  SettableFuture discoveryModuleFuture = SettableFuture.create();
-  SettableFuture replicatorModuleFuture = SettableFuture.create();
+  private final C5Server c5Server = context.mock(C5Server.class);
+  private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
+  private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
+  private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
+  private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
+  private final Channel nodeNotifications = context.mock(Channel.class);
+  private final Region region = context.mock(Region.class);
+  private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
+  private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
 
 
-  TabletService tabletService;
+  private TabletService tabletService;
 
-  PoolFiberFactory poolFiberFactory;
+  private PoolFiberFactory poolFiberFactory;
 
 
   @Before
@@ -104,7 +99,7 @@ public class BasicTableCreationTest {
         oneOf(c5Server).getConfigDirectory();
         will(returnValue(configDirectory));
 
-       // Emulate a very large quorum
+        // Emulate a very large quorum
         oneOf(c5Server).isSingleNodeMode();
         will(returnValue(false));
 
@@ -126,9 +121,7 @@ public class BasicTableCreationTest {
             with(any(String.class)),
             with.is(anything()));
         oneOf(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
-
-        oneOf(replicationModule).createReplicator(with(any(String.class)),
-            with(any(List.class)));
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
       }
     });
 
@@ -137,7 +130,7 @@ public class BasicTableCreationTest {
     replicatorModuleFuture.set(replicationModule);
 
 
-  Service.State state = future.get();
+    Service.State state = future.get();
     System.out.println(state);
   }
 
@@ -153,7 +146,8 @@ public class BasicTableCreationTest {
       {
         oneOf(c5FiberFactory).create();
         will(returnValue(poolFiberFactory.create()));
-      }});
+      }
+    });
 
     tabletService.onlineRegions.put("hbase:meta", region);
     ByteString tableName = ByteString.copyFromUtf8("tabletName");
@@ -162,7 +156,8 @@ public class BasicTableCreationTest {
     context.checking(new Expectations() {
       {
         oneOf(region).put(with(any(Put.class)));
-      }});
+      }
+    });
 
     tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName, nodeId));
   }

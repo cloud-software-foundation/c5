@@ -71,7 +71,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
         C5ServerConstants.START_META + ":" + pickedPeersString);
     Channel<CommandRpcRequest<?>> channel = server.getCommandChannel();
 
-    for (Long peer: peers){
+    for (Long peer : peers) {
       CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
       channel.publish(commandRpcRequest);
     }

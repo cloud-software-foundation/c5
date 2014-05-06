@@ -45,7 +45,6 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -194,7 +193,7 @@ public class TabletService extends AbstractService implements TabletModule {
           public void onSuccess(ImmutableMap<Long, NodeInfo> result) {
             try {
               maybeStartBootstrap(result);
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
               e.printStackTrace();
             }
           }
@@ -215,8 +214,7 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @FiberOnly
-  private void maybeStartBootstrap(ImmutableMap<Long, NodeInfo> nodes)
-      throws IOException, InterruptedException {
+  private void maybeStartBootstrap(ImmutableMap<Long, NodeInfo> nodes) throws IOException {
     List<Long> peers = new ArrayList<>(nodes.keySet());
 
     LOG.debug("Found a bunch of peers: {}", peers);
@@ -238,7 +236,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
   // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
   // how to bootstrap?
-  private void bootstrapRoot(final List<Long> peers) throws IOException, InterruptedException {
+  private void bootstrapRoot(final List<Long> peers) throws IOException {
     HTableDescriptor rootDesc = HTableDescriptor.ROOT_TABLEDESC;
     HRegionInfo rootRegion = new HRegionInfo(
         rootDesc.getTableName(), new byte[]{0}, new byte[]{}, false, 1);
@@ -251,7 +249,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private void openRegion0(final HRegionInfo regionInfo,
                            final HTableDescriptor tableDescriptor,
                            final ImmutableList<Long> peers
-  ) throws IOException, InterruptedException {
+  ) throws IOException {
     LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
     String quorumId = regionInfo.getRegionNameAsString();
@@ -367,7 +365,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
   private String createUserTable(List<Long> peers,
                                  HTableDescriptor hTableDescriptor,
-                                 HRegionInfo hRegionInfo) throws IOException, InterruptedException {
+                                 HRegionInfo hRegionInfo) throws IOException {
     openRegion0(hRegionInfo, hTableDescriptor, ImmutableList.copyOf(peers));
     addEntryToMeta(hRegionInfo, hTableDescriptor);
     return "OK";

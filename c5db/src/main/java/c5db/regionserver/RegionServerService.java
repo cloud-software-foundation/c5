@@ -28,7 +28,6 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import c5db.tablet.HRegionBridge;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
@@ -146,7 +145,8 @@ public class RegionServerService extends AbstractService implements RegionServer
 
 
             ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
-            CommandRpcRequest commandRpcRequest = new CommandRpcRequest(server.getNodeId(), moduleSubCommand);
+            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(),
+                moduleSubCommand);
             server.getCommandChannel().publish(commandRpcRequest);
             LOG.warn("Creating test table");
           }
@@ -193,6 +193,6 @@ public class RegionServerService extends AbstractService implements RegionServer
 
   public String toString() {
 
-    return super.toString()+ '{' + "port = " + port + '}';
+    return super.toString() + '{' + "port = " + port + '}';
   }
 }
