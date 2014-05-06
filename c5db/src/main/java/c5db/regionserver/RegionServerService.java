@@ -63,7 +63,6 @@ import sun.misc.BASE64Encoder;
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
-  private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private final NioEventLoopGroup acceptGroup;
   private final NioEventLoopGroup workerGroup;
@@ -72,7 +71,7 @@ public class RegionServerService extends AbstractService implements RegionServer
   private final ServerBootstrap bootstrap = new ServerBootstrap();
 
 
-  TabletModule tabletModule;
+  private TabletModule tabletModule;
 
   public RegionServerService(NioEventLoopGroup acceptGroup,
                              NioEventLoopGroup workerGroup,
@@ -82,7 +81,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
-    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
+    C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
 
     this.fiber = fiberFactory.create();
   }

@@ -174,7 +174,7 @@ public class C5DB extends AbstractService implements C5Server {
     return future;
   }
 
-  public RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+  private final RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   @Override
   public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests() {
@@ -350,7 +350,7 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @FiberOnly
-  private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
+  private void startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
     if (allModules.containsKey(moduleType)) {
       LOG.warn("Module {} already running", moduleType);
       throw new Exception("Cant start, running, module: " + moduleType);
@@ -401,7 +401,6 @@ public class C5DB extends AbstractService implements C5Server {
         throw new Exception("No such module as " + moduleType);
     }
 
-    return true;
   }
 
   private void startServiceModule(C5Module module) {
