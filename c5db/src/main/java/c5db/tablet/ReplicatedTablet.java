@@ -74,8 +74,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   private Region region;
 
-  private Replicator replicator;
-
   public void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel) {
     this.stateChangeChannel = stateChangeChannel;
   }
@@ -126,20 +124,16 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private void replicatorCreated(Replicator replicator) {
     assert tabletState == State.CreatingReplicator;
 
-    this.replicator = replicator;
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
-
-    this.replicator.start();
+    replicator.start();
 
     OLogShim shim = new OLogShim(replicator);
 
-    try {
-      region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
-      setTabletState(State.Open);
-    } catch (IOException e) {
-      handleFail(e);
-    }
+
+    region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
+    setTabletState(State.Open);
+
   }
 
   private void tabletStateChangeCallback(Replicator.State state) {

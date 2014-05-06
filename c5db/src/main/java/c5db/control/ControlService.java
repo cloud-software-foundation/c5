@@ -83,7 +83,7 @@ public class ControlService extends AbstractService implements ControlModule {
     controlClient = new SimpleControlClient(ioWorkerGroup);
   }
 
-  private SimpleControlClient controlClient;
+  private final SimpleControlClient controlClient;
 
   @Override
   public void doMessage(Request<CommandRpcRequest<?>, CommandReply> request) {
@@ -143,7 +143,7 @@ public class ControlService extends AbstractService implements ControlModule {
     return null;
   }
 
-  class MessageHandler extends SimpleChannelInboundHandler<CommandRpcRequest<? extends Message>> {
+  private class MessageHandler extends SimpleChannelInboundHandler<CommandRpcRequest<? extends Message>> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CommandRpcRequest<? extends Message> msg) throws Exception {

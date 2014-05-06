@@ -112,8 +112,8 @@ public class TabletRegistry {
   }
 
   public Tablet startTablet(HRegionInfo regionInfo,
-                                         HTableDescriptor tableDescriptor,
-                                         List<Long> peerList) throws IOException, InterruptedException {
+                            HTableDescriptor tableDescriptor,
+                            List<Long> peerList) throws IOException {
     Path basePath = configDirectory.getBaseConfigPath();
 
     // quorum name - ?
