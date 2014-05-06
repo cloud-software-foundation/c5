@@ -46,7 +46,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(ReplicatedTablet.class);
   private final C5Server server;
 
-  public void setTabletState(State tabletState) {
+  void setTabletState(State tabletState) {
     this.tabletState = tabletState;
     publishEvent(tabletState);
   }
@@ -149,7 +149,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
           try {
             long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
             RootTabletLeaderBehavior rootTabletLeaderBehavior =
-                new RootTabletLeaderBehavior(this, server, numberOfMetaPeers );
+                new RootTabletLeaderBehavior(this, server, numberOfMetaPeers);
             rootTabletLeaderBehavior.start();
           } catch (IOException e) {
             e.printStackTrace();

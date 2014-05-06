@@ -64,8 +64,8 @@ public class RootTabletLeaderBehaviorTest {
   private Region region;
   private C5Server c5Server;
 
-  private MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
-  AsyncChannelAsserts.ChannelListener commandListener;
+  private final MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
+  private AsyncChannelAsserts.ChannelListener commandListener;
 
   @Before
   public void before() throws IOException {
@@ -93,7 +93,7 @@ public class RootTabletLeaderBehaviorTest {
       exactly(2).of(c5Server).getCommandChannel();
       will(returnValue(commandMemoryChannel));
 
-  }});
+    }});
 
     commandListener = listenTo(c5Server.getCommandChannel());
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
