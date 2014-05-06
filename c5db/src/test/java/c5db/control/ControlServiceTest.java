@@ -76,7 +76,7 @@ public class ControlServiceTest {
   private final C5Server server = context.mock(C5Server.class);
   private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
 
-  private ControlService controlService ;
+  private ControlService controlService;
   private SimpleControlClient controlClient;
 
   private int modulePortUnderTest;
@@ -118,7 +118,7 @@ public class ControlServiceTest {
 
   private final CommandReply serverReply = new CommandReply(true, DO_NOT_CARE_REPLY_PAYLOAD, DO_NOT_CARE_EMPTY);
 
-  private void handleServerRequests(Request<CommandRpcRequest<?>, CommandReply>  msg) {
+  private void handleServerRequests(Request<CommandRpcRequest<?>, CommandReply> msg) {
     System.out.println("Handle server requests: " + msg.getRequest());
 
     msg.reply(serverReply);
@@ -191,7 +191,7 @@ public class ControlServiceTest {
 
   @Test(timeout = 3000)
   public void embeddedClientBadDNSLoopup() throws ExecutionException, InterruptedException {
-    context.checking(new Expectations(){{
+    context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
       will(returnFutureWithNodeInfo(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME")));
     }});
@@ -311,7 +311,8 @@ public class ControlServiceTest {
       return new NodeInfoReply(successFlag, Lists.newArrayList(address), port);
     }
   }
-  public static Action returnFutureWithNodeInfo(NodeInfoReplyBuilder builder) {
+
+  private static Action returnFutureWithNodeInfo(NodeInfoReplyBuilder builder) {
     return returnFutureWithValue(builder.build());
   }
 }
