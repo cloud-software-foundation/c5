@@ -114,11 +114,31 @@ public class RootTabletTest {
 
     context.checking(new Expectations() {
       {
-        States state = context.states("start");
-
         allowing(replicator).getQuorumId();
         will(returnValue(regionName));
 
+        allowing(replicator).getStateChannel();
+        will(returnValue(stateMemoryChannel));
+
+        allowing(replicator).getStateChangeChannel();
+        will(returnValue(new MemoryChannel<>()));
+
+      }
+    });
+  }
+
+  @After
+  public void after() {
+    tabletFiber.dispose();
+    stateChangeChannelListener.dispose();
+  }
+
+  @Test
+  public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
+    States state = context.states("start");
+
+    context.checking(new Expectations() {
+      {
         oneOf(replicationModule).createReplicator(regionName, peerList);
         will(returnValue(future));
         then(state.is("opening"));
@@ -135,6 +155,13 @@ public class RootTabletTest {
         will(returnValue(region));
         then(state.is("opened"));
 
+      }
+    });
+    replicatedTablet.start();
+    assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+
+    context.checking(new Expectations() {
+      {
         // Return 0 entries from the root table for Meta
         oneOf(region).get(with(any(Get.class)));
         will(returnValue(org.apache.hadoop.hbase.client.Result.create(new ArrayList<>())));
@@ -145,28 +172,13 @@ public class RootTabletTest {
         // Return 0 entries from the root table for Meta
         oneOf(region).put(with(any(Put.class)));
 
-        // Post put we send a command over the command channel
+        // Post put we send a command over the command commandRpcRequestChannel
         oneOf(server).getCommandChannel();
         will(returnValue(commandMemoryChannel));
-
-        allowing(replicator).getStateChannel();
-        will(returnValue(stateMemoryChannel));
       }
     });
-  }
 
-  @After
-  public void after() {
-    tabletFiber.dispose();
-    stateChangeChannelListener.dispose();
-  }
-
-  @Test
-  public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
-    replicatedTablet.start();
-    assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
-    Thread.sleep(10000);
   }
 }

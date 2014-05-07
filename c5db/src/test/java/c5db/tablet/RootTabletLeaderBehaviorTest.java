@@ -89,7 +89,7 @@ public class RootTabletLeaderBehaviorTest {
 
       oneOf(region).put(with(any(Put.class)));
 
-      // Post put we send a command over the command channel
+      // Post put we send a command over the command commandRpcRequestChannel
       exactly(2).of(c5Server).getCommandChannel();
       will(returnValue(commandMemoryChannel));
 
@@ -118,7 +118,7 @@ public class RootTabletLeaderBehaviorTest {
 
       oneOf(region).put(with(any(Put.class)));
 
-      // Post put we send a command over the command channel
+      // Post put we send a command over the command commandRpcRequestChannel
       oneOf(c5Server).getCommandChannel();
       will(returnValue(memoryChannel));
 
@@ -156,6 +156,7 @@ public class RootTabletLeaderBehaviorTest {
 
   @Test
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws Throwable {
+    MemoryChannel<CommandRpcRequest> memoryChannel = new MemoryChannel<>();
     Cell bonkCell = new KeyValue(Bytes.toBytes("123"), 0l);
     Result results = Result.create(new Cell[]{bonkCell});
 
@@ -169,6 +170,10 @@ public class RootTabletLeaderBehaviorTest {
       never(hRegionTablet).getPeers();
       never(c5Server).isSingleNodeMode();
       never(region).put(with(any(Put.class)));
+
+      // Post put we send a command over the command commandRpcRequestChannel
+      oneOf(c5Server).getCommandChannel();
+      will(returnValue(memoryChannel));
 
     }});
 

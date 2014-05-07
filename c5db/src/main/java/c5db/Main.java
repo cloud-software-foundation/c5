@@ -60,9 +60,6 @@ public class Main {
 
     ConfigDirectory cfgDir = new NioFileConfigDirectory(Paths.get(cfgPath));
     cfgDir.setNodeIdFile(Long.toString(nodeId));
-
-    C5Server instance = new C5DB(cfgDir);
-    instance.start();
     Random portRandomizer = new Random();
 
     int regionServerPort;
@@ -80,6 +77,16 @@ public class Main {
       webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
     }
 
+
+    int controlRpcServerPort;
+    if (hasControlRpcPropertyPortSet()) {
+      controlRpcServerPort = getControlRpcPropertyPortSet();
+    } else {
+      controlRpcServerPort= C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
+    }
+
+    C5Server instance = new C5DB(cfgDir);
+    instance.start();
 
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
@@ -102,8 +109,13 @@ public class Main {
 
     StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
+
+    StartModule controlService = new StartModule(ModuleType.ControlRpc, controlRpcServerPort, "");
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, controlService));
+
     return instance;
   }
+
 
   private static int getPropertyPort() {
     return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME));
@@ -113,11 +125,19 @@ public class Main {
     return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME));
   }
 
+  private static int getControlRpcPropertyPortSet() {
+    return Integer.parseInt(System.getProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME));
+  }
+
   private static boolean hasPropertyPortSet() {
     return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME);
   }
 
   private static boolean hasWebServerPropertyPortSet() {
     return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME);
+  }
+
+  private static boolean hasControlRpcPropertyPortSet() {
+    return System.getProperties().containsKey(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME);
   }
 }
