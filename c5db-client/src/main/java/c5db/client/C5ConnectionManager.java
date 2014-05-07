@@ -78,6 +78,12 @@ class C5ConnectionManager {
     return channel;
   }
 
+  public Channel getOrCreateChannel(byte tableName, byte row){
+    // look up the leader in the local meta cache
+
+    return null;
+  }
+
   public Channel getOrCreateChannel(String host, int port)
       throws IOException, InterruptedException, TimeoutException, ExecutionException {
     final String hash = getHostPortHash(host, port);

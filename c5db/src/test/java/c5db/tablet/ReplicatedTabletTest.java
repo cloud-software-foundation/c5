@@ -21,6 +21,7 @@ import c5db.AsyncChannelAsserts;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.TabletStateChange;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
@@ -58,7 +59,8 @@ public class ReplicatedTabletTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private MemoryChannel<Replicator.State> channel;
+  private MemoryChannel<Replicator.State> stateChannel;
+  private MemoryChannel<ReplicatorInstanceEvent> replicatorStateChangeChannel;
 
   final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
   final Replicator replicator = context.mock(Replicator.class);
@@ -88,7 +90,7 @@ public class ReplicatedTabletTest {
       replicationModule,
       regionCreator);
 
-  AsyncChannelAsserts.ChannelListener<TabletStateChange> listener;
+  AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChannelListener;
 
   @Before
   public void setup() throws Exception {
@@ -102,11 +104,12 @@ public class ReplicatedTabletTest {
         tabletFiber,
         replicationModule,
         regionCreator);
-    listener = listenTo(replicatedTablet.getStateChangeChannel());
+    tabletStateChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
 
     future.set(replicator);
-    listener = listenTo(replicatedTablet.getStateChangeChannel());
-    channel = new MemoryChannel<>();
+    tabletStateChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
+    stateChannel= new MemoryChannel<>();
+    replicatorStateChangeChannel = new MemoryChannel<>();
 
     context.checking(new Expectations() {
       {
@@ -130,33 +133,39 @@ public class ReplicatedTabletTest {
             with(same(conf)));
         will(returnValue(region));
         then(state.is("opened"));
-        channel = new MemoryChannel<>();
+        stateChannel= new MemoryChannel<>();
+        replicatorStateChangeChannel = new MemoryChannel<ReplicatorInstanceEvent>();
       }
     });
 
     context.checking(new Expectations() {{
       allowing(replicator).getStateChannel();
-      will(returnValue(channel));
+      will(returnValue(stateChannel));
+
+      allowing(replicator).getStateChangeChannel();
+      will(returnValue(replicatorStateChangeChannel));
+
     }});
   }
 
   @After
   public void after() {
     tabletFiber.dispose();
-    listener.dispose();
+    tabletStateChannelListener.dispose();
   }
 
   @Test
   public void basicTest() throws Throwable {
     replicatedTablet.start();
-    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+    assertEventually(tabletStateChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
   }
 
   @Test
   public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
     replicatedTablet.start();
-    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
-    channel.publish(Replicator.State.LEADER);
-    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
+    assertEventually(tabletStateChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+    stateChannel.publish(Replicator.State.LEADER);
+    assertEventually(tabletStateChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
+
   }
 }

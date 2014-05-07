@@ -17,6 +17,7 @@
 
 package c5db;
 
+import c5db.control.ControlService;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -392,6 +393,12 @@ public class C5DB extends AbstractService implements C5Server {
 
         break;
       }
+      case ControlRpc: {
+        C5Module module = new ControlService(this, fiberPool.create(), bossGroup, workerGroup, modulePort);
+        startServiceModule(module);
+        break;
+      }
+
 
       default:
         throw new Exception("No such module as " + moduleType);

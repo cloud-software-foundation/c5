@@ -28,6 +28,7 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
@@ -68,8 +69,6 @@ public class RegionServerService extends AbstractService implements RegionServer
   private final int port;
   private final C5Server server;
   private final ServerBootstrap bootstrap = new ServerBootstrap();
-
-
   private TabletModule tabletModule;
 
   public RegionServerService(NioEventLoopGroup acceptGroup,
@@ -81,7 +80,6 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.port = port;
     this.server = server;
     C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
-
     this.fiber = fiberFactory.create();
   }
 
@@ -188,7 +186,8 @@ public class RegionServerService extends AbstractService implements RegionServer
   public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
     String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
     LOG.debug("get online region:" + stringifiedRegion);
-    return tabletModule.getTablet(stringifiedRegion).getTheRegion();
+    Region tablet = tabletModule.getTablet(stringifiedRegion);
+    return tablet.getTheRegion();
   }
 
   public String toString() {

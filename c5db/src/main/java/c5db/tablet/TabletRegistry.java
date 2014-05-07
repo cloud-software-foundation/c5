@@ -101,7 +101,6 @@ public class TabletRegistry {
             replicationModule,
             regionCreator);
         tablet.setStateChangeChannel(commonStateChangeChannel);
-
         tablet.start();
 
         tablets.put(quorum, tablet);
@@ -144,7 +143,6 @@ public class TabletRegistry {
         regionCreator);
     newTablet.setStateChangeChannel(commonStateChangeChannel);
     tablets.put(quorumName, newTablet);
-
     newTablet.start();
     return newTablet;
   }
