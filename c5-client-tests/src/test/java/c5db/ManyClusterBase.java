@@ -66,15 +66,19 @@ public class ManyClusterBase {
   private static Channel<TabletStateChange> stateChanges1;
   private static Channel<TabletStateChange> stateChanges2;
   private static Channel<CommandRpcRequest<?>> commandChannel;
+  public static final byte[] value = Bytes.toBytes("value");
 
 
   @Rule
   public TestName name = new TestName();
-  private C5Table table;
+  public C5Table table;
   public static int metaOnPort;
+  public byte[] row;
+  private int userTabletOn;
 
-  private static int getRegionServerPort() {
-    return regionServerPort;
+  public int getRegionServerPort() {
+    Log.info("Getting region from: " + userTabletOn);
+    return userTabletOn;
   }
 
   private static C5Server server;
@@ -86,7 +90,7 @@ public class ManyClusterBase {
     HTableDescriptor testDesc = new HTableDescriptor(tableName);
     testDesc.addFamily(new HColumnDescriptor("cf"));
     HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-    String peerString = String.valueOf(server.getNodeId());
+    String peerString = String.valueOf(server.getNodeId() + "," + server1.getNodeId() + "," + server2.getNodeId());
     BASE64Encoder encoder = new BASE64Encoder();
 
     String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
@@ -105,14 +109,28 @@ public class ManyClusterBase {
 
     Callback<TabletStateChange> onMsg = message -> {
       System.out.println(message);
-      if (message.state.equals(Tablet.State.Open)
-          || message.state.equals(Tablet.State.Leader)) {
+      if (message.state.equals(Tablet.State.Leader)) {
+        userTabletOn = regionServerPort -2;
+        latch.countDown();
+      }
+    };
+    Callback<TabletStateChange> onMsg1 = message -> {
+      System.out.println(message);
+      if (message.state.equals(Tablet.State.Leader)) {
+        userTabletOn = regionServerPort -1 ;
+        latch.countDown();
+      }
+    };
+    Callback<TabletStateChange> onMsg2 = message -> {
+      System.out.println(message);
+      if (message.state.equals(Tablet.State.Leader)) {
+        userTabletOn = regionServerPort;
         latch.countDown();
       }
     };
     stateChanges.subscribe(receiver, onMsg);
-    stateChanges1.subscribe(receiver, onMsg);
-    stateChanges2.subscribe(receiver, onMsg);
+    stateChanges1.subscribe(receiver, onMsg1);
+    stateChanges2.subscribe(receiver, onMsg2);
 
     final ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
@@ -124,7 +142,9 @@ public class ManyClusterBase {
     // create java.util.concurrent.CountDownLatch to notify when message arrives
     latch.await();
 
-    table = new C5Table(tableName, getRegionServerPort());
+    table = new C5Table(tableName, userTabletOn);
+    row = Bytes.toBytes(name.getMethodName());
+
     receiver.dispose();
   }
 
