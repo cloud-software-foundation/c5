@@ -39,7 +39,6 @@ import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,9 +46,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class RootTabletLeaderBehaviorTest {
 
@@ -60,20 +63,12 @@ public class RootTabletLeaderBehaviorTest {
   private c5db.interfaces.tablet.Tablet hRegionTablet;
   private Region region;
   private C5Server c5Server;
-  private Fiber fiber;
-  private MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
-  AsyncChannelAsserts.ChannelListener commandListener;
 
-
-  @After
-  public void tearDown() {
-    fiber.dispose();
-  }
+  private final MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
+  private AsyncChannelAsserts.ChannelListener commandListener;
 
   @Before
   public void before() throws IOException {
-    fiber = new ThreadFiber();
-
     hRegionTablet = context.mock(Tablet.class, "mockHRegionTablet");
     region = context.mock(Region.class, "mockRegion");
     c5Server = context.mock(C5Server.class, "mockC5Server");
@@ -81,7 +76,7 @@ public class RootTabletLeaderBehaviorTest {
 
   @Test
   public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws Throwable {
-    List<Long> fakePeers = Arrays.asList(0l);
+    List<Long> fakePeers = Arrays.asList(1l, 2l, 3l, 4l, 5l, 6l);
     context.checking(new Expectations() {{
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
@@ -91,9 +86,6 @@ public class RootTabletLeaderBehaviorTest {
 
       oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
-
-      exactly(2).of(c5Server).isSingleNodeMode();
-      will(returnValue(true));
 
       oneOf(region).put(with(any(Put.class)));
 
@@ -105,10 +97,62 @@ public class RootTabletLeaderBehaviorTest {
 
     commandListener = listenTo(c5Server.getCommandChannel());
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-        c5Server);
+        c5Server, C5ServerConstants.DEFAULT_QUORUM_SIZE);
     rootTabletLeaderBehavior.start();
     assertEventually(commandListener, hasMessageWithRPC(C5ServerConstants.START_META));
   }
+
+  @Test
+  public void shouldSendStartMetaPacketsToTheRightNumberOfPeers() throws Throwable {
+    MemoryChannel<CommandRpcRequest> memoryChannel = new MemoryChannel<>();
+    List<Long> fakePeers = Arrays.asList(3l, 1l, 2l, 5l, 6l, 100l);
+    context.checking(new Expectations() {{
+      oneOf(hRegionTablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).get(with(any(Get.class)));
+      will(returnValue(Result.create(new Cell[]{})));
+
+      oneOf(hRegionTablet).getPeers();
+      will(returnValue(fakePeers));
+
+      oneOf(region).put(with(any(Put.class)));
+
+      // Post put we send a command over the command channel
+      oneOf(c5Server).getCommandChannel();
+      will(returnValue(memoryChannel));
+
+    }});
+
+    AtomicLong counter = new AtomicLong(C5ServerConstants.DEFAULT_QUORUM_SIZE);
+    final CountDownLatch latch = new CountDownLatch((int) counter.get());
+
+    Fiber fiber = new ThreadFiber();
+    memoryChannel.subscribe(fiber, message -> {
+      if (((ModuleSubCommand) message.message).getSubCommand().contains(C5ServerConstants.START_META)) {
+        counter.decrementAndGet();
+        latch.countDown();
+      }
+    });
+
+    fiber.execute(() -> {
+      RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
+          c5Server,
+          C5ServerConstants.DEFAULT_QUORUM_SIZE);
+      try {
+        rootTabletLeaderBehavior.start();
+      } catch (IOException e) {
+        e.printStackTrace();
+        throw new RuntimeException("Fail Test" + e);
+      }
+    });
+    fiber.start();
+    latch.await();
+
+    assertThat(counter.get(), is(0l));
+    fiber.dispose();
+  }
+
 
   @Test
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws Throwable {
@@ -128,11 +172,11 @@ public class RootTabletLeaderBehaviorTest {
 
     }});
 
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
+        c5Server, C5ServerConstants.DEFAULT_QUORUM_SIZE);
     rootTabletLeaderBehavior.start();
 
   }
-
 
   private Matcher<CommandRpcRequest<ModuleSubCommand>> hasMessageWithRPC(String s) {
     return new MessageMatcher(s);
@@ -153,7 +197,8 @@ public class RootTabletLeaderBehaviorTest {
     @Override
     protected boolean matchesSafely(CommandRpcRequest<ModuleSubCommand> moduleSubCommandCommandRpcRequest) {
       return moduleSubCommandCommandRpcRequest.message.getModule().equals(ModuleType.Tablet) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().startsWith(C5ServerConstants.START_META);
+          moduleSubCommandCommandRpcRequest.message.getSubCommand().startsWith(C5ServerConstants.START_META) &&
+          moduleSubCommandCommandRpcRequest.message.getSubCommand().contains(s);
 
     }
   }

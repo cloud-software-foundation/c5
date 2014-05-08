@@ -53,7 +53,7 @@ public class Main {
 
     // use system properties for other config so we don't end up writing a whole command line
     // parse framework.
-    String reqCfgPath = System.getProperty("c5.cfgPath");
+    String reqCfgPath = System.getProperty(C5ServerConstants.C5_CFG_PATH);
     if (reqCfgPath != null) {
       cfgPath = reqCfgPath;
     }
@@ -72,6 +72,14 @@ public class Main {
       regionServerPort = C5ServerConstants.DEFAULT_REGION_SERVER_PORT_MIN
           + portRandomizer.nextInt(C5ServerConstants.REGION_SERVER_PORT_RANGE);
     }
+
+    int webServerPort;
+    if (hasWebServerPropertyPortSet()) {
+      webServerPort = getWebServerPropertyPort();
+    } else {
+      webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
+    }
+
 
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
@@ -92,22 +100,24 @@ public class Main {
     StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
 
-    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, 31337, "");
+    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
     return instance;
   }
 
   private static int getPropertyPort() {
-    String regionServerPort = System.getProperty("regionServerPort");
+    return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME));
+  }
 
-    if (regionServerPort != null) {
-      return Integer.parseInt(regionServerPort);
-    }
-
-    return Integer.parseInt(System.getProperty("port"));
+  private static int getWebServerPropertyPort() {
+    return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME));
   }
 
   private static boolean hasPropertyPortSet() {
-    return System.getProperties().containsKey("regionServerPort") || System.getProperties().containsKey("port");
+    return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME);
+  }
+
+  private static boolean hasWebServerPropertyPortSet() {
+    return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME);
   }
 }

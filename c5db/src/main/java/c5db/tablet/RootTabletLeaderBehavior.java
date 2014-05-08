@@ -24,6 +24,7 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.util.FiberOnly;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
@@ -45,38 +47,45 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
   private final c5db.interfaces.tablet.Tablet tablet;
   private final C5Server server;
+  private final long numberOfMetaPeers;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
-                                  final C5Server server) {
+                                  final C5Server server,
+                                  final long numberOfMetaPeers) {
     this.tablet = tablet;
     this.server = server;
+    this.numberOfMetaPeers = numberOfMetaPeers;
   }
 
+  @FiberOnly
   private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
     List<Long> pickedPeers = pickPeers(peers);
-    long leader = pickLeader(pickedPeers);
-    createMetaEntryInRoot(region, pickedPeers, leader);
-    requestMetaCommandCreated(pickedPeers, leader);
+    requestMetaCommandCreated(pickedPeers);
+    createLeaderLessMetaEntryInRoot(region, pickedPeers);
   }
 
-  private void requestMetaCommandCreated(List<Long> pickedPeers, long leader) {
-    String pickedPeersString = StringUtils.join(pickedPeers, ',');
+  @FiberOnly
+  private void requestMetaCommandCreated(List<Long> peers) {
+    String pickedPeersString = StringUtils.join(peers, ',');
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         C5ServerConstants.START_META + ":" + pickedPeersString);
-    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
     Channel<CommandRpcRequest<?>> channel = server.getCommandChannel();
-    channel.publish(commandRpcRequest);
 
+    for (Long peer : peers) {
+      CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
+      channel.publish(commandRpcRequest);
+    }
   }
 
-  private void createMetaEntryInRoot(Region region, List<Long> pickedPeers, long leader) throws IOException {
+  private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
     TableName tableName = new TableName(ByteBuffer.wrap(C5ServerConstants.INTERNAL_NAMESPACE),
         ByteBuffer.wrap(C5ServerConstants.META_TABLE_NAME));
     RegionInfo regionInfo = new RegionInfo(1,
         tableName,
         pickedPeers,
-        leader,
+        0l, // This signifies that we haven't picked the leader
+        // TBD The meta leader updates the entry with itself
         ByteBuffer.wrap(C5ServerConstants.META_START_KEY),
         ByteBuffer.wrap(C5ServerConstants.META_END_KEY),
         true,
@@ -87,25 +96,23 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     region.put(put);
   }
 
-  private long pickLeader(List<Long> pickedPeers) {
-    if (server.isSingleNodeMode()) {
-      if (pickedPeers.size() > 1) {
-        LOG.error("We are in single mode but we have multiple peers");
-      }
-      return pickedPeers.iterator().next();
-    } else {
-      throw new UnsupportedOperationException("we only support single node currently");
-    }
-  }
-
   private List<Long> pickPeers(List<Long> peers) {
-    if (server.isSingleNodeMode()) {
-      if (peers.size() > 1) {
-        LOG.error("We are in single mode but we have multiple peers");
+    List<Long> peersCopy = new ArrayList<>(peers);
+    Collections.shuffle(peersCopy);
+    List<Long> peersToReturn = new ArrayList<>();
+
+    int counter = 0;
+    while (peersToReturn.size() < numberOfMetaPeers
+        && counter < peersCopy.size()) {
+      if (!peersToReturn.contains(peersCopy.get(counter))) {
+        peersToReturn.add(peersCopy.get(counter));
       }
-      return Arrays.asList(peers.iterator().next());
+      counter++;
+    }
+    if (peersToReturn.size() == numberOfMetaPeers) {
+      return peersToReturn;
     } else {
-      throw new UnsupportedOperationException("we only support single node currently");
+      throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
     }
   }
 

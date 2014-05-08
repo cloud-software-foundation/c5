@@ -80,6 +80,7 @@ public class C5DB extends AbstractService implements C5Server {
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
+  private final int minQuorumSize;
 
   private Fiber serverFiber;
   private PoolFiberFactory fiberPool;
@@ -113,6 +114,13 @@ public class C5DB extends AbstractService implements C5Server {
     } else {
       this.clusterName = C5ServerConstants.LOCALHOST;
     }
+
+    if (System.getProperties().containsKey(C5ServerConstants.MIN_CLUSTER_SIZE)) {
+      this.minQuorumSize = Integer.parseInt(System.getProperty(C5ServerConstants.MIN_CLUSTER_SIZE));
+    } else {
+      this.minQuorumSize = C5ServerConstants.MINIMUM_DEFAULT_QUORUM_SIZE;
+    }
+
   }
 
   @Override
@@ -151,22 +159,18 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-    serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(allModules));
-    });
+    serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
     return future.get();
   }
 
   @Override
   public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-    serverFiber.execute(() -> {
-      future.set(ImmutableMap.copyOf(allModules));
-    });
+    serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
     return future;
   }
 
-  public RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
+  private final RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   @Override
   public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests() {
@@ -193,6 +197,11 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   public boolean isSingleNodeMode() {
     return this.clusterName.equals(C5ServerConstants.LOCALHOST);
+  }
+
+  @Override
+  public int getMinQuorumSize(){
+    return this.minQuorumSize;
   }
 
   @Override
@@ -337,7 +346,7 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @FiberOnly
-  private boolean startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
+  private void startModule(final ModuleType moduleType, final int modulePort, String moduleArgv) throws Exception {
     if (allModules.containsKey(moduleType)) {
       LOG.warn("Module {} already running", moduleType);
       throw new Exception("Cant start, running, module: " + moduleType);
@@ -388,7 +397,6 @@ public class C5DB extends AbstractService implements C5Server {
         throw new Exception("No such module as " + moduleType);
     }
 
-    return true;
   }
 
   private void startServiceModule(C5Module module) {

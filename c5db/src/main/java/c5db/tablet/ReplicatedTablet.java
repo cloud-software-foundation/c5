@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -45,7 +46,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(ReplicatedTablet.class);
   private final C5Server server;
 
-  public void setTabletState(State tabletState) {
+  void setTabletState(State tabletState) {
     this.tabletState = tabletState;
     publishEvent(tabletState);
   }
@@ -72,8 +73,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private State tabletState;
 
   private Region region;
-
-  private Replicator replicator;
 
   public void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel) {
     this.stateChangeChannel = stateChangeChannel;
@@ -125,36 +124,41 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private void replicatorCreated(Replicator replicator) {
     assert tabletState == State.CreatingReplicator;
 
-    this.replicator = replicator;
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
-
-    this.replicator.start();
-
+    replicator.start();
     OLogShim shim = new OLogShim(replicator);
+    region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
+    setTabletState(State.Open);
 
-    try {
-      region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
-      setTabletState(State.Open);
-    } catch (IOException e) {
-      handleFail(e);
-    }
   }
 
   private void tabletStateChangeCallback(Replicator.State state) {
-    if (state.equals(Replicator.State.LEADER)) {
-      if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-        RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
-        try {
-          rootTabletLeaderBehavior.start();
-        } catch (IOException e) {
-          e.printStackTrace();
-          System.exit(0);
+    switch (state) {
+      case INIT:
+        break;
+      case FOLLOWER:
+        this.setTabletState(State.Open);
+        break;
+      case CANDIDATE:
+        this.setTabletState(State.Open);
+        break;
+      case LEADER:
+        this.setTabletState(State.Leader);
+        if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+          try {
+            long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
+            RootTabletLeaderBehavior rootTabletLeaderBehavior =
+                new RootTabletLeaderBehavior(this, server, numberOfMetaPeers);
+            rootTabletLeaderBehavior.start();
+          } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+          }
+        } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
+          // Have the meta leader update the root region with it being marked as the leader
         }
-        this.setTabletState(State.Leader);
-      } else {
-        this.setTabletState(State.Leader);
-      }
+        break;
     }
   }
 
@@ -167,7 +171,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   private void handleFail(Throwable t) {
-
     tabletFiber.dispose();
     setTabletStateFailed(t);
   }

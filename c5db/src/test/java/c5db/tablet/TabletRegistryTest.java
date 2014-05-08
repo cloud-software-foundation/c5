@@ -20,8 +20,8 @@ import c5db.AsyncChannelAsserts;
 import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.tablet.*;
 import c5db.interfaces.tablet.Tablet;
+import c5db.interfaces.tablet.TabletStateChange;
 import c5db.util.C5FiberFactory;
 import c5db.util.JUnitRuleFiberExceptions;
 import com.google.common.collect.ImmutableList;
@@ -48,7 +48,7 @@ import static c5db.util.PoolFiberFactoryWithExecutor.factoryWithExceptionHandler
  *
  */
 public class TabletRegistryTest {
-  private static final Channel<TabletStateChange> DONT_CARE_STATE_CHANGE_CHANNEL = null;
+  private static final Channel<TabletStateChange> DO_NOT_CARE_STATE_CHANGE_CHANNEL = null;
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery();
   @Rule
@@ -99,7 +99,7 @@ public class TabletRegistryTest {
           with(same(regionCreator)));
       will(returnValue(rootTablet));
 
-      oneOf(rootTablet).setStateChangeChannel(DONT_CARE_STATE_CHANGE_CHANNEL);
+      oneOf(rootTablet).setStateChangeChannel(DO_NOT_CARE_STATE_CHANGE_CHANNEL);
       oneOf(rootTablet).start();
     }});
 
@@ -108,7 +108,7 @@ public class TabletRegistryTest {
         configDirectory,
         legacyConf,
         c5FiberFactory,
-        DONT_CARE_STATE_CHANGE_CHANNEL,
+        DO_NOT_CARE_STATE_CHANGE_CHANNEL,
         replicationModule, tabletFactory,
         regionCreator);
   }

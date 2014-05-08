@@ -66,24 +66,24 @@ public class RootTabletTest {
 
   private MemoryChannel<Replicator.State> stateMemoryChannel;
 
-  final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
-  final Replicator replicator = context.mock(Replicator.class);
-  final Region.Creator regionCreator = context.mock(Region.Creator.class);
-  final Region region = context.mock(Region.class);
-  final C5Server server = context.mock(C5Server.class);
-  final SettableFuture<Replicator> future = SettableFuture.create();
+  private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
+  private final Replicator replicator = context.mock(Replicator.class);
+  private final Region.Creator regionCreator = context.mock(Region.Creator.class);
+  private final Region region = context.mock(Region.class);
+  private final C5Server server = context.mock(C5Server.class);
+  private final SettableFuture<Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
-  final List<Long> peerList = ImmutableList.of(1L);
-  final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("hbase", "root"));
-  final String regionName = regionInfo.getRegionNameAsString();
-  final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("hbase", "root"));
+  private final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
+  private final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("hbase", "root"));
+  private final String regionName = regionInfo.getRegionNameAsString();
+  private final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("hbase", "root"));
 
-  final Path path = Paths.get("/");
-  final Configuration conf = new Configuration();
+  private final Path path = Paths.get("/");
+  private final Configuration conf = new Configuration();
 
-  final Fiber tabletFiber = new ThreadFiber();
-  ReplicatedTablet replicatedTablet = new ReplicatedTablet(server,
+  private final Fiber tabletFiber = new ThreadFiber();
+  private ReplicatedTablet replicatedTablet = new ReplicatedTablet(server,
       regionInfo,
       tableDescriptor,
       peerList,
@@ -93,7 +93,7 @@ public class RootTabletTest {
       replicationModule,
       regionCreator);
 
-  AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
+  private AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
 
   @Before
   public void setup() throws Exception {
@@ -139,7 +139,7 @@ public class RootTabletTest {
         oneOf(region).get(with(any(Get.class)));
         will(returnValue(org.apache.hadoop.hbase.client.Result.create(new ArrayList<>())));
 
-        exactly(2).of(server).isSingleNodeMode();
+        oneOf(server).isSingleNodeMode();
         will(returnValue(true));
 
         // Return 0 entries from the root table for Meta
@@ -148,13 +148,11 @@ public class RootTabletTest {
         // Post put we send a command over the command channel
         oneOf(server).getCommandChannel();
         will(returnValue(commandMemoryChannel));
+
+        allowing(replicator).getStateChannel();
+        will(returnValue(stateMemoryChannel));
       }
     });
-
-    context.checking(new Expectations() {{
-      allowing(replicator).getStateChannel();
-      will(returnValue(stateMemoryChannel));
-    }});
   }
 
   @After
@@ -169,7 +167,6 @@ public class RootTabletTest {
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
-
-
+    Thread.sleep(10000);
   }
 }

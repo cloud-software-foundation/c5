@@ -38,22 +38,27 @@ import java.nio.file.Path;
  */
 public class HRegionBridge implements Region {
 
-  private final HRegion theRegion;
+  private HRegion theRegion;
 
   public HRegionBridge(
       Path basePath,
       HRegionInfo regionInfo,
       HTableDescriptor tableDescriptor,
       HLog log,
-      Configuration conf) throws IOException {
-    theRegion = HRegion.openHRegion(
-        new org.apache.hadoop.fs.Path(basePath.toString()),
-        regionInfo,
-        tableDescriptor,
-        log,
-        conf,
-        new HRegionServicesBridge(conf),
-        null);
+      Configuration conf) {
+    try {
+      theRegion = HRegion.openHRegion(
+          new org.apache.hadoop.fs.Path(basePath.toString()),
+          regionInfo,
+          tableDescriptor,
+          log,
+          conf,
+          new HRegionServicesBridge(conf),
+          null);
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
 
@@ -71,7 +76,8 @@ public class HRegionBridge implements Region {
     theRegion.put(put);
   }
 
-  HRegion getTheRegion() {
+  @Override
+  public HRegion getTheRegion() {
     return theRegion;
   }
 }

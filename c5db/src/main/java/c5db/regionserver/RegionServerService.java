@@ -28,6 +28,7 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
@@ -62,16 +63,13 @@ import sun.misc.BASE64Encoder;
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
-  private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private final NioEventLoopGroup acceptGroup;
   private final NioEventLoopGroup workerGroup;
   private final int port;
   private final C5Server server;
   private final ServerBootstrap bootstrap = new ServerBootstrap();
-
-
-  TabletModule tabletModule;
+  private TabletModule tabletModule;
 
   public RegionServerService(NioEventLoopGroup acceptGroup,
                              NioEventLoopGroup workerGroup,
@@ -81,8 +79,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
-    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
-
+    C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
   }
 
@@ -146,7 +143,8 @@ public class RegionServerService extends AbstractService implements RegionServer
 
 
             ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
-            CommandRpcRequest commandRpcRequest = new CommandRpcRequest(server.getNodeId(), moduleSubCommand);
+            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(),
+                moduleSubCommand);
             server.getCommandChannel().publish(commandRpcRequest);
             LOG.warn("Creating test table");
           }
@@ -188,11 +186,12 @@ public class RegionServerService extends AbstractService implements RegionServer
   public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
     String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
     LOG.debug("get online region:" + stringifiedRegion);
-    return tabletModule.getTablet(stringifiedRegion);
+    Region tablet = tabletModule.getTablet(stringifiedRegion);
+    return tablet.getTheRegion();
   }
 
   public String toString() {
 
-    return super.toString()+ '{' + "port = " + port + '}';
+    return super.toString() + '{' + "port = " + port + '}';
   }
 }

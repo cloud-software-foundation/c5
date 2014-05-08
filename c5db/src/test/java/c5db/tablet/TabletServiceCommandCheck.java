@@ -23,6 +23,7 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
@@ -36,6 +37,7 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -51,7 +53,6 @@ import sun.misc.BASE64Encoder;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -69,14 +70,14 @@ import static org.hamcrest.core.StringStartsWith.startsWith;
 public class TabletServiceCommandCheck {
 
   private static final String TEST_TABLE_NAME = "testTable";
-  private static final Channel<TabletStateChange> DONT_CARE_STATE_CHANGE_CHANNEL = null;
+
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
   private final Channel<Object> newNodeNotificationChannel = new MemoryChannel<>();
   private final SettableFuture stateFuture = SettableFuture.create();
-  private final SettableFuture replicationFuture = SettableFuture.create();
+  private final SettableFuture<Replicator> replicationFuture = SettableFuture.create();
 
   private C5Server c5Server;
   private TabletService tabletService;
@@ -84,28 +85,27 @@ public class TabletServiceCommandCheck {
   private DiscoveryModule discoveryModule;
   private ReplicationModule replicationModule;
   private ConfigDirectory config;
-  private final List<Throwable> throwables = new ArrayList<>();
 
   private final SettableFuture<DiscoveryModule> discoveryServiceFuture = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicationServiceFuture = SettableFuture.create();
   private Path configDirectory;
   private Replicator replicator;
-  C5FiberFactory fiberFactory = getFiberFactory(this::notifyFailed);
-  PoolFiberFactory fiberPool;
+  private final C5FiberFactory fiberFactory = getFiberFactory(this::notifyFailed);
+  private PoolFiberFactory fiberPool;
   private byte[] tabletDescBytes;
   private byte[] testRegionBytes;
 
-  protected final void notifyFailed(Throwable cause) {
+  final void notifyFailed(Throwable cause) {
   }
 
 
-  public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
+  C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
     fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     return new PoolFiberFactoryWithExecutor(fiberPool, new ExceptionHandlingBatchExecutor(throwableConsumer));
   }
 
   @After
-  public void tearDown(){
+  public void tearDown() {
     fiberPool.dispose();
   }
 
@@ -168,7 +168,7 @@ public class TabletServiceCommandCheck {
     HTableDescriptor testDesc = new HTableDescriptor(tableName);
     testDesc.addFamily(new HColumnDescriptor("testFamily"));
     HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-    String peerString = "1, 2, 3";
+    String peerString = "1";
     BASE64Encoder encoder = new BASE64Encoder();
     tabletDescBytes = testDesc.toByteArray();
     String hTableDesc = encoder.encodeBuffer(tabletDescBytes);
@@ -208,6 +208,22 @@ public class TabletServiceCommandCheck {
       }
     });
 
+    Tablet metaTablet = context.mock(Tablet.class);
+    Region metaRegion = context.mock(Region.class);
+    context.checking(new Expectations() {
+      {
+        oneOf(metaTablet).getRegion();
+        will(returnValue(metaRegion));
+
+      }
+    });
+    tabletService.tabletRegistry.getTablets().put("hbase:meta,fake", metaTablet);
+    context.checking(new Expectations() {
+      {
+        oneOf(metaRegion).put(with(any(Put.class)));
+      }
+    });
+
     tabletService.acceptCommand(createTableString());
 
     context.checking(new Expectations() {
@@ -233,7 +249,6 @@ public class TabletServiceCommandCheck {
         oneOf(config).readPeers(with(any(String.class)));
         will(returnValue(Arrays.asList(1l)));
 
-
         allowing(config).configuredQuorums();
 
       }
@@ -247,9 +262,9 @@ public class TabletServiceCommandCheck {
         replicationModule,
         ReplicatedTablet::new,
         HRegionBridge::new);
-
     tabletRegistry.startOnDiskRegions();
     Map<String, c5db.interfaces.tablet.Tablet> tablets = tabletRegistry.getTablets();
+
     assertThat(tablets.size(), is(equalTo(1)));
     assertThat(tablets.keySet().iterator().next(), startsWith(TEST_TABLE_NAME));
 
