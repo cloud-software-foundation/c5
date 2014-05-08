@@ -77,6 +77,7 @@ public class C5DB extends AbstractService implements C5Server {
   private final String clusterName;
   private final long nodeId;
   private final ConfigDirectory configDirectory;
+  private long rootLeaderId = 0;
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
@@ -416,6 +417,14 @@ public class C5DB extends AbstractService implements C5Server {
     }
 
     theModule.stop();
+  }
+
+  public long getRootLeaderId() {
+    return rootLeaderId;
+  }
+
+  public void setRootLeaderId(long rootLeaderId) {
+    this.rootLeaderId = rootLeaderId;
   }
 
   /**

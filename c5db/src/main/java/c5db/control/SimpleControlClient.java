@@ -17,8 +17,12 @@
 package c5db.control;
 
 import c5db.C5ServerConstants;
+import c5db.interfaces.DiscoveryModule;
+import c5db.interfaces.discovery.NodeInfoReply;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleType;
+import c5db.util.C5Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.bootstrap.Bootstrap;
@@ -35,7 +39,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 /**
  * A very simple control client that uses 1 shot HTTP requests to ask remote services
@@ -102,5 +108,41 @@ public class SimpleControlClient {
 
     return replyMessageFuture;
   }
+  public ListenableFuture<CommandReply> sendRequest(CommandRpcRequest<?> request, DiscoveryModule discoveryModule) {
+    ListenableFuture<NodeInfoReply> nodeInfoFuture = discoveryModule.getNodeInfo(request.receipientNodeId,
+        ModuleType.ControlRpc);
+    C5Futures.addCallback(nodeInfoFuture, nodeInfo -> {
 
+
+      /*if (nodeInfo.found) {
+        String firstAddress = nodeInfo.addresses.get(0);
+        int port = nodeInfo.port;
+        InetSocketAddress socketAddress = null;
+        try {
+          socketAddress = new InetSocketAddress(
+              InetAddress.getByName(firstAddress), port);
+
+          C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
+              request::reply, exception -> {
+                CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
+                request.reply(reply);
+              }, serviceFiber
+          );
+        } catch (UnknownHostException e) {
+          LOG.error("Bad address", e);
+          CommandReply reply = new CommandReply(false, "", "Bad remote address:" + e);
+          request.reply(reply);
+        }
+      } else {
+        CommandReply reply = new CommandReply(false, "", "Bad node id " + request.getRequest().receipientNodeId);
+        request.reply(reply);
+      }
+    }, exception -> {
+      LOG.error("Unable to find nodeId! {}", request.getRequest().receipientNodeId);
+
+      CommandReply reply = new CommandReply(false, "", "Unable to find NodeId!");
+      request.reply(reply);
+    }, serviceFiber);
+*/
+  }
 }

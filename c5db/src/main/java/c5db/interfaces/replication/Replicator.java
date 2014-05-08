@@ -69,5 +69,7 @@ public interface Replicator {
     LEADER,
   }
 
+  public Channel<ReplicatorInstanceEvent> getStateChangeChannel();
+
 //  public ImmutableList<Long> getQuorum();
 }

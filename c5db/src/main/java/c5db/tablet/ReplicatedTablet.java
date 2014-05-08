@@ -17,15 +17,22 @@
 
 package c5db.tablet;
 
+import c5db.C5DB;
 import c5db.C5ServerConstants;
+import c5db.control.SimpleControlClient;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
+import c5db.messages.generated.ModuleSubCommand;
+import c5db.messages.generated.ModuleType;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -125,15 +132,25 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     assert tabletState == State.CreatingReplicator;
 
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
-    replicatorStateChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
+    replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
+    Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
+    replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
     OLogShim shim = new OLogShim(replicator);
     region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
     setTabletState(State.Open);
-
   }
 
-  private void tabletStateChangeCallback(Replicator.State state) {
+  private void tabletStateChangeCallback(ReplicatorInstanceEvent replicatorInstanceEvent) {
+    if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+      ((C5DB)this.server).setRootLeaderId(replicatorInstanceEvent.newLeader);
+    } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
+
+    }
+  }
+
+
+  private void tabletStateCallback(Replicator.State state) {
     switch (state) {
       case INIT:
         break;
@@ -156,7 +173,15 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             System.exit(0);
           }
         } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
-          // Have the meta leader update the root region with it being marked as the leader
+            // Have the meta leader update the root region with it being marked as the leader
+          NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
+          SimpleControlClient controlClient = new SimpleControlClient(ioWorkerGroup);
+          CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest
+              = new CommandRpcRequest<>(((C5DB)server).getRootLeaderId(),
+              new ModuleSubCommand(ModuleType.Tablet, "Set me as meta leader"));
+          controlClient.sendRequest(commandCommandRpcRequest)
+        } else {
+          // update the meta table with my leader status
         }
         break;
     }

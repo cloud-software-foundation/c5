@@ -31,8 +31,9 @@ import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.protostuff.ByteString;
+import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -40,14 +41,18 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.mortbay.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -62,12 +67,13 @@ public class C5Table extends C5Shim implements AutoCloseable {
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private final int port;
   private final AtomicLong commandId = new AtomicLong(0);
-  private final Channel channel;
   private final String hostname;
-  private MessageHandler handler;
+
+  private static final Logger LOG = LoggerFactory.getLogger(C5Table.class);
+  private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
 
   public C5Table(ByteString tableName) throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    this(tableName, C5Constants.TEST_PORT);
+    this("localhost", tableName, C5Constants.TEST_PORT);
   }
 
   /**
@@ -77,12 +83,52 @@ public class C5Table extends C5Shim implements AutoCloseable {
    */
   public C5Table(ByteString tableName, int port)
       throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    super(tableName);
-    this.hostname = "localhost";
-    this.port = port;
-    channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
-    handler = channel.pipeline().get(MessageHandler.class);
+    this("localhost", tableName, port);
   }
+
+  /**
+   * C5Table is the main entry points for clients of C5DB
+   *
+   * @param tableName The name of the table to connect to.
+   */
+  public C5Table(String hostname, ByteString tableName, int port)
+      throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    super(tableName);
+
+    // TODO Route data so we don't need to connect to meta
+    this.hostname = hostname;
+    this.port = port;
+
+    ByteString metaTableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
+    if (!tableName.equals(metaTableName)){
+      C5Table metaScan = new C5Table(hostname, metaTableName, port);
+      Scan scan = new Scan(tableName.toByteArray());
+      scan.addColumn(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER);
+      ResultScanner scanner = metaScan.getScanner(scan);
+
+      Result result;
+      do {
+        result = scanner.next();
+        if (result == null){
+          return;
+        }
+        LOG.info("Found meta entry:" + result);
+        try {
+          HRegionInfo hregionInfo = HRegionInfo.parseFrom(result.getValue(HConstants.CATALOG_FAMILY,
+              HConstants.REGIONINFO_QUALIFIER));
+          this.scannerCache.put(result.toString(), hregionInfo);
+        } catch (DeserializationException e) {
+          System.exit(1);
+          e.printStackTrace();
+        }
+
+      } while(result != null);
+    } else {
+      LOG.error("They actually connected to meta now what do we do?");
+    }
+
+  }
+
 
   // TODO actually make this work
   public static ByteBuffer getRegion(byte[] row) {
@@ -95,6 +141,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
     final SettableFuture<Response> resultFuture = SettableFuture.create();
     final GetRequest getRequest = RequestConverter.buildGetRequest(getRegionName(), get, false);
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
       return ProtobufUtil.toResult(resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet().getResult());
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -120,6 +168,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         true);
 
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getGetCall(commandId.incrementAndGet(), getRequest), resultFuture, channel);
       final GetResponse getResponse = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS).getGet();
       final c5db.client.generated.Result result = getResponse.getResult();
@@ -150,6 +200,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         0L);
 
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.callScan(ProtobufUtil.getScanCall(commandId.incrementAndGet(), scanRequest), future, channel);
       final long scannerId = future.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
       /// TODO ADD A CREATE as well
@@ -195,9 +247,11 @@ public class C5Table extends C5Shim implements AutoCloseable {
         put);
 
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+    } catch (InterruptedException | ExecutionException | TimeoutException | IOException e) {
       throw new InterruptedIOException(e.toString());
     }
   }
@@ -218,6 +272,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         delete);
 
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -239,7 +295,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
     try {
       final RegionAction regionAction = RequestConverter.buildRegionAction(getRegionName(), false, rm);
       regionActions.add(regionAction);
-
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getMultiCall(commandId.incrementAndGet(),
               new MultiRequest(regionActions)),
           resultFuture,
@@ -253,12 +310,11 @@ public class C5Table extends C5Shim implements AutoCloseable {
 
   @Override
   public void close() {
-    channel.writeAndFlush(new CloseWebSocketFrame());
     try {
-      channel.closeFuture().sync();
-      c5ConnectionManager.closeChannel(this.hostname, this.port);
-    } catch (InterruptedException | ExecutionException | TimeoutException e) {
-      Log.warn(e);
+      c5ConnectionManager.close();
+    } catch (InterruptedException e) {
+      System.exit(1);
+      e.printStackTrace();
     }
   }
 
@@ -280,6 +336,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         condition);
 
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       Response result = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
       if (result.getMutate().getProcessed()) {
@@ -308,6 +366,8 @@ public class C5Table extends C5Shim implements AutoCloseable {
         delete,
         condition);
     try {
+      Channel channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+      MessageHandler handler = channel.pipeline().get(MessageHandler.class);
       handler.call(ProtobufUtil.getMutateCall(commandId.incrementAndGet(), mutateRequest), resultFuture, channel);
       Response result = resultFuture.get(C5Constants.TIMEOUT, TimeUnit.MILLISECONDS);
       if (result.getMutate().getProcessed()) {
