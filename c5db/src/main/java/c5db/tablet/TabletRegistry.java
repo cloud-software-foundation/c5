@@ -143,7 +143,6 @@ public class TabletRegistry {
         regionCreator);
     newTablet.setStateChangeChannel(commonStateChangeChannel);
     tablets.put(quorumName, newTablet);
-
     newTablet.start();
     return newTablet;
   }

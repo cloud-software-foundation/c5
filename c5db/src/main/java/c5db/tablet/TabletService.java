@@ -251,7 +251,7 @@ public class TabletService extends AbstractService implements TabletModule {
                            final HTableDescriptor tableDescriptor,
                            final ImmutableList<Long> peers
   ) throws IOException {
-    LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
+    LOG.info("Opening replicator for region {} peers {}", regionInfo, peers);
 
     String quorumId = regionInfo.getRegionNameAsString();
 
@@ -281,9 +281,7 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public void startTablet(List<Long> peers, String tabletName) {
-
-  }
+  public void startTablet(List<Long> peers, String tabletName) {  }
 
   @Override
   public Channel<TabletStateChange> getTabletStateChanges() {
@@ -371,7 +369,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
   private String startMeta(String commandString) {
     HTableDescriptor metaDesc = HTableDescriptor.META_TABLEDESC;
-    HRegionInfo metaRegion = SystemTableNames.rootRegionInfo();
+    HRegionInfo metaRegion = SystemTableNames.metaRegionInfo();
     // ok we have enough to start a region up now:
     String peerString = commandString.substring(commandString.indexOf(":") + 1);
     List<Long> peers = new ArrayList<>();

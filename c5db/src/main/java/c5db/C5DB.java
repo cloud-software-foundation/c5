@@ -425,7 +425,6 @@ public class C5DB extends AbstractService implements C5Server {
     theModule.stop();
   }
 
-
   /**
    * Publishes state changes for the given module. It is up to the caller
    * to properly register an instance of this class and pass the SAME module

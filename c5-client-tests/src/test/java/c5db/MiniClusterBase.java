@@ -159,7 +159,7 @@ public class MiniClusterBase {
     ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
 
     ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
-    ControlModule controlServer = (ControlModule) replicationServerFuture.get();
+    ControlModule controlServer = (ControlModule) controlServerFuture.get();
 
 
     stateChanges = tabletServer.getTabletStateChanges();
