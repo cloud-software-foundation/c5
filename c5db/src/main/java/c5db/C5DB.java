@@ -17,6 +17,7 @@
 
 package c5db;
 
+import c5db.control.ControlService;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
@@ -77,7 +78,6 @@ public class C5DB extends AbstractService implements C5Server {
   private final String clusterName;
   private final long nodeId;
   private final ConfigDirectory configDirectory;
-  private long rootLeaderId = 0;
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
@@ -393,6 +393,12 @@ public class C5DB extends AbstractService implements C5Server {
 
         break;
       }
+      case ControlRpc: {
+        C5Module module = new ControlService(this, fiberPool.create(), bossGroup, workerGroup, modulePort);
+        startServiceModule(module);
+        break;
+      }
+
 
       default:
         throw new Exception("No such module as " + moduleType);
@@ -419,13 +425,6 @@ public class C5DB extends AbstractService implements C5Server {
     theModule.stop();
   }
 
-  public long getRootLeaderId() {
-    return rootLeaderId;
-  }
-
-  public void setRootLeaderId(long rootLeaderId) {
-    this.rootLeaderId = rootLeaderId;
-  }
 
   /**
    * Publishes state changes for the given module. It is up to the caller

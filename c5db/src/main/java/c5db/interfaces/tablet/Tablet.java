@@ -39,6 +39,8 @@ public interface Tablet {
 
   HTableDescriptor getTableDescriptor();
 
+  long getLeader();
+
   List<Long> getPeers();
 
   Region getRegion();

@@ -19,6 +19,7 @@ package c5db;
 import c5db.client.C5Table;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -157,6 +158,10 @@ public class MiniClusterBase {
     ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
     ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
 
+    ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
+    ControlModule controlServer = (ControlModule) replicationServerFuture.get();
+
+
     stateChanges = tabletServer.getTabletStateChanges();
 
     Fiber receiver = new ThreadFiber();
@@ -173,7 +178,10 @@ public class MiniClusterBase {
     };
     stateChanges.subscribe(receiver, onMsg);
 
-    while (!regionServer.isRunning() || !tabletServer.isRunning() || !replicationServer.isRunning()) {
+    while (!regionServer.isRunning()
+        || !tabletServer.isRunning()
+        || !replicationServer.isRunning()
+        || !controlServer.isRunning()) {
       Thread.sleep(600);
     }
 

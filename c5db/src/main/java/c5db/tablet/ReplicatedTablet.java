@@ -19,7 +19,9 @@ package c5db.tablet;
 
 import c5db.C5DB;
 import c5db.C5ServerConstants;
+import c5db.control.ControlService;
 import c5db.control.SimpleControlClient;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -27,6 +29,7 @@ import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
+import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5Futures;
@@ -38,6 +41,8 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.Request;
+import org.jetlang.channels.Session;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A tablet, backed by a replicator that keeps values replicated across multiple servers.
@@ -52,6 +58,9 @@ import java.util.List;
 public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private static final Logger LOG = LoggerFactory.getLogger(ReplicatedTablet.class);
   private final C5Server server;
+  private long leader;
+
+  private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
 
   void setTabletState(State tabletState) {
     this.tabletState = tabletState;
@@ -84,8 +93,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   public void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel) {
     this.stateChangeChannel = stateChangeChannel;
   }
-
-  private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
 
   public ReplicatedTablet(final C5Server server,
                           final HRegionInfo regionInfo,
@@ -138,17 +145,26 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     replicator.start();
     OLogShim shim = new OLogShim(replicator);
     region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
+    publishEvent(State.Open);
     setTabletState(State.Open);
   }
 
   private void tabletStateChangeCallback(ReplicatorInstanceEvent replicatorInstanceEvent) {
-    if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-      ((C5DB)this.server).setRootLeaderId(replicatorInstanceEvent.newLeader);
-    } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
-
+    switch(replicatorInstanceEvent.eventType) {
+      case QUORUM_START:
+        break;
+      case LEADER_ELECTED:
+        this.leader = replicatorInstanceEvent.newLeader;
+        break;
+      case ELECTION_TIMEOUT:
+        break;
+      case QUORUM_FAILURE:
+        break;
+      case LEADER_DEPOSED:
+        this.leader = replicatorInstanceEvent.newLeader;
+        break;
     }
   }
-
 
   private void tabletStateCallback(Replicator.State state) {
     switch (state) {
@@ -165,8 +181,9 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
           try {
             long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
-            RootTabletLeaderBehavior rootTabletLeaderBehavior =
-                new RootTabletLeaderBehavior(this, server, numberOfMetaPeers);
+            RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
+                server,
+                numberOfMetaPeers);
             rootTabletLeaderBehavior.start();
           } catch (IOException e) {
             e.printStackTrace();
@@ -174,12 +191,9 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
           }
         } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
             // Have the meta leader update the root region with it being marked as the leader
-          NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
-          SimpleControlClient controlClient = new SimpleControlClient(ioWorkerGroup);
-          CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest
-              = new CommandRpcRequest<>(((C5DB)server).getRootLeaderId(),
-              new ModuleSubCommand(ModuleType.Tablet, "Set me as meta leader"));
-          controlClient.sendRequest(commandCommandRpcRequest)
+          MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
+          metaTabletLeaderBehavior.start();
+
         } else {
           // update the meta table with my leader status
         }
@@ -227,6 +241,11 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   @Override
   public HTableDescriptor getTableDescriptor() {
     return tableDescriptor;
+  }
+
+  @Override
+  public long getLeader() {
+    return leader;
   }
 
   @Override

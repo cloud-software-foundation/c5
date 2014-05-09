@@ -151,6 +151,10 @@ public class RootTabletTest {
 
         allowing(replicator).getStateChannel();
         will(returnValue(stateMemoryChannel));
+
+        allowing(replicator).getStateChangeChannel();
+        will(returnValue(new MemoryChannel<>()));
+
       }
     });
   }

@@ -19,6 +19,7 @@ package c5db;
 import c5db.client.C5Table;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -184,50 +185,70 @@ public class ManyClusterBase {
 
     regionServerPort = 8080 + rnd.nextInt(1000);
     int webServerPort = 31337 + rnd.nextInt(1000);
-
-    System.setProperty("regionServerPort", String.valueOf(regionServerPort));
-    System.setProperty("webServerPort", String.valueOf(webServerPort));
+    int controlServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
+    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(regionServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(webServerPort));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort ));
     server = Main.startC5Server(new String[]{});
-    System.setProperty("regionServerPort", String.valueOf(++regionServerPort));
-    System.setProperty("webServerPort", String.valueOf(++webServerPort));
+
+    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort ));
     server1 = Main.startC5Server(new String[]{});
-    System.setProperty("regionServerPort", String.valueOf(++regionServerPort));
-    System.setProperty("webServerPort", String.valueOf(++webServerPort));
+
+    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort ));
     server2 = Main.startC5Server(new String[]{});
 
     ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
     ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
+    ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
 
     C5Module regionServer = regionServerFuture.get();
     TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
     ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
+    ControlModule controlServer = (ControlModule) controlServerFuture.get();
 
-    while (!regionServer.isRunning() || !tabletServer.isRunning() || !replicationServer.isRunning()) {
+    while (!regionServer.isRunning()
+        || !tabletServer.isRunning()
+        || !replicationServer.isRunning()
+        || !controlServer.isRunning()) {
       Thread.sleep(600);
     }
 
     ListenableFuture<C5Module> regionServerFuture1 = server1.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture1 = server1.getModule(ModuleType.Tablet);
     ListenableFuture<C5Module> replicationServerFuture1 = server1.getModule(ModuleType.Replication);
+    ListenableFuture<C5Module> controlServerFuture1 = server1.getModule(ModuleType.ControlRpc);
 
     C5Module regionServer1 = regionServerFuture1.get();
     TabletModule tabletServer1 = (TabletModule) tabletServerFuture1.get();
     ReplicationModule replicationServer1 = (ReplicationModule) replicationServerFuture1.get();
+    ControlModule controlServer1 = (ControlModule) controlServerFuture1.get();
 
-    while (!regionServer1.isRunning() || !tabletServer1.isRunning() || !replicationServer1.isRunning()) {
+    while (!regionServer1.isRunning()
+        || !tabletServer1.isRunning()
+        || !replicationServer1.isRunning()
+        || !controlServer1.isRunning()) {
       Thread.sleep(600);
     }
 
     ListenableFuture<C5Module> regionServerFuture2 = server2.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture2 = server2.getModule(ModuleType.Tablet);
     ListenableFuture<C5Module> replicationServerFuture2 = server2.getModule(ModuleType.Replication);
+    ListenableFuture<C5Module> controlServerFuture2 = server2.getModule(ModuleType.ControlRpc);
 
     C5Module regionServer2 = regionServerFuture2.get();
     TabletModule tabletServer2 = (TabletModule) tabletServerFuture2.get();
     ReplicationModule replicationServer2 = (ReplicationModule) replicationServerFuture2.get();
+    ControlModule controlServer2 = (ControlModule) controlServerFuture2.get();
 
-    while (!regionServer2.isRunning() || !tabletServer2.isRunning() || !replicationServer2.isRunning()) {
+    while (!regionServer2.isRunning()
+        || !tabletServer2.isRunning()
+        || !replicationServer2.isRunning()
+        || !controlServer2.isRunning()) {
       Thread.sleep(600);
     }
 
@@ -285,5 +306,4 @@ public class ManyClusterBase {
     receiver.dispose();
 
   }
-
 }

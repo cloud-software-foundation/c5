@@ -101,7 +101,6 @@ public class TabletRegistry {
             replicationModule,
             regionCreator);
         tablet.setStateChangeChannel(commonStateChangeChannel);
-
         tablet.start();
 
         tablets.put(quorum, tablet);

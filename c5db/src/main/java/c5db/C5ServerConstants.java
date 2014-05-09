@@ -28,6 +28,7 @@ public class C5ServerConstants {
   public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
   public static final String WEB_SERVER_PORT_PROPERTY_NAME = "webServerPort";
   public static final String REGION_SERVER_PORT_PROPERTY_NAME = "regionServerPort";
+  public static final String CONTROL_SERVER_PORT_PROPERTY_NAME = "controlServerPort";
 
   public static final String LOCALHOST = "localhost";
   public static final int WAL_THREAD_POOL_SIZE = 1;
@@ -46,10 +47,13 @@ public class C5ServerConstants {
   public static final int REPLICATOR_PORT_RANGE = 30000;
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
+  public static final String SET_META_LEADER = "Set me as Meta Leader";
   public static final int DEFAULT_WEB_SERVER_PORT = 31337;
 
   public static final java.lang.String MIN_CLUSTER_SIZE = "minClusterSize";
   public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
   public static final int DEFAULT_QUORUM_SIZE = 3;
   public static final String C5_CFG_PATH = "c5.cfgPath";
+  public static final int CONTROL_RPC_PROPERTY_PORT = 9099;
+
 }
