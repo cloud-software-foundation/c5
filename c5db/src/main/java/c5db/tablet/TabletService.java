@@ -73,7 +73,6 @@ public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
   private static final int INITIALIZATION_TIME = 1000;
   private static final byte[] HTABLE_DESCRIPTOR_QUALIFIER = Bytes.toBytes("HTABLE_QUAL");
-  private static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUAL");
 
   private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
@@ -407,10 +406,19 @@ public class TabletService extends AbstractService implements TabletModule {
     HRegionInfo hRegionInfo = SystemTableNames.rootRegionInfo();
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
-    put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
-    put.add(HConstants.CATALOG_FAMILY, LEADER_QUALIFIER, Bytes.toBytes(leader));
+    put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
     region.put(put);
   }
+
+  private void addLeaderEntryToMeta(long leader) throws IOException {
+    Region region = this.getTablet("hbase:meta");
+    HRegionInfo hRegionInfo = SystemTableNames.metaRegionInfo();
+    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
+
+    put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
+    region.put(put);
+  }
+
 
 
   int getMinQuorumSize() {

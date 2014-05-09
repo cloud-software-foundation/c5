@@ -17,6 +17,8 @@
 
 package c5db;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 public class C5ServerConstants {
   public static final int MSG_SIZE = 100;
   public static final String LOG_NAME = "log";
@@ -55,5 +57,7 @@ public class C5ServerConstants {
   public static final int DEFAULT_QUORUM_SIZE = 3;
   public static final String C5_CFG_PATH = "c5.cfgPath";
   public static final int CONTROL_RPC_PROPERTY_PORT = 9099;
+  public static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUALIFIER");
+
 
 }

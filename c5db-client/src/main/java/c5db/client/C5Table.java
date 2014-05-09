@@ -115,7 +115,7 @@ public class C5Table extends C5Shim implements AutoCloseable {
         LOG.info("Found meta entry:" + result);
         try {
           HRegionInfo hregionInfo = HRegionInfo.parseFrom(result.getValue(HConstants.CATALOG_FAMILY,
-              HConstants.REGIONINFO_QUALIFIER));
+              Bytes.toBytes("LEADER_QUALIFIER")));
           this.scannerCache.put(result.toString(), hregionInfo);
         } catch (DeserializationException e) {
           System.exit(1);
