@@ -97,23 +97,9 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   private List<Long> pickPeers(List<Long> peers) {
-    List<Long> peersCopy = new ArrayList<>(peers);
+    final List<Long> peersCopy = new ArrayList<>(peers);
     Collections.shuffle(peersCopy);
-    List<Long> peersToReturn = new ArrayList<>();
-
-    int counter = 0;
-    while (peersToReturn.size() < numberOfMetaPeers
-        && counter < peersCopy.size()) {
-      if (!peersToReturn.contains(peersCopy.get(counter))) {
-        peersToReturn.add(peersCopy.get(counter));
-      }
-      counter++;
-    }
-    if (peersToReturn.size() == numberOfMetaPeers) {
-      return peersToReturn;
-    } else {
-      throw new UnsupportedOperationException("Unable to track down enough nodes to make progress");
-    }
+    return peers.subList(0, (int)numberOfMetaPeers);
   }
 
   boolean getExists(Region region, Get get) throws IOException {
