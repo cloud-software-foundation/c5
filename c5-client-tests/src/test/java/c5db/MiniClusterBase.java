@@ -140,27 +140,25 @@ public class MiniClusterBase {
   @BeforeClass
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
     System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.getRoot().getAbsolutePath());
-
+    int webServerPort = 9091 + rnd.nextInt(100);
     regionServerPort = 8080 + rnd.nextInt(1000);
+    System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
     System.setProperty("regionServerPort", String.valueOf(regionServerPort));
+    System.setProperty("webServerPort", String.valueOf(webServerPort));
 
     server = Main.startC5Server(new String[]{});
 
     ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
-    C5Module regionServer = regionServerFuture.get();
-
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
-
     ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
-    ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
-
     ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
-    ControlModule controlServer = (ControlModule) controlServerFuture.get();
 
+    C5Module regionServer = regionServerFuture.get();
+    C5Module replicationServer = replicationServerFuture.get();
+    C5Module controlServer = controlServerFuture.get();
+    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
 
     stateChanges = tabletServer.getTabletStateChanges();
 

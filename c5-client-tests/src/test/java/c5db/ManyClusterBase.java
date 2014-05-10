@@ -111,14 +111,14 @@ public class ManyClusterBase {
     Callback<TabletStateChange> onMsg = message -> {
       System.out.println(message);
       if (message.state.equals(Tablet.State.Leader)) {
-        userTabletOn = regionServerPort -2;
+        userTabletOn = regionServerPort - 2;
         latch.countDown();
       }
     };
     Callback<TabletStateChange> onMsg1 = message -> {
       System.out.println(message);
       if (message.state.equals(Tablet.State.Leader)) {
-        userTabletOn = regionServerPort -1 ;
+        userTabletOn = regionServerPort - 1;
         latch.countDown();
       }
     };
@@ -156,15 +156,13 @@ public class ManyClusterBase {
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
+    List<ListenableFuture<Service.State>> states;
 
-    ImmutableMap<ModuleType, C5Module> modules = server.getModules();
-
-    List<ListenableFuture<Service.State>> states = new ArrayList<>();
-    for (C5Module module : modules.values()) {
+    states = new ArrayList<>();
+    for (C5Module module : server.getModules().values()) {
       ListenableFuture<Service.State> future = module.stop();
       states.add(future);
     }
-
     for (ListenableFuture<Service.State> state : states) {
       try {
         state.get(10000, TimeUnit.MILLISECONDS);
@@ -172,33 +170,58 @@ public class ManyClusterBase {
         e.printStackTrace();
       }
     }
-
     server.stopAndWait();
+
+    states = new ArrayList<>();
+    for (C5Module module : server1.getModules().values()) {
+      ListenableFuture<Service.State> future = module.stop();
+      states.add(future);
+    }
+    for (ListenableFuture<Service.State> state : states) {
+      try {
+        state.get(10000, TimeUnit.MILLISECONDS);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     server1.stopAndWait();
+
+    for (C5Module module : server2.getModules().values()) {
+      ListenableFuture<Service.State> future = module.stop();
+      states.add(future);
+    }
+    for (ListenableFuture<Service.State> state : states) {
+      try {
+        state.get(10000, TimeUnit.MILLISECONDS);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     server2.stopAndWait();
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+    Thread.sleep(1000);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     System.setProperty("clusterName", String.valueOf("foo"));
 
     regionServerPort = 8080 + rnd.nextInt(1000);
     int webServerPort = 31337 + rnd.nextInt(1000);
-    int controlServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
+    int controlServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT + rnd.nextInt(100);
     System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(regionServerPort));
     System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort ));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort));
     server = Main.startC5Server(new String[]{});
 
     System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
     System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort ));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
     server1 = Main.startC5Server(new String[]{});
 
     System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
     System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort ));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
     server2 = Main.startC5Server(new String[]{});
 
     ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
@@ -306,4 +329,5 @@ public class ManyClusterBase {
     receiver.dispose();
 
   }
+
 }

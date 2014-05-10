@@ -45,55 +45,41 @@ import java.util.List;
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
-  private final c5db.interfaces.tablet.Tablet tablet;
-  private final C5Server server;
   private final long numberOfMetaPeers;
+  private final Tablet tablet;
+  Channel<CommandRpcRequest<?>> commandRpcRequestChannel;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
                                   final C5Server server,
                                   final long numberOfMetaPeers) {
-    this.tablet = tablet;
-    this.server = server;
     this.numberOfMetaPeers = numberOfMetaPeers;
+    commandRpcRequestChannel = server.getCommandChannel();
+    this.tablet = tablet;
+
   }
 
-  @FiberOnly
-  private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
-    List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(peers);
-    requestMetaCommandCreated(pickedPeers);
-    createLeaderLessMetaEntryInRoot(region, pickedPeers);
-  }
+  public void start() throws IOException {
 
-  @FiberOnly
-  private void requestMetaCommandCreated(List<Long> peers) {
-    String pickedPeersString = StringUtils.join(peers, ',');
-    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        C5ServerConstants.START_META + ":" + pickedPeersString);
-    Channel<CommandRpcRequest<?>> channel = server.getCommandChannel();
-
-    for (Long peer : peers) {
-      CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
-      channel.publish(commandRpcRequest);
+    Region region = tablet.getRegion();
+    if (!metaExists(region)) {
+      List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(tablet.getPeers());
+      createLeaderLessMetaEntryInRoot(region, pickedPeers);
+      requestMetaCommandCreated(pickedPeers);
+    } else {
+      // Check to see if you can take root
     }
-  }
+ }
 
-  private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
-    Put put = new Put(C5ServerConstants.META_ROW);
-    TableName tableName = new TableName(ByteBuffer.wrap(C5ServerConstants.INTERNAL_NAMESPACE),
-        ByteBuffer.wrap(C5ServerConstants.META_TABLE_NAME));
-    RegionInfo regionInfo = new RegionInfo(1,
-        tableName,
-        pickedPeers,
-        0l, // This signifies that we haven't picked the leader
-        // TBD The meta leader updates the entry with itself
-        ByteBuffer.wrap(C5ServerConstants.META_START_KEY),
-        ByteBuffer.wrap(C5ServerConstants.META_END_KEY),
-        true,
-        false);
-    put.add(HConstants.CATALOG_FAMILY,
-        HConstants.REGIONINFO_QUALIFIER,
-        ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
-    region.put(put);
+  boolean metaExists(Region region) {
+    // TODO We should make sure the meta is well formed
+    Get get = new Get(C5ServerConstants.META_ROW);
+    Result result;
+    try {
+      result = region.get(get);
+    } catch (IOException e) {
+      return false;
+    }
+    return !(result == null) && result.size() > 0;
   }
 
   private List<Long> shuffleListAndReturnMetaRegionPeers(final List<Long> peers) {
@@ -101,20 +87,39 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     return peers.subList(0, (int)numberOfMetaPeers);
   }
 
-  boolean metaExists(Region region) throws IOException {
-    // TODO We should make sure the meta is well formed
-    Get get = new Get(C5ServerConstants.META_ROW);
-    Result result = region.get(get);
-    return !(result == null) && result.size() > 0;
-  }
+  @FiberOnly
+  private void requestMetaCommandCreated(List<Long> peers) {
+    String pickedPeersString = StringUtils.join(peers, ',');
+    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
+        C5ServerConstants.START_META + ":" + pickedPeersString);
 
-  public void start() throws IOException {
-    Region region = tablet.getRegion();
-    if (!metaExists(region)) {
-      List<Long> peers = tablet.getPeers();
-      bootStrapMeta(region, peers);
-    } else {
-      // Check to see if you can take root
+    for (Long peer : peers) {
+      CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
+      commandRpcRequestChannel.publish(commandRpcRequest);
     }
+  }
+  private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
+    Put put = new Put(C5ServerConstants.META_ROW);
+    org.apache.hadoop.hbase.TableName hbaseDatabaseName = SystemTableNames.metaTableName();
+    ByteBuffer hbaseNameSpace = ByteBuffer.wrap(hbaseDatabaseName.getNamespace());
+    ByteBuffer hbaseTableName = ByteBuffer.wrap(hbaseDatabaseName.getName());
+    TableName tableName = new TableName(hbaseNameSpace, hbaseTableName);
+
+    ByteBuffer startKey = ByteBuffer.wrap(C5ServerConstants.META_START_KEY);
+    ByteBuffer endKey = ByteBuffer.wrap(C5ServerConstants.META_END_KEY);
+
+    RegionInfo regionInfo = new RegionInfo(1,
+        tableName,
+        pickedPeers,
+        0l, // This signifies that we haven't picked the leader
+        startKey,
+        endKey,
+        true,
+        false);
+
+    put.add(HConstants.CATALOG_FAMILY,
+        HConstants.REGIONINFO_QUALIFIER,
+        ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
+    region.put(put);
   }
 }
