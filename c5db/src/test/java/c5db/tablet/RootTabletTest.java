@@ -169,7 +169,6 @@ public class RootTabletTest {
         oneOf(server).isSingleNodeMode();
         will(returnValue(true));
 
-        // Return 0 entries from the root table for Meta
         oneOf(region).put(with(any(Put.class)));
 
         // Post put we send a command over the command commandRpcRequestChannel
