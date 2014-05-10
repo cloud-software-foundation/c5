@@ -59,7 +59,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   @FiberOnly
   private void bootStrapMeta(Region region, List<Long> peers) throws IOException {
-    List<Long> pickedPeers = pickPeers(peers);
+    List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(peers);
     requestMetaCommandCreated(pickedPeers);
     createLeaderLessMetaEntryInRoot(region, pickedPeers);
   }
@@ -96,21 +96,16 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     region.put(put);
   }
 
-  private List<Long> pickPeers(List<Long> peers) {
-    final List<Long> peersCopy = new ArrayList<>(peers);
-    Collections.shuffle(peersCopy);
+  private List<Long> shuffleListAndReturnMetaRegionPeers(final List<Long> peers) {
+    Collections.shuffle(new ArrayList<>(peers));
     return peers.subList(0, (int)numberOfMetaPeers);
-  }
-
-  boolean getExists(Region region, Get get) throws IOException {
-    Result result = region.get(get);
-    return !(result == null) && result.size() > 0;
   }
 
   boolean metaExists(Region region) throws IOException {
     // TODO We should make sure the meta is well formed
     Get get = new Get(C5ServerConstants.META_ROW);
-    return getExists(region, get);
+    Result result = region.get(get);
+    return !(result == null) && result.size() > 0;
   }
 
   public void start() throws IOException {
@@ -118,6 +113,8 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     if (!metaExists(region)) {
       List<Long> peers = tablet.getPeers();
       bootStrapMeta(region, peers);
+    } else {
+      // Check to see if you can take root
     }
   }
 }
