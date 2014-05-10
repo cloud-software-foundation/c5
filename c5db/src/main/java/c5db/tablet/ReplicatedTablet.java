@@ -177,7 +177,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         this.setTabletState(State.Open);
         break;
       case LEADER:
-        this.setTabletState(State.Leader);
         if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
           try {
             long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
@@ -197,8 +196,10 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         } else {
           // update the meta table with my leader status
         }
+        this.setTabletState(State.Leader);
         break;
     }
+
   }
 
   private void publishEvent(State newState) {
