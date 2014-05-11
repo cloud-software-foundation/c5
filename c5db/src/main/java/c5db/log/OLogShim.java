@@ -22,7 +22,7 @@ import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.replication.ReplicatorInfoPersistence;
-import c5db.replication.ReplicatorInformationInterface;
+import c5db.replication.ReplicatorInformation;
 import io.protostuff.LinkBuffer;
 import io.protostuff.LowCopyProtostuffOutput;
 import org.apache.hadoop.fs.Syncable;
@@ -286,7 +286,7 @@ public class OLogShim implements Syncable, HLog {
     return 0;
   }
 
-  public static class Info implements ReplicatorInformationInterface {
+  public static class Info implements ReplicatorInformation {
 
     public final long offset;
 
