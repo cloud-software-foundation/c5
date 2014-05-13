@@ -29,9 +29,11 @@ import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.Graph;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +49,17 @@ import java.util.Set;
 public class ModuleDeps {
   private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
 
+  public static List<ModuleType> getModuleReverseDependencyOrder(Collection<Class<?>> startThese)
+      throws ClassNotFoundException {
+    List<ModuleType> moduleTypeList = new ArrayList<>(startThese.size());
+
+    for (Graph.Node<ModuleType> node : Iterables.concat(createGraph(startThese))) {
+      moduleTypeList.add(node.type);
+    }
+
+    return moduleTypeList;
+  }
+
   public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(String... startThese) throws ClassNotFoundException {
     List<Class<?>> classList = new LinkedList<>();
 
@@ -58,7 +71,8 @@ public class ModuleDeps {
     return createGraph(classList);
   }
 
-  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(Collection<Class<?>> startThese) throws ClassNotFoundException {
+  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(Collection<Class<?>> startThese)
+      throws ClassNotFoundException {
     Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
     Queue<Class<?>> queue = new LinkedList<>(startThese);
 
