@@ -27,6 +27,7 @@ import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableList;
@@ -97,27 +98,13 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public Region getTablet(String tabletName) {
-    // TODO ugly hack fix eventually
-    while (onlineRegions.size() == 0) {
-      try {
-        LOG.error("Waiting for regions to come online");
-        Thread.sleep(INITIALIZATION_TIME);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+  public Tablet getTablet(String tabletName) throws RegionNotFoundException {
+    Tablet tablet = getRegionWithJustTableName(tabletName);
+    if (tablet != null) {
+      return tablet;
+    } else {
+      throw new RegionNotFoundException("Unable to find specified tablet:" + tabletName);
     }
-    Region region = onlineRegions.get(tabletName);
-
-    // TODO remove
-    if (region == null) {
-      Tablet tablet = getRegionWithJustTableName(tabletName);
-      if (tablet != null) {
-        return tablet.getRegion();
-      }
-    }
-
-    return region;
   }
 
   // TODO remove
@@ -280,7 +267,8 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public void startTablet(List<Long> peers, String tabletName) {  }
+  public void startTablet(List<Long> peers, String tabletName) {
+  }
 
   @Override
   public Channel<TabletStateChange> getTabletStateChanges() {
@@ -335,9 +323,9 @@ public class TabletService extends AbstractService implements TabletModule {
     String nodeId = commandString.substring(nodeIdOffset);
     try {
       addMetaLeaderEntryToRoot(Long.parseLong(nodeId));
-    } catch (IOException e) {
-      System.exit(1);
+    } catch (IOException | RegionNotFoundException e) {
       e.printStackTrace();
+      System.exit(1);
     }
     return "OK";
   }
@@ -359,7 +347,7 @@ public class TabletService extends AbstractService implements TabletModule {
       hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
       hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
       return createUserTableHelper(peers, hTableDescriptor, hRegionInfo);
-    } catch (DeserializationException | IOException e) {
+    } catch (RegionNotFoundException | DeserializationException | IOException e) {
       e.printStackTrace();
       System.exit(1);
     }
@@ -386,14 +374,15 @@ public class TabletService extends AbstractService implements TabletModule {
 
   private String createUserTableHelper(List<Long> peers,
                                        HTableDescriptor hTableDescriptor,
-                                       HRegionInfo hRegionInfo) throws IOException {
+                                       HRegionInfo hRegionInfo) throws IOException, RegionNotFoundException {
     openRegion0(hRegionInfo, hTableDescriptor, ImmutableList.copyOf(peers));
     addEntryToMeta(hRegionInfo, hTableDescriptor);
     return "OK";
   }
 
-  private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor) throws IOException {
-    Region region = this.getTablet("hbase:meta");
+  private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor)
+      throws IOException, RegionNotFoundException {
+    Region region = this.getTablet("hbase:meta").getRegion();
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
     put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
@@ -401,8 +390,8 @@ public class TabletService extends AbstractService implements TabletModule {
     region.put(put);
   }
 
-  private void addMetaLeaderEntryToRoot(long leader) throws IOException {
-    Region region = this.getTablet("hbase:root");
+  private void addMetaLeaderEntryToRoot(long leader) throws IOException, RegionNotFoundException {
+    Region region = this.getTablet("hbase:root").getRegion();
     HRegionInfo hRegionInfo = SystemTableNames.rootRegionInfo();
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
@@ -410,16 +399,14 @@ public class TabletService extends AbstractService implements TabletModule {
     region.put(put);
   }
 
-  private void addLeaderEntryToMeta(long leader) throws IOException {
-    Region region = this.getTablet("hbase:meta");
+  private void addLeaderEntryToMeta(long leader) throws IOException, RegionNotFoundException {
+    Region region = this.getTablet("hbase:meta").getRegion();
     HRegionInfo hRegionInfo = SystemTableNames.metaRegionInfo();
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
     put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
     region.put(put);
   }
-
-
 
   int getMinQuorumSize() {
     if (server.isSingleNodeMode()) {

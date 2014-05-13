@@ -26,6 +26,7 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
+import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
@@ -54,6 +55,8 @@ import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Encoder;
+
+import java.nio.ByteBuffer;
 
 /**
  * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
@@ -106,7 +109,7 @@ public class RegionServerService extends AbstractService implements RegionServer
                                 p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
                                 p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
                                 p.addLast("encoder", new WebsocketProtostuffEncoder());
-                                p.addLast("handler", new C5ServerHandler(RegionServerService.this));
+                                p.addLast("handler", new RegionServerHandler(RegionServerService.this));
                               }
                             }
               );
@@ -181,16 +184,25 @@ public class RegionServerService extends AbstractService implements RegionServer
     return null;
   }
 
-  public Region getOnlineRegion(RegionSpecifier regionSpecifier) {
-    String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
+  public Region getOnlineRegion(RegionSpecifier regionSpecifier) throws RegionNotFoundException {
+    ByteBuffer regionSpecifierBuffer = regionSpecifier.getValue();
+    if (regionSpecifierBuffer == null) {
+      throw new RegionNotFoundException("No region specifier specified in the request");
+    }
+
+    String stringifiedRegion = Bytes.toString(regionSpecifierBuffer.array());
     LOG.debug("get online region:" + stringifiedRegion);
 
-    Region tablet = tabletModule.getTablet(stringifiedRegion);
-    return tabletModule.getTablet(stringifiedRegion);
+    Tablet tablet = tabletModule.getTablet(stringifiedRegion);
+    if (tablet == null) {
+      throw new RegionNotFoundException("Unable to find specified tablet:" + stringifiedRegion);
+    }
+    return tablet.getRegion();
   }
 
   public String toString() {
 
     return super.toString() + '{' + "port = " + port + '}';
   }
+
 }
