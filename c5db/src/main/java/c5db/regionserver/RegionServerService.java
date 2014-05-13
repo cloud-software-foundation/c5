@@ -49,7 +49,6 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
@@ -92,7 +91,7 @@ public class RegionServerService extends AbstractService implements RegionServer
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
       Futures.addCallback(f, new FutureCallback<C5Module>() {
         @Override
-        public void onSuccess(C5Module result) {
+        public void onSuccess(final C5Module result) {
           tabletModule = (TabletModule) result;
           bootstrap.group(acceptGroup, workerGroup)
               .option(ChannelOption.SO_REUSEADDR, true)
@@ -143,8 +142,7 @@ public class RegionServerService extends AbstractService implements RegionServer
 
 
             ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
-            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(),
-                moduleSubCommand);
+            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(), moduleSubCommand);
             server.getCommandChannel().publish(commandRpcRequest);
             LOG.warn("Creating test table");
           }
@@ -183,11 +181,12 @@ public class RegionServerService extends AbstractService implements RegionServer
     return null;
   }
 
-  public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
+  public Region getOnlineRegion(RegionSpecifier regionSpecifier) {
     String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
     LOG.debug("get online region:" + stringifiedRegion);
+
     Region tablet = tabletModule.getTablet(stringifiedRegion);
-    return tablet.getTheRegion();
+    return tabletModule.getTablet(stringifiedRegion);
   }
 
   public String toString() {
