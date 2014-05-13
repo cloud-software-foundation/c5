@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,27 +47,29 @@ import java.util.Set;
 public class ModuleDeps {
   private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
 
-
   public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(String... startThese) throws ClassNotFoundException {
-    Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
-    Map<ModuleType, Class<?>> typeClassMap = new HashMap<>();
+    List<Class<?>> classList = new LinkedList<>();
 
-    Queue<Class<?>> q = new LinkedList<>();
     for (String name : startThese) {
       Class<?> c = Class.forName(name);
-      q.add(c);
+      classList.add(c);
     }
 
+    return createGraph(classList);
+  }
+
+  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(Collection<Class<?>> startThese) throws ClassNotFoundException {
+    Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
+    Queue<Class<?>> queue = new LinkedList<>(startThese);
+
     Class<?> parent;
-    while ((parent = q.poll()) != null) {
+    while ((parent = queue.poll()) != null) {
       ModuleTypeBinding mt = parent.getAnnotation(ModuleTypeBinding.class);
 
       if (mt == null) {
         LOG.warn("Module interface {} has no type annotation - skipping", parent);
         continue;
       }
-
-      typeClassMap.put(mt.value(), parent);
 
       ModuleType type = mt.value();
       Graph.Node<ModuleType> node = allNodes.get(type);
@@ -95,7 +98,7 @@ public class ModuleDeps {
         }
         node.dependencies.add(depNode);
         // add to the queue:
-        q.add(dep);
+        queue.add(dep);
       }
     }
 
