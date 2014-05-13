@@ -228,16 +228,21 @@ public class ReverseProtobufUtil {
     scan.setBatch(proto.getBatchSize());
     scan.setMaxResultSize(proto.getMaxResultSize());
     scan.setSmall(proto.getSmall());
-    for (c5db.client.generated.NameBytesPair attribute : proto.getAttributeList()) {
-      scan.setAttribute(attribute.getName(), attribute.getValue().array());
+
+    if (proto.getAttributeList() != null) {
+      for (c5db.client.generated.NameBytesPair attribute : proto.getAttributeList()) {
+        scan.setAttribute(attribute.getName(), attribute.getValue().array());
+      }
     }
 
-    for (c5db.client.generated.Column column : proto.getColumnList()) {
-      byte[] family = column.getFamily().array();
-      for (ByteBuffer qualifier : column.getQualifierList()) {
-        scan.addColumn(family, qualifier.array());
+    if (proto.getColumnList() != null) {
+      for (c5db.client.generated.Column column : proto.getColumnList()) {
+        byte[] family = column.getFamily().array();
+        for (ByteBuffer qualifier : column.getQualifierList()) {
+          scan.addColumn(family, qualifier.array());
+        }
+        scan.addFamily(family);
       }
-      scan.addFamily(family);
     }
     return scan;
   }

@@ -23,6 +23,7 @@ import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
 import c5db.client.generated.ScanResponse;
+import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Scan;
@@ -49,8 +50,9 @@ public class ScanRunnable implements Callback<Integer> {
   public ScanRunnable(final ChannelHandlerContext ctx,
                       final Call call,
                       final long scannerId,
-                      final HRegion region) throws IOException {
+                      final Region region) throws IOException {
     super();
+    assert(call.getScan() != null);
     Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
     this.ctx = ctx;
     this.call = call;
@@ -75,6 +77,8 @@ public class ScanRunnable implements Callback<Integer> {
         List<Cell> rawCells = new ArrayList<>();
 
         try {
+          // Arguably you should only return numberOfMessages, but I figure it can't hurt that
+          // much to pass them up
           moreResults = scanner.nextRaw(rawCells);
           if (!moreResults) {
             this.scanner.close();
