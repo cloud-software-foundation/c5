@@ -244,10 +244,19 @@ public class TabletService extends AbstractService implements TabletModule {
     final c5db.interfaces.tablet.Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
     Channel<TabletStateChange> tabletChannel = tablet.getStateChangeChannel();
     Fiber tabletCallbackFiber = fiberFactory.create();
+
     tabletCallbackFiber.start();
     tabletChannel.subscribe(tabletCallbackFiber, message -> {
       if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open)
           || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
+        try {
+          tabletRegistry.startTablet(tablet.getRegionInfo(),
+              tablet.getTableDescriptor(),
+              tablet.getPeers());
+        } catch (IOException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
         onlineRegions.put(quorumId, tablet.getRegion());
         tabletCallbackFiber.dispose();
       }
@@ -255,6 +264,9 @@ public class TabletService extends AbstractService implements TabletModule {
     if (tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Open)
         || tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
       tabletCallbackFiber.dispose();
+      tabletRegistry.startTablet(tablet.getRegionInfo(),
+          tablet.getTableDescriptor(),
+          tablet.getPeers());
       onlineRegions.put(quorumId, tablet.getRegion());
     }
   }
