@@ -332,7 +332,7 @@ public class C5DB extends AbstractService implements C5Server {
 
         stopModule(message.getModule(), message.getHardStop(), message.getStopReason());
 
-        stdout = String.format("Module %s started", message.getModule());
+        stdout = String.format("Module %s stopped", message.getModule());
       } else if (subMessage instanceof ModuleSubCommand) {
         // how this works:
         // - pluck out the module
