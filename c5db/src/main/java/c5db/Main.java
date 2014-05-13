@@ -89,7 +89,6 @@ public class Main {
       webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
     }
 
-
     int controlRpcServerPort;
     if (hasControlRpcPropertyPortSet()) {
       controlRpcServerPort = getControlRpcPropertyPortSet();
@@ -104,29 +103,31 @@ public class Main {
     instance.start();
 
     // issue startup commands here that are common/we always want:
-    StartModule startLog = new StartModule(ModuleType.Log, 0, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startLog));
 
-    StartModule startBeacon = new StartModule(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startBeacon));
+    Set<Class<?>> modulesToStart = Sets.newHashSet(
+        LogModule.class,
+        DiscoveryModule.class,
+        ReplicationModule.class,
+        TabletModule.class,
+        RegionServerModule.class,
+        WebAdminModule.class,
+        ControlModule.class);
 
-    StartModule startReplication = new StartModule(ModuleType.Replication,
-        portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
-            + C5ServerConstants.REPLICATOR_PORT_MIN, ""
-    );
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startReplication));
+    Map<ModuleType, Integer> modulePorts = new ImmutableMap.Builder<ModuleType, Integer>()
+        .put(ModuleType.Log, 0)
+        .put(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT)
+        .put(ModuleType.Replication, replicationPort)
+        .put(ModuleType.Tablet, 0)
+        .put(ModuleType.RegionServer, regionServerPort)
+        .put(ModuleType.WebAdmin, webServerPort)
+        .put(ModuleType.ControlRpc, controlRpcServerPort)
+        .build();
 
-    StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startTablet));
-
-    StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
-
-    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
-
-    StartModule controlService = new StartModule(ModuleType.ControlRpc, controlRpcServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, controlService));
+    for (ModuleType moduleType : ModuleDeps.getModuleReverseDependencyOrder(modulesToStart)) {
+      int port = modulePorts.get(moduleType);
+      StartModule startModuleMessage = new StartModule(moduleType, port, "");
+      instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startModuleMessage));
+    }
 
     return instance;
   }
