@@ -14,35 +14,7 @@
     <version>0.1-SNAPSHOT</version>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.12</version>
-                    <configuration>
-                        <excludes>**/generated/**/*</excludes>
-                        <configLocation>checkstyle_checks.xml</configLocation>
-                        <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
-                        <suppressionsLocation>suppressions.xml</suppressionsLocation>
-                    </configuration>
-
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.2-SNAPSHOT</version>
-                <configuration>
-                    <targetJdk>1.8</targetJdk>
-                    <sourceEncoding>utf-8</sourceEncoding>
-                    <excludes>
-                        <exclude>**/generated/*.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-maven-plugin</artifactId>
@@ -109,7 +81,6 @@
             <artifactId>jetty-rewrite</artifactId>
             <version>9.1.4.v20140401</version>
         </dependency>
-
 
 
         <dependency>
@@ -203,6 +174,13 @@
             <groupId>c5db</groupId>
             <artifactId>c5-proto</artifactId>
             <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-client</artifactId>
+            <version>0.1-SNAPSHOT</version>
+
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

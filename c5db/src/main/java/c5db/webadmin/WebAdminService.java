@@ -69,8 +69,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
   private DiscoveryModule discoveryModule = null;
   private TabletModule tabletModule = null;
 
-  public WebAdminService(C5Server server,
-                         int port) {
+  public WebAdminService(C5Server server, int port) {
     this.server = server;
     this.port = port;
 

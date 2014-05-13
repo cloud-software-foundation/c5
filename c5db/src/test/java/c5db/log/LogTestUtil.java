@@ -17,7 +17,9 @@
 
 package c5db.log;
 
+import c5db.replication.QuorumConfiguration;
 import c5db.replication.generated.LogEntry;
+import c5db.replication.generated.QuorumConfigurationMessage;
 import com.google.common.collect.Lists;
 import com.google.common.math.LongMath;
 import io.netty.util.CharsetUtil;
@@ -43,7 +45,7 @@ public class LogTestUtil {
   }
 
   public static OLogEntry makeEntry(long seqNum, long term, ByteBuffer data) {
-    return new OLogEntry(seqNum, term, Lists.newArrayList(data));
+    return new OLogEntry(seqNum, term, new OLogRawDataContent(Lists.newArrayList(data)));
   }
 
   public static List<OLogEntry> makeSingleEntryList(long seqNum, long term, String stringData) {
@@ -55,11 +57,15 @@ public class LogTestUtil {
   }
 
   public static LogEntry makeProtostuffEntry(long seqNum, long term, String stringData) {
-    return makeEntry(seqNum, term, stringData).toProtostuffMessage();
+    return makeEntry(seqNum, term, stringData).toProtostuff();
   }
 
   public static LogEntry makeProtostuffEntry(long seqNum, long term, ByteBuffer data) {
-    return makeEntry(seqNum, term, data).toProtostuffMessage();
+    return makeEntry(seqNum, term, data).toProtostuff();
+  }
+
+  public static LogEntry makeConfigurationEntry(long seqNum, long term, QuorumConfigurationMessage configuration) {
+    return new LogEntry(term, seqNum, new ArrayList<>(), configuration);
   }
 
   public static long seqNum(long seqNum) {
@@ -98,5 +104,35 @@ public class LogTestUtil {
 
   public static OLogEntry anOLogEntry() {
     return makeEntry(aSeqNum(), anElectionTerm(), someData());
+  }
+
+  public static LogSequenceBuilder entries() {
+    return new LogSequenceBuilder();
+  }
+
+  public static class LogSequenceBuilder {
+    private final List<LogEntry> logSequence = new ArrayList<>();
+    private long term = 1;
+
+    public LogSequenceBuilder term(long term) {
+      this.term = term;
+      return this;
+    }
+
+    public LogSequenceBuilder indexes(long... indexList) {
+      for (long index : indexList) {
+        logSequence.add(makeProtostuffEntry(index, term, someData()));
+      }
+      return this;
+    }
+
+    public LogSequenceBuilder configurationAndIndex(QuorumConfiguration configuration, long index) {
+      logSequence.add(new LogEntry(term, index, new ArrayList<>(), configuration.toProtostuff()));
+      return this;
+    }
+
+    public List<LogEntry> build() {
+      return logSequence;
+    }
   }
 }

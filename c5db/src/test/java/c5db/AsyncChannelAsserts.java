@@ -19,6 +19,7 @@ package c5db;
 
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberOnly;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.hamcrest.Description;
@@ -34,6 +35,7 @@ import org.jetlang.fibers.ThreadFiber;
 import org.junit.runners.model.MultipleFailureException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Helpers that allow us to assert or wait for channel messages from jetlang.
- * <p/>
+ * <p>
  * TODO currently we create a fiber thread for every instance we run, maybe
  * consider using a fiber pool.
  */
@@ -163,7 +165,7 @@ public class AsyncChannelAsserts {
    * @param <T> Type of channel object
    */
   public static class ChannelHistoryMonitor<T> {
-    private final List<T> messageLog = new ArrayList<>();
+    private final List<T> messageLog = Collections.synchronizedList(new ArrayList<>());
     private final Map<Matcher<? super T>, SettableFuture<T>> waitingToMatch = new HashMap<>();
     private final Fiber fiber;
     private static final int WAIT_TIMEOUT = 5; // seconds
@@ -187,12 +189,25 @@ public class AsyncChannelAsserts {
     }
 
     public boolean hasAny(Matcher<? super T> matcher) {
-      for (T element : messageLog) {
-        if (matcher.matches(element)) {
-          return true;
+      synchronized (messageLog) {
+        for (T element : messageLog) {
+          if (matcher.matches(element)) {
+            return true;
+          }
         }
       }
       return false;
+    }
+
+    public T getLatest(Matcher<? super T> matcher) {
+      synchronized (messageLog) {
+        for (T element : Lists.reverse(messageLog)) {
+          if (matcher.matches(element)) {
+            return element;
+          }
+        }
+      }
+      return null;
     }
 
     public T waitFor(Matcher<? super T> matcher) {
@@ -207,14 +222,20 @@ public class AsyncChannelAsserts {
       }
     }
 
+    public void forgetHistory() {
+      messageLog.clear();
+    }
+
     private ListenableFuture<T> future(Matcher<? super T> matcher) {
       SettableFuture<T> finished = SettableFuture.create();
 
       fiber.execute(() -> {
-        for (T element : messageLog) {
-          if (matcher.matches(element)) {
-            finished.set(element);
-            return;
+        synchronized (messageLog) {
+          for (T element : messageLog) {
+            if (matcher.matches(element)) {
+              finished.set(element);
+              return;
+            }
           }
         }
         waitingToMatch.put(matcher, finished);

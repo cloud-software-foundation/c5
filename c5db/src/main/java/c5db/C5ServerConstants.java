@@ -17,6 +17,8 @@
 
 package c5db;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 public class C5ServerConstants {
   public static final int MSG_SIZE = 100;
   public static final String LOG_NAME = "log";
@@ -24,22 +26,39 @@ public class C5ServerConstants {
   public static final String ARCHIVE_DIR = "old_wal";
   public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
-  public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
+
   public static final String LOCALHOST = "localhost";
   public static final int WAL_THREAD_POOL_SIZE = 1;
+  public static final java.lang.String MIN_CLUSTER_SIZE = "minClusterSize";
+  public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
+  public static final int DEFAULT_QUORUM_SIZE = 3;
+  public static final String C5_CFG_PATH = "c5.cfgPath";
 
-  public static final byte[] META_ROW = {1, 2, 3, 4, 5};
+  public static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUALIFIER");
 
-  public static final byte[] INTERNAL_NAMESPACE = {1, 2, 3, 4};
-  public static final byte[] META_TABLE_NAME = {1, 2, 3, 4};
-  public static final byte[] META_START_KEY = {0x00};
-
-  public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-  public static final int DEFAULT_REGION_SERVER_PORT_MIN = 8080;
-  public static final int REGION_SERVER_PORT_RANGE = 1000;
-  public static final int DISCOVERY_PORT = 54333;
-  public static final int REPLICATOR_PORT_MIN = 1024;
-  public static final int REPLICATOR_PORT_RANGE = 30000;
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
+  public static final String SET_META_LEADER = "Set me as Meta Leader";
+
+  public static final int DISCOVERY_PORT = 54333;
+
+  public static final int DEFAULT_WEB_SERVER_PORT = 31337;
+  public static final int CONTROL_RPC_PROPERTY_PORT = 9099;
+
+  public static final int REPLICATOR_PORT_MIN = 1024;
+  public static final int REPLICATOR_PORT_RANGE = 30000;
+
+
+  public static final int DEFAULT_REGION_SERVER_PORT_MIN = 8080;
+  public static final int REGION_SERVER_PORT_RANGE = 1000;
+
+  public static final String CLUSTER_NAME_PROPERTY_NAME = "clusterName";
+  public static final String WEB_SERVER_PORT_PROPERTY_NAME = "webServerPort";
+  public static final String REGION_SERVER_PORT_PROPERTY_NAME = "regionServerPort";
+  public static final String CONTROL_SERVER_PORT_PROPERTY_NAME = "controlServerPort";
+
+
+  public static final byte[] META_ROW = {1, 2, 3, 4, 5};
+  public static final byte[] META_START_KEY = {0x00};
+  public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 }

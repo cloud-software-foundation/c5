@@ -23,6 +23,9 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
 import java.io.IOException;
@@ -45,15 +48,19 @@ public interface Region {
 
   void put(Put put) throws IOException;
 
+  HRegion getTheRegion();
+
+  RegionScanner getScanner(Scan scan);
+
   /**
-   * Constructor arguments basically.
-   */
+     * Constructor arguments basically.
+     */
   public interface Creator {
     Region getHRegion(
         Path basePath,
         HRegionInfo regionInfo,
         HTableDescriptor tableDescriptor,
         HLog log,
-        Configuration conf) throws IOException;
+        Configuration conf);
   }
 }

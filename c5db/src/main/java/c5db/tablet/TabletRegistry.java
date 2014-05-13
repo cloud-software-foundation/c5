@@ -101,7 +101,6 @@ public class TabletRegistry {
             replicationModule,
             regionCreator);
         tablet.setStateChangeChannel(commonStateChangeChannel);
-
         tablet.start();
 
         tablets.put(quorum, tablet);
@@ -112,8 +111,8 @@ public class TabletRegistry {
   }
 
   public Tablet startTablet(HRegionInfo regionInfo,
-                                         HTableDescriptor tableDescriptor,
-                                         List<Long> peerList) throws IOException, InterruptedException {
+                            HTableDescriptor tableDescriptor,
+                            List<Long> peerList) throws IOException {
     Path basePath = configDirectory.getBaseConfigPath();
 
     // quorum name - ?
@@ -144,7 +143,6 @@ public class TabletRegistry {
         regionCreator);
     newTablet.setStateChangeChannel(commonStateChangeChannel);
     tablets.put(quorumName, newTablet);
-
     newTablet.start();
     return newTablet;
   }

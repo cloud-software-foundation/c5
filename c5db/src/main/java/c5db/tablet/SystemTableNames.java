@@ -18,6 +18,7 @@ package c5db.tablet;
 
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 
 /**
@@ -27,7 +28,13 @@ public class SystemTableNames {
   public static HTableDescriptor rootTableDescriptor() {
     return HTableDescriptor.ROOT_TABLEDESC;
   }
+  public static HTableDescriptor metaTableDescriptor() {
+    return HTableDescriptor.META_TABLEDESC;
+  }
 
+  public static TableName metaTableName() {
+    return  TableName.valueOf(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR, "meta");
+  }
   public static TableName rootTableName() {
     return HTableDescriptor.ROOT_TABLE_NAME;
   }
@@ -45,6 +52,9 @@ public class SystemTableNames {
   private static int rootRegionId() {
     return 1;
   }
+  private static int metaRegionId() {
+    return 2;
+  }
 
   private static byte[] startKeyZero() {
     return new byte[]{0};
@@ -52,5 +62,15 @@ public class SystemTableNames {
 
   private static byte[] endKeyEmpty() {
     return new byte[]{};
+  }
+
+  public static HRegionInfo metaRegionInfo() {
+    return new HRegionInfo(
+        metaTableName(),
+        startKeyZero(),
+        endKeyEmpty(),
+        false,
+        metaRegionId()
+    );
   }
 }

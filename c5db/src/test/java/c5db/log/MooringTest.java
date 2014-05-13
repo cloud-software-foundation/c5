@@ -17,6 +17,7 @@
 
 package c5db.log;
 
+import c5db.replication.QuorumConfiguration;
 import c5db.replication.generated.LogEntry;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
@@ -29,7 +30,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static c5db.log.LogTestUtil.makeConfigurationEntry;
+import static c5db.log.LogTestUtil.makeEntry;
 import static c5db.log.LogTestUtil.makeProtostuffEntry;
+import static c5db.log.OLogEntryOracle.QuorumConfigurationWithSeqNum;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -45,10 +49,12 @@ public class MooringTest {
   @Before
   public void accessesOLogToObtainTheLastTermAndIndexWhenItIsConstructed() throws Exception {
     context.checking(new Expectations() {{
-      oneOf(oLog).getLastSeqNum(quorumId);
-      will(returnValue(Futures.immediateFuture(0L)));
-      oneOf(oLog).getLastTerm(quorumId);
-      will(returnValue(Futures.immediateFuture(0L)));
+      oneOf(oLog).openAsync(quorumId);
+      will(returnValue(
+          Futures.immediateFuture(makeEntry(0, 0, ""))));
+
+      oneOf(oLog).getQuorumConfig(0, quorumId);
+      will(returnValue(zeroConfiguration()));
     }});
 
     log = new Mooring(oLog, quorumId);
@@ -90,6 +96,11 @@ public class MooringTest {
     expectTruncationNTimes(1);
     oLogGetTermWillReturn(0);
 
+    context.checking(new Expectations() {{
+      oneOf(oLog).getQuorumConfig(index - 1, quorumId);
+      will(returnValue(zeroConfiguration()));
+    }});
+
     log.logEntries(
         singleEntryList(index, term(34), someData()));
 
@@ -105,16 +116,82 @@ public class MooringTest {
     expectTruncationNTimes(1);
     oLogGetTermWillReturn(termOfFirstEntry);
 
+    context.checking(new Expectations() {{
+      oneOf(oLog).getQuorumConfig(indexOfFirstEntry, quorumId);
+      will(returnValue(zeroConfiguration()));
+    }});
+
     log.logEntries(
         Lists.newArrayList(
             makeProtostuffEntry(indexOfFirstEntry, termOfFirstEntry, someData()),
-            makeProtostuffEntry(index(13), term(35), someData()))
-    );
-    log.truncateLog(13);
+            makeProtostuffEntry(indexOfFirstEntry + 1, term(35), someData())));
+    log.truncateLog(indexOfFirstEntry + 1);
 
     assertThat(log.getLastIndex(), is(equalTo(indexOfFirstEntry)));
     assertThat(log.getLastTerm(), is(equalTo(termOfFirstEntry)));
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void throwsAnExceptionIfAskedToTruncateToAnIndexOfZero() {
+    log.truncateLog(0);
+  }
+
+  @Test
+  public void storesAndRetrievesTheLastQuorumConfigurationLogged() {
+    final long term = 7;
+    final QuorumConfiguration config = aQuorumConfiguration();
+
+    expectLoggingNTimes(1);
+
+    log.logEntries(
+        Lists.newArrayList(
+            makeProtostuffEntry(index(2), term, someData()),
+            makeConfigurationEntry(index(3), term, config.toProtostuff()),
+            makeProtostuffEntry(index(4), term, someData())
+        ));
+
+    assertThat(log.getLastConfiguration(), is(equalTo(config)));
+    assertThat(log.getLastConfigurationIndex(), is(equalTo(3L)));
+  }
+
+  @Test
+  public void retrievesTheEmptyQuorumConfigurationWhenTheLogIsEmpty() {
+    assertThat(log.getLastConfiguration(), is(equalTo(QuorumConfiguration.EMPTY)));
+    assertThat(log.getLastConfigurationIndex(), is(equalTo(0L)));
+  }
+
+  @Test
+  public void retrievesAnEarlierQuorumConfigurationWhenALaterOneIsTruncated() {
+    final long term = 7;
+    final QuorumConfiguration firstConfig = aQuorumConfiguration();
+    final long firstConfigSeqNum = 777;
+    final QuorumConfiguration secondConfig = firstConfig.completeTransition();
+    final long secondConfigSeqNum = firstConfigSeqNum + 1;
+
+    expectLoggingNTimes(1);
+    expectTruncationNTimes(1);
+    allowOLogGetTerm();
+
+    log.logEntries(
+        Lists.newArrayList(
+            makeConfigurationEntry(firstConfigSeqNum, term, firstConfig.toProtostuff()),
+            makeConfigurationEntry(secondConfigSeqNum, term, secondConfig.toProtostuff())
+        ));
+
+    assertThat(log.getLastConfiguration(), is(equalTo(secondConfig)));
+    assertThat(log.getLastConfigurationIndex(), is(equalTo(secondConfigSeqNum)));
+
+    context.checking(new Expectations() {{
+      oneOf(oLog).getQuorumConfig(firstConfigSeqNum, quorumId);
+      will(returnValue(new QuorumConfigurationWithSeqNum(firstConfig, firstConfigSeqNum)));
+    }});
+
+    log.truncateLog(secondConfigSeqNum);
+
+    assertThat(log.getLastConfiguration(), is(equalTo(firstConfig)));
+    assertThat(log.getLastConfigurationIndex(), is(equalTo(firstConfigSeqNum)));
+  }
+
 
   private long index(long i) {
     return i;
@@ -126,6 +203,12 @@ public class MooringTest {
 
   private String someData() {
     return "test data";
+  }
+
+  private QuorumConfiguration aQuorumConfiguration() {
+    return QuorumConfiguration
+        .of(Lists.newArrayList(1L, 2L, 3L))
+        .transitionTo(Lists.newArrayList(4L, 5L, 6L));
   }
 
   private List<LogEntry> singleEntryList(long index, long term, String stringData) {
@@ -152,9 +235,19 @@ public class MooringTest {
     }});
   }
 
+  private void allowOLogGetTerm() {
+    context.checking(new Expectations() {{
+      allowing(oLog).getLogTerm(with(any(Long.class)), with(any(String.class)));
+    }});
+  }
+
   private void ignoringLog() {
     context.checking(new Expectations() {{
       ignoring(oLog);
     }});
+  }
+
+  private QuorumConfigurationWithSeqNum zeroConfiguration() {
+    return new QuorumConfigurationWithSeqNum(QuorumConfiguration.EMPTY, 0);
   }
 }

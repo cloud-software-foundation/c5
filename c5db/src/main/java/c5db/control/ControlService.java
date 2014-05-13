@@ -66,7 +66,6 @@ public class ControlService extends AbstractService implements ControlModule {
   private final int modulePort;
 
   private DiscoveryModule discoveryModule;
-  private ServerBootstrap serverBootstrap;
   private Channel listenChannel;
 
   public ControlService(C5Server server,
@@ -83,7 +82,7 @@ public class ControlService extends AbstractService implements ControlModule {
     controlClient = new SimpleControlClient(ioWorkerGroup);
   }
 
-  private SimpleControlClient controlClient;
+  private final SimpleControlClient controlClient;
 
   @Override
   public void doMessage(Request<CommandRpcRequest<?>, CommandReply> request) {
@@ -99,9 +98,7 @@ public class ControlService extends AbstractService implements ControlModule {
               InetAddress.getByName(firstAddress), port);
 
           C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
-              replyResult -> {
-                request.reply(replyResult);
-              }, exception -> {
+              request::reply, exception -> {
                 CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
                 request.reply(reply);
               }, serviceFiber
@@ -143,7 +140,7 @@ public class ControlService extends AbstractService implements ControlModule {
     return null;
   }
 
-  class MessageHandler extends SimpleChannelInboundHandler<CommandRpcRequest<? extends Message>> {
+  private class MessageHandler extends SimpleChannelInboundHandler<CommandRpcRequest<? extends Message>> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CommandRpcRequest<? extends Message> msg) throws Exception {
@@ -158,9 +155,7 @@ public class ControlService extends AbstractService implements ControlModule {
         System.out.println("Reply to client: " + reply);
         ctx.channel().writeAndFlush(reply);
         ctx.channel().close();
-      }, 1000, TimeUnit.MILLISECONDS, () -> {
-        sendErrorReply(ctx.channel(), new Exception("Timed out request"));
-      });
+      }, 1000, TimeUnit.MILLISECONDS, () -> sendErrorReply(ctx.channel(), new Exception("Timed out request")));
     }
   }
 
@@ -174,20 +169,16 @@ public class ControlService extends AbstractService implements ControlModule {
   protected void doStart() {
     serviceFiber.start();
 
-    serviceFiber.execute(() -> {
-      C5Futures.addCallback(server.getModule(ModuleType.Discovery),
-          module -> {
-            discoveryModule = (DiscoveryModule) module;
-            startHttpRpc();
-          }, exception -> {
-            notifyFailed(exception);
-          }, serviceFiber);
-    });
+    serviceFiber.execute(() -> C5Futures.addCallback(server.getModule(ModuleType.Discovery),
+        module -> {
+          discoveryModule = (DiscoveryModule) module;
+          startHttpRpc();
+        }, this::notifyFailed, serviceFiber));
   }
 
   private void startHttpRpc() {
     try {
-      serverBootstrap = new ServerBootstrap();
+      ServerBootstrap serverBootstrap = new ServerBootstrap();
       serverBootstrap.group(acceptConnectionGroup, ioWorkerGroup)
           .channel(NioServerSocketChannel.class)
           .option(ChannelOption.SO_REUSEADDR, true)
