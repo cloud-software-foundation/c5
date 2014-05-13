@@ -17,14 +17,26 @@
 package c5db;
 
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
+import c5db.interfaces.DiscoveryModule;
+import c5db.interfaces.LogModule;
+import c5db.interfaces.RegionServerModule;
+import c5db.interfaces.ReplicationModule;
+import c5db.interfaces.TabletModule;
+import c5db.interfaces.WebAdminModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
+import c5db.module_cfg.ModuleDeps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * CLI Entry point for the C5DB server.
@@ -77,7 +89,6 @@ public class Main {
       webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
     }
 
-
     int controlRpcServerPort;
     if (hasControlRpcPropertyPortSet()) {
       controlRpcServerPort = getControlRpcPropertyPortSet();
@@ -85,33 +96,38 @@ public class Main {
       controlRpcServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
     }
 
+    int replicationPort = portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
+        + C5ServerConstants.REPLICATOR_PORT_MIN;
+
     C5Server instance = new C5DB(cfgDir);
     instance.start();
 
     // issue startup commands here that are common/we always want:
-    StartModule startLog = new StartModule(ModuleType.Log, 0, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startLog));
 
-    StartModule startBeacon = new StartModule(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startBeacon));
+    Set<Class<?>> modulesToStart = Sets.newHashSet(
+        LogModule.class,
+        DiscoveryModule.class,
+        ReplicationModule.class,
+        TabletModule.class,
+        RegionServerModule.class,
+        WebAdminModule.class,
+        ControlModule.class);
 
-    StartModule startReplication = new StartModule(ModuleType.Replication,
-        portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
-            + C5ServerConstants.REPLICATOR_PORT_MIN, ""
-    );
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startReplication));
+    Map<ModuleType, Integer> modulePorts = new ImmutableMap.Builder<ModuleType, Integer>()
+        .put(ModuleType.Log, 0)
+        .put(ModuleType.Discovery, C5ServerConstants.DISCOVERY_PORT)
+        .put(ModuleType.Replication, replicationPort)
+        .put(ModuleType.Tablet, 0)
+        .put(ModuleType.RegionServer, regionServerPort)
+        .put(ModuleType.WebAdmin, webServerPort)
+        .put(ModuleType.ControlRpc, controlRpcServerPort)
+        .build();
 
-    StartModule startTablet = new StartModule(ModuleType.Tablet, 0, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startTablet));
-
-    StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
-
-    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
-
-    StartModule controlService = new StartModule(ModuleType.ControlRpc, controlRpcServerPort, "");
-    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, controlService));
+    for (ModuleType moduleType : ModuleDeps.getModuleReverseDependencyOrder(modulesToStart)) {
+      int port = modulePorts.get(moduleType);
+      StartModule startModuleMessage = new StartModule(moduleType, port, "");
+      instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startModuleMessage));
+    }
 
     return instance;
   }
