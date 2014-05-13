@@ -18,6 +18,7 @@
 package c5db.log;
 
 import c5db.replication.generated.LogEntry;
+import c5db.replication.generated.QuorumConfigurationMessage;
 import com.google.common.collect.Lists;
 import com.google.common.math.LongMath;
 import io.netty.util.CharsetUtil;
@@ -43,7 +44,7 @@ public class LogTestUtil {
   }
 
   public static OLogEntry makeEntry(long seqNum, long term, ByteBuffer data) {
-    return new OLogEntry(seqNum, term, Lists.newArrayList(data));
+    return new OLogEntry(seqNum, term, new OLogRawDataContent(Lists.newArrayList(data)));
   }
 
   public static List<OLogEntry> makeSingleEntryList(long seqNum, long term, String stringData) {
@@ -55,11 +56,15 @@ public class LogTestUtil {
   }
 
   public static LogEntry makeProtostuffEntry(long seqNum, long term, String stringData) {
-    return makeEntry(seqNum, term, stringData).toProtostuffMessage();
+    return makeEntry(seqNum, term, stringData).toProtostuff();
   }
 
   public static LogEntry makeProtostuffEntry(long seqNum, long term, ByteBuffer data) {
-    return makeEntry(seqNum, term, data).toProtostuffMessage();
+    return makeEntry(seqNum, term, data).toProtostuff();
+  }
+
+  public static LogEntry makeConfigurationEntry(long seqNum, long term, QuorumConfigurationMessage configuration) {
+    return new LogEntry(term, seqNum, new ArrayList<>(), configuration);
   }
 
   public static long seqNum(long seqNum) {

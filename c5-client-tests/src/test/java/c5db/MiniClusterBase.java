@@ -19,6 +19,7 @@ package c5db;
 import c5db.client.C5Table;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -30,10 +31,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
@@ -43,10 +40,11 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
-import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +56,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
+
+  @ClassRule
+  public static TemporaryFolder testFolder = new TemporaryFolder();
+
   private static int regionServerPort;
   public static final byte[] value = Bytes.toBytes("value");
   public static final byte[] notEqualToValue = Bytes.toBytes("notEqualToValue");
@@ -75,21 +77,6 @@ public class MiniClusterBase {
 
   private static C5Server server;
 
-  String getCreateTabletSubCommand(ByteString tableNameBytes) {
-    TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
-    HTableDescriptor testDesc = new HTableDescriptor(tableName);
-    testDesc.addFamily(new HColumnDescriptor("cf"));
-    HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-    String peerString = String.valueOf(server.getNodeId());
-    BASE64Encoder encoder = new BASE64Encoder();
-
-    String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
-    String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
-
-    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
-
-  }
-
   @Before
   public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     Fiber receiver = new ThreadFiber();
@@ -99,8 +86,7 @@ public class MiniClusterBase {
 
     Callback<TabletStateChange> onMsg = message -> {
       System.out.println(message);
-      if (message.state.equals(Tablet.State.Open)
-          || message.state.equals(Tablet.State.Leader)) {
+      if (message.state.equals(Tablet.State.Open) || message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
@@ -111,7 +97,7 @@ public class MiniClusterBase {
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
 
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        getCreateTabletSubCommand(tableName));
+        TestHelpers.getCreateTabletSubCommand(tableName, server.getNodeId()));
     CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
         createTableSubCommand);
 
@@ -154,22 +140,25 @@ public class MiniClusterBase {
   @BeforeClass
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
-
+    System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.getRoot().getAbsolutePath());
+    int webServerPort = 9091 + rnd.nextInt(100);
     regionServerPort = 8080 + rnd.nextInt(1000);
+    System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
     System.setProperty("regionServerPort", String.valueOf(regionServerPort));
+    System.setProperty("webServerPort", String.valueOf(webServerPort));
 
     server = Main.startC5Server(new String[]{});
 
     ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
-    C5Module regionServer = regionServerFuture.get();
-
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
-
     ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
-    ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
+    ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
+
+    C5Module regionServer = regionServerFuture.get();
+    C5Module replicationServer = replicationServerFuture.get();
+    C5Module controlServer = controlServerFuture.get();
+    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
 
     stateChanges = tabletServer.getTabletStateChanges();
 
@@ -181,13 +170,16 @@ public class MiniClusterBase {
 
     Callback<TabletStateChange> onMsg = message -> {
       System.out.println(message);
-      if (message.state.equals(Tablet.State.Open)) {
+      if (message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
     stateChanges.subscribe(receiver, onMsg);
 
-    while (!regionServer.isRunning() || !tabletServer.isRunning() || !replicationServer.isRunning()) {
+    while (!regionServer.isRunning()
+        || !tabletServer.isRunning()
+        || !replicationServer.isRunning()
+        || !controlServer.isRunning()) {
       Thread.sleep(600);
     }
 

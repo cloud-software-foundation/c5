@@ -28,6 +28,7 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
@@ -48,7 +49,6 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
@@ -62,16 +62,13 @@ import sun.misc.BASE64Encoder;
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
-  private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private final NioEventLoopGroup acceptGroup;
   private final NioEventLoopGroup workerGroup;
   private final int port;
   private final C5Server server;
   private final ServerBootstrap bootstrap = new ServerBootstrap();
-
-
-  TabletModule tabletModule;
+  private TabletModule tabletModule;
 
   public RegionServerService(NioEventLoopGroup acceptGroup,
                              NioEventLoopGroup workerGroup,
@@ -81,8 +78,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
-    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
-
+    C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
   }
 
@@ -95,7 +91,7 @@ public class RegionServerService extends AbstractService implements RegionServer
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
       Futures.addCallback(f, new FutureCallback<C5Module>() {
         @Override
-        public void onSuccess(C5Module result) {
+        public void onSuccess(final C5Module result) {
           tabletModule = (TabletModule) result;
           bootstrap.group(acceptGroup, workerGroup)
               .option(ChannelOption.SO_REUSEADDR, true)
@@ -146,7 +142,7 @@ public class RegionServerService extends AbstractService implements RegionServer
 
 
             ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
-            CommandRpcRequest commandRpcRequest = new CommandRpcRequest(server.getNodeId(), moduleSubCommand);
+            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(), moduleSubCommand);
             server.getCommandChannel().publish(commandRpcRequest);
             LOG.warn("Creating test table");
           }
@@ -185,14 +181,16 @@ public class RegionServerService extends AbstractService implements RegionServer
     return null;
   }
 
-  public HRegion getOnlineRegion(RegionSpecifier regionSpecifier) {
+  public Region getOnlineRegion(RegionSpecifier regionSpecifier) {
     String stringifiedRegion = Bytes.toString(regionSpecifier.getValue().array());
     LOG.debug("get online region:" + stringifiedRegion);
+
+    Region tablet = tabletModule.getTablet(stringifiedRegion);
     return tabletModule.getTablet(stringifiedRegion);
   }
 
   public String toString() {
 
-    return super.toString()+ '{' + "port = " + port + '}';
+    return super.toString() + '{' + "port = " + port + '}';
   }
 }

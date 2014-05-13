@@ -24,7 +24,9 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
 import java.io.IOException;
@@ -38,22 +40,27 @@ import java.nio.file.Path;
  */
 public class HRegionBridge implements Region {
 
-  private final HRegion theRegion;
+  private HRegion theRegion;
 
   public HRegionBridge(
       Path basePath,
       HRegionInfo regionInfo,
       HTableDescriptor tableDescriptor,
       HLog log,
-      Configuration conf) throws IOException {
-    theRegion = HRegion.openHRegion(
-        new org.apache.hadoop.fs.Path(basePath.toString()),
-        regionInfo,
-        tableDescriptor,
-        log,
-        conf,
-        new HRegionServicesBridge(conf),
-        null);
+      Configuration conf) {
+    try {
+      theRegion = HRegion.openHRegion(
+          new org.apache.hadoop.fs.Path(basePath.toString()),
+          regionInfo,
+          tableDescriptor,
+          log,
+          conf,
+          new HRegionServicesBridge(conf),
+          null);
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
 
@@ -71,7 +78,19 @@ public class HRegionBridge implements Region {
     theRegion.put(put);
   }
 
-  HRegion getTheRegion() {
+  @Override
+  public HRegion getTheRegion() {
     return theRegion;
+  }
+
+  @Override
+  public RegionScanner getScanner(Scan scan) {
+    try {
+      return getTheRegion().getScanner(scan);
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    return null;
   }
 }

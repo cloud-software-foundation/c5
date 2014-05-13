@@ -123,5 +123,7 @@ public interface C5Server extends Service {
 
   ListenableFuture<Void> getShutdownFuture();
 
+  int getMinQuorumSize();
+
   public Channel<ConfigKeyUpdated> getConfigUpdateChannel();
 }

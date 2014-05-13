@@ -53,16 +53,13 @@ public class Main {
 
     // use system properties for other config so we don't end up writing a whole command line
     // parse framework.
-    String reqCfgPath = System.getProperty("c5.cfgPath");
+    String reqCfgPath = System.getProperty(C5ServerConstants.C5_CFG_PATH);
     if (reqCfgPath != null) {
       cfgPath = reqCfgPath;
     }
 
     ConfigDirectory cfgDir = new NioFileConfigDirectory(Paths.get(cfgPath));
     cfgDir.setNodeIdFile(Long.toString(nodeId));
-
-    C5Server instance = new C5DB(cfgDir);
-    instance.start();
     Random portRandomizer = new Random();
 
     int regionServerPort;
@@ -72,6 +69,24 @@ public class Main {
       regionServerPort = C5ServerConstants.DEFAULT_REGION_SERVER_PORT_MIN
           + portRandomizer.nextInt(C5ServerConstants.REGION_SERVER_PORT_RANGE);
     }
+
+    int webServerPort;
+    if (hasWebServerPropertyPortSet()) {
+      webServerPort = getWebServerPropertyPort();
+    } else {
+      webServerPort = C5ServerConstants.DEFAULT_WEB_SERVER_PORT;
+    }
+
+
+    int controlRpcServerPort;
+    if (hasControlRpcPropertyPortSet()) {
+      controlRpcServerPort = getControlRpcPropertyPortSet();
+    } else {
+      controlRpcServerPort= C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
+    }
+
+    C5Server instance = new C5DB(cfgDir);
+    instance.start();
 
     // issue startup commands here that are common/we always want:
     StartModule startLog = new StartModule(ModuleType.Log, 0, "");
@@ -92,22 +107,37 @@ public class Main {
     StartModule startRegionServer = new StartModule(ModuleType.RegionServer, regionServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startRegionServer));
 
-    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, 31337, "");
+    StartModule webAdminService = new StartModule(ModuleType.WebAdmin, webServerPort, "");
     instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, webAdminService));
+
+    StartModule controlService = new StartModule(ModuleType.ControlRpc, controlRpcServerPort, "");
+    instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, controlService));
+
     return instance;
   }
 
+
   private static int getPropertyPort() {
-    String regionServerPort = System.getProperty("regionServerPort");
+    return Integer.parseInt(System.getProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME));
+  }
 
-    if (regionServerPort != null) {
-      return Integer.parseInt(regionServerPort);
-    }
+  private static int getWebServerPropertyPort() {
+    return Integer.parseInt(System.getProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME));
+  }
 
-    return Integer.parseInt(System.getProperty("port"));
+  private static int getControlRpcPropertyPortSet() {
+    return Integer.parseInt(System.getProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME));
   }
 
   private static boolean hasPropertyPortSet() {
-    return System.getProperties().containsKey("regionServerPort") || System.getProperties().containsKey("port");
+    return System.getProperties().containsKey(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME);
+  }
+
+  private static boolean hasWebServerPropertyPortSet() {
+    return System.getProperties().containsKey(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME);
+  }
+
+  private static boolean hasControlRpcPropertyPortSet() {
+    return System.getProperties().containsKey(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME);
   }
 }
