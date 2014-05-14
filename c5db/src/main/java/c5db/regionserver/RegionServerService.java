@@ -123,32 +123,6 @@ public class RegionServerService extends AbstractService implements RegionServer
             }
           });
 
-          if (System.getProperties().containsKey("testTable")) {
-            ByteString tableNameBytes = ByteString.copyFrom(Bytes.toBytes("testTable"));
-            TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
-            HTableDescriptor testDesc = new HTableDescriptor(tableName);
-            testDesc.addFamily(new HColumnDescriptor("cf"));
-            HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-            String peerString = String.valueOf(server.getNodeId());
-            BASE64Encoder encoder = new BASE64Encoder();
-
-            String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
-            String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
-
-            String createString = C5ServerConstants.CREATE_TABLE
-                + ":"
-                + hTableDesc
-                + ","
-                + hRegionInfo
-                + ","
-                + peerString;
-
-
-            ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, createString);
-            CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(server.getNodeId(), moduleSubCommand);
-            server.getCommandChannel().publish(commandRpcRequest);
-            LOG.warn("Creating test table");
-          }
         }
 
         @Override

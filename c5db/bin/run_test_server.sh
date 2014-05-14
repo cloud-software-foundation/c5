@@ -7,4 +7,4 @@ then
 else
 	mvn assembly:single
 fi
-java -DtestTable -cp ${MAVEN_JAR}:target/c5db-0.1-SNAPSHOT.jar c5db.Main 
+java -cp ${MAVEN_JAR}:target/c5db-0.1-SNAPSHOT.jar c5db.Main 
