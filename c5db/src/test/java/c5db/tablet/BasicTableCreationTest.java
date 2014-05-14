@@ -19,25 +19,28 @@ package c5db.tablet;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.TestHelpers;
+import c5db.discovery.generated.Availability;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
+import c5db.interfaces.discovery.NewNodeVisible;
+import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
-import org.apache.hadoop.hbase.client.Put;
-import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
-import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -48,7 +51,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -61,31 +66,25 @@ public class BasicTableCreationTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private final int QUORUM_SIZE = 100;
-  private final SettableFuture nodeNotificationsCallback = SettableFuture.create();
-
+  private final int QUORUM_SIZE = 3;
+  private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
+  private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
+  private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
+  private final MemoryChannel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
+  private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
+  private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
   private final C5Server c5Server = context.mock(C5Server.class);
   private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
   private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
   private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
   private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
-  private final Channel nodeNotifications = context.mock(Channel.class);
-  private final Region region = context.mock(Region.class);
-  private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
-  private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
-  private final MemoryChannel stateChangeChannel = new MemoryChannel();
-  private final MemoryChannel stateChannel = new MemoryChannel();
-  Replicator replicator = context.mock(Replicator.class);
-
-
+  private final Replicator replicator = context.mock(Replicator.class);
+  private final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newSingleThreadExecutor());
+  private SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
   private TabletService tabletService;
 
-  private PoolFiberFactory poolFiberFactory;
-
-
   @Before
-  public void before() throws IOException, ExecutionException, InterruptedException {
-    poolFiberFactory = new PoolFiberFactory(Executors.newSingleThreadExecutor());
+  public void before() throws IOException, ExecutionException, InterruptedException, RegionNotFoundException {
     context.checking(new Expectations() {
       {
         oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
@@ -97,14 +96,10 @@ public class BasicTableCreationTest {
     });
     tabletService = new TabletService(c5Server);
     SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
-
     replicatorSettableFuture.set(replicator);
 
     context.checking(new Expectations() {
       {
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(poolFiberFactory.create()));
 
         oneOf(c5Server).getModule(ModuleType.Discovery);
         will(returnValue(discoveryModuleFuture));
@@ -112,23 +107,17 @@ public class BasicTableCreationTest {
         oneOf(c5Server).getModule(ModuleType.Replication);
         will(returnValue(replicatorModuleFuture));
 
-        oneOf(c5Server).getConfigDirectory();
+        allowing(c5Server).getConfigDirectory();
         will(returnValue(configDirectory));
-
         // Emulate a very large quorum
-        oneOf(c5Server).isSingleNodeMode();
+        allowing(c5Server).isSingleNodeMode();
         will(returnValue(false));
 
-        oneOf(c5Server).getMinQuorumSize();
+        allowing(c5Server).getMinQuorumSize();
         will(returnValue(QUORUM_SIZE));
 
         oneOf(discoveryModule).getNewNodeNotifications();
         will(returnValue(nodeNotifications));
-
-        oneOf(nodeNotifications).subscribe(with.is(anything()), with.is(anything()));
-
-        oneOf(discoveryModule).getState();
-        will(returnValue(nodeNotificationsCallback));
 
         allowing(configDirectory).getBaseConfigPath();
         will(returnValue(Paths.get("/tmp")));
@@ -137,30 +126,62 @@ public class BasicTableCreationTest {
             with(any(String.class)),
             with.is(anything()));
         allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
-        allowing(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicatorSettableFuture));
-
-        allowing(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
-
-        allowing(replicator).getStateChannel();
-        will(returnValue(stateChannel));
-
-        allowing(replicator).start();
-
-        allowing(replicator).getQuorumId();
-        will(returnValue("hbase:meta,\\x00"));
-
       }
     });
 
     ListenableFuture<Service.State> future = tabletService.start();
+
     discoveryModuleFuture.set(discoveryModule);
+
+    context.checking(new Expectations() {{
+      oneOf(discoveryModule).getState();
+      will(returnValue(nodeNotificationsCallback));
+    }});
+
+    Map<Long, NodeInfo> nodeStates = new HashMap<>();
+    nodeStates.put(1l, new NodeInfo(new Availability()));
+    nodeStates.put(2l, new NodeInfo(new Availability()));
+    nodeStates.put(3l, new NodeInfo(new Availability()));
+
+    nodeNotificationsCallback.set(ImmutableMap.copyOf(nodeStates));
+
+    Fiber fiber = poolFiberFactory.create();
+    Fiber fiber2 = poolFiberFactory.create();
+    context.checking(new Expectations() {{
+      // Emulate a very large quorum
+
+      oneOf(c5FiberFactory).create();
+      will(returnValue(fiber));
+
+      oneOf(c5FiberFactory).create();
+      will(returnValue(fiber2));
+
+      oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+      will(returnValue(replicatorSettableFuture));
+
+      oneOf(replicator).getStateChannel();
+      will(returnValue(stateChannel));
+
+      oneOf(replicator).getStateChangeChannel();
+      will(returnValue(stateChangeChannel));
+
+      oneOf(replicator).start();
+
+      oneOf(replicator).getQuorumId();
+      will(returnValue("hbase:root,\\x00,1.33578e495f8173aac4be480afe41410a."));
+    }});
+    CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    tabletService.getTabletStateChanges().subscribe(fiber2, message -> {
+      if (message.state.equals(Tablet.State.Open)) {
+        countDownLatch.countDown();
+      }
+    });
+
+
     replicatorModuleFuture.set(replicationModule);
-
-
-    Service.State state = future.get();
-    System.out.println(state);
+    future.get();
+    countDownLatch.await();
   }
 
   @After
@@ -171,47 +192,86 @@ public class BasicTableCreationTest {
 
   @Test
   public void shouldCreateMetaEntryAppropriatelyOnTableCreation() throws Throwable {
-    final Fiber fiber = poolFiberFactory.create();
+
+    final Fiber startMetaFiber1 = poolFiberFactory.create();
+    final Fiber startMetaFiber2 = poolFiberFactory.create();
+    replicatorSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
         oneOf(c5FiberFactory).create();
-        will(returnValue(fiber));
+        will(returnValue(startMetaFiber1));
+
+        oneOf(c5FiberFactory).create();
+        will(returnValue(startMetaFiber2));
+
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        will(returnValue(replicatorSettableFuture));
+
+        oneOf(replicator).getStateChannel();
+        will(returnValue(stateChannel));
+
+        oneOf(replicator).getStateChangeChannel();
+        will(returnValue(stateChangeChannel));
+
+        oneOf(replicator).start();
+
+        oneOf(replicator).getQuorumId();
+        will(returnValue("hbase:meta,\\x00,1.33578e495f8173aac4be480afe41410a."));
+
       }
     });
 
-    ByteString tableName = ByteString.copyFromUtf8("tabletName");
-    long nodeId = 1l;
-
     tabletService.acceptCommand(C5ServerConstants.START_META + ":1,2,3");
-    Tablet tablet = tabletService.getTablet("hbase:meta");
+    replicatorSettableFuture.set(replicator);
+
     CountDownLatch countDownLatch = new CountDownLatch(1);
-    tablet.getStateChangeChannel().subscribe(fiber, new Callback<TabletStateChange>() {
-      @Override
-      public void onMessage(TabletStateChange message) {
+
+    tabletService.getTabletStateChanges().subscribe(startMetaFiber1, message -> {
+      if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")
+          && message.state.equals(Tablet.State.Open)) {
         countDownLatch.countDown();
       }
     });
     countDownLatch.await();
 
-    final Fiber fiber2 = poolFiberFactory.create();
-    final Fiber fiber3 = poolFiberFactory.create();
+    tabletService.getTablet("hbase:meta");
+    final Fiber startUserTableFiber1 = poolFiberFactory.create();
+    final Fiber startUserTableFiber2 = poolFiberFactory.create();
 
-    SettableFuture<Long> logFuture = SettableFuture.create();
+    SettableFuture<Long> longSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
-        oneOf(c5FiberFactory).create();
-        will(returnValue(fiber2));
 
         oneOf(c5FiberFactory).create();
-        will(returnValue(fiber3));
+        will(returnValue(startUserTableFiber1));
+
+        oneOf(c5FiberFactory).create();
+        will(returnValue(startUserTableFiber2));
+
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        will(returnValue(replicatorSettableFuture));
+
+        oneOf(replicator).getStateChannel();
+        will(returnValue(stateChannel));
+
+        oneOf(replicator).getStateChangeChannel();
+        will(returnValue(stateChangeChannel));
+
+        oneOf(replicator).start();
+
+        oneOf(replicator).getQuorumId();
+        will(returnValue("hbase:tabletName,\\x00,1.33578e495f8173aac4be480afe41410a."));
 
         allowing(replicator).logData(with(any(List.class)));
-        will(returnValue(logFuture));
-
+        will(returnValue(longSettableFuture));
       }
     });
+    ByteString tableName = ByteString.copyFromUtf8("tabletName");
+    long nodeId = 1l;
 
     tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName, nodeId));
+    replicatorSettableFuture.set(replicator);
+
   }
 }
 
