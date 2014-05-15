@@ -14,23 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client;
-
-import c5db.client.generated.Call;
-import c5db.client.generated.Response;
-import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInboundHandler;
+package c5db;
 
 /**
  * Created by posix4e on 5/15/14.
  */
-public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
-
-  SettableFuture<Response> call(Call request, Channel channel);
-
-  void callScan(Call request, SettableFuture<Long> future, Channel channel);
+public class C5TestServerConstants {
+  public static final String LOCALHOST = "localhost";
 }

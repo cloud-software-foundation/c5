@@ -36,64 +36,29 @@
 
 package c5db.client;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Row;
-import org.apache.hadoop.hbase.client.RowMutations;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.client.coprocessor.Batch;
 
-import java.io.IOException;
+import c5db.client.generated.Get;
+import c5db.client.generated.GetRequest;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MutateRequest;
+import c5db.client.generated.Response;
+import c5db.client.generated.Result;
+import c5db.client.generated.Scan;
+import c5db.client.generated.ScanRequest;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.List;
 
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
  */
-public interface TableInterface {
+public interface TableInterface extends AutoCloseable {
 
-  Configuration getConfiguration();
+  ListenableFuture<Response> dotGetCall(GetRequest get);
 
-  boolean exists(Get get) throws IOException;
+  ListenableFuture<Response>  doScanCall(ScanRequest scanRequest);
 
-  Boolean[] exists(List<Get> gets) throws IOException;
+  ListenableFuture<Response>  doMutateCall(MutateRequest mutateRequest);
 
-  void batch(List<? extends Row> actions, Object[] results) throws IOException, InterruptedException;
-
-  Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException;
-
-  <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback)
-      throws IOException, InterruptedException;
-
-  <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback)
-      throws IOException, InterruptedException;
-
-  Result get(Get get) throws IOException;
-
-  Result[] get(List<Get> gets) throws IOException;
-
-  ResultScanner getScanner(Scan scan) throws IOException;
-
-  ResultScanner getScanner(byte[] family) throws IOException;
-
-  ResultScanner getScanner(byte[] family, byte[] qualifier) throws IOException;
-
-  void put(Put put) throws IOException;
-
-  void put(List<Put> puts) throws IOException;
-
-  boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException;
-
-  void delete(Delete delete) throws IOException;
-
-  void delete(List<Delete> deletes) throws IOException;
-
-  boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete) throws IOException;
-
-  void mutateRow(RowMutations rm) throws IOException;
-
-  void close() throws IOException;
+  ListenableFuture<Response> doMultiCall(MultiRequest multiRequest);
 }

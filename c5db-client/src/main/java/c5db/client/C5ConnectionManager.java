@@ -16,120 +16,21 @@
  */
 package c5db.client;
 
-import c5db.client.codec.WebsocketProtostuffEncoder;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import org.mortbay.log.Log;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * A class which manages all of the outbound connections from a client to a set of regions/tablets.
+ * Created by posix4e on 5/15/14.
  */
-class C5ConnectionManager {
-  private final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
-  private final Bootstrap bootstrap = new Bootstrap();
-  private final EventLoopGroup group = new NioEventLoopGroup();
-  private URI uri;
+public interface C5ConnectionManager {
+  Channel getOrCreateChannel(byte tableName, byte row);
 
-  public C5ConnectionManager() {
-    bootstrap.group(group);
+  Channel getOrCreateChannel(String host, int port) throws InterruptedException, ExecutionException, TimeoutException;
 
+  void closeChannel(String host, int port);
 
-    try {
-      uri = new URI("ws://0.0.0.0:8080/websocket");
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-
-  }
-
-  String getHostPortHash(String host, int port) {
-    return host + ":" + port;
-  }
-
-  Channel connect(String host, int port) throws InterruptedException, TimeoutException, ExecutionException {
-    final WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(uri,
-        WebSocketVersion.V13,
-        null,
-        false,
-        new DefaultHttpHeaders());
-    final C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
-    bootstrap.channel(NioSocketChannel.class).handler(initializer);
-
-    final ChannelFuture future = bootstrap.connect(host, port);
-    final Channel channel = future.sync().channel();
-    initializer.syncOnHandshake();
-    return channel;
-  }
-
-  public Channel getOrCreateChannel(byte tableName, byte row){
-    // look up the leader in the local meta cache
-
-    return null;
-  }
-
-  public Channel getOrCreateChannel(String host, int port)
-      throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    final String hash = getHostPortHash(host, port);
-
-    if (!regionChannelMap.containsKey(hash)) {
-      final Channel channel = connect(host, port);
-      regionChannelMap.put(hash, channel);
-      Log.warn("Channel" + channel);
-      return channel;
-    }
-
-    Channel channel = regionChannelMap.get(hash);
-
-    // Clear stale channels
-    if (!(channel.isOpen() && channel.isActive() && isHandShakeConnected(channel))) {
-      closeChannel(host, port);
-      channel.disconnect();
-      channel = getOrCreateChannel(host, port);
-    }
-
-    return channel;
-  }
-
-  private boolean isHandShakeConnected(Channel channel) {
-    final ChannelPipeline pipeline = channel.pipeline();
-    final WebsocketProtostuffEncoder encoder = pipeline.get(WebsocketProtostuffEncoder.class);
-    return encoder.getHandShaker().isHandshakeComplete();
-  }
-
-  public void closeChannel(String host, int port)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    final String hash = getHostPortHash(host, port);
-    regionChannelMap.remove(hash);
-  }
-
-  public void close() throws InterruptedException {
-    final List<ChannelFuture> channels = new ArrayList<>();
-    for (Channel channel : regionChannelMap.getValues()) {
-      final ChannelFuture channelFuture = channel.close();
-      channels.add(channelFuture);
-    }
-
-    regionChannelMap.clear();
-    for (ChannelFuture future : channels) {
-      future.sync();
-    }
-    group.shutdownGracefully();
-  }
+  void close() throws InterruptedException;
 }

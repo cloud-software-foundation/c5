@@ -186,7 +186,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             rootTabletLeaderBehavior.start();
           } catch (IOException e) {
             e.printStackTrace();
-            System.exit(0);
+
           }
         } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
             // Have the meta leader update the root region with it being marked as the leader

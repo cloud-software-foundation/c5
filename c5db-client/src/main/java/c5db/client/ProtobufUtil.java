@@ -57,6 +57,7 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -75,6 +76,7 @@ public class ProtobufUtil {
    * @param proto the protocol buffer Result to convert
    * @return the converted client Result
    */
+  @NotNull
   public static Result toResult(final c5db.client.generated.Result proto) {
     if (proto == null) {
       return null;
@@ -87,6 +89,7 @@ public class ProtobufUtil {
     return Result.create(cells);
   }
 
+  @NotNull
   private static Cell toCell(c5db.client.generated.Cell c) {
 
     return CellUtil.createCell(c.getRow().array(),
@@ -105,6 +108,7 @@ public class ProtobufUtil {
    * @return a protocol buffer Get
    * @throws IOException
    */
+  @NotNull
   public static c5db.client.generated.Get toGet(final Get get, boolean existenceOnly) throws IOException {
 
     c5db.client.generated.TimeRange timeRange;
@@ -167,6 +171,7 @@ public class ProtobufUtil {
    * @param filter the Filter to convert
    * @return the converted protocol buffer Filter
    */
+  @NotNull
   private static c5db.client.generated.Filter toFilter(Filter filter) throws IOException {
     if (filter == null) {
       return new c5db.client.generated.Filter();
@@ -181,6 +186,7 @@ public class ProtobufUtil {
    * @param mutation The client Mutation
    * @return a protobuf Mutation
    */
+  @NotNull
   public static MutationProto toMutation(final MutationProto.MutationType type,
                                          final Mutation mutation) {
 
@@ -238,6 +244,7 @@ public class ProtobufUtil {
    * @param type The delete type to make
    * @return protocol buffer DeleteType
    */
+  @NotNull
   public static MutationProto.DeleteType toDeleteType(KeyValue.Type type) {
     switch (type) {
       case Delete:
@@ -258,6 +265,7 @@ public class ProtobufUtil {
    * @return the converted protocol buffer Scan
    * @throws IOException
    */
+  @NotNull
   public static c5db.client.generated.Scan toScan(final Scan scan) throws IOException {
 
     boolean cacheBlocks = scan.getCacheBlocks();
@@ -324,19 +332,20 @@ public class ProtobufUtil {
         loadColumnFamiliesOnDemand,
         false);
   }
-
+  @NotNull
   public static Call getGetCall(long commandId, GetRequest get) {
     return new Call(Call.Command.GET, commandId, get, null, null, null);
   }
-
+  @NotNull
   public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
     return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null);
   }
-
+  @NotNull
   public static Call getScanCall(long commandId, ScanRequest scanRequest) {
     return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
   }
 
+  @NotNull
   public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
     return new Call(Call.Command.MULTI, commandId, null, null, null, multiRequest);
   }
@@ -347,6 +356,7 @@ public class ProtobufUtil {
    * @param proto the protocol buffer Result to convert
    * @return the converted client Result
    */
+  @NotNull
   public static Result toResultExists(final c5db.client.generated.Result proto) {
     if (proto == null) {
       return null;
@@ -360,6 +370,7 @@ public class ProtobufUtil {
    * @param comparator the ByteArrayComparable to convert
    * @return the converted protocol buffer Comparator
    */
+  @NotNull
   public static Comparator toComparator(ByteArrayComparable comparator) {
     return new Comparator(comparator.getClass().getName(), comparator.getValue());
   }

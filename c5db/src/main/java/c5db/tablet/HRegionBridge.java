@@ -59,7 +59,7 @@ public class HRegionBridge implements Region {
           null);
     } catch (IOException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
   }
 
@@ -89,7 +89,7 @@ public class HRegionBridge implements Region {
       return getTheRegion().getScanner(scan);
     } catch (IOException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
     return null;
   }
