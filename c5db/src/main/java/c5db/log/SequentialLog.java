@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * only be added to the sequence by appending, and entries can only be removed from the sequence
  * by truncating from the end. Entries cannot be changed in place (except by truncating and then
  * appending).
- * <p/>
+ * <p>
  * This structure does not have the notion of quorums; SequentialLog only contains one ascending
  * sequence of log entries.
  *
@@ -64,7 +64,7 @@ public interface SequentialLog<E extends SequentialEntry> extends AutoCloseable 
   boolean isEmpty() throws IOException;
 
   /**
-   * Retrieve the last entry in the log.
+   * Retrieve the last entry in the log, or null if the log is empty.
    *
    * @return The last entry.
    * @throws IOException
@@ -109,6 +109,10 @@ public interface SequentialLog<E extends SequentialEntry> extends AutoCloseable 
     public LogEntryNotFound(Throwable cause) {
       super(cause);
     }
+
+    public LogEntryNotFound(String s) {
+      super(s);
+    }
   }
 
   /**
@@ -117,6 +121,10 @@ public interface SequentialLog<E extends SequentialEntry> extends AutoCloseable 
   class LogEntryNotInSequence extends RuntimeException {
     public LogEntryNotInSequence() {
       super();
+    }
+
+    public LogEntryNotInSequence(String s) {
+      super(s);
     }
   }
 }

@@ -17,8 +17,10 @@
 
 package c5db.replication;
 
+import c5db.interfaces.replication.IllegalQuorumBootstrapException;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.log.ReplicatorLog;
 import c5db.replication.generated.AppendEntries;
 import c5db.replication.generated.AppendEntriesReply;
@@ -29,12 +31,9 @@ import c5db.replication.rpc.RpcReply;
 import c5db.replication.rpc.RpcRequest;
 import c5db.replication.rpc.RpcWireReply;
 import c5db.replication.rpc.RpcWireRequest;
+import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.SortedMultiset;
-import com.google.common.collect.TreeMultiset;
-import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -52,14 +51,17 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import c5db.interfaces.replication.ReplicatorInstanceEvent;
 
 
 /**
@@ -70,87 +72,63 @@ import c5db.interfaces.replication.ReplicatorInstanceEvent;
  * with the log package via {@link c5db.log.ReplicatorLog}.
  */
 public class ReplicatorInstance implements Replicator {
-  @Override
-  public String toString() {
-    return "ReplicatorInstance{" +
-        "myId=" + myId +
-        ", quorumId='" + quorumId + '\'' +
-        ", lastCommittedIndex=" + lastCommittedIndex +
-        ", myState=" + myState +
-        ", currentTerm=" + currentTerm +
-        ", votedFor=" + votedFor +
-        ", lastRPC=" + lastRPC +
-        '}';
-  }
 
-  private final MemoryChannel<State> stateMemoryChannel = new MemoryChannel<>();
-
-  public RequestChannel<RpcWireRequest, RpcReply> getIncomingChannel() {
-    return incomingChannel;
-  }
-
-  private final RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel;
+  private final Channel<State> stateMemoryChannel = new MemoryChannel<>();
   private final RequestChannel<RpcWireRequest, RpcReply> incomingChannel = new MemoryRequestChannel<>();
+  private final RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel;
   private final Channel<ReplicatorInstanceEvent> stateChangeChannel;
   private final Channel<IndexCommitNotice> commitNoticeChannel;
 
-  /**
-   * ******* final fields ************
-   */
   private final Fiber fiber;
   private final long myId;
   private final String quorumId;
   private final Logger logger;
+  private final ReplicatorLog log;
+  private final long myElectionTimeout;
 
-  private final ImmutableList<Long> peers;
+  final ReplicatorInformationInterface info;
+  final ReplicatorInfoPersistence persister;
 
   /**
-   * *** These next few fields are used when we are a leader ******
+   * state used by leader
    */
+
+  private final BlockingQueue<InternalReplicationRequest> logRequests = new ArrayBlockingQueue<>(100);
+
   // this is the next index from our log we need to send to each peer, kept track of on a per-peer basis.
-  private HashMap<Long, Long> peersNextIndex;
-  // The last succesfully acked message from our peers.  I also keep track of my own acked log messages in here.
-  private HashMap<Long, Long> peersLastAckedIndex;
+  private final Map<Long, Long> peersNextIndex = new HashMap<>();
+
+  // The last successfully acked message from our peers.  I also keep track of my own acked log messages in here.
+  private final Map<Long, Long> peersLastAckedIndex = new HashMap<>();
+
   private long myFirstIndexAsLeader;
   private long lastCommittedIndex;
 
-  @Override
-  public String getQuorumId() {
-    return quorumId;
-  }
+  /**
+   * state, in theory persistent
+   */
 
-  private static class IntLogRequest {
-    public final List<ByteBuffer> data;
-    public final SettableFuture<Long> logNumberNotifation;
+  long currentTerm;
+  private long votedFor;
+  private QuorumConfiguration quorumConfig = QuorumConfiguration.EMPTY;
+  private long quorumConfigIndex = 0;
 
-    private IntLogRequest(List<ByteBuffer> data) {
-      this.data = data;
-      this.logNumberNotifation = SettableFuture.create();
-    }
-  }
-
-  private final BlockingQueue<IntLogRequest> logRequests = new ArrayBlockingQueue<>(100);
+  /**
+   * state, not persistent
+   */
 
   State myState = State.FOLLOWER;
 
-  // In theory these are persistent:
-  long currentTerm;
-  long votedFor;
-
   // Election timers, etc.
   private long lastRPC;
-  private long myElectionTimeout;
   private long whosLeader = 0;
-  private Disposable electionChecker;
+  @SuppressWarnings("UnusedDeclaration")
+  private final Disposable electionChecker;
 
-  private final ReplicatorLog log;
-  final ReplicatorInformationInterface info;
-  final ReplicatorInfoPersistence persister;
 
   public ReplicatorInstance(final Fiber fiber,
                             final long myId,
                             final String quorumId,
-                            List<Long> peers,
                             ReplicatorLog log,
                             ReplicatorInformationInterface info,
                             ReplicatorInfoPersistence persister,
@@ -161,7 +139,6 @@ public class ReplicatorInstance implements Replicator {
     this.myId = myId;
     this.quorumId = quorumId;
     this.logger = getNewLogger();
-    this.peers = ImmutableList.copyOf(peers);
     this.sendRpcChannel = sendRpcChannel;
     this.log = log;
     this.info = info;
@@ -173,7 +150,7 @@ public class ReplicatorInstance implements Replicator {
     this.lastRPC = info.currentTimeMillis();
     this.lastCommittedIndex = 0;
 
-    assert this.peers.contains(this.myId);
+    refreshQuorumConfigurationFromLog();
 
     fiber.execute(() -> {
       try {
@@ -184,11 +161,12 @@ public class ReplicatorInstance implements Replicator {
                 ReplicatorInstanceEvent.EventType.QUORUM_START,
                 ReplicatorInstance.this,
                 0,
+                0,
                 info.currentTimeMillis(),
                 null)
         );
       } catch (IOException e) {
-        logger.error("error during persistent data init {}", e);
+        logger.error("error during persistent data init", e);
         failReplicatorInstance(e);
       }
     });
@@ -207,7 +185,6 @@ public class ReplicatorInstance implements Replicator {
   ReplicatorInstance(final Fiber fiber,
                      final long myId,
                      final String quorumId,
-                     List<Long> peers,
                      ReplicatorLog log,
                      ReplicatorInformationInterface info,
                      ReplicatorInfoPersistence persister,
@@ -224,7 +201,6 @@ public class ReplicatorInstance implements Replicator {
     this.myId = myId;
     this.quorumId = quorumId;
     this.logger = getNewLogger();
-    this.peers = ImmutableList.copyOf(peers);
     this.sendRpcChannel = sendRpcChannel;
     this.log = log;
     this.info = info;
@@ -233,10 +209,6 @@ public class ReplicatorInstance implements Replicator {
     this.commitNoticeChannel = commitNoticeChannel;
     this.myElectionTimeout = info.electionTimeout();
     this.lastRPC = info.currentTimeMillis();
-
-    assert this.peers.contains(this.myId);
-    assert votedFor == 0 || this.peers.contains(votedFor);
-    assert leaderId == 0 || this.peers.contains(leaderId);
 
     incomingChannel.subscribe(fiber, this::onIncomingMessage);
     electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection,
@@ -250,6 +222,8 @@ public class ReplicatorInstance implements Replicator {
     this.whosLeader = leaderId;
     this.votedFor = votedFor;
 
+    refreshQuorumConfigurationFromLog();
+
     try {
       persister.writeCurrentTermAndVotedFor(quorumId, currentTerm, votedFor);
     } catch (IOException e) {
@@ -261,19 +235,30 @@ public class ReplicatorInstance implements Replicator {
     }
   }
 
-  void failReplicatorInstance(Throwable e) {
-    stateChangeChannel.publish(
-        new ReplicatorInstanceEvent(
-            ReplicatorInstanceEvent.EventType.QUORUM_FAILURE,
-            this,
-            0,
-            info.currentTimeMillis(),
-            e)
-    );
-    fiber.dispose(); // kill us forever.
+  /**
+   * public API
+   */
+
+  @Override
+  public String getQuorumId() {
+    return quorumId;
   }
 
-  // public API:
+  @Override
+  public QuorumConfiguration getQuorumConfiguration() {
+    return quorumConfig;
+  }
+
+  @Override
+  public ListenableFuture<Long> changeQuorum(Collection<Long> newPeers) throws InterruptedException {
+    if (!isLeader()) {
+      logger.debug("attempted to changeQuorum on a non-leader");
+      return null;
+    }
+
+    final QuorumConfiguration transitionConfig = quorumConfig.getTransitionalConfiguration(newPeers);
+    return putQuorumChangeRequest(transitionConfig);
+  }
 
   @Override
   public ListenableFuture<Long> logData(List<ByteBuffer> data) throws InterruptedException {
@@ -282,11 +267,151 @@ public class ReplicatorInstance implements Replicator {
       return null;
     }
 
-    IntLogRequest req = new IntLogRequest(data);
+    InternalReplicationRequest req = InternalReplicationRequest.toLogData(data);
     logRequests.put(req);
 
     // TODO return the durable notification future?
-    return req.logNumberNotifation;
+    return req.logNumberNotification;
+  }
+
+  @Override
+  public long getId() {
+    return myId;
+  }
+
+  @Override
+  public boolean isLeader() {
+    return myState == State.LEADER;
+  }
+
+  @Override
+  public void start() {
+    logger.debug("started {} with election timeout {}", this.quorumId, this.myElectionTimeout);
+    fiber.start();
+  }
+
+  @Override
+  public String toString() {
+    return "ReplicatorInstance{" +
+        "myId=" + myId +
+        ", quorumId='" + quorumId + '\'' +
+        ", quorumConfig='" + quorumConfig + '\'' +
+        ", lastCommittedIndex=" + lastCommittedIndex +
+        ", myState=" + myState +
+        ", currentTerm=" + currentTerm +
+        ", votedFor=" + votedFor +
+        ", lastRPC=" + lastRPC +
+        '}';
+  }
+
+  @Override
+  public Channel<State> getStateChannel() {
+    return stateMemoryChannel;
+  }
+
+  public RequestChannel<RpcWireRequest, RpcReply> getIncomingChannel() {
+    return incomingChannel;
+  }
+
+  public void dispose() {
+    fiber.dispose();
+  }
+
+  /**
+   * Call this method on each replicator in a new quorum in order to establish the quorum
+   * configuration and elect a leader.
+   * <p>
+   * Before a quorum (a group of cooperating replicators) may process replication requests
+   * it must elect a leader. But a leader cannot elect itself unless it's aware of its peers,
+   * which requires it to log a quorum configuration entry containing that peer set. This
+   * method chooses a replicator, promotes it to leader, and has it log that first entry.
+   * Because it creates a leader without an election, it's dangerous to call on any peer
+   * that's already part of an active quorum.
+   *
+   * @param peerIds Collection of peers in the new quorum.
+   * @return A future which will return the log entry index of the new quorum's configuration
+   * entry, when it is known. The actual completion of the bootstrap will be signaled by the
+   * commitment of the log entry at the returned index.
+   */
+  public ListenableFuture<Long> bootstrapQuorum(Collection<Long> peerIds) {
+    assert peerIds.size() > 0;
+
+    if (!quorumConfig.isEmpty() || myState != State.FOLLOWER || log.getLastIndex() != 0) {
+      throw new IllegalQuorumBootstrapException("Replicator is already part of an active quorum");
+    }
+
+    // Choose the peer with the least id.
+    if (Collections.min(peerIds) != myId) {
+      return Futures.immediateFuture(0L);
+    }
+
+    final QuorumConfiguration config = QuorumConfiguration.of(peerIds);
+    final SettableFuture<Long> logIndexFuture = SettableFuture.create();
+
+    fiber.execute(() -> {
+      try {
+        setCurrentTerm(currentTerm + 1);
+        becomeLeader();
+        C5Futures.addCallback(
+            offerQuorumChangeRequest(config),
+            logIndexFuture::set,
+            logIndexFuture::setException,
+            fiber);
+      } catch (Throwable t) {
+        logger.error("error trying to bootstrap quorum", t);
+      }
+    });
+
+    return logIndexFuture;
+  }
+
+
+  void failReplicatorInstance(Throwable e) {
+    stateChangeChannel.publish(
+        new ReplicatorInstanceEvent(
+            ReplicatorInstanceEvent.EventType.QUORUM_FAILURE,
+            this,
+            0,
+            0,
+            info.currentTimeMillis(),
+            e)
+    );
+    fiber.dispose(); // kill us forever.
+  }
+
+  /**
+   * Submits a request to change the quorum, blocking if necessary until the request
+   * queue can accept the request.
+   *
+   * @return A future which will return the log index of the quorum configuration entry,
+   */
+  private ListenableFuture<Long> putQuorumChangeRequest(QuorumConfiguration quorumConfig)
+      throws InterruptedException {
+    InternalReplicationRequest req = InternalReplicationRequest.toChangeConfig(quorumConfig);
+    logRequests.put(req);
+    return req.logNumberNotification;
+  }
+
+  /**
+   * Submits a request to change the quorum, but only if it is possible to do so without blocking.
+   *
+   * @return A future which will return the log index of the quorum configuration entry,
+   * or null if it was not possible to submit the request without blocking.
+   */
+  @FiberOnly
+  private ListenableFuture<Long> offerQuorumChangeRequest(QuorumConfiguration quorumConfig) {
+    if (this.quorumConfig.equals(quorumConfig)) {
+      logger.warn("got a request to change quorum to but I'm already in that quorum config {} ", quorumConfig);
+      return null;
+    }
+
+    InternalReplicationRequest req = InternalReplicationRequest.toChangeConfig(quorumConfig);
+    if (logRequests.offer(req)) {
+      return req.logNumberNotification;
+    } else {
+      logger.warn("change request could not be submitted because log request queue was full {}", quorumConfig);
+      return null;
+    }
   }
 
   @FiberOnly
@@ -297,18 +422,21 @@ public class ReplicatorInstance implements Replicator {
 
   @FiberOnly
   private void onIncomingMessage(Request<RpcWireRequest, RpcReply> message) {
-    RpcWireRequest req = message.getRequest();
-    if (req.isRequestVoteMessage()) {
-      doRequestVote(message);
+    try {
+      RpcWireRequest req = message.getRequest();
+      if (req.isRequestVoteMessage()) {
+        doRequestVote(message);
 
-    } else if (req.isAppendMessage()) {
-      doAppendMessage(message);
+      } else if (req.isAppendMessage()) {
+        doAppendMessage(message);
 
-
-    } else {
-      logger.warn("got a message of protobuf type I dont know: {}", req);
+      } else {
+        logger.warn("got a message of protobuf type I don't know: {}", req);
+      }
+    } catch (Exception e) {
+      logger.error("exception while processing message {}: {}", message, e);
+      throw e;
     }
-
   }
 
   @FiberOnly
@@ -332,7 +460,7 @@ public class ReplicatorInstance implements Replicator {
       if (myState != State.FOLLOWER) {
         logger.debug("stepping down to follower, currentTerm: {}", currentTerm);
 
-        haltLeader();
+        becomeFollower();
       }
     }
 
@@ -366,10 +494,7 @@ public class ReplicatorInstance implements Replicator {
 
     // 1. return if term < currentTerm (sec 5.1)
     if (appendMessage.getTerm() < currentTerm) {
-      // TODO is this the correct message reply?
-      AppendEntriesReply m = new AppendEntriesReply(currentTerm, false, 0);
-      RpcReply reply = new RpcReply(m);
-      request.reply(reply);
+      appendReply(request, false);
       return;
     }
 
@@ -380,7 +505,7 @@ public class ReplicatorInstance implements Replicator {
 
     // 3. Step down if we are a leader or a candidate (sec 5.2, 5.5)
     if (myState != State.FOLLOWER) {
-      haltLeader();
+      becomeFollower();
     }
 
     // 4. reset election timeout
@@ -388,17 +513,7 @@ public class ReplicatorInstance implements Replicator {
 
     long theLeader = appendMessage.getLeaderId();
     if (whosLeader != theLeader) {
-      logger.debug("discovered new leader: {}", theLeader);
-      whosLeader = theLeader;
-
-      stateChangeChannel.publish(
-          new ReplicatorInstanceEvent(
-              ReplicatorInstanceEvent.EventType.LEADER_ELECTED,
-              this,
-              whosLeader,
-              info.currentTimeMillis(),
-              null)
-      );
+      acknowledgeNewLeader(theLeader);
     }
 
     // 5. return failure if log doesn't contain an entry at
@@ -407,16 +522,14 @@ public class ReplicatorInstance implements Replicator {
     long msgPrevLogIndex = appendMessage.getPrevLogIndex();
     long msgPrevLogTerm = appendMessage.getPrevLogTerm();
     if (msgPrevLogIndex != 0 && log.getLogTerm(msgPrevLogIndex) != msgPrevLogTerm) {
-      AppendEntriesReply m = new AppendEntriesReply(currentTerm, false, log.getLastIndex());
+      AppendEntriesReply m = new AppendEntriesReply(currentTerm, false, log.getLastIndex() + 1);
       RpcReply reply = new RpcReply(m);
       request.reply(reply);
       return;
     }
 
     if (appendMessage.getEntriesList().isEmpty()) {
-      AppendEntriesReply m = new AppendEntriesReply(currentTerm, true, 0);
-      RpcReply reply = new RpcReply(m);
-      request.reply(reply);
+      appendReply(request, true);
       long newCommitIndex = Math.min(appendMessage.getCommitIndex(), log.getLastIndex());
       setLastCommittedIndex(newCommitIndex);
       return;
@@ -426,61 +539,70 @@ public class ReplicatorInstance implements Replicator {
     // existing entries starting with first conflicting entry (sec 5.3)
     // nb: The process in which we fix the local log may involve a async log operation, so that is entirely
     // hidden up in this future.  Note that the process can fail, so we handle that as well.
-    ListenableFuture<ArrayList<LogEntry>> entriesToCommitFuture = validateAndFixLocalLog(request, appendMessage);
-    Futures.addCallback(entriesToCommitFuture, new FutureCallback<ArrayList<LogEntry>>() {
-      @Override
-      public void onSuccess(ArrayList<LogEntry> entriesToCommit) {
+    ListenableFuture<ArrayList<LogEntry>> entriesToCommitFuture = validateAndFixLocalLog(appendMessage);
+    // TODO this method of placing callbacks on the replicator's fiber can cause race conditions
+    // TODO since later-received messages can be handled prior to the callback on earlier-received messages
+    C5Futures.addCallback(entriesToCommitFuture,
+        (entriesToCommit) -> {
+          // 7. Append any new entries not already in the log.
+          ListenableFuture<Boolean> logCommitNotification = log.logEntries(entriesToCommit);
+          refreshQuorumConfigurationFromLog();
 
-        // 7. Append any new entries not already in the log.
-        ListenableFuture<Boolean> logCommitNotification = log.logEntries(entriesToCommit);
+          // 8. apply newly committed entries to state machine
 
-        // 8. apply newly committed entries to state machine
+          // wait for the log to commit before returning message.  But do so async.
+          C5Futures.addCallback(logCommitNotification,
+              (result) -> {
+                appendReply(request, true);
 
-        // wait for the log to commit before returning message.  But do so async.
-        Futures.addCallback(logCommitNotification, new FutureCallback<Boolean>() {
-          @Override
-          public void onSuccess(Boolean result) {
-            AppendEntriesReply m = new AppendEntriesReply(currentTerm, true, 0);
-            RpcReply reply = new RpcReply(m);
-            request.reply(reply);
+                // Notify and mark the last committed index.
+                long newCommitIndex = Math.min(appendMessage.getCommitIndex(), log.getLastIndex());
+                setLastCommittedIndex(newCommitIndex);
+              },
+              (Throwable t) -> {
+                // TODO A log commit failure is probably a fatal error. Quit the instance?
+                // TODO better error reporting. A log commit failure will be a serious issue.
+                logger.error("failure appending new entries to log", t);
+                appendReply(request, false);
+              }, fiber);
 
-            // Notify and mark the last committed index.
-            long newCommitIndex = Math.min(appendMessage.getCommitIndex(), log.getLastIndex());
-            setLastCommittedIndex(newCommitIndex);
-          }
-
-          @Override
-          public void onFailure(Throwable t) {
-            // TODO A log commit failure is probably a fatal error. Quit the instance?
-            // TODO better error reporting. A log commit failure will be a serious issue.
-            AppendEntriesReply m = new AppendEntriesReply(currentTerm, false, 0);
-
-            RpcReply reply = new RpcReply(m);
-            request.reply(reply);
-          }
+        },
+        (Throwable t) -> {
+          logger.error("failure validating and fixing local log", t);
+          appendReply(request, false);
         }, fiber);
-
-      }
-
-      @Override
-      public void onFailure(Throwable t) {
-        AppendEntriesReply m = new AppendEntriesReply(currentTerm, false, 0);
-        RpcReply reply = new RpcReply(m);
-        request.reply(reply);
-      }
-    }, fiber);
   }
 
-  private ListenableFuture<ArrayList<LogEntry>> validateAndFixLocalLog(Request<RpcWireRequest, RpcReply> request,
-                                                                       AppendEntries appendMessage) {
+  private void appendReply(Request<RpcWireRequest, RpcReply> request, boolean success) {
+    AppendEntriesReply m = new AppendEntriesReply(currentTerm, success, 0);
+    RpcReply reply = new RpcReply(m);
+    request.reply(reply);
+  }
+
+  @FiberOnly
+  private void acknowledgeNewLeader(long theLeader) {
+    logger.debug("discovered new leader: {}", theLeader);
+    whosLeader = theLeader;
+
+    stateChangeChannel.publish(
+        new ReplicatorInstanceEvent(
+            ReplicatorInstanceEvent.EventType.LEADER_ELECTED,
+            this,
+            whosLeader,
+            currentTerm,
+            info.currentTimeMillis(),
+            null)
+    );
+  }
+
+  private ListenableFuture<ArrayList<LogEntry>> validateAndFixLocalLog(AppendEntries appendMessage) {
     final SettableFuture<ArrayList<LogEntry>> future = SettableFuture.create();
 
-    validateAndFixLocalLog0(request, appendMessage, future);
+    validateAndFixLocalLog0(appendMessage, future);
     return future;
   }
 
-  private void validateAndFixLocalLog0(final Request<RpcWireRequest, RpcReply> request,
-                                       final AppendEntries appendMessage,
+  private void validateAndFixLocalLog0(final AppendEntries appendMessage,
                                        final SettableFuture<ArrayList<LogEntry>> future) {
 
     // 6. if existing entries conflict with new entries, delete all
@@ -526,24 +648,18 @@ public class ReplicatorInstance implements Replicator {
 
         // delete this and all subsequent entries:
         ListenableFuture<Boolean> truncateResult = log.truncateLog(entryIndex);
-        Futures.addCallback(truncateResult, new FutureCallback<Boolean>() {
-          @Override
-          public void onSuccess(Boolean ignored) {
-            // Recurse, which involved a little redo work, but at makes this code easier to reason about.
-            validateAndFixLocalLog0(request, appendMessage, future);
-          }
+        C5Futures.addCallback(truncateResult,
+            (result) ->
+                // Recurse, which involved a little redo work, but at makes this code easier to reason about.
+                validateAndFixLocalLog0(appendMessage, future),
 
-          @Override
-          public void onFailure(Throwable t) {
-            failReplicatorInstance(t);
-            future.setException(t); // TODO determine if this is the proper thing to do here?
-          }
-        }, fiber);
+            (Throwable t) -> {
+              failReplicatorInstance(t);
+              future.setException(t); // TODO determine if this is the proper thing to do here?
+            }, fiber);
 
         return;
-      } //else {
-      // this log entry did NOT conflict we dont need to re-commit this entry.
-      //}
+      }
     }
     future.set(entriesToCommit);
   }
@@ -555,14 +671,11 @@ public class ReplicatorInstance implements Replicator {
       return;
     }
 
-    if (lastRPC + this.myElectionTimeout < info.currentTimeMillis()) {
+    if (lastRPC + this.myElectionTimeout < info.currentTimeMillis()
+        && quorumConfig.allPeers().contains(myId)) {
       logger.trace("timed out checking on election, try new election");
       doElection();
     }
-  }
-
-  private int calculateMajority(int peerCount) {
-    return (int) Math.ceil((peerCount + 1) / 2.0);
   }
 
   @FiberOnly
@@ -572,11 +685,11 @@ public class ReplicatorInstance implements Replicator {
             ReplicatorInstanceEvent.EventType.ELECTION_TIMEOUT,
             this,
             0,
+            0,
             info.currentTimeMillis(),
             null)
     );
 
-    final int majority = calculateMajority(peers.size());
     // Start new election "timer".
     lastRPC = info.currentTimeMillis();
     // increment term.
@@ -588,20 +701,19 @@ public class ReplicatorInstance implements Replicator {
     logger.debug("starting election for currentTerm: {}", currentTerm);
 
     final long termBeingVotedFor = currentTerm;
-    final List<Long> votes = new ArrayList<>();
-    for (long peer : peers) {
+    final Set<Long> votes = new HashSet<>();
+    for (long peer : quorumConfig.allPeers()) {
       RpcRequest req = new RpcRequest(peer, myId, quorumId, msg);
       AsyncRequest.withOneReply(fiber, sendRpcChannel, req,
-          message -> handleElectionReply0(message, termBeingVotedFor, votes, majority),
-          1, TimeUnit.SECONDS, new RequestVoteTimeout(req, termBeingVotedFor, votes, majority));
+          message -> handleElectionReply0(message, termBeingVotedFor, votes),
+          1, TimeUnit.SECONDS, new RequestVoteTimeout(req, termBeingVotedFor, votes));
     }
   }
 
   private class RequestVoteTimeout implements Runnable {
     public final RpcRequest request;
     public final long termBeingVotedFor;
-    public final List<Long> votes;
-    public final int majority;
+    public final Set<Long> votes;
 
     @Override
     public String toString() {
@@ -609,15 +721,13 @@ public class ReplicatorInstance implements Replicator {
           "request=" + request +
           ", termBeingVotedFor=" + termBeingVotedFor +
           ", votes=" + votes +
-          ", majority=" + majority +
           '}';
     }
 
-    private RequestVoteTimeout(RpcRequest request, long termBeingVotedFor, List<Long> votes, int majority) {
+    private RequestVoteTimeout(RpcRequest request, long termBeingVotedFor, Set<Long> votes) {
       this.request = request;
       this.termBeingVotedFor = termBeingVotedFor;
       this.votes = votes;
-      this.majority = majority;
     }
 
     @Override
@@ -637,13 +747,14 @@ public class ReplicatorInstance implements Replicator {
 
       // Note we are using 'this' as the recursive timeout.
       AsyncRequest.withOneReply(fiber, sendRpcChannel, request,
-          message -> handleElectionReply0(message, termBeingVotedFor, votes, majority),
+          message -> handleElectionReply0(message, termBeingVotedFor, votes),
           1, TimeUnit.SECONDS, this);
     }
   }
 
   // RPC callback for timeouts
-  private void handleElectionReply0(RpcWireReply message, long termBeingVotedFor, List<Long> votes, int majority) {
+  @FiberOnly
+  private void handleElectionReply0(RpcWireReply message, long termBeingVotedFor, Set<Long> votes) {
     // if current term has advanced, these replies are stale and should be ignored:
 
     if (message == null) {
@@ -684,10 +795,13 @@ public class ReplicatorInstance implements Replicator {
       votes.add(message.from);
     }
 
-    if (votes.size() >= majority) {
-
+    if (votesConstituteMajority(votes)) {
       becomeLeader();
     }
+  }
+
+  private boolean votesConstituteMajority(Set<Long> votes) {
+    return quorumConfig.setContainsMajority(votes);
   }
 
 
@@ -695,17 +809,20 @@ public class ReplicatorInstance implements Replicator {
   private Disposable queueConsumer;
 
   @FiberOnly
-  private void haltLeader() {
+  private void becomeFollower() {
+    boolean wasLeader = myState == State.LEADER;
     myState = State.FOLLOWER;
 
-    stateChangeChannel.publish(
-        new ReplicatorInstanceEvent(
-            ReplicatorInstanceEvent.EventType.LEADER_DEPOSED,
-            this,
-            0,
-            info.currentTimeMillis(),
-            null)
-    );
+    if (wasLeader) {
+      stateChangeChannel.publish(
+          new ReplicatorInstanceEvent(
+              ReplicatorInstanceEvent.EventType.LEADER_DEPOSED,
+              this,
+              0,
+              0,
+              info.currentTimeMillis(),
+              null));
+    }
 
     stopQueueConsumer();
   }
@@ -718,6 +835,7 @@ public class ReplicatorInstance implements Replicator {
     }
   }
 
+  @FiberOnly
   private void becomeLeader() {
     logger.warn("I AM THE LEADER NOW, commence AppendEntries RPCs term = {}", currentTerm);
 
@@ -727,29 +845,25 @@ public class ReplicatorInstance implements Replicator {
     // Page 7, para 5
     long myNextLog = log.getLastIndex() + 1;
 
-    peersLastAckedIndex = new HashMap<>(peers.size());
-    peersNextIndex = new HashMap<>(peers.size() - 1);
-    for (long peer : peers) {
-      if (peer == myId) {
-        continue;
-      }
+    peersLastAckedIndex.clear();
+    peersNextIndex.clear();
 
+    for (long peer : allPeersExceptMe()) {
       peersNextIndex.put(peer, myNextLog);
     }
 
     // none so far!
     myFirstIndexAsLeader = 0;
 
-
     stateChangeChannel.publish(
         new ReplicatorInstanceEvent(
             ReplicatorInstanceEvent.EventType.LEADER_ELECTED,
             this,
             myId,
+            currentTerm,
             info.currentTimeMillis(),
             null)
     );
-
 
     startQueueConsumer();
   }
@@ -759,7 +873,9 @@ public class ReplicatorInstance implements Replicator {
     queueConsumer = fiber.scheduleAtFixedRate(() -> {
       try {
         consumeQueue();
+        checkOnQuorumChange();
       } catch (Throwable t) {
+        logger.error("Exception in consumeQueue: ", t);
         failReplicatorInstance(t);
       }
     }, 0, info.groupCommitDelay(), TimeUnit.MILLISECONDS);
@@ -768,7 +884,7 @@ public class ReplicatorInstance implements Replicator {
   @FiberOnly
   private void consumeQueue() {
     // retrieve as many items as possible. send rpc.
-    final List<IntLogRequest> reqs = new ArrayList<>();
+    final List<InternalReplicationRequest> reqs = new ArrayList<>();
 
     logger.trace("queue consuming");
     while (logRequests.peek() != null) {
@@ -782,18 +898,14 @@ public class ReplicatorInstance implements Replicator {
 
     List<LogEntry> newLogEntries = createLogEntriesFromIntRequests(reqs, firstIndexInList);
     leaderLogNewEntries(newLogEntries, lastIndexInList);
+    refreshQuorumConfigurationFromLog();
 
     assert lastIndexInList == log.getLastIndex();
 
-    final int majority = calculateMajority(peers.size());
-
-    for (final long peer : peers) {
-      if (myId == peer) {
-        continue; // dont send myself messages.
-      }
+    for (final long peer : allPeersExceptMe()) {
 
       // for each peer, figure out how many "back messages" should I send:
-      final long peerNextIdx = this.peersNextIndex.get(peer);
+      final long peerNextIdx = this.peersNextIndex.getOrDefault(peer, firstIndexInList);
 
       if (peerNextIdx < firstIndexInList) {
         final long moreCount = firstIndexInList - peerNextIdx;
@@ -802,52 +914,69 @@ public class ReplicatorInstance implements Replicator {
         // TODO check moreCount is reasonable, and available in log. Otherwise do alternative peer catch up
         // TODO alternative peer catchup is by a different process, send message to that then skip sending AppendRpc
 
-        // TODO allow for smaller 'catch up' messages so we dont try to create a 400GB sized message.
+        // TODO allow for smaller 'catch up' messages so we don't try to create a 400GB sized message.
 
-        // TODO cache these extra LogEntry objects so we dont recreate too many of them.
+        // TODO cache these extra LogEntry objects so we don't recreate too many of them.
 
         ListenableFuture<List<LogEntry>> peerEntriesFuture = log.getLogEntries(peerNextIdx, firstIndexInList);
 
-        Futures.addCallback(peerEntriesFuture, new FutureCallback<List<LogEntry>>() {
-          @Override
-          public void onSuccess(List<LogEntry> entriesFromLog) {
-            // TODO make sure the lists splice neatly together.
-            assert entriesFromLog.size() == moreCount;
-            if (peerNextIdx != peersNextIndex.get(peer) ||
-                myState != State.LEADER) {
-              // These were the same when we started checking the log, but they're not now -- that means
-              // things happened while the log was retrieving, so discard this result. This is safe because
-              // the next (or concurrent) run of consumeQueue has better information.
-              return;
-            }
+        C5Futures.addCallback(peerEntriesFuture,
+            (entriesFromLog) -> {
+              // TODO make sure the lists splice neatly together.
+              assert entriesFromLog.size() == moreCount;
+              if (peerNextIdx != peersNextIndex.get(peer) ||
+                  myState != State.LEADER) {
+                // These were the same when we started checking the log, but they're not now -- that means
+                // things happened while the log was retrieving, so discard this result. This is safe because
+                // the next (or concurrent) run of consumeQueue has better information.
+                return;
+              }
 
-            List<LogEntry> entriesToAppend = new ArrayList<>((int) (newLogEntries.size() + moreCount));
-            entriesToAppend.addAll(entriesFromLog);
-            entriesToAppend.addAll(newLogEntries);
-            sendAppendEntries(peer, peerNextIdx, lastIndexInList, majority, entriesToAppend);
-          }
-
-          @Override
-          public void onFailure(Throwable throwable) {
-            // Failed to retrieve from local log
-            // TODO is this situation ever recoverable?
-            failReplicatorInstance(throwable);
-          }
-        }, fiber);
+              List<LogEntry> entriesToAppend = new ArrayList<>((int) (newLogEntries.size() + moreCount));
+              entriesToAppend.addAll(entriesFromLog);
+              entriesToAppend.addAll(newLogEntries);
+              sendAppendEntries(peer, peerNextIdx, lastIndexInList, entriesToAppend);
+            },
+            (Throwable t) -> {
+              // TODO is this situation ever recoverable?
+              logger.error("failed to retrieve from log", t);
+              failReplicatorInstance(t);
+            }, fiber);
       } else {
-        sendAppendEntries(peer, peerNextIdx, lastIndexInList, majority, newLogEntries);
+        sendAppendEntries(peer, peerNextIdx, lastIndexInList, newLogEntries);
       }
     }
   }
 
   @FiberOnly
-  private List<LogEntry> createLogEntriesFromIntRequests(List<IntLogRequest> requests, long firstEntryIndex) {
+  private void checkOnQuorumChange() {
+
+    if (lastCommittedIndex >= quorumConfigIndex) {
+      if (quorumConfig.isTransitional) {
+        // Current transitional quorum is committed, so begin replicating the next stage.
+        // If this call happens to fail because the log request queue is full, we'll catch
+        // it the next time around.
+        offerQuorumChangeRequest(quorumConfig.getCompletedConfiguration());
+      } else {
+
+        if (!quorumConfig.allPeers().contains(myId)) {
+          // Committed, stable configuration
+          // Resign if it does not include me.
+          // TODO should there be a special event for this? Should the replicator shut itself down completely?
+          becomeFollower();
+        }
+      }
+    }
+  }
+
+  @FiberOnly
+  private List<LogEntry> createLogEntriesFromIntRequests(List<InternalReplicationRequest> requests, long firstEntryIndex) {
     long idAssigner = firstEntryIndex;
 
     // Build the log entries:
     List<LogEntry> newLogEntries = new ArrayList<>(requests.size());
-    for (IntLogRequest logReq : requests) {
-      LogEntry entry = new LogEntry(currentTerm, idAssigner, logReq.data);
+    for (InternalReplicationRequest logReq : requests) {
+      final LogEntry entry = logReq.getEntry(currentTerm, idAssigner);
       newLogEntries.add(entry);
 
       if (myFirstIndexAsLeader == 0) {
@@ -856,7 +985,7 @@ public class ReplicatorInstance implements Replicator {
       }
 
       // let the client know what our id is
-      logReq.logNumberNotifation.set(idAssigner);
+      logReq.logNumberNotification.set(idAssigner);
 
       idAssigner++;
     }
@@ -872,27 +1001,20 @@ public class ReplicatorInstance implements Replicator {
     }
     localLogFuture = log.logEntries(newLogEntries);
 
-    Futures.addCallback(localLogFuture, new FutureCallback<Boolean>() {
-      @Override
-      public void onSuccess(Boolean result) {
-        assert result != null && result;
-
-        peersLastAckedIndex.put(myId, lastIndexInList);
-        int majority = calculateMajority(peers.size());
-        calculateLastVisible(majority, lastIndexInList);
-      }
-
-      @Override
-      public void onFailure(Throwable t) {
-        // pretty bad.
-        logger.error("failed to commit to local log {}", t);
-      }
-    }, fiber);
+    C5Futures.addCallback(localLogFuture,
+        (result) -> {
+          peersLastAckedIndex.put(myId, lastIndexInList);
+          checkIfMajorityCanCommit(lastIndexInList);
+        },
+        (Throwable t) -> {
+          logger.error("failed to commit to local log", t);
+          failReplicatorInstance(t);
+        }, fiber);
   }
 
   @FiberOnly
-  private void sendAppendEntries(long peer, long peerNextIdx, long lastIndexSent, int majority,
-                                 final List<LogEntry> entries) {
+  private void sendAppendEntries(long peer, long peerNextIdx, long lastIndexSent, final List<LogEntry> entries) {
+
     assert (entries.size() == 0) || (entries.get(0).getIndex() == peerNextIdx);
     assert (entries.size() == 0) || (entries.get(entries.size() - 1).getIndex() == lastIndexSent);
 
@@ -920,59 +1042,70 @@ public class ReplicatorInstance implements Replicator {
       boolean wasSuccessful = message.getAppendReplyMessage().getSuccess();
       if (!wasSuccessful) {
         // This is per Page 7, paragraph 5.  "After a rejection, the leader decrements nextIndex and retries"
-        if (message.getAppendReplyMessage().getMyLastLogEntry() != 0) {
-          peersNextIndex.put(peer, message.getAppendReplyMessage().getMyLastLogEntry());
+        if (message.getAppendReplyMessage().getMyNextLogEntry() != 0) {
+          peersNextIndex.put(peer, message.getAppendReplyMessage().getMyNextLogEntry());
         } else {
-          peersNextIndex.put(peer, peerNextIdx - 1);
+          peersNextIndex.put(peer, Math.max(peerNextIdx - 1, 1));
         }
       } else {
         // we have been successfully acked up to this point.
         logger.trace("peer {} acked for {}", peer, lastIndexSent);
         peersLastAckedIndex.put(peer, lastIndexSent);
 
-        calculateLastVisible(majority, lastIndexSent);
+        checkIfMajorityCanCommit(lastIndexSent);
       }
-    }, 5, TimeUnit.SECONDS, () -> {
-      logger.trace("peer {} timed out", peer);
-      // Do nothing -> let next timeout handle things.
-      // This timeout exists just so that we can cancel and clean up stuff in jetlang.
-    });
+    }, 5, TimeUnit.SECONDS, () ->
+        // Do nothing -> let next timeout handle things.
+        // This timeout exists just so that we can cancel and clean up stuff in jetlang.
+        logger.trace("peer {} timed out", peer));
   }
 
   @FiberOnly
-  private void calculateLastVisible(int majority, long lastIndexSent) {
-    if (lastIndexSent == lastCommittedIndex) {
+  private void checkIfMajorityCanCommit(long lastAckedIndex) {
+    /**
+     * Determine if a majority of the current peers have replicated entries up to some index,
+     * and thus it is safe to commit up to that index (aka declare it visible); if so, actually
+     * commit. The argument is the last-updated index, but the actual index found to be able to
+     * be committed by a majority could be less than or equal to that index.
+     */
+
+    if (lastAckedIndex <= lastCommittedIndex) {
       return; // already committed this entry
     }
 
     if (myFirstIndexAsLeader == 0) {
-      return; // cant declare new visible yet until we have a first index as the leader.
+      return; // can't declare new visible yet until we have a first index as the leader.
+    }
+
+    if (quorumConfig.isEmpty()) {
+      return; // there are no peers in the quorum, so nothing can be committed
     }
 
     /**
-     * Goal: find an N such that N > lastCommittedIndex, a majority of peersLastAckedIndex[peerId] >= N,
-     * and N >= myFirstIndexAsLeader. If found, commit up to the greatest such N. (sec 5.3, sec 5.4).
+     * Goal: find an N such that N > lastCommittedIndex, a majority of peersLastAckedIndex[peerId] >= N
+     * (considering peers within the current peer configuration) and N >= myFirstIndexAsLeader. If found,
+     * commit up to the greatest such N. (sec 5.3, sec 5.4).
      */
 
-    SortedMultiset<Long> committedIndexs = TreeMultiset.create(peersLastAckedIndex.values());
-    committedIndexs.add(0L, peers.size() - peersLastAckedIndex.size()); // pad with zeros to the correct size
-    final long greatestIndexCommittedByMajority = Iterables.get(committedIndexs.descendingMultiset(), majority - 1);
+    final long newCommitIndex = quorumConfig.calculateCommittedIndex(peersLastAckedIndex);
 
-    if (greatestIndexCommittedByMajority < myFirstIndexAsLeader) {
-      logger.warn("Found most-acked entry {} but my first index as leader was {}, cant declare visible yet",
-          greatestIndexCommittedByMajority, myFirstIndexAsLeader);
+    if (newCommitIndex <= lastCommittedIndex) {
       return;
     }
 
-    if (greatestIndexCommittedByMajority < lastCommittedIndex) {
-      logger.warn("weird mostAcked {} is smaller than lastCommittedIndex {}",
-          greatestIndexCommittedByMajority, lastCommittedIndex);
+    if (newCommitIndex < myFirstIndexAsLeader) {
+      logger.info("Found newCommitIndex {} but my first index as leader was {}, can't declare visible yet",
+          newCommitIndex, myFirstIndexAsLeader);
       return;
     }
-    if (greatestIndexCommittedByMajority == lastCommittedIndex) {
+
+    if (newCommitIndex < lastCommittedIndex) {
+      logger.warn("weird newCommitIndex {} is smaller than lastCommittedIndex {}",
+          newCommitIndex, lastCommittedIndex);
       return;
     }
-    setLastCommittedIndex(greatestIndexCommittedByMajority);
+
+    setLastCommittedIndex(newCommitIndex);
     logger.trace("discovered new visible entry {}", lastCommittedIndex);
 
     // TODO take action and notify clients (pending new system frameworks)
@@ -989,7 +1122,11 @@ public class ReplicatorInstance implements Replicator {
   }
 
   private void notifyLastCommitted() {
-    commitNoticeChannel.publish(new IndexCommitNotice(this, lastCommittedIndex));
+    if (lastCommittedIndex >= quorumConfigIndex) {
+      commitNoticeChannel.publish(new IndexCommitNotice(this, lastCommittedIndex, quorumConfig));
+    } else {
+      commitNoticeChannel.publish(new IndexCommitNotice(this, lastCommittedIndex, null));
+    }
   }
 
   private void setVotedFor(long votedFor) {
@@ -1017,30 +1154,12 @@ public class ReplicatorInstance implements Replicator {
     return LoggerFactory.getLogger("(" + getClass().getSimpleName() + " - " + quorumId + " - " + myId + ")");
   }
 
-  @Override
-  public long getId() {
-    return myId;
+  private Set<Long> allPeersExceptMe() {
+    return Sets.difference(quorumConfig.allPeers(), Sets.newHashSet(myId));
   }
 
-  public void dispose() {
-    fiber.dispose();
+  private void refreshQuorumConfigurationFromLog() {
+    quorumConfig = log.getLastConfiguration();
+    quorumConfigIndex = log.getLastConfigurationIndex();
   }
-
-  @Override
-  public boolean isLeader() {
-    return myState == State.LEADER;
-  }
-
-  @Override
-  public void start() {
-    logger.debug("started {} with election timeout {}", this.quorumId, this.myElectionTimeout);
-    fiber.start();
-  }
-
-  @Override
-  public Channel<State> getStateChannel() {
-    return stateMemoryChannel;
-  }
-
-
 }

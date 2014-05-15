@@ -14,12 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.interfaces.replication;
 
+import c5db.replication.QuorumConfiguration;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.jetlang.channels.Channel;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,9 +31,25 @@ import java.util.List;
 public interface Replicator {
   String getQuorumId();
 
+  QuorumConfiguration getQuorumConfiguration();
+
   /**
-   * TODO change the type of datum to a protobuf that is useful.
-   * <p/>
+   * Change the members of the quorum to a new collection of peers (which may include peers in
+   * the current quorum).
+   *
+   * @param newPeers The collection of peer IDs in the new quorum.
+   * @return a future which will return the log entry index of the transitional quorum
+   * configuration entry, when it is known. The transitional quorum configuration combines
+   * the current group of peers with the given collection of new peers. When that transitional
+   * configuration is committed, the quorum configuration is guaranteed to go through; prior
+   * to that commit, it is possible that a fault will cancel the quorum change operation.
+   * <p>
+   * The actual completion of the quorum change will be signaled by the commitment of the
+   * quorum consisting of the given peers.
+   */
+  ListenableFuture<Long> changeQuorum(Collection<Long> newPeers) throws InterruptedException;
+
+  /**
    * Log a datum
    *
    * @param data Some data to log.

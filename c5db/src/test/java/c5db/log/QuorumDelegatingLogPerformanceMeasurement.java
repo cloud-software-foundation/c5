@@ -94,7 +94,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
 
   private final List<Integer> logSequence;
   private final long totalMessageSizeB;
-  private final long numberOflogCallsBetweenSleeps;
+  private final long numberOfLogCallsBetweenSleeps;
   private final int numThreads;
   private final int numQuorums;
   private final List<String> quorumList;
@@ -108,7 +108,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
     this.logSequence = logSequence;
     quorumList = getQuorumIds(numQuorums);
     totalMessageSizeB = computeTotalMessageSizeInBytes();
-    numberOflogCallsBetweenSleeps = calculateNumberOfLogCallsBetweenSleeps();
+    numberOfLogCallsBetweenSleeps = calculateNumberOfLogCallsBetweenSleeps();
   }
 
   private void doWarmUp()
@@ -117,9 +117,9 @@ public class QuorumDelegatingLogPerformanceMeasurement {
     doLogRun(true);
     detailPrintln(
         "Finished warmup; final message injection rate = "
-            + formatDouble((double) numberOflogCallsBetweenSleeps / dynamicSleepIntervalMillis * 1000.)
+            + formatDouble((double) numberOfLogCallsBetweenSleeps / dynamicSleepIntervalMillis * 1000.)
             + " messages per second (alternating "
-            + numberOflogCallsBetweenSleeps + " messages with "
+            + numberOfLogCallsBetweenSleeps + " messages with "
             + dynamicSleepIntervalMillis + " ms sleeps)");
     detailPrintln("---");
   }
@@ -141,10 +141,14 @@ public class QuorumDelegatingLogPerformanceMeasurement {
 
     detailPrintln("Logging to " + testDir.toString());
 
-    long sleepCountdown = numberOflogCallsBetweenSleeps;
+    long sleepCountdown = numberOfLogCallsBetweenSleeps;
     long startTime;
 
     try (OLog log = getLog(logFileService)) {
+      for (String quorumId : quorumList) {
+        log.openAsync(quorumId).get();
+      }
+
       startTime = System.nanoTime();
 
       for (int messageSizeLog2 : logSequence) {
@@ -161,7 +165,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
               Thread.sleep(dynamicSleepIntervalMillis);
             }
 
-            sleepCountdown = numberOflogCallsBetweenSleeps;
+            sleepCountdown = numberOfLogCallsBetweenSleeps;
           }
         }
       }
@@ -263,7 +267,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
     KeySerializingExecutor executor = new WrappingKeySerializingExecutor(newFixedThreadPool(numThreads));
     return new QuorumDelegatingLog(logFileService,
         executor,
-        NavigableMapTermOracle::new,
+        NavigableMapOLogEntryOracle::new,
         InMemoryPersistenceNavigator::new);
   }
 
@@ -281,7 +285,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
   private static OLogEntry constructLogEntry(int messageSizeLog2, String quorumId) {
     int size = pow(2, messageSizeLog2);
     List<ByteBuffer> data = Lists.newArrayList(ByteBuffer.wrap(bytes, 0, size));
-    return new OLogEntry(quorumNextSeqNum(quorumId), term(1), data);
+    return new OLogEntry(quorumNextSeqNum(quorumId), term(1), new OLogRawDataContent(data));
   }
 
   private static final Map<String, Long> quorumSeqNums = new HashMap<>();
