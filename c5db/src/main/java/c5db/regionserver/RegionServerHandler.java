@@ -21,6 +21,7 @@ import c5db.client.generated.Action;
 import c5db.client.generated.Call;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
+import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
@@ -55,6 +56,7 @@ import java.util.List;
  */
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerHandler.class);
+
   private final RegionServerService regionServerService;
   private final ScannerManager scanManager = ScannerManager.INSTANCE;
 
@@ -88,6 +90,9 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     final MultiRequest request = call.getMulti();
     final MultiResponse multiResponse = new MultiResponse();
     final List<MutationProto> mutations = new ArrayList<>();
+    if (request== null){
+      throw new IOException("Poorly specified multi. There is no actual get data in the RPC");
+    }
 
     for (RegionAction regionAction : request.getRegionActionList()) {
       for (Action actionUnion : regionAction.getActionList()) {
@@ -98,6 +103,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
         }
       }
     }
+
     if (!mutations.isEmpty()) {
       final MutationProto firstMutate = mutations.get(0);
       final byte[] row = firstMutate.getRow().array();
@@ -130,9 +136,14 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     ctx.writeAndFlush(response);
   }
 
-  private void mutate(ChannelHandlerContext ctx, Call call) throws RegionNotFoundException {
+  private void mutate(ChannelHandlerContext ctx, Call call) throws RegionNotFoundException, IOException {
     boolean success;
     final MutateRequest mutateIn = call.getMutate();
+
+    if (mutateIn == null){
+      throw new IOException("Poorly specified mutate. There is no actual get data in the RPC");
+    }
+
     MutateResponse mutateResponse;
     try {
       final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
@@ -239,6 +250,10 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private void scan(ChannelHandlerContext ctx, Call call) throws IOException,
       RegionNotFoundException {
     final ScanRequest scanIn = call.getScan();
+    if (scanIn == null){
+      throw new IOException("Poorly specified scan. There is no actual get data in the RPC");
+    }
+
     final long scannerId;
     scannerId = getScannerId(scanIn);
     final Integer numberOfRowsToSend = scanIn.getNumberOfRows();
@@ -271,7 +286,12 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
 
   private void get(ChannelHandlerContext ctx, Call call) throws IOException,
       RegionNotFoundException {
-    final Get getIn = call.getGet().getGet();
+
+    final GetRequest getRequest = call.getGet();
+    if (getRequest == null){
+      throw new IOException("Poorly specified getRequest. There is no actual get data in the RPC");
+    }
+    final Get getIn = getRequest.getGet();
 
     final Region region = regionServerService.getOnlineRegion(call.getGet().getRegion());
     if (region == null) {
@@ -292,7 +312,8 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       final Response response = new Response(Response.Command.GET, call.getCommandId(), getResponse, null, null, null);
       ctx.writeAndFlush(response);
     } catch (NullPointerException e) {
-      LOG.error("Badly formed get sent, we should ignore it");
+      String msg = "Poorly specified getRequest. We can't convert it to a protobuf as some fields are not specified";
+      throw new IOException(msg);
     }
   }
 
