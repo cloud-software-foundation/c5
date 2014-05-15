@@ -85,7 +85,7 @@ public final class RequestConverter {
    * @param value the region specifier byte array value
    * @return a protocol buffer RegionSpecifier
    */
-  private static RegionSpecifier buildRegionSpecifier(final byte[] value) {
+  public static RegionSpecifier buildRegionSpecifier(final byte[] value) {
     return new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(value));
   }
 

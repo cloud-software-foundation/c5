@@ -70,8 +70,8 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
     try {
       controlService = (ControlModule) f.get();
     } catch (InterruptedException | ExecutionException e) {
-      System.exit(1);
       e.printStackTrace();
+      System.exit(1);
     }
     controlService.doMessage(request);
   }

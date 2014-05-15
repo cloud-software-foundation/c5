@@ -37,8 +37,8 @@
 package c5db.client.scanner;
 
 import c5db.client.C5Constants;
-import c5db.client.C5Table;
 import c5db.client.ProtobufUtil;
+import c5db.client.RequestConverter;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.ScanResponse;
@@ -56,6 +56,7 @@ public class ClientScanner extends AbstractClientScanner {
   private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
   private final long commandId;
   private boolean isClosed = true;
+
 
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
@@ -108,8 +109,7 @@ public class ClientScanner extends AbstractClientScanner {
 
   private void getMoreRows() throws IOException {
     //TODO getRegion shouldn't be needed and currently is hardcoded
-    final RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        C5Table.getRegion(new byte[]{}));
+    final RegionSpecifier regionSpecifier = RequestConverter.buildRegionSpecifier(new byte[]{});
 
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
     this.outStandingRequests += requestSize;

@@ -255,7 +255,7 @@ public class TabletService extends AbstractService implements TabletModule {
               tablet.getPeers());
         } catch (IOException e) {
           e.printStackTrace();
-          System.exit(1);
+
         }
         onlineRegions.put(quorumId, tablet.getRegion());
         tabletCallbackFiber.dispose();
@@ -337,7 +337,7 @@ public class TabletService extends AbstractService implements TabletModule {
       addMetaLeaderEntryToRoot(Long.parseLong(nodeId));
     } catch (IOException | RegionNotFoundException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
     return "OK";
   }
@@ -361,7 +361,7 @@ public class TabletService extends AbstractService implements TabletModule {
       return createUserTableHelper(peers, hTableDescriptor, hRegionInfo);
     } catch (RegionNotFoundException | DeserializationException | IOException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
     return "OK";
   }
@@ -379,7 +379,7 @@ public class TabletService extends AbstractService implements TabletModule {
       openRegion0(metaRegion, metaDesc, ImmutableList.copyOf(peers));
     } catch (IOException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
     return "OK";
   }

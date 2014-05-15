@@ -25,8 +25,6 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -54,7 +52,7 @@ class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
     pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
     pipeline.addLast("websocket-aggregator", new WebSocketFrameAggregator(C5Constants.MAX_RESPONSE_SIZE));
     pipeline.addLast("message-codec", decoder);
-    pipeline.addLast("message-handler", new MessageHandler());
+    pipeline.addLast("message-handler", new FutureBasedMessageHandler());
   }
 
   public void syncOnHandshake() throws InterruptedException, TimeoutException, ExecutionException {

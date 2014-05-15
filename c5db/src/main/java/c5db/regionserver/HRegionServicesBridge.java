@@ -81,13 +81,13 @@ public class HRegionServicesBridge implements RegionServerServices {
           LOG.info("FlushCache");
         } catch (IOException e) {
           e.printStackTrace();
-          System.exit(1);
+
         }
       }
 
       @Override
       public void requestDelayedFlush(HRegion region, long delay) {
-        System.exit(1);
+        LOG.error("requestDelayedFlush");
       }
     };
   }
@@ -126,7 +126,7 @@ public class HRegionServicesBridge implements RegionServerServices {
       return fileSystem;
     } catch (IOException e) {
       e.printStackTrace();
-      System.exit(1);
+
     }
     return null;
   }
