@@ -46,13 +46,12 @@ public class C5TableTests {
     setThreadingPolicy(new Synchroniser());
   }};
 
-
   private final MessageHandler messageHandler = context.mock(MessageHandler.class);
   private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
   private final byte[] row = Bytes.toBytes("row");
- private C5AsyncDatabase c5AsyncDatabase;
+  private C5AsyncDatabase c5AsyncDatabase;
   private SettableFuture callFuture;
   private FakeHTable hTable;
 
@@ -141,6 +140,4 @@ public class C5TableTests {
     callFuture.set(new Response());
     hTable.get(new Get(row));
   }
-
-
 }
