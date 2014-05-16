@@ -20,7 +20,6 @@
 package org.apache.hadoop.hbase.client;
 
 import com.google.protobuf.Service;
-import com.google.protobuf.ServiceException;
 import io.protostuff.ByteString;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -43,7 +42,7 @@ import java.util.concurrent.TimeoutException;
 class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
 
-  private FakeHTable(String hostname, int port, ByteString tableName) throws IOException, InterruptedException, TimeoutException, ExecutionException {
+  private FakeHTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
     super(hostname, port, tableName);
   }
 
@@ -71,7 +70,6 @@ class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
   public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount, boolean writeToWAL) throws IOException {
     return 0;
   }
-
 
   @Override
   public Result getRowOrBefore(byte[] row, byte[] family) throws IOException {

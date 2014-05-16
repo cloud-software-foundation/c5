@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * <ul>
@@ -63,13 +64,13 @@ public final class WickedQueue<E> implements Queue<E> {
 
   @SuppressWarnings("unchecked")
   public WickedQueue() {
-    this.capacity = findNextPositivePowerOfTwo(c5db.client.C5Constants.MAX_CACHE_SZ);
+    this.capacity = findNextPositivePowerOfTwo();
     mask = this.capacity - 1;
     buffer = (E[]) new Object[this.capacity];
   }
 
-  private static int findNextPositivePowerOfTwo(final int value) {
-    return 1 << (32 - Integer.numberOfLeadingZeros(value - 1));
+  private static int findNextPositivePowerOfTwo() {
+    return 1 << (32 - Integer.numberOfLeadingZeros(c5db.client.C5Constants.MAX_CACHE_SZ - 1));
   }
 
   public boolean add(final E e) {
@@ -189,10 +190,7 @@ public final class WickedQueue<E> implements Queue<E> {
   }
 
   public boolean addAll(final Collection<? extends E> c) {
-    for (final E e : c) {
-      add(e);
-    }
-
+    addAll(c.stream().collect(Collectors.toList()));
     return true;
   }
 

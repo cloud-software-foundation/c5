@@ -40,13 +40,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class C5AsyncDatabase implements TableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
-  private final int port;
   private final AtomicLong commandId = new AtomicLong(0);
-  private final String hostname;
   private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
+  private final C5ConnectionManager c5ConnectionManager;
   private Channel channel;
   private MessageHandler handler;
-  private final C5ConnectionManager c5ConnectionManager;
   private byte[] tableName;
 
   /**
@@ -61,11 +59,10 @@ public class C5AsyncDatabase implements TableInterface {
   C5AsyncDatabase(String hostname, int port, C5ConnectionManager c5ConnectionManager)
       throws InterruptedException, ExecutionException, TimeoutException {
     // TODO Route data so we don't need to connect to meta
-    this.hostname = hostname;
-    this.port = port;
     this.c5ConnectionManager = c5ConnectionManager;
-    this.channel = c5ConnectionManager.getOrCreateChannel(this.hostname, this.port);
+    this.channel = c5ConnectionManager.getOrCreateChannel(hostname, port);
     this.handler = channel.pipeline().get(FutureBasedMessageHandler.class);
+
   }
 
   @Override
