@@ -72,7 +72,7 @@ public class C5CommonTestUtil {
     this(HBaseConfiguration.create());
   }
 
-  public C5CommonTestUtil(Configuration conf) {
+  private C5CommonTestUtil(Configuration conf) {
     this.conf = conf;
   }
 
@@ -156,7 +156,7 @@ public class C5CommonTestUtil {
    * @return True if we removed the test dirs
    * @throws IOException
    */
-  public boolean cleanupTestDir() throws IOException {
+  public boolean cleanupTestDir() {
     if (deleteDir(this.dataTestDir)) {
       this.dataTestDir = null;
       return true;
@@ -169,7 +169,7 @@ public class C5CommonTestUtil {
    * @return True if we removed the test dir
    * @throws IOException
    */
-  boolean cleanupTestDir(final String subdir) throws IOException {
+  boolean cleanupTestDir(final String subdir) {
     return this.dataTestDir != null && deleteDir(new File(this.dataTestDir, subdir));
   }
 

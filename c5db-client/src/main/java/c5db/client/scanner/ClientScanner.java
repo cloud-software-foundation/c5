@@ -53,7 +53,7 @@ import java.util.ArrayList;
 public class ClientScanner extends AbstractClientScanner {
   private final Channel ch;
   private final long scannerId;
-  private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>(C5Constants.MAX_CACHE_SZ);
+  private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>();
   private final long commandId;
   private boolean isClosed = true;
 
@@ -107,7 +107,7 @@ public class ClientScanner extends AbstractClientScanner {
     return ProtobufUtil.toResult(result);
   }
 
-  private void getMoreRows() throws IOException {
+  private void getMoreRows() {
     //TODO getRegion shouldn't be needed and currently is hardcoded
     final RegionSpecifier regionSpecifier = RequestConverter.buildRegionSpecifier(new byte[]{});
 

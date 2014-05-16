@@ -22,9 +22,6 @@ class PaddedAtomicLong extends AtomicLong {
   public volatile long p1, p2, p3, p4, p5, p6 = 7;
 
   public PaddedAtomicLong() {
-  }
-
-  public PaddedAtomicLong(final long initialValue) {
-    super(initialValue);
+    super((long) 0);
   }
 }

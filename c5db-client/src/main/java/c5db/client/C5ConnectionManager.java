@@ -24,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by posix4e on 5/15/14.
  */
-public interface C5ConnectionManager {
+interface C5ConnectionManager {
   Channel getOrCreateChannel(byte tableName, byte row);
 
   Channel getOrCreateChannel(String host, int port) throws InterruptedException, ExecutionException, TimeoutException;

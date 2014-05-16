@@ -40,10 +40,10 @@ import java.util.concurrent.TimeoutException;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
+class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
 
-  public FakeHTable(String hostname, int port, ByteString tableName) throws IOException, InterruptedException, TimeoutException, ExecutionException {
+  private FakeHTable(String hostname, int port, ByteString tableName) throws IOException, InterruptedException, TimeoutException, ExecutionException {
     super(hostname, port, tableName);
   }
 
@@ -102,13 +102,13 @@ public class FakeHTable extends c5db.client.FakeHTable implements HTableInterfac
   }
 
   @Override
-  public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable) throws ServiceException, Throwable {
+  public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable) throws Throwable {
     LOG.error("Unspported");
     return null;
   }
 
   @Override
-  public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable, Batch.Callback<R> callback) throws ServiceException, Throwable {
+  public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable, Batch.Callback<R> callback) throws Throwable {
     LOG.error("Unspported");
   }
 

@@ -47,7 +47,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
  */
-public interface TableInterface extends AutoCloseable {
+interface TableInterface extends AutoCloseable {
 
   ListenableFuture<Response> dotGetCall(GetRequest get);
 
