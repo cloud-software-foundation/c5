@@ -56,7 +56,7 @@ public class C5AsyncDatabase implements TableInterface {
     this(hostname, port, new C5NettyConnectionManager());
   }
 
-  C5AsyncDatabase(String hostname, int port, C5ConnectionManager c5ConnectionManager)
+  public C5AsyncDatabase(String hostname, int port, C5ConnectionManager c5ConnectionManager)
       throws InterruptedException, ExecutionException, TimeoutException {
     // TODO Route data so we don't need to connect to meta
     this.c5ConnectionManager = c5ConnectionManager;

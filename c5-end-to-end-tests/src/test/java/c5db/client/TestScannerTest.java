@@ -19,32 +19,33 @@ package c5db.client;
 import c5db.MiniClusterBase;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.Scan;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static junit.framework.TestCase.assertFalse;
-
-public class TestInOrderScan extends MiniClusterBase {
-
-  private final byte[] cf = Bytes.toBytes("cf");
+public class TestScannerTest extends MiniClusterBase {
 
   @Test
-  public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    Result result = null;
-    ResultScanner scanner;
+  public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    int i = 0;
+    Result result;
 
-    scanner = table.getScanner(cf);
-    byte[] previousRow = {};
+    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {
-      if (result != null) {
-        previousRow = result.getRow();
+      i++;
+      if (i % 1024 == 0) {
+        System.out.print("#");
+        System.out.flush();
+      }
+      if (i % (1024 * 80) == 0) {
+        System.out.println("");
       }
       result = scanner.next();
-      if (result != null) assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
     } while (result != null);
+    scanner.close();
+
   }
 }

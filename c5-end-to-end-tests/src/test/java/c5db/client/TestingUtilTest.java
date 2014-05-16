@@ -42,7 +42,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 
-public class TestingUtil extends MiniClusterBase {
+public class TestingUtilTest extends MiniClusterBase {
 
   @Test
   public void testSimplePutGet() throws IOException {

@@ -30,7 +30,7 @@ import static c5db.testing.BytesMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TestTooBigForASingleWebSocket extends ManyClusterBase {
+public class TestTooBigForASingleWebSocketTest extends ManyClusterBase {
   private static final byte[] randomBytes = new byte[65535 * 4];
   private static final Random random = new Random();
 

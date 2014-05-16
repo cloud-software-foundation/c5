@@ -40,9 +40,10 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class C5TableTests {
+public class C5FakeHTableTest {
+
   @Rule
-  public JUnitRuleMockery context = new JUnitRuleMockery() {{
+  private JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 

@@ -27,7 +27,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class TestFlush extends MiniClusterBase {
+public class TestFlushTest extends MiniClusterBase {
 
 
   @Test

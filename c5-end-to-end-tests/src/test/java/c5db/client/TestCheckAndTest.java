@@ -32,7 +32,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TestCheckAnd extends MiniClusterBase {
+public class TestCheckAndTest extends MiniClusterBase {
 
   @Test
   public void shouldFailCheckAndPutNullRow() throws IOException {
