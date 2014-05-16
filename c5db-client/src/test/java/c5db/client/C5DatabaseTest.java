@@ -47,7 +47,7 @@ import java.util.concurrent.TimeoutException;
 
 public class C5DatabaseTest {
   @Rule
-  private JUnitRuleMockery context = new JUnitRuleMockery() {{
+  public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 

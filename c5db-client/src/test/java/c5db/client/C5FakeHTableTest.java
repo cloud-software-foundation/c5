@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 public class C5FakeHTableTest {
 
   @Rule
-  private JUnitRuleMockery context = new JUnitRuleMockery() {{
+  public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 
