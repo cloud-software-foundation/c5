@@ -201,18 +201,13 @@
         <artifactId>findbugs-maven-plugin</artifactId>
       </plugin>
       <!-- Testing plugins -->
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>true</skipTests>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.apache.hadoop.hbase.ServerResourceCheckerJUnitListener</value>
-            </property>
-          </properties>
-        </configuration>
-      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <skipTests>true</skipTests>
+            </configuration>
+        </plugin>
     </plugins>
     <!-- General Resources -->
     <pluginManagement>

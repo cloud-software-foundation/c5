@@ -65,14 +65,9 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
     f = server.getModule(ModuleType.ControlRpc);
   }
 
-  public void start() {
+  public void start() throws ExecutionException, InterruptedException {
     ControlModule controlService = null;
-    try {
-      controlService = (ControlModule) f.get();
-    } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+    controlService = (ControlModule) f.get();
     controlService.doMessage(request);
   }
 }

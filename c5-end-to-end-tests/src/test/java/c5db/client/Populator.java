@@ -50,7 +50,7 @@ public class Populator extends MiniClusterBase {
       long start = System.currentTimeMillis();
 
       int numberOfBatches = 1;
-      int batchSize = 1024 * 81;
+      int batchSize = 1024;
       if (args.length == 2) {
         numberOfBatches = Integer.parseInt(args[0]);
         batchSize = Integer.parseInt(args[1]);

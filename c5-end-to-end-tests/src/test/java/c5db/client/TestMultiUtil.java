@@ -17,6 +17,7 @@
 package c5db.client;
 
 import c5db.ManyClusterBase;
+import c5db.MiniClusterBase;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -31,7 +32,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class TestMultiUtil extends ManyClusterBase {
+public class TestMultiUtil extends MiniClusterBase {
   private final byte[] row1 = Bytes.toBytes("row1");
   private final byte[] row2 = Bytes.toBytes("row2");
 

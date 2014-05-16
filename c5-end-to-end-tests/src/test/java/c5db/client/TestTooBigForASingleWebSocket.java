@@ -16,12 +16,9 @@
  */
 package c5db.client;
 
-import c5db.C5TestServerConstants;
 import c5db.ManyClusterBase;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,18 +40,10 @@ public class TestTooBigForASingleWebSocket extends ManyClusterBase {
 
   private final byte[] cf = Bytes.toBytes("cf");
   private final byte[] cq = Bytes.toBytes("cq");
-  private FakeHTable c5AsyncDatabase;
-
-  @Before
-  public void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-
-    c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
-  }
 
   @Test
   public void shouldSuccessfullyAcceptSmallPut() throws InterruptedException, ExecutionException, TimeoutException, IOException, MutationFailedException {
-    DataHelper.putRowInDB(c5AsyncDatabase, row);
+    DataHelper.putRowInDB(table, row);
   }
 
   @Test
@@ -62,7 +51,7 @@ public class TestTooBigForASingleWebSocket extends ManyClusterBase {
       throws InterruptedException, ExecutionException, TimeoutException, MutationFailedException, IOException {
     byte[] valuePutIntoDatabase = row;
     putRowAndValueIntoDatabase(row, valuePutIntoDatabase);
-    assertThat(DataHelper.valueReadFromDB(c5AsyncDatabase, row), is(equalTo(valuePutIntoDatabase)));
+    assertThat(DataHelper.valueReadFromDB(table, row), is(equalTo(valuePutIntoDatabase)));
   }
 
   @Test
@@ -76,14 +65,14 @@ public class TestTooBigForASingleWebSocket extends ManyClusterBase {
   public void shouldSuccessfullyAcceptLargePutAndReadSameValue() throws IOException {
     byte[] valuePutIntoDatabase = randomBytes;
     putRowAndValueIntoDatabase(row, valuePutIntoDatabase);
-    assertThat(DataHelper.valueReadFromDB(c5AsyncDatabase, row), is(equalTo(valuePutIntoDatabase)));
+    assertThat(DataHelper.valueReadFromDB(table, row), is(equalTo(valuePutIntoDatabase)));
   }
 
   private void putRowAndValueIntoDatabase(byte[] row,
                                           byte[] valuePutIntoDatabase) throws IOException {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
-    c5AsyncDatabase.put(put);
+    table.put(put);
   }
 
 }
