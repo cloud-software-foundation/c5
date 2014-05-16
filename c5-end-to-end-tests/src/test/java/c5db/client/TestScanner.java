@@ -16,45 +16,36 @@
  */
 package c5db.client;
 
-import c5db.C5TestServerConstants;
 import c5db.MiniClusterBase;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.Scan;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static junit.framework.TestCase.assertFalse;
+public class TestScanner extends MiniClusterBase {
 
-public class TestInOrderScan extends MiniClusterBase {
+  @Test
+  public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    int i = 0;
+    Result result;
 
-  private final byte[] cf = Bytes.toBytes("cf");
-
-  public TestInOrderScan() throws IOException, InterruptedException {
-    super();
-  }
-
-  @Test(timeout = 10000)
-  public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-    FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
-
-    Result result = null;
-    ResultScanner scanner;
-
-    scanner = table.getScanner(cf);
-    byte[] previousRow = {};
+    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {
-      if (result != null) {
-        previousRow = result.getRow();
+      i++;
+      if (i % 1024 == 0) {
+        System.out.print("#");
+        System.out.flush();
+      }
+      if (i % (1024 * 80) == 0) {
+        System.out.println("");
       }
       result = scanner.next();
-      if (result != null) assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
     } while (result != null);
-    table.close();
+    scanner.close();
+
   }
 }

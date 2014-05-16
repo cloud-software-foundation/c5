@@ -177,26 +177,30 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         this.setTabletState(State.Open);
         break;
       case LEADER:
-        if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-          try {
-            long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
-            RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
-                server,
-                numberOfMetaPeers);
-            rootTabletLeaderBehavior.start();
-          } catch (IOException e) {
-            e.printStackTrace();
+        try {
+            if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
 
-          }
-        } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
-            // Have the meta leader update the root region with it being marked as the leader
-          MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
-          metaTabletLeaderBehavior.start();
+                long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
+                RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
+                        server,
+                        numberOfMetaPeers);
+                rootTabletLeaderBehavior.start();
 
-        } else {
-          // update the meta table with my leader status
+            } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
+                // Have the meta leader update the root region with it being marked as the leader
+                MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
+                metaTabletLeaderBehavior.start();
+
+            } else {
+                // update the meta table with my leader status
+            }
+            this.setTabletState(State.Leader);
+        } catch (Exception e){
+            LOG.error(e.getLocalizedMessage());
+            LOG.error(e.getLocalizedMessage());
+            LOG.error(e.getLocalizedMessage());
+            LOG.error(e.getLocalizedMessage());
         }
-        this.setTabletState(State.Leader);
         break;
     }
 
