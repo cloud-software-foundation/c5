@@ -18,7 +18,6 @@ package c5db.client;
 
 import io.netty.channel.Channel;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 

@@ -22,11 +22,9 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
-import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.HRegionInfo;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class C5AsyncDatabase implements TableInterface{
+public class C5AsyncDatabase implements TableInterface {
   private C5ConnectionManager c5ConnectionManager;
   private final int port;
   private final AtomicLong commandId = new AtomicLong(0);
@@ -54,7 +52,6 @@ public class C5AsyncDatabase implements TableInterface{
 
   /**
    * C5Table is the main entry points for clients of C5DB
-   *
    */
 
   public C5AsyncDatabase(String hostname, int port)
@@ -75,24 +72,27 @@ public class C5AsyncDatabase implements TableInterface{
   @Override
   public ListenableFuture<Response> dotGetCall(final GetRequest get) {
     return handler.call(new Call(Call.Command.GET,
-        commandId.incrementAndGet(),
-        get,
-        null,
-        null,
-        null),
-        channel);
-    }
+            commandId.incrementAndGet(),
+            get,
+            null,
+            null,
+            null),
+        channel
+    );
+  }
 
   @Override
-  public ListenableFuture<Response>  doScanCall(ScanRequest scanRequest) {
+  public ListenableFuture<Response> doScanCall(ScanRequest scanRequest) {
     return handler.call(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
   }
+
   @Override
-    public ListenableFuture<Response>  doMutateCall(MutateRequest mutateRequest) {
-      return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
-    }
+  public ListenableFuture<Response> doMutateCall(MutateRequest mutateRequest) {
+    return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
+  }
+
   @Override
-  public ListenableFuture<Response>  doMultiCall(MultiRequest multiRequest) {
+  public ListenableFuture<Response> doMultiCall(MultiRequest multiRequest) {
     return handler.call(new Call(Call.Command.MULTI, commandId.incrementAndGet(), null, null, null, multiRequest), channel);
   }
 

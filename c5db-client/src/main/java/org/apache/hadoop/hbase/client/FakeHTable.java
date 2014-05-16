@@ -19,41 +19,9 @@
  */
 package org.apache.hadoop.hbase.client;
 
-import c5db.client.C5AsyncDatabase;
-import c5db.client.C5Constants;
-import c5db.client.ProtobufUtil;
-import c5db.client.RequestConverter;
-import c5db.client.TableInterface;
-import c5db.client.generated.ByteArrayComparable;
-import c5db.client.generated.Comparator;
-import c5db.client.generated.CompareType;
-import c5db.client.generated.Condition;
-import c5db.client.generated.GetRequest;
-import c5db.client.generated.MultiRequest;
-import c5db.client.generated.MutateRequest;
-import c5db.client.generated.MutationProto;
-import c5db.client.generated.RegionAction;
-import c5db.client.generated.RegionSpecifier;
-import c5db.client.generated.ScanRequest;
-import c5db.client.scanner.ClientScannerManager;
-import com.google.protobuf.Service;
-import com.google.protobuf.ServiceException;
 import io.protostuff.ByteString;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.coprocessor.Batch;
-import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 

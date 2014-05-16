@@ -332,14 +332,17 @@ public class ProtobufUtil {
         loadColumnFamiliesOnDemand,
         false);
   }
+
   @NotNull
   public static Call getGetCall(long commandId, GetRequest get) {
     return new Call(Call.Command.GET, commandId, get, null, null, null);
   }
+
   @NotNull
   public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
     return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null);
   }
+
   @NotNull
   public static Call getScanCall(long commandId, ScanRequest scanRequest) {
     return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);

@@ -26,7 +26,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jmock.Expectations;
@@ -144,7 +143,7 @@ public class C5TableTests {
     hTable.put(new Put(row));
   }
 
-  public void getShouldErrorWithNullResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException{
+  public void getShouldErrorWithNullResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException {
     context.checking(new Expectations() {
       {
         oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
