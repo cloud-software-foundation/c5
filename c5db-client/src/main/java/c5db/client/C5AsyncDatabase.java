@@ -39,16 +39,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
 public class C5AsyncDatabase implements TableInterface {
-  private C5ConnectionManager c5ConnectionManager;
+  private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
   private final int port;
   private final AtomicLong commandId = new AtomicLong(0);
   private final String hostname;
-
-  private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
   private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
-  private byte[] tableName;
   Channel channel;
   MessageHandler handler;
+  private C5ConnectionManager c5ConnectionManager;
+  private byte[] tableName;
 
   /**
    * C5Table is the main entry points for clients of C5DB
