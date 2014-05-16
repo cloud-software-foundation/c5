@@ -170,7 +170,7 @@ public class FakeHTable implements AutoCloseable {
     }
   }
 
-  void delete(Delete delete) throws IOException {
+  public void delete(Delete delete) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
         MutationProto.MutationType.DELETE,
         delete);
