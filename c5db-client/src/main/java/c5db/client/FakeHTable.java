@@ -68,14 +68,15 @@ import java.util.concurrent.TimeoutException;
 public class FakeHTable implements HTableInterface, AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
-  byte[] regionName;
-  RegionSpecifier regionSpecifier;
   /**
    * C5Table is the main entry points for clients of C5DB
    *
    * @param tableName The name of the table to connect to.
    */
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
+  byte[] regionName;
+  RegionSpecifier regionSpecifier;
+  TableInterface c5AsyncDatabase;
   private byte[] tableName;
 
 
@@ -87,7 +88,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
   }
 
-
   FakeHTable(TableInterface c5AsyncDatabase, ByteString tableName)
       throws IOException, InterruptedException, TimeoutException, ExecutionException {
     this.c5AsyncDatabase = c5AsyncDatabase;
@@ -96,7 +96,9 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
   }
 
-  TableInterface c5AsyncDatabase;
+  public static Comparator toComparator(ByteArrayComparable comparator) {
+    return new Comparator(comparator.getClass().getName(), comparator.getValue());
+  }
 
   @Override
   public Result get(final Get get) throws IOException {
@@ -224,10 +226,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  public static Comparator toComparator(ByteArrayComparable comparator) {
-    return new Comparator(comparator.getClass().getName(), comparator.getValue());
-  }
-
   @Override
   public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException {
 
@@ -321,10 +319,15 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
   }
 
   @Override
+  public void setAutoFlush(boolean autoFlush) {
+    LOG.error("Unspported");
+
+  }
+
+  @Override
   public void flushCommits() throws IOException {
     LOG.error("we auto flush by default");
   }
-
 
   @Override
   public CoprocessorRpcChannel coprocessorService(byte[] row) {
@@ -341,12 +344,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
   @Override
   public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable, Batch.Callback<R> callback) throws ServiceException, Throwable {
     LOG.error("Unspported");
-  }
-
-  @Override
-  public void setAutoFlush(boolean autoFlush) {
-    LOG.error("Unspported");
-
   }
 
   @Override
@@ -370,17 +367,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     LOG.error("Unspported");
   }
 
-
-  public class InvalidResponse extends Exception {
-    public InvalidResponse(String s) {
-    }
-  }
-
-  public class InvalidScannerResults extends Exception {
-    public InvalidScannerResults(String s) {
-    }
-  }
-
   @Override
   public byte[] getTableName() {
     return this.tableName;
@@ -391,7 +377,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return null;
   }
 
-
   public Configuration getConfiguration() {
     return null;
   }
@@ -401,21 +386,28 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return null;
   }
 
-
   public void batch(List<? extends Row> actions, Object[] results) {
   }
-
 
   public Object[] batch(List<? extends Row> actions) {
     return new Object[0];
   }
-
 
   public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) {
   }
 
   public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) {
     return new Object[0];
+  }
+
+  public class InvalidResponse extends Exception {
+    public InvalidResponse(String s) {
+    }
+  }
+
+  public class InvalidScannerResults extends Exception {
+    public InvalidScannerResults(String s) {
+    }
   }
 
 }

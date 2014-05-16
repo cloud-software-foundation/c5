@@ -20,10 +20,6 @@ package c5db.client;
  * A class to abstract all of the magic numbers for our client
  */
 public final class C5Constants {
-  private C5Constants() {
-    throw new UnsupportedOperationException();
-  }
-
   public static final int DEFAULT_INIT_SCAN = 100;
   public static final int MAX_REQUEST_SIZE = 1000000;
   public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
@@ -31,4 +27,7 @@ public final class C5Constants {
   public static final long TIMEOUT = 10000;
   public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
   public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
+  private C5Constants() {
+    throw new UnsupportedOperationException();
+  }
 }
