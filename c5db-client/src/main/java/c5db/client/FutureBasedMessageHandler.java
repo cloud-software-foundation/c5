@@ -20,8 +20,6 @@ import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
-import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -70,7 +68,7 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
   @Override
   public SettableFuture<Response> call(final Call request, final Channel channel) {
     SettableFuture<Response> settableFuture = SettableFuture.create();
-    futures.put(request.getCommandId(), settableFuture );
+    futures.put(request.getCommandId(), settableFuture);
     channel.writeAndFlush(request);
     return settableFuture;
   }

@@ -18,8 +18,6 @@ package c5db.client;
 
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
-import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;

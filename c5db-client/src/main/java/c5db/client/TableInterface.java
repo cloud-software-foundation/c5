@@ -37,17 +37,12 @@
 package c5db.client;
 
 
-import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.Response;
-import c5db.client.generated.Result;
-import c5db.client.generated.Scan;
 import c5db.client.generated.ScanRequest;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
 
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
@@ -56,9 +51,9 @@ public interface TableInterface extends AutoCloseable {
 
   ListenableFuture<Response> dotGetCall(GetRequest get);
 
-  ListenableFuture<Response>  doScanCall(ScanRequest scanRequest);
+  ListenableFuture<Response> doScanCall(ScanRequest scanRequest);
 
-  ListenableFuture<Response>  doMutateCall(MutateRequest mutateRequest);
+  ListenableFuture<Response> doMutateCall(MutateRequest mutateRequest);
 
   ListenableFuture<Response> doMultiCall(MultiRequest multiRequest);
 }
