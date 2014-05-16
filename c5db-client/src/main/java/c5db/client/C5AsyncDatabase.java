@@ -44,9 +44,9 @@ public class C5AsyncDatabase implements TableInterface {
   private final AtomicLong commandId = new AtomicLong(0);
   private final String hostname;
   private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
-  Channel channel;
-  MessageHandler handler;
-  private C5ConnectionManager c5ConnectionManager;
+  private Channel channel;
+  private MessageHandler handler;
+  private final C5ConnectionManager c5ConnectionManager;
   private byte[] tableName;
 
   /**

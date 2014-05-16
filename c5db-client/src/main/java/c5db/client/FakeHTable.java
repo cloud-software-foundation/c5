@@ -55,35 +55,33 @@ import java.util.concurrent.TimeoutException;
 public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
+  private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
+  private byte[] regionName;
+  private RegionSpecifier regionSpecifier;
+  private TableInterface c5AsyncDatabase;
+  private byte[] tableName;
+
   /**
-   * C5Table is the main entry points for clients of C5DB
+   * A mock HTable Client
    *
    * @param tableName The name of the table to connect to.
    */
-  private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
-  byte[] regionName;
-  RegionSpecifier regionSpecifier;
-  TableInterface c5AsyncDatabase;
-  private byte[] tableName;
-
-
   public FakeHTable(String hostname, int port, ByteString tableName)
-      throws IOException, InterruptedException, TimeoutException, ExecutionException {
+      throws InterruptedException, TimeoutException, ExecutionException {
     c5AsyncDatabase = new C5AsyncDatabase(hostname, port);
     this.tableName = tableName.toByteArray();
     regionName = tableName.toByteArray();
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
   }
 
-  FakeHTable(TableInterface c5AsyncDatabase, ByteString tableName)
-      throws IOException, InterruptedException, TimeoutException, ExecutionException {
+  FakeHTable(TableInterface c5AsyncDatabase, ByteString tableName) {
     this.c5AsyncDatabase = c5AsyncDatabase;
     this.tableName = tableName.toByteArray();
     regionName = tableName.toByteArray();
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
   }
 
-  public static Comparator toComparator(ByteArrayComparable comparator) {
+  private static Comparator toComparator(ByteArrayComparable comparator) {
     return new Comparator(comparator.getClass().getName(), comparator.getValue());
   }
 
@@ -172,7 +170,7 @@ public class FakeHTable implements AutoCloseable {
     }
   }
 
-  public void delete(Delete delete) throws IOException {
+  void delete(Delete delete) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
         MutationProto.MutationType.DELETE,
         delete);
@@ -192,7 +190,7 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void mutateRow(RowMutations rm) throws IOException {
-    RegionAction regionAction = RequestConverter.buildRegionAction(regionName, true, rm);
+    RegionAction regionAction = RequestConverter.buildRegionAction(regionName, rm);
     List<RegionAction> regionActions = Arrays.asList(regionAction);
     try {
       c5AsyncDatabase.doMultiCall(new MultiRequest(regionActions)).get();
@@ -257,12 +255,12 @@ public class FakeHTable implements AutoCloseable {
     return this.tableName;
   }
 
-  public class InvalidResponse extends Exception {
+  private class InvalidResponse extends Exception {
     public InvalidResponse(String s) {
     }
   }
 
-  public class InvalidScannerResults extends Exception {
+  private class InvalidScannerResults extends Exception {
     public InvalidScannerResults(String s) {
     }
   }

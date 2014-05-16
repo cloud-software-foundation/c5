@@ -129,11 +129,9 @@ public final class RequestConverter {
    *
    * @param regionName   The region name the actions apply to.
    * @param rowMutations The row mutations to apply to the region
-   * @param atomic       Whether or not the actions should be atomic
    * @return a data-laden RegionAction
    */
   public static RegionAction buildRegionAction(final byte[] regionName,
-                                               final boolean atomic,
                                                final RowMutations rowMutations)
       throws IOException {
     final RegionSpecifier region = buildRegionSpecifier(regionName);
@@ -154,6 +152,6 @@ public final class RequestConverter {
       actions.add(action);
 
     }
-    return new RegionAction(region, atomic, actions);
+    return new RegionAction(region, true, actions);
   }
 }

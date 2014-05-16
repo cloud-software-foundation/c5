@@ -56,19 +56,19 @@ public final class WickedQueue<E> implements Queue<E> {
   private final int mask;
   private final E[] buffer;
 
-  private final AtomicLong tail = new c5db.client.queue.PaddedAtomicLong(0);
-  private final AtomicLong head = new c5db.client.queue.PaddedAtomicLong(0);
+  private final AtomicLong tail = new c5db.client.queue.PaddedAtomicLong();
+  private final AtomicLong head = new c5db.client.queue.PaddedAtomicLong();
   private final PaddedLong tailCache = new PaddedLong();
   private final PaddedLong headCache = new PaddedLong();
 
   @SuppressWarnings("unchecked")
-  public WickedQueue(final int capacity) {
-    this.capacity = findNextPositivePowerOfTwo(capacity);
+  public WickedQueue() {
+    this.capacity = findNextPositivePowerOfTwo(c5db.client.C5Constants.MAX_CACHE_SZ);
     mask = this.capacity - 1;
     buffer = (E[]) new Object[this.capacity];
   }
 
-  public static int findNextPositivePowerOfTwo(final int value) {
+  private static int findNextPositivePowerOfTwo(final int value) {
     return 1 << (32 - Integer.numberOfLeadingZeros(value - 1));
   }
 

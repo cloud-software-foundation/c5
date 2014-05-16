@@ -48,13 +48,13 @@ public class C5TableTests {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  MessageHandler messageHandler = context.mock(MessageHandler.class);
-  ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
-  C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
-  Channel channel = context.mock(Channel.class);
-  C5AsyncDatabase c5AsyncDatabase;
-  SettableFuture callFuture;
-  private byte[] row = Bytes.toBytes("row");
+  private final MessageHandler messageHandler = context.mock(MessageHandler.class);
+  private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
+  private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
+  private final Channel channel = context.mock(Channel.class);
+  private C5AsyncDatabase c5AsyncDatabase;
+  private SettableFuture callFuture;
+  private final byte[] row = Bytes.toBytes("row");
   private FakeHTable hTable;
 
   @Before
@@ -122,7 +122,7 @@ public class C5TableTests {
   }
 
   public void putCanSucceed()
-      throws InterruptedException, ExecutionException, TimeoutException, MutationFailedException, IOException {
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
     context.checking(new Expectations() {
       {
         oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
