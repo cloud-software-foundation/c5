@@ -31,12 +31,12 @@ import java.util.concurrent.TimeoutException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class MiniClustersBaseTests extends MiniClusterBase {
+public class ManyClustersBaseTest extends ManyClusterBase {
 
   @Test
   public void metaTableShouldContainUserTableEntries() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
-    FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
+    FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, metaOnPort, tableName);
     ResultScanner scanner = c5AsyncDatabase.getScanner(HConstants.CATALOG_FAMILY);
 
     Result result;

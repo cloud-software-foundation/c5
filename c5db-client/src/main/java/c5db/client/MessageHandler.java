@@ -23,7 +23,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
 
-interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
+public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
 
   ListenableFuture<Response> call(Call request, Channel channel);
 

@@ -32,7 +32,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class TestMultiUtil extends MiniClusterBase {
+public class TestMultiUtilTest extends MiniClusterBase {
   private final byte[] row1 = Bytes.toBytes("row1");
   private final byte[] row2 = Bytes.toBytes("row2");
 

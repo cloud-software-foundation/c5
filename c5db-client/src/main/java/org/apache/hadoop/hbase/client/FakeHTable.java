@@ -39,10 +39,10 @@ import java.util.concurrent.TimeoutException;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
+public class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
 
-  private FakeHTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
+  public FakeHTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
     super(hostname, port, tableName);
   }
 

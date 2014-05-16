@@ -71,7 +71,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 
-public class TabletServiceCommandCheck {
+public class TabletServiceCommandCheckTest {
 
   private static final String TEST_TABLE_NAME = "testTable";
 

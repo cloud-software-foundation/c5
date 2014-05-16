@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class Populator extends MiniClusterBase {
+public class PopulatorTest extends MiniClusterBase {
 
 
   private static ByteString tableName = ByteString.bytesDefaultValue("testTable");
 
-  public Populator() {
+  public PopulatorTest() {
 
   }
 
@@ -105,7 +105,7 @@ public class Populator extends MiniClusterBase {
 
   @Test
   public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
-    Populator populator = new Populator();
+    PopulatorTest populator = new PopulatorTest();
     tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
 
     main(new String[]{String.valueOf(getRegionServerPort())});

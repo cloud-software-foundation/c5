@@ -39,7 +39,7 @@ import java.util.List;
 
 import static c5db.regionserver.AddElementsActionReturnTrue.addElements;
 
-public class ScanRunnableTests {
+public class ScanRunnableTest {
   private final RegionScanner regionScanner;
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -49,7 +49,7 @@ public class ScanRunnableTests {
   private final Region region = context.mock(Region.class);
   private ScanRunnable scanRunnable;
 
-  public ScanRunnableTests() {
+  public ScanRunnableTest() {
     regionScanner = context.mock(RegionScanner.class);
   }
 

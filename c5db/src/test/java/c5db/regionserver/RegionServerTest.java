@@ -52,7 +52,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class RegionServerTests {
+public class RegionServerTest {
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
