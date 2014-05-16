@@ -51,7 +51,7 @@ public interface TableInterface extends AutoCloseable {
 
   ListenableFuture<Response> dotGetCall(GetRequest get);
 
-  ListenableFuture<Response> doScanCall(ScanRequest scanRequest);
+  ListenableFuture<Long> doScanCall(ScanRequest scanRequest);
 
   ListenableFuture<Response> doMutateCall(MutateRequest mutateRequest);
 
