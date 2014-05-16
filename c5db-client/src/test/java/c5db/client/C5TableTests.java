@@ -41,24 +41,37 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class C5TableTests {
-
-
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 
+
   private final MessageHandler messageHandler = context.mock(MessageHandler.class);
   private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
-  private C5AsyncDatabase c5AsyncDatabase;
-  private SettableFuture callFuture;
   private final byte[] row = Bytes.toBytes("row");
+ private C5AsyncDatabase c5AsyncDatabase;
+  private SettableFuture callFuture;
   private FakeHTable hTable;
 
   @Before
   public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
+        will(returnValue(channel));
+
+        oneOf(channel).pipeline();
+        will(returnValue(channelPipeline));
+
+        oneOf(channelPipeline).get(with(any(Class.class)));
+        will(returnValue(messageHandler));
+
+      }
+    });
+
     c5AsyncDatabase = new C5AsyncDatabase("fake", 0, c5ConnectionManager);
     hTable = new FakeHTable(c5AsyncDatabase, ByteString.copyFromUtf8("Doesntexist"));
     callFuture = SettableFuture.create();
@@ -76,19 +89,10 @@ public class C5TableTests {
     c5AsyncDatabase.close();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = IOException.class)
   public void putShouldErrorOnInvalidResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException, MutationFailedException {
     context.checking(new Expectations() {
       {
-        oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
-        will(returnValue(channel));
-
-        oneOf(channel).pipeline();
-        will(returnValue(channelPipeline));
-
-        oneOf(channelPipeline).get(with(any(Class.class)));
-        will(returnValue(messageHandler));
-
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));
       }
@@ -98,20 +102,11 @@ public class C5TableTests {
 
   }
 
-  @Test(expected = MutationFailedException.class)
+  @Test(expected = IOException.class)
   public void putShouldThrowErrorIfMutationFailed()
       throws InterruptedException, ExecutionException, TimeoutException, MutationFailedException, IOException {
     context.checking(new Expectations() {
       {
-        oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
-        will(returnValue(channel));
-
-        oneOf(channel).pipeline();
-        will(returnValue(channelPipeline));
-
-        oneOf(channelPipeline).get(with(any(Class.class)));
-        will(returnValue(messageHandler));
-
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));
       }
@@ -121,19 +116,11 @@ public class C5TableTests {
     hTable.put(new Put(row));
   }
 
+  @Test
   public void putCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
     context.checking(new Expectations() {
       {
-        oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
-        will(returnValue(channel));
-
-        oneOf(channel).pipeline();
-        will(returnValue(channelPipeline));
-
-        oneOf(channelPipeline).get(with(any(Class.class)));
-        will(returnValue(messageHandler));
-
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));
       }
@@ -143,18 +130,10 @@ public class C5TableTests {
     hTable.put(new Put(row));
   }
 
+  @Test(expected = IOException.class)
   public void getShouldErrorWithNullResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException {
     context.checking(new Expectations() {
       {
-        oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
-        will(returnValue(channel));
-
-        oneOf(channel).pipeline();
-        will(returnValue(channelPipeline));
-
-        oneOf(channelPipeline).get(with(any(Class.class)));
-        will(returnValue(messageHandler));
-
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));
       }

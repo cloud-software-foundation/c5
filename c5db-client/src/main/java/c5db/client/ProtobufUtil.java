@@ -76,7 +76,6 @@ public class ProtobufUtil {
    * @param proto the protocol buffer Result to convert
    * @return the converted client Result
    */
-  @NotNull
   public static Result toResult(final c5db.client.generated.Result proto) {
     if (proto == null) {
       return null;
@@ -244,7 +243,6 @@ public class ProtobufUtil {
    * @param type The delete type to make
    * @return protocol buffer DeleteType
    */
-  @NotNull
   private static MutationProto.DeleteType toDeleteType(KeyValue.Type type) {
     switch (type) {
       case Delete:

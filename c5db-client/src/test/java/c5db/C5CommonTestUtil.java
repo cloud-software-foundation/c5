@@ -154,7 +154,6 @@ public class C5CommonTestUtil {
 
   /**
    * @return True if we removed the test dirs
-   * @throws IOException
    */
   public boolean cleanupTestDir() {
     if (deleteDir(this.dataTestDir)) {
@@ -167,7 +166,6 @@ public class C5CommonTestUtil {
   /**
    * @param subdir Test subdir name.
    * @return True if we removed the test dir
-   * @throws IOException
    */
   boolean cleanupTestDir(final String subdir) {
     return this.dataTestDir != null && deleteDir(new File(this.dataTestDir, subdir));

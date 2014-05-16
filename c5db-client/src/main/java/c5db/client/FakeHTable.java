@@ -89,7 +89,7 @@ public class FakeHTable implements AutoCloseable {
     GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, false);
     try {
       return ProtobufUtil.toResult(c5AsyncDatabase.dotGetCall(getRequest).get().getGet().getResult());
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (Exception e) {
       throw new IOException(e);
     }
   }
@@ -159,7 +159,7 @@ public class FakeHTable implements AutoCloseable {
       if (!c5AsyncDatabase.doMutateCall(mutateRequest).get().getMutate().getProcessed()) {
         throw new IOException("Not processed");
       }
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (Exception e) {
       throw new IOException(e);
     }
   }
