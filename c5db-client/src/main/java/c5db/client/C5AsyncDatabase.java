@@ -81,8 +81,8 @@ public class C5AsyncDatabase implements TableInterface {
   }
 
   @Override
-  public ListenableFuture<Response> doScanCall(ScanRequest scanRequest) {
-    return handler.call(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
+  public ListenableFuture<Long> doScanCall(ScanRequest scanRequest) {
+    return handler.callScan(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
   }
 
   @Override

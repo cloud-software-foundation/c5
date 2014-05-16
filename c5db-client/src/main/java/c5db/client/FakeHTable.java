@@ -28,26 +28,14 @@ import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScannerManager;
-import com.google.protobuf.Service;
-import com.google.protobuf.ServiceException;
 import io.protostuff.ByteString;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.client.coprocessor.Batch;
-import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +45,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -65,9 +52,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class FakeHTable implements HTableInterface, AutoCloseable {
+public class FakeHTable implements AutoCloseable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
   /**
    * C5Table is the main entry points for clients of C5DB
    *
@@ -100,7 +87,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return new Comparator(comparator.getClass().getName(), comparator.getValue());
   }
 
-  @Override
   public Result get(final Get get) throws IOException {
     GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, false);
     try {
@@ -110,7 +96,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  @Override
   public Result[] get(List<Get> gets) throws IOException {
     //TODO Batch get
     final List<Result> results = new ArrayList<>();
@@ -120,7 +105,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return results.toArray(new Result[results.size()]);
   }
 
-  @Override
   public boolean exists(final Get get) throws IOException {
     GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, true);
     try {
@@ -130,7 +114,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  @Override
   public ResultScanner getScanner(final Scan scan) throws IOException {
     if (scan.getStartRow() != null && scan.getStartRow().length > 0
         && scan.getStopRow() != null && scan.getStopRow().length > 0
@@ -145,27 +128,24 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
         0L);
 
     try {
-      return clientScannerManager.get(c5AsyncDatabase.doScanCall(scanRequest).get().getScan().getScannerId());
+      return clientScannerManager.get(c5AsyncDatabase.doScanCall(scanRequest).get());
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
-  @Override
   public ResultScanner getScanner(byte[] family) throws IOException {
     final Scan scan = new Scan();
     scan.addFamily(family);
     return getScanner(scan);
   }
 
-  @Override
   public ResultScanner getScanner(byte[] family, byte[] qualifier) throws IOException {
     final Scan scan = new Scan();
     scan.addColumn(family, qualifier);
     return getScanner(scan);
   }
 
-  @Override
   public Boolean[] exists(List<Get> gets) throws IOException {
     //TODO Batch get
     final List<Boolean> results = new ArrayList<>();
@@ -175,7 +155,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return results.toArray(new Boolean[results.size()]);
   }
 
-  @Override
   public void put(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
     try {
@@ -187,14 +166,12 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  @Override
   public void put(List<Put> puts) throws IOException {
     for (Put put : puts) {
       this.put(put);
     }
   }
 
-  @Override
   public void delete(Delete delete) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
         MutationProto.MutationType.DELETE,
@@ -208,14 +185,12 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  @Override
   public void delete(List<Delete> deletes) throws IOException {
     for (Delete delete : deletes) {
       this.delete(delete);
     }
   }
 
-  @Override
   public void mutateRow(RowMutations rm) throws IOException {
     RegionAction regionAction = RequestConverter.buildRegionAction(regionName, true, rm);
     List<RegionAction> regionActions = Arrays.asList(regionAction);
@@ -226,7 +201,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-  @Override
   public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException {
 
     Condition condition = new Condition(ByteBuffer.wrap(row),
@@ -248,7 +222,6 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     return true;
   }
 
-  @Override
   public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete)
       throws IOException {
     Condition condition = new Condition(ByteBuffer.wrap(row),
@@ -280,124 +253,8 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     }
   }
 
-
-  @Override
-  public Result append(Append append) throws IOException {
-    return null;
-  }
-
-  @Override
-  public Result increment(Increment increment) throws IOException {
-    return null;
-  }
-
-  @Override
-  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount) throws IOException {
-    return 0;
-  }
-
-  @Override
-  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount, Durability durability) throws IOException {
-    return 0;
-  }
-
-  @Override
-  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount, boolean writeToWAL) throws IOException {
-    return 0;
-  }
-
-
-  @Override
-  public Result getRowOrBefore(byte[] row, byte[] family) throws IOException {
-    throw new IOException("We don't support getClosestRow");
-  }
-
-  @Override
-  public boolean isAutoFlush() {
-    LOG.error("we auto flush by default");
-    return true;
-  }
-
-  @Override
-  public void setAutoFlush(boolean autoFlush) {
-    LOG.error("Unspported");
-
-  }
-
-  @Override
-  public void flushCommits() throws IOException {
-    LOG.error("we auto flush by default");
-  }
-
-  @Override
-  public CoprocessorRpcChannel coprocessorService(byte[] row) {
-    LOG.error("Unspported");
-    return null;
-  }
-
-  @Override
-  public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable) throws ServiceException, Throwable {
-    LOG.error("Unspported");
-    return null;
-  }
-
-  @Override
-  public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable, Batch.Callback<R> callback) throws ServiceException, Throwable {
-    LOG.error("Unspported");
-  }
-
-  @Override
-  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
-    LOG.error("Unspported");
-  }
-
-  @Override
-  public void setAutoFlushTo(boolean autoFlush) {
-    LOG.error("Unspported");
-  }
-
-  @Override
-  public long getWriteBufferSize() {
-    LOG.error("Unspported");
-    return 0;
-  }
-
-  @Override
-  public void setWriteBufferSize(long writeBufferSize) throws IOException {
-    LOG.error("Unspported");
-  }
-
-  @Override
   public byte[] getTableName() {
     return this.tableName;
-  }
-
-  @Override
-  public TableName getName() {
-    return null;
-  }
-
-  public Configuration getConfiguration() {
-    return null;
-  }
-
-  @Override
-  public HTableDescriptor getTableDescriptor() throws IOException {
-    return null;
-  }
-
-  public void batch(List<? extends Row> actions, Object[] results) {
-  }
-
-  public Object[] batch(List<? extends Row> actions) {
-    return new Object[0];
-  }
-
-  public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) {
-  }
-
-  public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) {
-    return new Object[0];
   }
 
   public class InvalidResponse extends Exception {
@@ -409,5 +266,4 @@ public class FakeHTable implements HTableInterface, AutoCloseable {
     public InvalidScannerResults(String s) {
     }
   }
-
 }

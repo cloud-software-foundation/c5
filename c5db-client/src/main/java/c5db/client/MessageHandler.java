@@ -18,17 +18,14 @@ package c5db.client;
 
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
 
-/**
- * Created by posix4e on 5/15/14.
- */
 public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
 
-  SettableFuture<Response> call(Call request, Channel channel);
+  ListenableFuture<Response> call(Call request, Channel channel);
 
-  void callScan(Call request, SettableFuture<Long> future, Channel channel);
+  ListenableFuture<Long> callScan(Call request, Channel channel);
 }

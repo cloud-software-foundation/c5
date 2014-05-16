@@ -27,6 +27,7 @@ public final class C5Constants {
   public static final long TIMEOUT = 10000;
   public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
   public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
+
   private C5Constants() {
     throw new UnsupportedOperationException();
   }
