@@ -121,7 +121,6 @@ public class FakeHTable implements AutoCloseable {
       throw new IOException("StopRow needs to be greater than StartRow");
     }
 
-
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier,
         ProtobufUtil.toScan(scan),
         0L,

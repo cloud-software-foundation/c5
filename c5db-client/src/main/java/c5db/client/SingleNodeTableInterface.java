@@ -79,17 +79,20 @@ public class SingleNodeTableInterface implements TableInterface {
 
   @Override
   public ListenableFuture<Long> scan(ScanRequest scanRequest) {
-    return handler.callScan(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
+    return handler.callScan(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null),
+        channel);
   }
 
   @Override
   public ListenableFuture<Response> mutate(MutateRequest mutateRequest) {
-    return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
+    return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null),
+        channel);
   }
 
   @Override
   public ListenableFuture<Response> multiRequest(MultiRequest multiRequest) {
-    return handler.call(new Call(Call.Command.MULTI, commandId.incrementAndGet(), null, null, null, multiRequest), channel);
+    return handler.call(new Call(Call.Command.MULTI, commandId.incrementAndGet(), null, null, null, multiRequest),
+        channel);
   }
 
   @Override
