@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static c5db.client.DataHelper.putRowInDB;
 import static junit.framework.TestCase.assertFalse;
 
 public class TestInOrderScanTest extends MiniClusterBase {
@@ -36,6 +37,17 @@ public class TestInOrderScanTest extends MiniClusterBase {
   public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
     Result result = null;
     ResultScanner scanner;
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
 
     scanner = table.getScanner(cf);
     byte[] previousRow = {};
