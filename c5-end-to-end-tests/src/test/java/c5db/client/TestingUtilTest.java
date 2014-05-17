@@ -36,6 +36,7 @@ import static c5db.client.DataHelper.valuesExistsInDB;
 import static c5db.client.DataHelper.valuesReadFromDB;
 import static c5db.testing.BytesMatchers.equalTo;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
@@ -86,22 +87,30 @@ public class TestingUtilTest extends MiniClusterBase {
 
   @Test
   public void testScan() throws IOException {
-    byte[] row1 = new byte[]{0x00};
-    byte[] row2 = new byte[]{0x01};
-    byte[] row3 = new byte[]{0x02};
-    byte[] stopRow = new byte[]{0x03};
+    byte[] row0 = new byte[]{0x00};
+    byte[] row1 = new byte[]{0x01};
+    byte[] row2 = new byte[]{0x02};
+    byte[] row3 = new byte[]{0x03};
+    byte[] row10 = new byte[]{0x0a};
+    byte[] row11 = new byte[]{0x0b};
+    byte[] row12 = new byte[]{0x0c};
 
+    putRowInDB(table, row0);
     putRowInDB(table, row1);
     putRowInDB(table, row2);
     putRowInDB(table, row3);
+    putRowInDB(table, row10);
+    putRowInDB(table, row11);
+    putRowInDB(table, row12);
 
     Scan scan = new Scan(row1);
-    scan.setStopRow(stopRow);
+    scan.setStopRow(row3);
     ResultScanner resultScanner = table.getScanner(scan);
 
     assertArrayEquals(resultScanner.next().getRow(), row1);
     assertArrayEquals(resultScanner.next().getRow(), row2);
-    assertArrayEquals(resultScanner.next().getRow(), row3);
+    assertEquals(resultScanner.next(), null);
+    assertEquals(resultScanner.next(), null);
   }
 
   @Test
