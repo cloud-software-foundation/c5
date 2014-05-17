@@ -26,6 +26,7 @@ import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -67,7 +68,10 @@ public class MiniClusterBase {
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    server.stopAndWait();
+    for (C5Module module: server.getModules().values()){
+      module.stopAndWait();
+    }
+    Service.State state = server.stopAndWait();
   }
 
   @BeforeClass
