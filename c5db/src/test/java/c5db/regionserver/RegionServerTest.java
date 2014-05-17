@@ -41,6 +41,7 @@ import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class RegionServerTest {
   private final int port = 10000 + random.nextInt(100);
 
   private RegionServerHandler regionServerHandler;
-
+  RegionServerService regionServerService;
 
   @Before
   public void before() throws ExecutionException, InterruptedException {
@@ -83,7 +84,7 @@ public class RegionServerTest {
       oneOf(c5FiberFactory).create();
       will(returnValue(fiberFactory.create()));
     }});
-    RegionServerService regionServerService = new RegionServerService(acceptConnectionGroup,
+    regionServerService = new RegionServerService(acceptConnectionGroup,
         ioWorkerGroup,
         port,
         server);
@@ -100,7 +101,10 @@ public class RegionServerTest {
     regionServerHandler = new RegionServerHandler(regionServerService);
   }
 
-
+  @After
+  public void after() throws ExecutionException, InterruptedException {
+    regionServerService.stop();
+  }
 
   @Test(expected = RegionNotFoundException.class)
   public void shouldThrowErrorWhenInvalidRegionSpecifierSpecified() throws Exception {
