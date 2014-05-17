@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class C5AsyncDatabase implements TableInterface {
-  private static final Logger LOG = LoggerFactory.getLogger(C5AsyncDatabase.class);
+public class SingleNodeTableInterface implements TableInterface {
+  private static final Logger LOG = LoggerFactory.getLogger(SingleNodeTableInterface.class);
   private final AtomicLong commandId = new AtomicLong(0);
   private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
   private final C5ConnectionManager c5ConnectionManager;
@@ -51,12 +51,12 @@ public class C5AsyncDatabase implements TableInterface {
    * C5Table is the main entry points for clients of C5DB
    */
 
-  public C5AsyncDatabase(String hostname, int port)
+  public SingleNodeTableInterface(String hostname, int port)
       throws InterruptedException, ExecutionException, TimeoutException {
     this(hostname, port, new C5NettyConnectionManager());
   }
 
-  public C5AsyncDatabase(String hostname, int port, C5ConnectionManager c5ConnectionManager)
+  public SingleNodeTableInterface(String hostname, int port, C5ConnectionManager c5ConnectionManager)
       throws InterruptedException, ExecutionException, TimeoutException {
     // TODO Route data so we don't need to connect to meta
     this.c5ConnectionManager = c5ConnectionManager;

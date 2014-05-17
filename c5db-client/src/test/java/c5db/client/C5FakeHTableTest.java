@@ -21,11 +21,9 @@ package c5db.client;
 import c5db.client.generated.Call;
 import c5db.client.generated.Cell;
 import c5db.client.generated.CellType;
-import c5db.client.generated.KeyValue;
 import c5db.client.generated.MutateResponse;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanResponse;
-import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
@@ -68,7 +66,7 @@ public class C5FakeHTableTest {
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
   private final byte[] row = Bytes.toBytes("row");
-  private C5AsyncDatabase c5AsyncDatabase;
+  private SingleNodeTableInterface singleNodeTableInterface;
   private SettableFuture callFuture;
   private FakeHTable hTable;
 
@@ -88,8 +86,8 @@ public class C5FakeHTableTest {
       }
     });
 
-    c5AsyncDatabase = new C5AsyncDatabase("fake", 0, c5ConnectionManager);
-    hTable = new FakeHTable(c5AsyncDatabase, ByteString.copyFromUtf8("Doesntexist"));
+    singleNodeTableInterface = new SingleNodeTableInterface("fake", 0, c5ConnectionManager);
+    hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Doesntexist"));
     callFuture = SettableFuture.create();
   }
 
@@ -102,7 +100,7 @@ public class C5FakeHTableTest {
       }
     });
 
-    c5AsyncDatabase.close();
+    singleNodeTableInterface.close();
   }
 
   @Test(expected = IOException.class)
