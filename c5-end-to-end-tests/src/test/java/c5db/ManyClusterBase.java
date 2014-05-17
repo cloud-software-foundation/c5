@@ -135,16 +135,6 @@ public class ManyClusterBase {
     System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort));
     server = Main.startC5Server(new String[]{});
 
-    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
-    server1 = Main.startC5Server(new String[]{});
-
-    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
-    server2 = Main.startC5Server(new String[]{});
-
     ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
     ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
@@ -162,6 +152,11 @@ public class ManyClusterBase {
       Thread.sleep(600);
     }
 
+    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
+    server1 = Main.startC5Server(new String[]{});
+
     ListenableFuture<C5Module> regionServerFuture1 = server1.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture1 = server1.getModule(ModuleType.Tablet);
     ListenableFuture<C5Module> replicationServerFuture1 = server1.getModule(ModuleType.Replication);
@@ -178,6 +173,10 @@ public class ManyClusterBase {
         || !controlServer1.isRunning()) {
       Thread.sleep(600);
     }
+    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
+    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
+    server2 = Main.startC5Server(new String[]{});
 
     ListenableFuture<C5Module> regionServerFuture2 = server2.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture2 = server2.getModule(ModuleType.Tablet);
