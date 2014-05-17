@@ -19,17 +19,25 @@ package c5db;
 import c5db.client.FakeHTable;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+
 
 public class ManyClustersBaseTest extends ManyClusterBase {
 
@@ -39,15 +47,33 @@ public class ManyClustersBaseTest extends ManyClusterBase {
     FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, metaOnPort, tableName);
     ResultScanner scanner = c5AsyncDatabase.getScanner(HConstants.CATALOG_FAMILY);
 
-    Result result;
-    int counter = 0;
-    do {
-      result = scanner.next();
-      if (result != null) {
-        counter++;
-      }
-    } while (result != null);
+    assertThat(scanner.next(), isWellFormedUserTable(name));
+    assertThat(scanner.next(), is(nullValue()));
 
-    assertThat(counter, is(1));
+  }
+
+  private Matcher<? super Result> isWellFormedUserTable(TestName testName) {
+    return new BaseMatcher<Result>() {
+      @Override
+      public boolean matches(Object o) {
+        if (o == null) {
+          return false;
+        }
+        Result result = (Result) o;
+        HRegionInfo regioninfo;
+        try {
+          regioninfo = HRegionInfo.parseFrom(result.getValue(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER));
+        } catch (DeserializationException e) {
+          e.printStackTrace();
+          return false;
+        }
+        return regioninfo.getRegionNameAsString().startsWith(testName.getMethodName());
+      }
+
+      @Override
+      public void describeTo(Description description) {
+
+      }
+    };
   }
 }

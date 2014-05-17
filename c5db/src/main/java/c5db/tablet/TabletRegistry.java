@@ -89,7 +89,8 @@ public class TabletRegistry {
         HTableDescriptor tableDescriptor = HTableDescriptor.parseFrom(tableDescriptorBytes);
 
         Path basePath = configDirectory.getBaseConfigPath();
-
+        Fiber fiber = fiberFactory.create();
+        fiber.start();
         Tablet tablet = tabletFactory.create(
             c5server,
             regionInfo,
@@ -97,12 +98,10 @@ public class TabletRegistry {
             peers,
             basePath,
             legacyConf,
-            fiberFactory.create(),
+            fiber,
             replicationModule,
             regionCreator);
         tablet.setStateChangeChannel(commonStateChangeChannel);
-        tablet.start();
-
         tablets.put(quorum, tablet);
       } catch (IOException | DeserializationException e) {
         LOG.error("Unable to start quorum, due to config error: " + quorum, e);
@@ -131,6 +130,7 @@ public class TabletRegistry {
     configDirectory.writePeersToFile(quorumName, peerList);
 
     Fiber tabletFiber = fiberFactory.create();
+    
     Tablet newTablet = tabletFactory.create(
         c5server,
         regionInfo,
@@ -142,8 +142,8 @@ public class TabletRegistry {
         replicationModule,
         regionCreator);
     newTablet.setStateChangeChannel(commonStateChangeChannel);
-    tablets.put(quorumName, newTablet);
     newTablet.start();
+    tablets.put(quorumName, newTablet);
     return newTablet;
   }
 

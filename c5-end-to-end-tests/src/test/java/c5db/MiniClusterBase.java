@@ -25,9 +25,7 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -44,13 +42,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
@@ -60,7 +54,6 @@ public class MiniClusterBase {
   private static final Random rnd = new Random();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
-  private static int regionServerPort;
   private static Channel<TabletStateChange> stateChanges;
   private static C5Server server;
   @Rule
@@ -68,29 +61,12 @@ public class MiniClusterBase {
   protected FakeHTable table;
   protected byte[] row;
 
-  protected static int getRegionServerPort() {
-    return regionServerPort;
+  protected static int getRegionServerPort() throws ExecutionException, InterruptedException {
+    return server.getModule(ModuleType.RegionServer).get().port();
   }
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-
-    ImmutableMap<ModuleType, C5Module> modules = server.getModules();
-
-    List<ListenableFuture<Service.State>> states = new ArrayList<>();
-    for (C5Module module : modules.values()) {
-      ListenableFuture<Service.State> future = module.stop();
-      states.add(future);
-    }
-
-    for (ListenableFuture<Service.State> state : states) {
-      try {
-        state.get(10000, TimeUnit.MILLISECONDS);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
     server.stopAndWait();
   }
 
@@ -100,24 +76,13 @@ public class MiniClusterBase {
 
     System.setProperty(C5ServerConstants.C5_CFG_PATH, MiniClusterBase.testFolder.getRoot().getAbsolutePath());
     int webServerPort = 9091 + rnd.nextInt(100);
-    regionServerPort = 8080 + rnd.nextInt(1000);
     System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
-    System.setProperty("regionServerPort", String.valueOf(regionServerPort));
-    System.setProperty("webServerPort", String.valueOf(webServerPort));
+    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(webServerPort));
 
     server = Main.startC5Server(new String[]{});
-
-    ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
-    ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
-
-    C5Module regionServer = regionServerFuture.get();
-    C5Module replicationServer = replicationServerFuture.get();
-    C5Module controlServer = controlServerFuture.get();
     TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
-
     stateChanges = tabletServer.getTabletStateChanges();
 
     Fiber receiver = new ThreadFiber();
@@ -127,39 +92,33 @@ public class MiniClusterBase {
     final CountDownLatch latch = new CountDownLatch(2);
 
     Callback<TabletStateChange> onMsg = message -> {
-      System.out.println(message);
       if (message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
     stateChanges.subscribe(receiver, onMsg);
 
-    while (!regionServer.isRunning()
-        || !tabletServer.isRunning()
-        || !replicationServer.isRunning()
-        || !controlServer.isRunning()) {
-      Thread.sleep(600);
-    }
-
     latch.await();
     receiver.dispose();
   }
 
+  @After
+  public void after() throws InterruptedException {
+    table.close();
+  }
+
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public void before() throws InterruptedException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
     final CountDownLatch latch = new CountDownLatch(1);
-
     Callback<TabletStateChange> onMsg = message -> {
-      System.out.println(message);
       if (message.state.equals(Tablet.State.Open) || message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
     stateChanges.subscribe(receiver, onMsg);
-
 
     final ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
@@ -170,16 +129,14 @@ public class MiniClusterBase {
         createTableSubCommand);
 
     commandChannel.publish(createTableCommand);
-    // create java.util.concurrent.CountDownLatch to notify when message arrives
     latch.await();
 
-    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
+    try {
+      table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
+    } catch (TimeoutException | ExecutionException e) {
+      e.printStackTrace();
+    }
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
-  }
-
-  @After
-  public void after() throws InterruptedException {
-    table.close();
   }
 }

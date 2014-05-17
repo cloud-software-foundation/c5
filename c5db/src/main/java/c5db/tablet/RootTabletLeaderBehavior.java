@@ -93,10 +93,9 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         C5ServerConstants.START_META + ":" + pickedPeersString);
 
-    for (Long peer : peers) {
-      CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
-      commandRpcRequestChannel.publish(commandRpcRequest);
-    }
+    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peers.get(0), moduleSubCommand);
+    commandRpcRequestChannel.publish(commandRpcRequest);
+
   }
   private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
