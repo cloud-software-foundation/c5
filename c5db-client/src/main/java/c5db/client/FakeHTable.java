@@ -27,7 +27,9 @@ import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
+import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -118,18 +120,25 @@ public class FakeHTable implements AutoCloseable {
         && Bytes.compareTo(scan.getStartRow(), scan.getStopRow()) > 0) {
       throw new IOException("StopRow needs to be greater than StartRow");
     }
+
+
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier,
         ProtobufUtil.toScan(scan),
         0L,
         C5Constants.DEFAULT_INIT_SCAN,
         false,
         0L);
-
+    ClientScanner scanner;
     try {
-      return clientScannerManager.get(c5AsyncDatabase.doScanCall(scanRequest).get());
+      Long scanResult = c5AsyncDatabase.doScanCall(scanRequest).get();
+      scanner = clientScannerManager.get(scanResult);
+      if (scanner == null){
+        throw new IOException("Unable to find scanner");
+      }
     } catch (Exception e) {
       throw new IOException(e);
     }
+    return scanner;
   }
 
   public ResultScanner getScanner(byte[] family) throws IOException {

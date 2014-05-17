@@ -16,15 +16,19 @@
  */
 package c5db.client.scanner;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 public enum ClientScannerManager {
   INSTANCE;
 
-  private final ConcurrentHashMap<Long, ClientScanner> scannerMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, SettableFuture<ClientScanner>> scannerMap = new ConcurrentHashMap<>();
 
   public ClientScanner createAndGet(Channel channel, long scannerId, long commandId) throws IOException {
     if (hasScanner(scannerId)) {
@@ -32,12 +36,14 @@ public enum ClientScannerManager {
     }
 
     final ClientScanner scanner = new ClientScanner(channel, scannerId, commandId);
-    scannerMap.put(scannerId, scanner);
+    SettableFuture<ClientScanner> clientScannerSettableFuture = SettableFuture.create();
+    clientScannerSettableFuture.set(scanner);
+    scannerMap.put(scannerId, clientScannerSettableFuture);
     return scanner;
   }
 
-  public ClientScanner get(long scannerId) {
-    return scannerMap.get(scannerId);
+  public ClientScanner get(long scannerId) throws ExecutionException, InterruptedException {
+    return scannerMap.get(scannerId).get();
   }
 
   public boolean hasScanner(long scannerId) {
