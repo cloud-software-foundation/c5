@@ -30,7 +30,6 @@ import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -91,7 +90,7 @@ public class FakeHTable implements AutoCloseable {
   public Result get(final Get get) throws IOException {
     GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, false);
     try {
-      return ProtobufUtil.toResult(c5AsyncDatabase.dotGetCall(getRequest).get().getGet().getResult());
+      return ProtobufUtil.toResult(c5AsyncDatabase.get(getRequest).get().getGet().getResult());
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -109,7 +108,7 @@ public class FakeHTable implements AutoCloseable {
   public boolean exists(final Get get) throws IOException {
     GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, true);
     try {
-      return c5AsyncDatabase.dotGetCall(getRequest).get().getGet().getResult().getExists();
+      return c5AsyncDatabase.get(getRequest).get().getGet().getResult().getExists();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
@@ -131,7 +130,7 @@ public class FakeHTable implements AutoCloseable {
         0L);
     ListenableFuture<ClientScanner> scanner;
     try {
-      Long scanResult = c5AsyncDatabase.doScanCall(scanRequest).get();
+      Long scanResult = c5AsyncDatabase.scan(scanRequest).get();
       scanner = clientScannerManager.get(scanResult);
       if (scanner == null) {
         throw new IOException("Unable to find scanner");
@@ -166,7 +165,7 @@ public class FakeHTable implements AutoCloseable {
   public void put(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
     try {
-      if (!c5AsyncDatabase.doMutateCall(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
         throw new IOException("Not processed");
       }
     } catch (Exception e) {
@@ -185,7 +184,7 @@ public class FakeHTable implements AutoCloseable {
         MutationProto.MutationType.DELETE,
         delete);
     try {
-      if (!c5AsyncDatabase.doMutateCall(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
         throw new IOException("Not processed");
       }
     } catch (InterruptedException | ExecutionException e) {
@@ -203,7 +202,7 @@ public class FakeHTable implements AutoCloseable {
     RegionAction regionAction = RequestConverter.buildRegionAction(regionName, rm);
     List<RegionAction> regionActions = Arrays.asList(regionAction);
     try {
-      c5AsyncDatabase.doMultiCall(new MultiRequest(regionActions)).get();
+      c5AsyncDatabase.multiRequest(new MultiRequest(regionActions)).get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
@@ -221,7 +220,7 @@ public class FakeHTable implements AutoCloseable {
         put,
         condition);
     try {
-      if (!c5AsyncDatabase.doMutateCall(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
         return false;
       }
     } catch (InterruptedException | ExecutionException e) {
@@ -242,7 +241,7 @@ public class FakeHTable implements AutoCloseable {
         delete,
         condition);
     try {
-      if (!c5AsyncDatabase.doMutateCall(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
         return false;
       }
     } catch (InterruptedException | ExecutionException e) {
