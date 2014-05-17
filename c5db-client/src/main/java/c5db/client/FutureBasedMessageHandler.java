@@ -48,7 +48,7 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
         ClientScanner clientScanner;
 
         if (CLIENT_SCANNER_MANAGER.hasScanner(scannerId)) {
-          clientScanner = CLIENT_SCANNER_MANAGER.get(scannerId);
+          clientScanner = CLIENT_SCANNER_MANAGER.get(scannerId).get();
         } else {
           clientScanner = CLIENT_SCANNER_MANAGER.createAndGet(ctx.channel(), scannerId, msg.getCommandId());
           scannerFutures.get(msg.getCommandId()).set(scannerId);

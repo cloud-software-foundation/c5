@@ -30,6 +30,7 @@ import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -128,17 +129,17 @@ public class FakeHTable implements AutoCloseable {
         C5Constants.DEFAULT_INIT_SCAN,
         false,
         0L);
-    ClientScanner scanner;
+    ListenableFuture<ClientScanner> scanner;
     try {
       Long scanResult = c5AsyncDatabase.doScanCall(scanRequest).get();
       scanner = clientScannerManager.get(scanResult);
-      if (scanner == null){
+      if (scanner == null) {
         throw new IOException("Unable to find scanner");
       }
-    } catch (Exception e) {
+      return scanner.get();
+    } catch (ExecutionException | InterruptedException e){
       throw new IOException(e);
     }
-    return scanner;
   }
 
   public ResultScanner getScanner(byte[] family) throws IOException {

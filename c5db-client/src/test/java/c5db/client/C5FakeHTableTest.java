@@ -169,8 +169,8 @@ public class C5FakeHTableTest {
     });
 
     long scannerId = 10l;
-    callFuture.set(scannerId);
     ClientScannerManager.INSTANCE.createAndGet(channel, scannerId, 1);
+    callFuture.set(scannerId);
     ResultScanner scanner = hTable.getScanner(new Scan());
 
 
@@ -187,15 +187,15 @@ public class C5FakeHTableTest {
     List<c5db.client.generated.Result> scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
     ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, true, 0, scanResults);
 
-    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
 
     kv = Arrays.asList(cell);
     scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
     scanResponse = new ScanResponse(cellsPerResult, scannerId, false, 0, scanResults);
 
-    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
     scanResponse = new ScanResponse(Arrays.asList(0), scannerId, false, 0, new ArrayList<>());
-    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
     Result result;
     int counter = 0;
     do {
