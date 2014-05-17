@@ -48,12 +48,8 @@ import com.google.common.util.concurrent.ListenableFuture;
  * A shared interface so that a user can interchange HTable and C5Table.
  */
 interface TableInterface extends AutoCloseable {
-
-  ListenableFuture<Response> doGetCall(GetRequest get);
-
-  ListenableFuture<Long> doScanCall(ScanRequest scanRequest);
-
-  ListenableFuture<Response> doMutateCall(MutateRequest mutateRequest);
-
-  ListenableFuture<Response> doMultiCall(MultiRequest multiRequest);
+  ListenableFuture<Response> get(GetRequest get);
+  ListenableFuture<Long> scan(ScanRequest scanRequest);
+  ListenableFuture<Response> mutate(MutateRequest mutateRequest);
+  ListenableFuture<Response> multiRequest(MultiRequest multiRequest);
 }

@@ -66,7 +66,7 @@ public class C5AsyncDatabase implements TableInterface {
   }
 
   @Override
-  public ListenableFuture<Response> dotGetCall(final GetRequest get) {
+  public ListenableFuture<Response> get(final GetRequest get) {
     return handler.call(new Call(Call.Command.GET,
             commandId.incrementAndGet(),
             get,
@@ -78,17 +78,17 @@ public class C5AsyncDatabase implements TableInterface {
   }
 
   @Override
-  public ListenableFuture<Long> doScanCall(ScanRequest scanRequest) {
+  public ListenableFuture<Long> scan(ScanRequest scanRequest) {
     return handler.callScan(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
   }
 
   @Override
-  public ListenableFuture<Response> doMutateCall(MutateRequest mutateRequest) {
+  public ListenableFuture<Response> mutate(MutateRequest mutateRequest) {
     return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
   }
 
   @Override
-  public ListenableFuture<Response> doMultiCall(MultiRequest multiRequest) {
+  public ListenableFuture<Response> multiRequest(MultiRequest multiRequest) {
     return handler.call(new Call(Call.Command.MULTI, commandId.incrementAndGet(), null, null, null, multiRequest), channel);
   }
 

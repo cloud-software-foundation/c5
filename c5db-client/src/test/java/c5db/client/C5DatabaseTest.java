@@ -107,7 +107,7 @@ public class C5DatabaseTest {
         ByteBuffer.wrap(new byte[]{0x00}));
 
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, new MutationProto(), null);
-    c5AsyncDatabase.doMutateCall(mutateRequest);
+    c5AsyncDatabase.mutate(mutateRequest);
     Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
     callFuture.set(response);
 
@@ -120,7 +120,7 @@ public class C5DatabaseTest {
       }
     });
 
-    c5AsyncDatabase.doMutateCall(mutateRequest);
+    c5AsyncDatabase.mutate(mutateRequest);
     response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
     callFuture.set(response);
   }
@@ -140,7 +140,7 @@ public class C5DatabaseTest {
 
     Get get = new Get();
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
-    c5AsyncDatabase.dotGetCall(getRequest);
+    c5AsyncDatabase.get(getRequest);
     Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null);
     callFuture.set(response);
   }
