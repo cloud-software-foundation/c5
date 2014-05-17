@@ -170,7 +170,6 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
 
   @FiberOnly
   private void tabletStateChanges(TabletStateChange tabletStateChange) {
-    System.out.println("Tablet state change: " + tabletStateChange);
     // TODO send to the websockets
     TabletStateNotification note = new TabletStateNotification(
         tabletStateChange.tablet.getRegionInfo().getEncodedName(),

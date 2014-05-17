@@ -19,15 +19,12 @@ package c5db;
 import c5db.client.FakeHTable;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.ControlModule;
-import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import com.google.common.util.concurrent.ListenableFuture;
+import c5db.tablet.TabletService;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -38,6 +35,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.PoolFiberFactory;
 import org.jetlang.fibers.ThreadFiber;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,200 +52,68 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 public class ManyClusterBase {
-  protected static final byte[] value = Bytes.toBytes("value");
-  private static final Random rnd = new Random();
   static int metaOnPort;
-  private static int regionServerPort;
-  private static Channel<TabletStateChange> stateChanges;
-  private static Channel<TabletStateChange> stateChanges1;
-  private static Channel<TabletStateChange> stateChanges2;
   private static Channel<CommandRpcRequest<?>> commandChannel;
-  private static C5Server server;
-  private static C5Server server1;
-  private static C5Server server2;
+  private static List<C5Server> servers = new ArrayList<>();
+
   @Rule
   public TestName name = new TestName();
-  protected FakeHTable table;
-  protected byte[] row;
+  private FakeHTable table;
+  private byte[] row;
   private int userTabletOn;
 
-  @AfterClass
-  public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    List<ListenableFuture<Service.State>> states;
+  @AfterClass()
+  public static void afterClass() {
 
-    states = new ArrayList<>();
-    for (C5Module module : server.getModules().values()) {
-      ListenableFuture<Service.State> future = module.stop();
-      states.add(future);
-    }
-    for (ListenableFuture<Service.State> state : states) {
-      try {
-        state.get(10000, TimeUnit.MILLISECONDS);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    server.stopAndWait();
+    Log.warn("-----------------------------------------------------------------------------------------------------------");
+    for (C5Server server : servers) {
+      Service.State state = server.stopAndWait();
 
-    states = new ArrayList<>();
-    for (C5Module module : server1.getModules().values()) {
-      ListenableFuture<Service.State> future = module.stop();
-      states.add(future);
     }
-    for (ListenableFuture<Service.State> state : states) {
-      try {
-        state.get(10000, TimeUnit.MILLISECONDS);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    server1.stopAndWait();
+    Log.warn("-----------------------------------------------------------------------------------------------------------");
 
-    for (C5Module module : server2.getModules().values()) {
-      ListenableFuture<Service.State> future = module.stop();
-      states.add(future);
-    }
-    for (ListenableFuture<Service.State> state : states) {
-      try {
-        state.get(10000, TimeUnit.MILLISECONDS);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    server2.stopAndWait();
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    Thread.sleep(1000);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     System.setProperty("clusterName", String.valueOf("foo"));
+    int processors = Runtime.getRuntime().availableProcessors();
+    PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
 
-    regionServerPort = 8080 + rnd.nextInt(1000);
-    int webServerPort = 31337 + rnd.nextInt(1000);
-    int controlServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT + rnd.nextInt(100);
-    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(regionServerPort));
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort));
-    server = Main.startC5Server(new String[]{});
 
-    ListenableFuture<C5Module> regionServerFuture = server.getModule(ModuleType.RegionServer);
-    ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    ListenableFuture<C5Module> replicationServerFuture = server.getModule(ModuleType.Replication);
-    ListenableFuture<C5Module> controlServerFuture = server.getModule(ModuleType.ControlRpc);
+    Random random = new Random();
+    final CountDownLatch latch = new CountDownLatch(1);
+    for (int i=0 ;i!= 3; i++){
+      System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));
+      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000+ random.nextInt(1000)));
 
-    C5Module regionServer = regionServerFuture.get();
-    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
-    ReplicationModule replicationServer = (ReplicationModule) replicationServerFuture.get();
-    ControlModule controlServer = (ControlModule) controlServerFuture.get();
-
-    while (!regionServer.isRunning()
-        || !tabletServer.isRunning()
-        || !replicationServer.isRunning()
-        || !controlServer.isRunning()) {
-      Thread.sleep(600);
-    }
-
-    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
-    server1 = Main.startC5Server(new String[]{});
-
-    ListenableFuture<C5Module> regionServerFuture1 = server1.getModule(ModuleType.RegionServer);
-    ListenableFuture<C5Module> tabletServerFuture1 = server1.getModule(ModuleType.Tablet);
-    ListenableFuture<C5Module> replicationServerFuture1 = server1.getModule(ModuleType.Replication);
-    ListenableFuture<C5Module> controlServerFuture1 = server1.getModule(ModuleType.ControlRpc);
-
-    C5Module regionServer1 = regionServerFuture1.get();
-    TabletModule tabletServer1 = (TabletModule) tabletServerFuture1.get();
-    ReplicationModule replicationServer1 = (ReplicationModule) replicationServerFuture1.get();
-    ControlModule controlServer1 = (ControlModule) controlServerFuture1.get();
-
-    while (!regionServer1.isRunning()
-        || !tabletServer1.isRunning()
-        || !replicationServer1.isRunning()
-        || !controlServer1.isRunning()) {
-      Thread.sleep(600);
-    }
-    System.setProperty(C5ServerConstants.REGION_SERVER_PORT_PROPERTY_NAME, String.valueOf(++regionServerPort));
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(++webServerPort));
-    System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(++controlServerPort));
-    server2 = Main.startC5Server(new String[]{});
-
-    ListenableFuture<C5Module> regionServerFuture2 = server2.getModule(ModuleType.RegionServer);
-    ListenableFuture<C5Module> tabletServerFuture2 = server2.getModule(ModuleType.Tablet);
-    ListenableFuture<C5Module> replicationServerFuture2 = server2.getModule(ModuleType.Replication);
-    ListenableFuture<C5Module> controlServerFuture2 = server2.getModule(ModuleType.ControlRpc);
-
-    C5Module regionServer2 = regionServerFuture2.get();
-    TabletModule tabletServer2 = (TabletModule) tabletServerFuture2.get();
-    ReplicationModule replicationServer2 = (ReplicationModule) replicationServerFuture2.get();
-    ControlModule controlServer2 = (ControlModule) controlServerFuture2.get();
-
-    while (!regionServer2.isRunning()
-        || !tabletServer2.isRunning()
-        || !replicationServer2.isRunning()
-        || !controlServer2.isRunning()) {
-      Thread.sleep(600);
-    }
-
-    stateChanges = tabletServer.getTabletStateChanges();
-    stateChanges1 = tabletServer1.getTabletStateChanges();
-    stateChanges2 = tabletServer2.getTabletStateChanges();
-
-    Fiber receiver = new ThreadFiber();
-    receiver.start();
-
-    // create java.util.concurrent.CountDownLatch to notify when message arrives
-    final CountDownLatch latch = new CountDownLatch(2);
-
-    Callback<TabletStateChange> onMsg1 = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        System.out.println("Found: " + message.tablet.getRegionInfo().getRegionNameAsString());
-        if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServerPort - 2;
-          commandChannel = server.getCommandChannel();
+      C5Server server = Main.startC5Server(new String[]{});
+      servers.add(server);
+      // create java.util.concurrent.CountDownLatch to notify when message arrives
+      C5Module regionServer = server.getModule(ModuleType.RegionServer).get();
+      C5Module tabletServer = server.getModule(ModuleType.Tablet).get();
+      Fiber fiber = fiberPool.create();
+      fiber.start();
+      ((TabletService) tabletServer).getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
+        if (tabletStateChange.state.equals(Tablet.State.Leader)) {
+          if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
+            metaOnPort = regionServer.port();
+            System.out.println("Found meta on:" + metaOnPort);
+            commandChannel = server.getCommandChannel();
+            latch.countDown();
+          }
         }
-        latch.countDown();
-      }
-    };
-
-    Callback<TabletStateChange> onMsg2 = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        System.out.println("Found: " + message.tablet.getRegionInfo().getRegionNameAsString());
-        if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServerPort - 1;
-          commandChannel = server1.getCommandChannel();
-        }
-        latch.countDown();
-      }
-    };
-
-    Callback<TabletStateChange> onMsg3 = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        System.out.println("Found: " + message.tablet.getRegionInfo().getRegionNameAsString());
-        if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServerPort;
-          commandChannel = server2.getCommandChannel();
-        }
-        latch.countDown();
-      }
-    };
-
-    stateChanges.subscribe(receiver, onMsg1);
-    stateChanges1.subscribe(receiver, onMsg2);
-    stateChanges2.subscribe(receiver, onMsg3);
+      });
+    }
 
     latch.await();
-    receiver.dispose();
-
+    fiberPool.dispose();
+    Log.warn("-----------------------------------------------------------------------------------------------------------");
   }
 
   protected int getRegionServerPort() {
@@ -260,7 +126,10 @@ public class ManyClusterBase {
     HTableDescriptor testDesc = new HTableDescriptor(tableName);
     testDesc.addFamily(new HColumnDescriptor("cf"));
     HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-    String peerString = String.valueOf(server.getNodeId() + "," + server1.getNodeId() + "," + server2.getNodeId());
+
+    String peerString = String.valueOf(servers.get(0).getNodeId() + ","
+        + servers.get(1).getNodeId()
+        + "," + servers.get(2).getNodeId());
     BASE64Encoder encoder = new BASE64Encoder();
 
     String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
@@ -276,45 +145,33 @@ public class ManyClusterBase {
     receiver.start();
 
     final CountDownLatch latch = new CountDownLatch(1);
-
-    Callback<TabletStateChange> onMsg = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        userTabletOn = regionServerPort - 2;
-        latch.countDown();
-      }
-    };
-    Callback<TabletStateChange> onMsg1 = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        userTabletOn = regionServerPort - 1;
-        latch.countDown();
-      }
-    };
-    Callback<TabletStateChange> onMsg2 = message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Leader)) {
-        userTabletOn = regionServerPort;
-        latch.countDown();
-      }
-    };
-    stateChanges.subscribe(receiver, onMsg);
-    stateChanges1.subscribe(receiver, onMsg1);
-    stateChanges2.subscribe(receiver, onMsg2);
-
     final ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-    ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        getCreateTabletSubCommand(tableName));
 
-    commandChannel.publish(new CommandRpcRequest<>(server.getNodeId(), createTableSubCommand));
-    commandChannel.publish(new CommandRpcRequest<>(server1.getNodeId(), createTableSubCommand));
-    commandChannel.publish(new CommandRpcRequest<>(server2.getNodeId(), createTableSubCommand));
+    for (C5Server server : servers) {
+      C5Module regionServer = server.getModule(ModuleType.RegionServer).get();
+      C5Module tabletServer = server.getModule(ModuleType.Tablet).get();
+
+      Callback<TabletStateChange> onMsg = message -> {
+        if (!message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
+            && message.state.equals(Tablet.State.Leader)) {
+          userTabletOn = regionServer.port();
+          latch.countDown();
+        }
+      };
+      ((TabletService) tabletServer).getTabletStateChanges().subscribe(receiver, onMsg);
+    }
+
+    for (C5Server server : servers) {
+      ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
+          getCreateTabletSubCommand(tableName));
+      commandChannel.publish(new CommandRpcRequest<>(server.getNodeId(), createTableSubCommand));
+    }
+
     // create java.util.concurrent.CountDownLatch to notify when message arrives
     latch.await();
 
     table = new FakeHTable(C5TestServerConstants.LOCALHOST, userTabletOn, tableName);
     row = Bytes.toBytes(name.getMethodName());
-
     receiver.dispose();
   }
 

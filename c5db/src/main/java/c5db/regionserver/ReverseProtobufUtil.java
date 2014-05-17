@@ -216,9 +216,6 @@ public class ReverseProtobufUtil {
       c5db.client.generated.TimeRange timeRange = proto.getTimeRange();
       long minStamp = timeRange.getFrom();
       long maxStamp = timeRange.getTo();
-      // TODO REMOVE
-      System.out.println("minStamp: " + minStamp);
-      System.out.println("maxStamp: " + minStamp);
       scan.setTimeRange(minStamp, maxStamp);
     }
     if (proto.getFilter() != null && proto.getFilter().getName() != null) {

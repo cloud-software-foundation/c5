@@ -46,6 +46,7 @@ import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
+import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,8 +56,7 @@ public class ClientScanner extends AbstractClientScanner {
   private final long scannerId;
   private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>();
   private final long commandId;
-  private boolean isClosed = true;
-
+  private boolean isClosed = false;
 
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
@@ -69,7 +69,6 @@ public class ClientScanner extends AbstractClientScanner {
     ch = channel;
     this.scannerId = scannerId;
     this.commandId = commandId;
-    this.isClosed = false;
   }
 
   @Override
@@ -135,7 +134,7 @@ public class ClientScanner extends AbstractClientScanner {
   }
 
   public void add(ScanResponse response) {
-    if (!response.getMoreResults() ){
+    if (! this.isClosed && !response.getMoreResults()) {
       this.close();
     }
     for (c5db.client.generated.Result result : response.getResultsList()) {

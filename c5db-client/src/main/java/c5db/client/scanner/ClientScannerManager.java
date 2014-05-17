@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 

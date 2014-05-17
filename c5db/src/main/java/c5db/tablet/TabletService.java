@@ -110,6 +110,9 @@ public class TabletService extends AbstractService implements TabletModule {
   // TODO remove
   private Tablet getRegionWithJustTableName(String tableName) {
     // Always return the first region which matches
+    if (tabletRegistry == null){
+      return null;
+    }
     Optional<String> maybeFoundRegion = tabletRegistry
         .getTablets()
         .keySet()
@@ -237,37 +240,23 @@ public class TabletService extends AbstractService implements TabletModule {
                            final HTableDescriptor tableDescriptor,
                            final ImmutableList<Long> peers
   ) throws IOException {
-    LOG.info("Opening replicator for region {} peers {}", regionInfo, peers);
+    LOG.debug("Opening replicator for region {} peers {}", regionInfo, peers);
 
     String quorumId = regionInfo.getRegionNameAsString();
 
     final c5db.interfaces.tablet.Tablet tablet = tabletRegistry.startTablet(regionInfo, tableDescriptor, peers);
     Channel<TabletStateChange> tabletChannel = tablet.getStateChangeChannel();
-    Fiber tabletCallbackFiber = fiberFactory.create();
 
-    tabletCallbackFiber.start();
-    tabletChannel.subscribe(tabletCallbackFiber, message -> {
+    tabletChannel.subscribe(fiber, message -> {
       if (message.state.equals(c5db.interfaces.tablet.Tablet.State.Open)
           || message.state.equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
-        try {
-          tabletRegistry.startTablet(tablet.getRegionInfo(),
-              tablet.getTableDescriptor(),
-              tablet.getPeers());
-        } catch (IOException e) {
-          e.printStackTrace();
-
-        }
         onlineRegions.put(quorumId, tablet.getRegion());
-        tabletCallbackFiber.dispose();
       }
     });
     if (tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Open)
         || tablet.getTabletState().equals(c5db.interfaces.tablet.Tablet.State.Leader)) {
-      tabletCallbackFiber.dispose();
-      tabletRegistry.startTablet(tablet.getRegionInfo(),
-          tablet.getTableDescriptor(),
-          tablet.getPeers());
       onlineRegions.put(quorumId, tablet.getRegion());
+
     }
   }
 
