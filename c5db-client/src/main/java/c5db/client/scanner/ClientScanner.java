@@ -61,7 +61,6 @@ public class ClientScanner extends AbstractClientScanner {
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
   private int outStandingRequests = C5Constants.DEFAULT_INIT_SCAN;
 
-
   /**
    * Create a new ClientScanner for the specified table
    * Note that the passed {@link org.apache.hadoop.hbase.client.Scan}'s start row maybe changed changed.
@@ -136,6 +135,9 @@ public class ClientScanner extends AbstractClientScanner {
   }
 
   public void add(ScanResponse response) {
+    if (!response.getMoreResults() ){
+      this.close();
+    }
     for (c5db.client.generated.Result result : response.getResultsList()) {
       scanResults.add(result);
       this.outStandingRequests--;

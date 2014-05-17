@@ -19,14 +19,23 @@ package c5db.client;
 
 
 import c5db.client.generated.Call;
+import c5db.client.generated.Cell;
+import c5db.client.generated.CellType;
+import c5db.client.generated.KeyValue;
 import c5db.client.generated.MutateResponse;
 import c5db.client.generated.Response;
+import c5db.client.generated.ScanResponse;
+import c5db.client.scanner.ClientScanner;
+import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -37,8 +46,15 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class C5FakeHTableTest {
 
@@ -141,4 +157,53 @@ public class C5FakeHTableTest {
     callFuture.set(new Response());
     hTable.get(new Get(row));
   }
+
+  @Test
+  public void canScan() throws IOException, InterruptedException, ExecutionException {
+    SettableFuture<Long> callFuture = SettableFuture.create();
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).callScan(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+
+    long scannerId = 10l;
+    callFuture.set(scannerId);
+    ClientScannerManager.INSTANCE.createAndGet(channel, scannerId, 1);
+    ResultScanner scanner = hTable.getScanner(new Scan());
+
+
+    List<Integer> cellsPerResult = Arrays.asList(1);
+
+    Cell cell = new Cell(
+        ByteBuffer.wrap(Bytes.toBytes("row")),
+        ByteBuffer.wrap(Bytes.toBytes("cf")),
+        ByteBuffer.wrap(Bytes.toBytes("cq")),
+        0l,
+        CellType.PUT,
+        ByteBuffer.wrap(Bytes.toBytes("value")));
+    List<Cell> kv = Arrays.asList(cell);
+    List<c5db.client.generated.Result> scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
+    ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, true, 0, scanResults);
+
+    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+
+    kv = Arrays.asList(cell);
+    scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
+    scanResponse = new ScanResponse(cellsPerResult, scannerId, false, 0, scanResults);
+
+    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+    scanResponse = new ScanResponse(Arrays.asList(0), scannerId, false, 0, new ArrayList<>());
+    ClientScannerManager.INSTANCE.get(scannerId).add(scanResponse);
+    Result result;
+    int counter = 0;
+    do {
+      result = scanner.next();
+      counter++;
+    } while (result != null);
+
+    assertThat(counter, is(3));
+  }
+
 }
