@@ -90,7 +90,6 @@ public class TabletRegistry {
 
         Path basePath = configDirectory.getBaseConfigPath();
         Fiber fiber = fiberFactory.create();
-        fiber.start();
         Tablet tablet = tabletFactory.create(
             c5server,
             regionInfo,
@@ -101,6 +100,7 @@ public class TabletRegistry {
             fiber,
             replicationModule,
             regionCreator);
+        tablet.start();
         tablet.setStateChangeChannel(commonStateChangeChannel);
         tablets.put(quorum, tablet);
       } catch (IOException | DeserializationException e) {

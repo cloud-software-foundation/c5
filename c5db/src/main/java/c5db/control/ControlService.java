@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -223,8 +224,12 @@ public class ControlService extends AbstractService implements ControlModule {
 
   @Override
   protected void doStop() {
-    listenChannel.close();
-
+    ChannelFuture future = listenChannel.close();
+    try {
+      future.get();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
     notifyStopped();
   }
 }

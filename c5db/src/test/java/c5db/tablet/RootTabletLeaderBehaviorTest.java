@@ -124,18 +124,17 @@ public class RootTabletLeaderBehaviorTest {
 
     }});
 
-    AtomicLong counter = new AtomicLong(C5ServerConstants.DEFAULT_QUORUM_SIZE);
-    final CountDownLatch latch = new CountDownLatch((int) counter.get());
+    final CountDownLatch latch = new CountDownLatch(1);
 
     Fiber fiber = new ThreadFiber();
+    fiber.start();
     memoryChannel.subscribe(fiber, message -> {
       if (((ModuleSubCommand) message.message).getSubCommand().contains(C5ServerConstants.START_META)) {
-        counter.decrementAndGet();
         latch.countDown();
       }
     });
 
-    fiber.execute(() -> {
+
       RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
           c5Server,
           C5ServerConstants.DEFAULT_QUORUM_SIZE);
@@ -145,11 +144,10 @@ public class RootTabletLeaderBehaviorTest {
         e.printStackTrace();
         throw new RuntimeException("Fail Test" + e);
       }
-    });
-    fiber.start();
+
+
     latch.await();
 
-    assertThat(counter.get(), is(0l));
     fiber.dispose();
   }
 

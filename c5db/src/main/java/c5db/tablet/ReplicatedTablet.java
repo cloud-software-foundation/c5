@@ -145,7 +145,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     replicator.start();
     OLogShim shim = new OLogShim(replicator);
     region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
-    publishEvent(State.Open);
     setTabletState(State.Open);
   }
 
@@ -177,6 +176,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         this.setTabletState(State.Open);
         break;
       case LEADER:
+        this.setTabletState(State.Leader);
         try {
             if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
 
@@ -194,7 +194,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             } else {
                 // update the meta table with my leader status
             }
-            this.setTabletState(State.Leader);
         } catch (Exception e){
             LOG.error(e.getLocalizedMessage());
             LOG.error(e.getLocalizedMessage());

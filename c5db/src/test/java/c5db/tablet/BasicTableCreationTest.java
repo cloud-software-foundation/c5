@@ -41,6 +41,7 @@ import org.jetlang.channels.MemoryChannel;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
+import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -66,7 +67,7 @@ public class BasicTableCreationTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private final int QUORUM_SIZE = 3;
+  private final int QUORUM_SIZE = 1;
   private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
   private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
@@ -140,21 +141,14 @@ public class BasicTableCreationTest {
 
     Map<Long, NodeInfo> nodeStates = new HashMap<>();
     nodeStates.put(1l, new NodeInfo(new Availability()));
-    nodeStates.put(2l, new NodeInfo(new Availability()));
-    nodeStates.put(3l, new NodeInfo(new Availability()));
-
     nodeNotificationsCallback.set(ImmutableMap.copyOf(nodeStates));
 
     Fiber fiber = poolFiberFactory.create();
-    Fiber fiber2 = poolFiberFactory.create();
     context.checking(new Expectations() {{
       // Emulate a very large quorum
 
       oneOf(c5FiberFactory).create();
       will(returnValue(fiber));
-
-      oneOf(c5FiberFactory).create();
-      will(returnValue(fiber2));
 
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
       will(returnValue(replicatorSettableFuture));
@@ -172,9 +166,13 @@ public class BasicTableCreationTest {
     }});
     CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    tabletService.getTabletStateChanges().subscribe(fiber2, message -> {
+    ThreadFiber fiber123 = new ThreadFiber();
+    fiber123.start();
+    tabletService.getTabletStateChanges().subscribe(fiber123, message -> {
+      System.out.println(message);
       if (message.state.equals(Tablet.State.Open)) {
         countDownLatch.countDown();
+        fiber123.dispose();
       }
     });
 
@@ -182,10 +180,18 @@ public class BasicTableCreationTest {
     replicatorModuleFuture.set(replicationModule);
     future.get();
     countDownLatch.await();
+
   }
 
   @After
   public void tearDown() {
+    try {
+      tabletService.stop().get();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
     poolFiberFactory.dispose();
   }
 
@@ -194,15 +200,11 @@ public class BasicTableCreationTest {
   public void shouldCreateMetaEntryAppropriatelyOnTableCreation() throws Throwable {
 
     final Fiber startMetaFiber1 = poolFiberFactory.create();
-    final Fiber startMetaFiber2 = poolFiberFactory.create();
     replicatorSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
         oneOf(c5FiberFactory).create();
         will(returnValue(startMetaFiber1));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startMetaFiber2));
 
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(replicatorSettableFuture));
@@ -221,22 +223,24 @@ public class BasicTableCreationTest {
       }
     });
 
-    tabletService.acceptCommand(C5ServerConstants.START_META + ":1,2,3");
+    tabletService.acceptCommand(C5ServerConstants.START_META + ":1");
     replicatorSettableFuture.set(replicator);
 
     CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    tabletService.getTabletStateChanges().subscribe(startMetaFiber1, message -> {
+    ThreadFiber fiber123 = new ThreadFiber();
+    fiber123.start();
+    tabletService.getTabletStateChanges().subscribe(fiber123, message -> {
       if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")
           && message.state.equals(Tablet.State.Open)) {
         countDownLatch.countDown();
+        fiber123.dispose();
       }
     });
     countDownLatch.await();
 
     tabletService.getTablet("hbase:meta");
     final Fiber startUserTableFiber1 = poolFiberFactory.create();
-    final Fiber startUserTableFiber2 = poolFiberFactory.create();
 
     SettableFuture<Long> longSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
@@ -244,9 +248,6 @@ public class BasicTableCreationTest {
 
         oneOf(c5FiberFactory).create();
         will(returnValue(startUserTableFiber1));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startUserTableFiber2));
 
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(replicatorSettableFuture));
