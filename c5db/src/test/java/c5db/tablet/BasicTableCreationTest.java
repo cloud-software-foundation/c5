@@ -16,6 +16,7 @@
  */
 package c5db.tablet;
 
+import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.TestHelpers;
@@ -59,6 +60,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+
+import static c5db.AsyncChannelAsserts.assertEventually;
+import static c5db.AsyncChannelAsserts.listenTo;
+import static c5db.TabletMatchers.hasMessageWithState;
 
 public class BasicTableCreationTest {
 
@@ -269,9 +274,11 @@ public class BasicTableCreationTest {
     });
     ByteString tableName = ByteString.copyFromUtf8("tabletName");
     long nodeId = 1l;
+    AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
 
     tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName, nodeId));
     replicatorSettableFuture.set(replicator);
+    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
 
   }
 }
