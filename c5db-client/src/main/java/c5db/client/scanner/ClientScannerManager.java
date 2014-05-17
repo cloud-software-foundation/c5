@@ -42,8 +42,8 @@ public enum ClientScannerManager {
     return scanner;
   }
 
-  public ClientScanner get(long scannerId) throws ExecutionException, InterruptedException {
-    return scannerMap.get(scannerId).get();
+  public ListenableFuture<ClientScanner> get(long scannerId) throws ExecutionException, InterruptedException {
+    return scannerMap.get(scannerId);
   }
 
   public boolean hasScanner(long scannerId) {
