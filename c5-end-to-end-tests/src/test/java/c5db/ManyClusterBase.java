@@ -67,12 +67,14 @@ public class ManyClusterBase {
   private int userTabletOn;
 
   @AfterClass()
-  public static void afterClass() {
+  public static void afterClass() throws ExecutionException, InterruptedException {
 
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {
+      for (C5Module module: server.getModules().values()){
+        module.stopAndWait();
+      }
       Service.State state = server.stopAndWait();
-
     }
     Log.warn("-----------------------------------------------------------------------------------------------------------");
 
