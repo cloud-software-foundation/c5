@@ -232,13 +232,13 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(replicationFuture));
 
-        oneOf(replicator).getStateChannel();
+        allowing(replicator).getStateChannel();
         will(returnValue(channel));
 
-        oneOf(replicator).getStateChangeChannel();
+        allowing(replicator).getStateChangeChannel();
         will(returnValue(stateChangeChannel));
 
-        oneOf(replicator).start();
+        allowing(replicator).start();
         oneOf(replicator).getQuorumId();
         will(returnValue("1"));
 
@@ -249,6 +249,7 @@ public class TabletServiceCommandCheckTest {
     tabletService.acceptCommand(createTableString());
     AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+
   }
 
   private String addMETALeaderToRootString() {
@@ -261,7 +262,7 @@ public class TabletServiceCommandCheckTest {
   }
 
   @Test
-  public void shouldSetMetaLeader() throws ExecutionException, InterruptedException, IOException {
+  public void shouldSetMetaLeader() throws Throwable {
     context.checking(new Expectations() {
       {
 
@@ -297,15 +298,36 @@ public class TabletServiceCommandCheckTest {
     ListenableFuture<Service.State> future = tabletService.start();
     future.get();
     SettableFuture replicationFuture = SettableFuture.create();
+
+    Channel channel = new MemoryChannel();
+    Channel stateChangeChannel = new MemoryChannel();
+
     context.checking(new Expectations() {{
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
       will(returnValue(replicationFuture));
+
+      allowing(replicator).getStateChannel();
+      will(returnValue(channel));
+
+      allowing(replicator).getStateChangeChannel();
+      will(returnValue(stateChangeChannel));
+
+      allowing(replicator).start();
+      oneOf(replicator).getQuorumId();
+      will(returnValue("1"));
+
+      allowing(config).writeBinaryData(with(any(String.class)), with(any(String.class)), with(any(byte[].class)));
+
     }});
+
+    replicationFuture.set(replicator);
+    AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
 
     tabletService.acceptCommand(addMetaEntryToRoot());
     Tablet tablet = context.mock(Tablet.class);
     Region region = context.mock(Region.class);
     tabletService.tabletRegistry.getTablets().put("hbase:root,fake", tablet);
+
     context.checking(new Expectations() {{
       oneOf(tablet).getRegion();
       will(returnValue(region));
@@ -314,6 +336,8 @@ public class TabletServiceCommandCheckTest {
       oneOf(region).put(with(any(Put.class)));
     }});
     tabletService.acceptCommand(addMETALeaderToRootString());
+    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+    Thread.sleep(1000);
 
   }
 }

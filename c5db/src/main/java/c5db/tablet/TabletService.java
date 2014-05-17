@@ -242,6 +242,8 @@ public class TabletService extends AbstractService implements TabletModule {
 
   @Override
   public void startTablet(List<Long> peers, String tabletName) {
+    LOG.error("unimplemented");
+    System.exit(1);
   }
 
   @Override
