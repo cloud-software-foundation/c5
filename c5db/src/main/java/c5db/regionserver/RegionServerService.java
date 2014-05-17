@@ -25,9 +25,7 @@ import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
-import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
-import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
@@ -36,6 +34,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -45,18 +46,13 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
-import io.protostuff.ByteString;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Encoder;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
@@ -72,6 +68,7 @@ public class RegionServerService extends AbstractService implements RegionServer
   private final C5Server server;
   private final ServerBootstrap bootstrap = new ServerBootstrap();
   private TabletModule tabletModule;
+  private Channel listenChannel;
 
   public RegionServerService(NioEventLoopGroup acceptGroup,
                              NioEventLoopGroup workerGroup,
@@ -114,15 +111,18 @@ public class RegionServerService extends AbstractService implements RegionServer
                             }
               );
 
-          bootstrap.bind(port).addListener(future -> {
-            if (future.isSuccess()) {
-              notifyStarted();
-            } else {
-              LOG.error("Unable to find Region Server to {} {}", port, future.cause());
-              notifyFailed(future.cause());
+          bootstrap.bind(port).addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+              if (future.isSuccess()) {
+                listenChannel = future.channel();
+                notifyStarted();
+              } else {
+                LOG.error("Unable to find Region Server to {} {}", port, future.cause());
+                notifyFailed(future.cause());
+              }
             }
           });
-
         }
 
         @Override
@@ -135,6 +135,12 @@ public class RegionServerService extends AbstractService implements RegionServer
 
   @Override
   protected void doStop() {
+    try {
+      listenChannel.close().get();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+
     notifyStopped();
   }
 

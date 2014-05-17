@@ -18,10 +18,13 @@
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
+import c5db.C5ServerConstants;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
+import c5db.messages.generated.ModuleSubCommand;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.Message;
@@ -32,6 +35,11 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
@@ -62,7 +70,7 @@ public class RootTabletTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private MemoryChannel<Message<?>> commandMemoryChannel;
+  private Channel<Message<?>> commandMemoryChannel;
 
   private MemoryChannel<Replicator.State> stateMemoryChannel;
 
@@ -169,7 +177,7 @@ public class RootTabletTest {
         oneOf(server).isSingleNodeMode();
         will(returnValue(true));
 
-        oneOf(region).put(with(any(Put.class)));
+        allowing(region).put(with(any(Put.class)));
 
         // Post put we send a command over the command commandRpcRequestChannel
         oneOf(server).getCommandChannel();
@@ -177,7 +185,35 @@ public class RootTabletTest {
       }
     });
 
+    AsyncChannelAsserts.ChannelListener<Message<?>> commandListener = listenTo(commandMemoryChannel);
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
+
+    assertEventually(commandListener , hasSubmoduleWithCommand(C5ServerConstants.START_META));
+
+  }
+
+  public static Matcher<Message> hasSubmoduleWithCommand(String command) {
+    return new CommandMatcher<Message>(command);
+  }
+
+  private static class CommandMatcher<T> extends BaseMatcher<Message> {
+    private final String command;
+
+    public CommandMatcher(String command) {
+      this.command = command;
+    }
+
+    @Override
+    public boolean matches(Object o) {
+      CommandRpcRequest commandRpcRequest  = (CommandRpcRequest) o;
+      ModuleSubCommand moduleSubCommand = (ModuleSubCommand) commandRpcRequest.message;
+      return moduleSubCommand.getSubCommand().startsWith(command);
+    }
+
+    @Override
+    public void describeTo(Description description) {
+
+    }
   }
 }
