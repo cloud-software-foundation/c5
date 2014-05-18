@@ -59,7 +59,7 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
 
       @Override
       public void reply(CommandReply i) {
-        LOG.info("Command Reply");
+        LOG.info("Command Reply:", i);
       }
     };
     f = server.getModule(ModuleType.ControlRpc);
