@@ -54,14 +54,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import sun.misc.BASE64Encoder;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -295,7 +293,7 @@ public class TabletServiceCommandCheckTest {
     // Prepare the config directory
     ListenableFuture<Service.State> future = tabletService.start();
     future.get();
-    SettableFuture replicationFuture = SettableFuture.create();
+    SettableFuture<Replicator> replicationFuture = SettableFuture.create();
 
     Channel channel = new MemoryChannel();
     Channel stateChangeChannel = new MemoryChannel();
@@ -317,25 +315,25 @@ public class TabletServiceCommandCheckTest {
       allowing(config).writeBinaryData(with(any(String.class)), with(any(String.class)), with(any(byte[].class)));
 
     }});
-
-    replicationFuture.set(replicator);
     AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
+    replicationFuture.set(replicator);
 
     tabletService.acceptCommand(addMetaEntryToRoot());
+    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+
     Tablet tablet = context.mock(Tablet.class);
     Region region = context.mock(Region.class);
     tabletService.tabletRegistry.getTablets().put("hbase:root,fake", tablet);
 
+
+    // We have to use allowing because we have no way of waiting for the meta to update currently
     context.checking(new Expectations() {{
-      oneOf(tablet).getRegion();
+      allowing(tablet).getRegion();
       will(returnValue(region));
 
       // This is where we update meta leader
-      oneOf(region).put(with(any(Put.class)));
+      allowing(region).put(with(any(Put.class)));
     }});
     tabletService.acceptCommand(addMETALeaderToRootString());
-    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
-    Thread.sleep(1000);
-
   }
 }

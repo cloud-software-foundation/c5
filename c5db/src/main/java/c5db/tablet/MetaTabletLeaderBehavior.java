@@ -66,7 +66,7 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   public void start() throws ExecutionException, InterruptedException {
-    ControlModule controlService = null;
+    ControlModule controlService;
     controlService = (ControlModule) f.get();
     controlService.doMessage(request);
   }
