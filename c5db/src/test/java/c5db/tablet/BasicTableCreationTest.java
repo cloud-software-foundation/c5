@@ -31,7 +31,6 @@ import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -39,10 +38,8 @@ import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
-import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -51,12 +48,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -90,7 +85,7 @@ public class BasicTableCreationTest {
   private TabletService tabletService;
 
   @Before
-  public void before() throws IOException, ExecutionException, InterruptedException, RegionNotFoundException {
+  public void before() throws Throwable {
     context.checking(new Expectations() {
       {
         oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
@@ -169,34 +164,18 @@ public class BasicTableCreationTest {
       oneOf(replicator).getQuorumId();
       will(returnValue("hbase:root,\\x00,1.33578e495f8173aac4be480afe41410a."));
     }});
-    CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    ThreadFiber fiber123 = new ThreadFiber();
-    fiber123.start();
-    tabletService.getTabletStateChanges().subscribe(fiber123, message -> {
-      System.out.println(message);
-      if (message.state.equals(Tablet.State.Open)) {
-        countDownLatch.countDown();
-        fiber123.dispose();
-      }
-    });
-
+    AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
+        = listenTo(tabletService.getTabletStateChanges());
 
     replicatorModuleFuture.set(replicationModule);
     future.get();
-    countDownLatch.await();
+    assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
 
   }
 
   @After
-  public void tearDown() {
-    try {
-      tabletService.stop().get();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } catch (ExecutionException e) {
-      e.printStackTrace();
-    }
+  public void tearDown() throws ExecutionException, InterruptedException {
+    tabletService.stop().get();
     poolFiberFactory.dispose();
   }
 
@@ -231,18 +210,11 @@ public class BasicTableCreationTest {
     tabletService.acceptCommand(C5ServerConstants.START_META + ":1");
     replicatorSettableFuture.set(replicator);
 
-    CountDownLatch countDownLatch = new CountDownLatch(1);
+    AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
+        = listenTo(tabletService.getTabletStateChanges());
 
-    ThreadFiber fiber123 = new ThreadFiber();
-    fiber123.start();
-    tabletService.getTabletStateChanges().subscribe(fiber123, message -> {
-      if (message.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")
-          && message.state.equals(Tablet.State.Open)) {
-        countDownLatch.countDown();
-        fiber123.dispose();
-      }
-    });
-    countDownLatch.await();
+    replicatorModuleFuture.set(replicationModule);
+    assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
 
     tabletService.getTablet("hbase:meta");
     final Fiber startUserTableFiber1 = poolFiberFactory.create();
