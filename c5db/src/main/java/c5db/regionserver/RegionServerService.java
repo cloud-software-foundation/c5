@@ -139,6 +139,7 @@ public class RegionServerService extends AbstractService implements RegionServer
       listenChannel.close().get();
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
+      notifyFailed(e);
     }
 
     notifyStopped();
