@@ -41,7 +41,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 import sun.misc.BASE64Encoder;
@@ -59,6 +61,8 @@ public class ManyClusterBase {
   static int metaOnPort;
   private static Channel<CommandRpcRequest<?>> commandChannel;
   private static List<C5Server> servers = new ArrayList<>();
+  @ClassRule
+  public static TemporaryFolder testFolder = new TemporaryFolder();
 
   @Rule
   public TestName name = new TestName();
@@ -89,6 +93,8 @@ public class ManyClusterBase {
 
 
     Random random = new Random();
+
+    System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.newFolder().getAbsolutePath());
     final CountDownLatch latch = new CountDownLatch(1);
     for (int i = 0; i != 3; i++) {
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));

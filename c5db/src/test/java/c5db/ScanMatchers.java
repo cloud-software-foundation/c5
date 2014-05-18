@@ -16,41 +16,40 @@
  */
 package c5db;
 
-import c5db.client.FakeHTable;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Test;
 import org.junit.rules.TestName;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+public class ScanMatchers {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
+  public static Matcher<? super Result> isWellFormedUserTable(TestName testName) {
+    return new BaseMatcher<Result>() {
+      @Override
+      public boolean matches(Object o) {
+        if (o == null) {
+          return false;
+        }
+        Result result = (Result) o;
+        HRegionInfo regioninfo;
+        try {
+          regioninfo = HRegionInfo.parseFrom(result.getValue(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER));
+        } catch (DeserializationException e) {
+          e.printStackTrace();
+          return false;
+        }
+        return regioninfo.getRegionNameAsString().startsWith(testName.getMethodName());
+      }
 
+      @Override
+      public void describeTo(Description description) {
 
-public class ManyClustersBaseTest extends ManyClusterBase {
-
-  @Test
-  public void metaTableShouldContainUserTableEntries()
-      throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
-    FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, metaOnPort, tableName);
-    ResultScanner scanner = c5AsyncDatabase.getScanner(HConstants.CATALOG_FAMILY);
-
-    assertThat(scanner.next(), ScanMatchers.isWellFormedUserTable(name));
-    assertThat(scanner.next(), is(nullValue()));
-
+      }
+    };
   }
 
 }
