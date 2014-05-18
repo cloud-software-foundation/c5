@@ -182,13 +182,13 @@ public class C5FakeHTableTest {
         CellType.PUT,
         ByteBuffer.wrap(Bytes.toBytes("value")));
     List<Cell> kv = Arrays.asList(cell);
-    List<c5db.client.generated.Result> scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
+    List<c5db.client.generated.Result> scanResults = Arrays.asList(new c5db.client.generated.Result(kv, 1, true));
     ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, true, 0, scanResults);
 
     ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
 
     kv = Arrays.asList(cell);
-    scanResults = Arrays.asList(new c5db.client.generated.Result(kv,1 ,true));
+    scanResults = Arrays.asList(new c5db.client.generated.Result(kv, 1, true));
     scanResponse = new ScanResponse(cellsPerResult, scannerId, false, 0, scanResults);
 
     ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);

@@ -47,12 +47,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 public class RootTabletLeaderBehaviorTest {
 

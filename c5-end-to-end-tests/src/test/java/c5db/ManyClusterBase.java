@@ -71,7 +71,7 @@ public class ManyClusterBase {
 
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {
-      for (C5Module module: server.getModules().values()){
+      for (C5Module module : server.getModules().values()) {
         module.stopAndWait();
       }
       Service.State state = server.stopAndWait();
@@ -90,9 +90,9 @@ public class ManyClusterBase {
 
     Random random = new Random();
     final CountDownLatch latch = new CountDownLatch(1);
-    for (int i=0 ;i!= 3; i++){
+    for (int i = 0; i != 3; i++) {
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));
-      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000+ random.nextInt(1000)));
+      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000 + random.nextInt(1000)));
 
       C5Server server = Main.startC5Server(new String[]{});
       servers.add(server);
