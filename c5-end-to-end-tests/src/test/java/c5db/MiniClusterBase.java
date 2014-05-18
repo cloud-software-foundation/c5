@@ -72,6 +72,8 @@ public class MiniClusterBase {
       module.stopAndWait();
     }
     Service.State state = server.stopAndWait();
+    Log.warn("-----------------------------------------------------------------------------------------------------------");
+
   }
 
   @BeforeClass
