@@ -19,7 +19,6 @@ package c5db;
 import c5db.client.FakeHTable;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
@@ -29,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
 public class MiniClustersBaseTest extends MiniClusterBase {
@@ -38,16 +38,7 @@ public class MiniClustersBaseTest extends MiniClusterBase {
     ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
     FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
     ResultScanner scanner = c5AsyncDatabase.getScanner(HConstants.CATALOG_FAMILY);
-
-    Result result;
-    int counter = 0;
-    do {
-      result = scanner.next();
-      if (result != null) {
-        counter++;
-      }
-    } while (result != null);
-
-    assertThat(counter, is(1));
+    assertThat(scanner.next(), ScanMatchers.isWellFormedUserTable(name));
+    assertThat(scanner.next(), is(nullValue()));
   }
 }
