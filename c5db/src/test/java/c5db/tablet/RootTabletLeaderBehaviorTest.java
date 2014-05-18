@@ -18,11 +18,10 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
+import c5db.CommandMatchers;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
-import c5db.messages.generated.ModuleSubCommand;
-import c5db.messages.generated.ModuleType;
 import io.protostuff.Message;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
@@ -30,12 +29,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -46,7 +40,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -57,11 +50,10 @@ public class RootTabletLeaderBehaviorTest {
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
+  private final MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
   private c5db.interfaces.tablet.Tablet hRegionTablet;
   private Region region;
   private C5Server c5Server;
-
-  private final MemoryChannel<Message<?>> commandMemoryChannel = new MemoryChannel<>();
   private AsyncChannelAsserts.ChannelListener commandListener;
 
   @Before
@@ -96,7 +88,7 @@ public class RootTabletLeaderBehaviorTest {
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
         c5Server, C5ServerConstants.DEFAULT_QUORUM_SIZE);
     rootTabletLeaderBehavior.start();
-    assertEventually(commandListener, hasMessageWithRPC(C5ServerConstants.START_META));
+    assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
   }
 
   @Test
@@ -120,32 +112,20 @@ public class RootTabletLeaderBehaviorTest {
       will(returnValue(memoryChannel));
 
     }});
-
-    final CountDownLatch latch = new CountDownLatch(1);
-
-    Fiber fiber = new ThreadFiber();
-    fiber.start();
-    memoryChannel.subscribe(fiber, message -> {
-      if (((ModuleSubCommand) message.message).getSubCommand().contains(C5ServerConstants.START_META)) {
-        latch.countDown();
-      }
-    });
+    commandListener = listenTo(memoryChannel);
 
 
-      RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-          c5Server,
-          C5ServerConstants.DEFAULT_QUORUM_SIZE);
-      try {
-        rootTabletLeaderBehavior.start();
-      } catch (IOException e) {
-        e.printStackTrace();
-        throw new RuntimeException("Fail Test" + e);
-      }
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
+        c5Server,
+        C5ServerConstants.DEFAULT_QUORUM_SIZE);
+    try {
+      rootTabletLeaderBehavior.start();
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Fail Test" + e);
+    }
 
-
-    latch.await();
-
-    fiber.dispose();
+    assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
   }
 
 
@@ -178,28 +158,4 @@ public class RootTabletLeaderBehaviorTest {
 
   }
 
-  private Matcher<CommandRpcRequest<ModuleSubCommand>> hasMessageWithRPC(String s) {
-    return new MessageMatcher(s);
-  }
-
-  private class MessageMatcher extends TypeSafeMatcher<CommandRpcRequest<ModuleSubCommand>> {
-    private final String s;
-
-    public MessageMatcher(String s) {
-      this.s = s;
-    }
-
-    @Override
-    public void describeTo(Description description) {
-      description.appendText("a command which is: ").appendValue(s);
-    }
-
-    @Override
-    protected boolean matchesSafely(CommandRpcRequest<ModuleSubCommand> moduleSubCommandCommandRpcRequest) {
-      return moduleSubCommandCommandRpcRequest.message.getModule().equals(ModuleType.Tablet) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().startsWith(C5ServerConstants.START_META) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().contains(s);
-
-    }
-  }
 }
