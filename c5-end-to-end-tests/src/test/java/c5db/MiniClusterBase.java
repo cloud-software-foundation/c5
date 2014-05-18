@@ -68,7 +68,7 @@ public class MiniClusterBase {
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module: server.getModules().values()){
+    for (C5Module module : server.getModules().values()) {
       module.stopAndWait();
     }
     Service.State state = server.stopAndWait();

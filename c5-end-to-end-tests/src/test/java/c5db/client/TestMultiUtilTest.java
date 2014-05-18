@@ -16,7 +16,6 @@
  */
 package c5db.client;
 
-import c5db.ManyClusterBase;
 import c5db.MiniClusterBase;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.ResultScanner;
