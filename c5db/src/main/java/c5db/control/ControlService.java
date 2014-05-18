@@ -224,11 +224,10 @@ public class ControlService extends AbstractService implements ControlModule {
 
   @Override
   protected void doStop() {
-    ChannelFuture future = listenChannel.close();
     try {
-      future.get();
+      listenChannel.close().get();
     } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
+      notifyFailed(e);
     }
     notifyStopped();
   }
