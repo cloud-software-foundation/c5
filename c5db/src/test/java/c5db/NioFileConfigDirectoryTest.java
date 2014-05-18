@@ -39,7 +39,6 @@ public class NioFileConfigDirectoryTest {
   private HTableDescriptor metaDesc;
   private HRegionInfo metaRegion;
   private List<Long> peers;
-  private String quorumName;
 
   @Before
   public void setUp() throws Exception {
@@ -51,7 +50,7 @@ public class NioFileConfigDirectoryTest {
     metaDesc = HTableDescriptor.META_TABLEDESC;
     metaRegion = new HRegionInfo(metaDesc.getTableName(), new byte[]{0}, new byte[]{}, false, 1);
     peers = Arrays.asList(1l, 2l, 3l);
-    quorumName = metaRegion.getRegionNameAsString();
+    String quorumName = metaRegion.getRegionNameAsString();
 
     // write the stuff to disk first:
     cfgDir.writeBinaryData(quorumName, ConfigDirectory.regionInfoFile,

@@ -62,7 +62,6 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
 
   private final C5Server server;
   private final int port;
-  private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private Server jettyHttpServer;
 
@@ -73,7 +72,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     this.server = server;
     this.port = port;
 
-    fiberFactory = server.getFiberFactory(this::handleThrowable);
+    C5FiberFactory fiberFactory = server.getFiberFactory(this::handleThrowable);
     fiber = fiberFactory.create();
   }
 

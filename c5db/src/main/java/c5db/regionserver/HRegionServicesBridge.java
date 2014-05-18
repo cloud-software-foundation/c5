@@ -94,8 +94,7 @@ public class HRegionServicesBridge implements RegionServerServices {
 
   @Override
   public RegionServerAccounting getRegionServerAccounting() {
-    RegionServerAccounting regionServerAccounting = new RegionServerAccounting();
-    return regionServerAccounting;
+    return new RegionServerAccounting();
   }
 
   @Override
