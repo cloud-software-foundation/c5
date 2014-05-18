@@ -19,16 +19,9 @@ package c5db;
 import c5db.client.FakeHTable;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.junit.rules.TestName;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
