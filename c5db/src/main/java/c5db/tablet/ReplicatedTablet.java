@@ -36,6 +36,7 @@ import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -131,8 +132,15 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
     OLogShim shim = new OLogShim(replicator);
-    region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
-    setTabletState(State.Open);
+    try {
+      region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
+      setTabletState(State.Open);
+    } catch (IOException e) {
+      setTabletState(State.Failed);
+      LOG.error("Settings tablet state to failed, we got an IOError opening the region:" + e.toString());
+    }
+
+
   }
 
   private void tabletStateChangeCallback(ReplicatorInstanceEvent replicatorInstanceEvent) {

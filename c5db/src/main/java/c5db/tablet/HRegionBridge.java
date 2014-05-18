@@ -17,20 +17,14 @@
 
 package c5db.tablet;
 
-import c5db.regionserver.HRegionServicesBridge;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
-import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
@@ -41,29 +35,6 @@ import java.nio.file.Path;
 public class HRegionBridge implements Region {
 
   private HRegion theRegion;
-
-  public HRegionBridge(
-      Path basePath,
-      HRegionInfo regionInfo,
-      HTableDescriptor tableDescriptor,
-      HLog log,
-      Configuration conf) {
-    try {
-      theRegion = HRegion.openHRegion(
-          new org.apache.hadoop.fs.Path(basePath.toString()),
-          regionInfo,
-          tableDescriptor,
-          log,
-          conf,
-          new HRegionServicesBridge(conf),
-          null);
-    } catch (IOException e) {
-      e.printStackTrace();
-
-    }
-  }
-
-
   public HRegionBridge(final HRegion theRegion) {
     this.theRegion = theRegion;
   }
