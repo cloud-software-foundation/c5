@@ -134,12 +134,13 @@ public class ClientScanner extends AbstractClientScanner {
   }
 
   public void add(ScanResponse response) {
-    if (! this.isClosed && !response.getMoreResults()) {
-      this.close();
-    }
     for (c5db.client.generated.Result result : response.getResultsList()) {
       scanResults.add(result);
       this.outStandingRequests--;
     }
+    if (! this.isClosed && !response.getMoreResults()) {
+      this.close();
+    }
+
   }
 }
