@@ -91,8 +91,6 @@ public class TabletServiceCommandCheckTest {
   private Path configDirectory;
   private Replicator replicator;
   private PoolFiberFactory fiberPool;
-  private byte[] tabletDescBytes;
-  private byte[] testRegionBytes;
 
   final void notifyFailed(Throwable cause) {
   }
@@ -146,10 +144,10 @@ public class TabletServiceCommandCheckTest {
     HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
     String peerString = "1";
     BASE64Encoder encoder = new BASE64Encoder();
-    tabletDescBytes = testDesc.toByteArray();
+    byte[] tabletDescBytes = testDesc.toByteArray();
     String hTableDesc = encoder.encodeBuffer(tabletDescBytes);
 
-    testRegionBytes = testRegion.toByteArray();
+    byte[] testRegionBytes = testRegion.toByteArray();
     String hRegionInfo = encoder.encodeBuffer(testRegionBytes);
 
     return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;

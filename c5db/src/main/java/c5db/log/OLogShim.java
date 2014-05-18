@@ -53,12 +53,11 @@ public class OLogShim implements Syncable, HLog {
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final UUID uuid;
   private final Replicator replicatorInstance;
-  private final String tabletId;
 
   public OLogShim(Replicator replicatorInstance) {
     this.uuid = UUID.randomUUID();
     this.replicatorInstance = replicatorInstance;
-    this.tabletId = replicatorInstance.getQuorumId();
+    String tabletId = replicatorInstance.getQuorumId();
   }
 
   //TODO fix so we don't always insert a huge amount of data
