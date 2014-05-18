@@ -290,7 +290,7 @@ public class TabletService extends AbstractService implements TabletModule {
       } else if (commandString.startsWith(C5ServerConstants.SET_META_LEADER)) {
         return setMetaLeader(commandString);
       } else {
-       throw new IOException("Unknown command:" + commandString);
+        throw new IOException("Unknown command:" + commandString);
       }
     } catch (IOException | RegionNotFoundException | DeserializationException e) {
       e.printStackTrace();
