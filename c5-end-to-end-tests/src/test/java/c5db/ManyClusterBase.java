@@ -48,7 +48,12 @@ import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 import sun.misc.BASE64Encoder;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -89,7 +94,6 @@ public class ManyClusterBase {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     System.setProperty(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME, String.valueOf("foo"));
     testFolder.create();
-    System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.getRoot().getAbsolutePath());
 
     int processors = Runtime.getRuntime().availableProcessors();
     PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
@@ -97,6 +101,10 @@ public class ManyClusterBase {
 
     final CountDownLatch latch = new CountDownLatch(1);
     for (int i = 0; i != 3; i++) {
+      Path nodeBasePath = Paths.get(testFolder.getRoot().getAbsolutePath(), String.valueOf(random.nextInt()));
+      new File(nodeBasePath.toUri()).mkdirs();
+      System.setProperty(C5ServerConstants.C5_CFG_PATH, nodeBasePath.toString());
+
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));
       System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000 + random.nextInt(1000)));
 
