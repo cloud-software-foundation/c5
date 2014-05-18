@@ -87,14 +87,14 @@ public class ManyClusterBase {
   @BeforeClass
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-    System.setProperty("clusterName", String.valueOf("foo"));
+    System.setProperty(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME, String.valueOf("foo"));
+    testFolder.create();
+    System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.getRoot().getAbsolutePath());
+
     int processors = Runtime.getRuntime().availableProcessors();
     PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
-
-
     Random random = new Random();
 
-    System.setProperty(C5ServerConstants.C5_CFG_PATH, testFolder.newFolder().getAbsolutePath());
     final CountDownLatch latch = new CountDownLatch(1);
     for (int i = 0; i != 3; i++) {
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));
@@ -122,29 +122,6 @@ public class ManyClusterBase {
     latch.await();
     fiberPool.dispose();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-  }
-
-  protected int getRegionServerPort() {
-    Log.info("Getting region from: " + userTabletOn);
-    return userTabletOn;
-  }
-
-  String getCreateTabletSubCommand(ByteString tableNameBytes) {
-    TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
-    HTableDescriptor testDesc = new HTableDescriptor(tableName);
-    testDesc.addFamily(new HColumnDescriptor("cf"));
-    HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-
-    String peerString = String.valueOf(servers.get(0).getNodeId() + ","
-        + servers.get(1).getNodeId()
-        + "," + servers.get(2).getNodeId());
-    BASE64Encoder encoder = new BASE64Encoder();
-
-    String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
-    String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
-
-    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
-
   }
 
   @Before
@@ -181,6 +158,30 @@ public class ManyClusterBase {
     table = new FakeHTable(C5TestServerConstants.LOCALHOST, userTabletOn, tableName);
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
+  }
+
+
+  protected int getRegionServerPort() {
+    Log.info("Getting region from: " + userTabletOn);
+    return userTabletOn;
+  }
+
+  String getCreateTabletSubCommand(ByteString tableNameBytes) {
+    TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
+    HTableDescriptor testDesc = new HTableDescriptor(tableName);
+    testDesc.addFamily(new HColumnDescriptor("cf"));
+    HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
+
+    String peerString = String.valueOf(servers.get(0).getNodeId() + ","
+        + servers.get(1).getNodeId() + ","
+        + servers.get(2).getNodeId());
+    BASE64Encoder encoder = new BASE64Encoder();
+
+    String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
+    String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
+
+    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
+
   }
 
   @After
