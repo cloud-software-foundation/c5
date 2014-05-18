@@ -17,40 +17,27 @@
 
 package c5db.tablet;
 
-import c5db.C5DB;
 import c5db.C5ServerConstants;
-import c5db.control.ControlService;
-import c5db.control.SimpleControlClient;
-import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
-import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
-import c5db.messages.generated.CommandReply;
-import c5db.messages.generated.ModuleSubCommand;
-import c5db.messages.generated.ModuleType;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.channels.Request;
-import org.jetlang.channels.Session;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * A tablet, backed by a replicator that keeps values replicated across multiple servers.
@@ -149,7 +136,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   private void tabletStateChangeCallback(ReplicatorInstanceEvent replicatorInstanceEvent) {
-    switch(replicatorInstanceEvent.eventType) {
+    switch (replicatorInstanceEvent.eventType) {
       case QUORUM_START:
         break;
       case LEADER_ELECTED:
@@ -178,27 +165,27 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
       case LEADER:
         this.setTabletState(State.Leader);
         try {
-            if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
+          if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
 
-                long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
-                RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
-                        server,
-                        numberOfMetaPeers);
-                rootTabletLeaderBehavior.start();
+            long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
+            RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
+                server,
+                numberOfMetaPeers);
+            rootTabletLeaderBehavior.start();
 
-            } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
-                // Have the meta leader update the root region with it being marked as the leader
-                MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
-                metaTabletLeaderBehavior.start();
+          } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
+            // Have the meta leader update the root region with it being marked as the leader
+            MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
+            metaTabletLeaderBehavior.start();
 
-            } else {
-                // update the meta table with my leader status
-            }
-        } catch (Exception e){
-            LOG.error(e.getLocalizedMessage());
-            LOG.error(e.getLocalizedMessage());
-            LOG.error(e.getLocalizedMessage());
-            LOG.error(e.getLocalizedMessage());
+          } else {
+            // update the meta table with my leader status
+          }
+        } catch (Exception e) {
+          LOG.error(e.getLocalizedMessage());
+          LOG.error(e.getLocalizedMessage());
+          LOG.error(e.getLocalizedMessage());
+          LOG.error(e.getLocalizedMessage());
         }
         break;
     }
