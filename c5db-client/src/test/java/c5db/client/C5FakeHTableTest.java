@@ -29,10 +29,12 @@ import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.protostuff.ByteString;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jmock.Expectations;
@@ -144,6 +146,49 @@ public class C5FakeHTableTest {
     hTable.put(new Put(row));
   }
 
+  @Test
+  public void putsCanSucceed()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    callFuture.set(response);
+    hTable.put(Arrays.asList(new Put(row)));
+  }
+
+  @Test
+  public void deleteCanSucceed()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    callFuture.set(response);
+    hTable.delete(new Delete(row));
+  }
+
+  @Test
+  public void deletesCanSucceed()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    callFuture.set(response);
+    hTable.delete(Arrays.asList(new Delete(row)));
+  }
+
+
   @Test(expected = IOException.class)
   public void getShouldErrorWithNullResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException {
     context.checking(new Expectations() {
@@ -204,4 +249,17 @@ public class C5FakeHTableTest {
     assertThat(counter, is(3));
   }
 
+  @Test
+  public void canMutateRow() throws IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+
+    RowMutations rm = new RowMutations(Bytes.toBytes("row"));
+    callFuture.set(new Response());
+    hTable.mutateRow(rm);
+  }
 }
