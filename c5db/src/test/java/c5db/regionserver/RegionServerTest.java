@@ -18,8 +18,11 @@ package c5db.regionserver;
 
 import c5db.client.ProtobufUtil;
 import c5db.client.generated.Call;
+import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
+import c5db.client.generated.MutateRequest;
+import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.interfaces.C5Server;
@@ -35,6 +38,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -187,19 +191,15 @@ public class RegionServerTest {
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
   }
 
-
   @Test
-  public void shouldBeAbleToHandleConditionalGet() throws Exception {
+  public void shouldBeAbleToHandleMutate() throws Exception {
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         regionLocation);
 
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
 
-    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
-    GetRequest getRequest = new GetRequest(regionSpecifier, get);
-
-    Cell cell = new KeyValue(Bytes.toBytes("row"), Bytes.toBytes("cf"), Bytes.toBytes("cq"), Bytes.toBytes("value"));
-    Result result = Result.create(new Cell[]{cell});
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
@@ -207,13 +207,13 @@ public class RegionServerTest {
       oneOf(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
-      will(returnValue(result));
+      oneOf(region).put(with(any(org.apache.hadoop.hbase.client.Put.class)));
 
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
 
     }});
 
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
   }
+
 }

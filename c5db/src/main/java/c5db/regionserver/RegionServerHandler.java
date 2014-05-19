@@ -65,10 +65,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   }
 
   @Override
-  public void channelRead0(final ChannelHandlerContext ctx,
-                           final Call call)
-      throws Exception {
-
+  public void channelRead0(final ChannelHandlerContext ctx, final Call call) throws Exception {
     switch (call.getCommand()) {
       case GET:
         get(ctx, call);
@@ -85,8 +82,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     }
   }
 
-  private void multi(ChannelHandlerContext ctx, Call call)
-      throws IOException, RegionNotFoundException {
+  private void multi(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final MultiRequest request = call.getMulti();
     final MultiResponse multiResponse = new MultiResponse();
     final List<MutationProto> mutations = new ArrayList<>();
@@ -147,16 +143,13 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     MutateResponse mutateResponse;
     try {
       final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
-      if (region.getTheRegion() == null) {
-        throw new IOException("Unable to find region");
-      }
       final MutationProto.MutationType type = mutateIn.getMutation().getMutateType();
       switch (type) {
         case PUT:
           if (mutateIn.getCondition().getRow() == null) {
-            success = simplePut(mutateIn, region.getTheRegion());
+            success = simplePut(mutateIn, region);
           } else {
-            success = checkAndPut(mutateIn, region.getTheRegion());
+            success = checkAndPut(mutateIn, region);
           }
           break;
         case DELETE:
@@ -217,7 +210,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     return true;
   }
 
-  private boolean checkAndPut(MutateRequest mutateIn, HRegion region) throws IOException {
+  private boolean checkAndPut(MutateRequest mutateIn, Region region) throws IOException {
     boolean success;
     final Condition condition = mutateIn.getCondition();
     final byte[] row = condition.getRow().array();
@@ -227,7 +220,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
     final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
 
-    success = region.checkAndMutate(row,
+    success = region.getTheRegion().checkAndMutate(row,
         cf,
         cq,
         compareOp,
@@ -237,7 +230,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     return success;
   }
 
-  private boolean simplePut(MutateRequest mutateIn, HRegion region) {
+  private boolean simplePut(MutateRequest mutateIn, Region region) {
     try {
       region.put(ReverseProtobufUtil.toPut(mutateIn.getMutation()));
     } catch (IOException e) {
@@ -284,9 +277,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     return scannerId;
   }
 
-  private void get(ChannelHandlerContext ctx, Call call) throws IOException,
-      RegionNotFoundException {
-
+  private void get(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final GetRequest getRequest = call.getGet();
     if (getRequest == null){
       throw new IOException("Poorly specified getRequest. There is no actual get data in the RPC");
