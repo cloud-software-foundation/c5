@@ -24,15 +24,12 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 public class TestFlushTest extends MiniClusterBase {
 
 
   @Test
-  public void testFlush() throws IOException, InterruptedException, TimeoutException, ExecutionException, MutationFailedException {
-
+  public void testFlush() throws IOException {
     Random random = new Random();
     byte[] randomBytes = new byte[1024 * 1024];
     random.nextBytes(randomBytes);
