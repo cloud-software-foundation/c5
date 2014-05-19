@@ -263,13 +263,4 @@ public class FakeHTable implements AutoCloseable {
     return this.tableName;
   }
 
-  private class InvalidResponse extends Exception {
-    public InvalidResponse(String s) {
-    }
-  }
-
-  private class InvalidScannerResults extends Exception {
-    public InvalidScannerResults(String s) {
-    }
-  }
 }
