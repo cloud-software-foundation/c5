@@ -19,6 +19,8 @@ package c5db.tablet;
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
+import c5db.client.generated.Condition;
+import c5db.client.generated.MutationProto;
 import c5db.discovery.generated.Availability;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -224,8 +226,9 @@ public class TabletServiceCommandCheckTest {
     tabletService.tabletRegistry.getTablets().put("hbase:meta,fake", metaTablet);
     context.checking(new Expectations() {
       {
-        oneOf(metaRegion).put(with(any(Put.class)));
-        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        will(returnValue(true));
+
         will(returnValue(replicationFuture));
 
         allowing(replicator).getStateChannel();
@@ -332,7 +335,8 @@ public class TabletServiceCommandCheckTest {
       will(returnValue(region));
 
       // This is where we update meta leader
-      allowing(region).put(with(any(Put.class)));
+      allowing(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+      will(returnValue(true));
     }});
     tabletService.acceptCommand(addMETALeaderToRootString());
   }

@@ -17,9 +17,12 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
+import c5db.client.ProtobufUtil;
 import c5db.client.generated.Column;
+import c5db.client.generated.Condition;
 import c5db.client.generated.Filter;
 import c5db.client.generated.Get;
+import c5db.client.generated.MutationProto;
 import c5db.client.generated.NameBytesPair;
 import c5db.client.generated.RegionInfo;
 import c5db.client.generated.Result;
@@ -144,6 +147,6 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     put.add(HConstants.CATALOG_FAMILY,
         HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
-    region.put(put);
+    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT,put), new Condition());
   }
 }

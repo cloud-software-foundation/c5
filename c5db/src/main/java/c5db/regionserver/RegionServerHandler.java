@@ -134,43 +134,15 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   }
 
   private void mutate(ChannelHandlerContext ctx, Call call) throws RegionNotFoundException, IOException {
-    boolean success;
     final MutateRequest mutateIn = call.getMutate();
 
     if (mutateIn == null){
       throw new IOException("Poorly specified mutate. There is no actual get data in the RPC");
     }
 
-    MutateResponse mutateResponse;
-    try {
-      final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
-      final MutationProto.MutationType type = mutateIn.getMutation().getMutateType();
-      switch (type) {
-        case PUT:
-          if (mutateIn.getCondition().getRow() == null) {
-            success = simplePut(mutateIn, region);
-          } else {
-            success = checkAndPut(mutateIn, region);
-          }
-          break;
-        case DELETE:
-          if (mutateIn.getCondition().getRow() == null) {
-            success = simpleDelete(mutateIn, region.getTheRegion());
-          } else {
-            success = checkAndDelete(mutateIn, region.getTheRegion());
-          }
-          break;
-        default:
-          throw new RuntimeException(
-              "mutate supports atomic put and/or delete, not "
-                  + type.name()
-          );
-      }
-      mutateResponse = new MutateResponse(null, success);
-    } catch (IOException e) {
-      mutateResponse = new MutateResponse(null, false);
-      LOG.error(e.getLocalizedMessage());
-    }
+    final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
+    boolean success = region.mutate(mutateIn.getMutation(), mutateIn.getCondition());
+    MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), success);
 
     final Response response = new Response(Response.Command.MUTATE,
         call.getCommandId(),
@@ -181,65 +153,6 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     ctx.writeAndFlush(response);
   }
 
-  private boolean checkAndDelete(MutateRequest mutateIn, HRegion region) throws IOException {
-    boolean success;
-    final Condition condition = mutateIn.getCondition();
-    final byte[] row = condition.getRow().array();
-    final byte[] cf = condition.getFamily().array();
-    final byte[] cq = condition.getQualifier().array();
-
-    final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
-    final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
-
-    success = region.checkAndMutate(row,
-        cf,
-        cq,
-        compareOp,
-        comparator,
-        ReverseProtobufUtil.toDelete(mutateIn.getMutation()),
-        true);
-    return success;
-  }
-
-  private boolean simpleDelete(MutateRequest mutateIn, HRegion region) {
-    try {
-      region.delete(ReverseProtobufUtil.toDelete(mutateIn.getMutation()));
-    } catch (IOException e) {
-      LOG.error(e.getLocalizedMessage());
-      return false;
-    }
-    return true;
-  }
-
-  private boolean checkAndPut(MutateRequest mutateIn, Region region) throws IOException {
-    boolean success;
-    final Condition condition = mutateIn.getCondition();
-    final byte[] row = condition.getRow().array();
-    final byte[] cf = condition.getFamily().array();
-    final byte[] cq = condition.getQualifier().array();
-
-    final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
-    final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
-
-    success = region.getTheRegion().checkAndMutate(row,
-        cf,
-        cq,
-        compareOp,
-        comparator,
-        ReverseProtobufUtil.toPut(mutateIn.getMutation()),
-        true);
-    return success;
-  }
-
-  private boolean simplePut(MutateRequest mutateIn, Region region) {
-    try {
-      region.put(ReverseProtobufUtil.toPut(mutateIn.getMutation()));
-    } catch (IOException e) {
-      LOG.error(e.getLocalizedMessage());
-      return false;
-    }
-    return true;
-  }
 
   private void scan(ChannelHandlerContext ctx, Call call) throws IOException,
       RegionNotFoundException {

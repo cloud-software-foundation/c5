@@ -17,13 +17,17 @@
 
 package c5db.tablet;
 
+import c5db.client.generated.Condition;
+import c5db.client.generated.MutationProto;
 import c5db.regionserver.ReverseProtobufUtil;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.ByteArrayComparable;
+import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -34,6 +38,7 @@ import java.io.IOException;
  * and extract HRegion functionality.
  */
 public class HRegionBridge implements Region {
+  private static final Logger LOG = LoggerFactory.getLogger(HRegionBridge.class);
 
   private HRegion theRegion;
 
@@ -41,9 +46,89 @@ public class HRegionBridge implements Region {
     this.theRegion = theRegion;
   }
 
+
   @Override
-  public void put(final Put put) throws IOException {
-    theRegion.put(put);
+  public boolean mutate(MutationProto mutation, Condition condition) throws IOException {
+    final MutationProto.MutationType type = mutation.getMutateType();
+    boolean success;
+    switch (type) {
+      case PUT:
+        if (condition == null || condition.getRow() == null) {
+          success = simplePut(mutation);
+        } else {
+          success = checkAndPut(mutation, condition);
+        }
+        break;
+      case DELETE:
+        if (condition == null || condition.getRow() == null) {
+          success = simpleDelete(mutation);
+        } else {
+          success = checkAndDelete(mutation, condition);
+        }
+        break;
+      default:
+        throw new IOException("mutate supports atomic put and/or delete, not " + type.name());
+    }
+    return success;
+  }
+
+  private boolean checkAndPut(MutationProto mutation, Condition condition) throws IOException {
+    boolean success;
+    final byte[] row = condition.getRow().array();
+    final byte[] cf = condition.getFamily().array();
+    final byte[] cq = condition.getQualifier().array();
+
+    final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
+    final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
+
+    success = this.getTheRegion().checkAndMutate(row,
+        cf,
+        cq,
+        compareOp,
+        comparator,
+        ReverseProtobufUtil.toPut(mutation),
+        true);
+    return success;
+  }
+
+  private boolean simplePut(MutationProto mutation) {
+    try {
+      this.getTheRegion().put(ReverseProtobufUtil.toPut(mutation));
+    } catch (IOException e) {
+      LOG.error(e.getLocalizedMessage());
+      return false;
+    }
+    return true;
+  }
+
+
+  private boolean checkAndDelete(MutationProto mutation, Condition condition) throws IOException {
+    boolean success;
+    final byte[] row = condition.getRow().array();
+    final byte[] cf = condition.getFamily().array();
+    final byte[] cq = condition.getQualifier().array();
+
+    final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
+    final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
+
+    success = this.getTheRegion().checkAndMutate(row,
+        cf,
+        cq,
+        compareOp,
+        comparator,
+        ReverseProtobufUtil.toDelete(mutation),
+        true);
+    return success;
+  }
+
+  private boolean simpleDelete(MutationProto mutation) {
+    try {
+      this.getTheRegion().delete(ReverseProtobufUtil.toDelete(mutation));
+    } catch (IOException e) {
+      LOG.error(e.getLocalizedMessage());
+      return false;
+    }
+    return true;
   }
 
   @Override

@@ -17,6 +17,8 @@
 
 package c5db.tablet;
 
+import c5db.client.generated.Condition;
+import c5db.client.generated.MutationProto;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -42,7 +44,7 @@ public interface Region {
    * Mock out the creator interface - then create/return mock region interfaces.
    */
 
-  void put(Put put) throws IOException;
+  boolean mutate(MutationProto mutateProto, Condition condition) throws IOException;
 
   HRegion getTheRegion();
 

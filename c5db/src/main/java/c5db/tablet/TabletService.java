@@ -18,6 +18,9 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
+import c5db.client.ProtobufUtil;
+import c5db.client.generated.Condition;
+import c5db.client.generated.MutationProto;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -47,6 +50,7 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
+
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -363,11 +367,13 @@ public class TabletService extends AbstractService implements TabletModule {
   private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor)
       throws IOException, RegionNotFoundException {
     Region region = this.getTablet("hbase:meta").getRegion();
-    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
+    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
     put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
     put.add(HConstants.CATALOG_FAMILY, HTABLE_DESCRIPTOR_QUALIFIER, hTableDescriptor.toByteArray());
-    region.put(put);
+
+
+    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
   private void addMetaLeaderEntryToRoot(long leader) throws IOException, RegionNotFoundException {
@@ -375,7 +381,7 @@ public class TabletService extends AbstractService implements TabletModule {
     HRegionInfo hRegionInfo = SystemTableNames.rootRegionInfo();
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
     put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
-    region.put(put);
+    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
   private void addLeaderEntryToMeta(long leader) throws IOException, RegionNotFoundException {
@@ -384,7 +390,7 @@ public class TabletService extends AbstractService implements TabletModule {
     Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
 
     put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
-    region.put(put);
+    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
   int getMinQuorumSize() {
