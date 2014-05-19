@@ -17,11 +17,17 @@
 
 package c5db.tablet;
 
+import c5db.client.generated.Action;
 import c5db.client.generated.Condition;
+import c5db.client.generated.Get;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.Result;
 import c5db.regionserver.ReverseProtobufUtil;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Scan;
+
+import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegion;
@@ -30,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
@@ -136,27 +144,59 @@ public class HRegionBridge implements Region {
     return theRegion;
   }
 
-  @Override
-  public RegionScanner getScanner(Scan scan) {
-    try {
-      return getTheRegion().getScanner(scan);
-    } catch (IOException e) {
-      e.printStackTrace();
-
-    }
-    return null;
-  }
 
   @Override
-  public boolean exists(c5db.client.generated.Get get) throws IOException {
+  public boolean exists(Get get) throws IOException {
     final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
-    Result result = this.getTheRegion().get(serverGet);
+    org.apache.hadoop.hbase.client.Result result = this.getTheRegion().get(serverGet);
     return result.getExists();
   }
 
   @Override
-  public c5db.client.generated.Result get(c5db.client.generated.Get get) throws IOException {
+  public Result get(Get get) throws IOException {
     final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
     return ReverseProtobufUtil.toResult(this.getTheRegion().get(serverGet));
   }
+
+  @Override
+  public MultiResponse multi(MultiRequest multi) throws IOException {
+    final MultiResponse multiResponse = new MultiResponse();
+    final List<MutationProto> mutations = new ArrayList<>();
+
+    for (RegionAction regionAction : multi.getRegionActionList()) {
+      for (Action actionUnion : regionAction.getActionList()) {
+        if (actionUnion.getMutation() != null) {
+          mutations.add(actionUnion.getMutation());
+        } else {
+          throw new IOException("Unsupported atomic action type: " + actionUnion);
+        }
+      }
+    }
+
+    if (!mutations.isEmpty()) {
+      final MutationProto firstMutate = mutations.get(0);
+      final byte[] row = firstMutate.getRow().array();
+      final RowMutations rm = new RowMutations(row);
+      for (MutationProto mutate : mutations) {
+        final MutationProto.MutationType type = mutate.getMutateType();
+        switch (mutate.getMutateType()) {
+          case PUT:
+            rm.add(ReverseProtobufUtil.toPut(mutate));
+            break;
+          case DELETE:
+            rm.add(ReverseProtobufUtil.toDelete(mutate));
+            break;
+          default:
+            throw new IOException("mutate supports atomic put and/or delete, not "+ type.name());
+        }
+      }
+    }
+    return multiResponse;
+  }
+
+  @Override
+  public RegionScanner getScanner(c5db.client.generated.Scan scan) throws IOException {
+    return getTheRegion().getScanner(ReverseProtobufUtil.toScan(scan));
+  }
+
 }

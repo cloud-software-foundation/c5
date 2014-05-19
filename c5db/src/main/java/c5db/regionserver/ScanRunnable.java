@@ -53,11 +53,11 @@ public class ScanRunnable implements Callback<Integer> {
                       final Region region) throws IOException {
     super();
     assert(call.getScan() != null);
-    Scan scan = ReverseProtobufUtil.toScan(call.getScan().getScan());
+
     this.ctx = ctx;
     this.call = call;
     this.scannerId = scannerId;
-    this.scanner = region.getScanner(scan);
+    this.scanner = region.getScanner(call.getScan().getScan());
     this.close = false;
   }
 
