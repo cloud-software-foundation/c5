@@ -50,13 +50,13 @@ public interface Region {
 
   boolean mutate(MutationProto mutateProto, Condition condition) throws IOException;
 
-  HRegion getTheRegion();
+  org.apache.hadoop.hbase.regionserver.HRegionInterface getTheRegion();
 
   boolean exists(Get get) throws IOException;
 
   Result get(Get get) throws IOException;
 
-  c5db.client.generated.MultiResponse multi(MultiRequest multi) throws IOException;
+  void multi(MultiRequest multi) throws IOException;
 
   RegionScanner getScanner(Scan scan) throws IOException;
 

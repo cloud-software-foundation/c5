@@ -17,27 +17,20 @@
 
 package c5db.tablet;
 
-import c5db.client.generated.Action;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.MultiRequest;
-import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutationProto;
-import c5db.client.generated.RegionAction;
 import c5db.client.generated.Result;
 import c5db.regionserver.ReverseProtobufUtil;
-
-import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
-import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.regionserver.HRegionInterface;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
@@ -48,9 +41,9 @@ import java.util.List;
 public class HRegionBridge implements Region {
   private static final Logger LOG = LoggerFactory.getLogger(HRegionBridge.class);
 
-  private HRegion theRegion;
+  private HRegionInterface theRegion;
 
-  public HRegionBridge(final HRegion theRegion) {
+  public HRegionBridge(final HRegionInterface theRegion) {
     this.theRegion = theRegion;
   }
 
@@ -140,7 +133,7 @@ public class HRegionBridge implements Region {
   }
 
   @Override
-  public HRegion getTheRegion() {
+  public HRegionInterface getTheRegion() {
     return theRegion;
   }
 
@@ -159,39 +152,8 @@ public class HRegionBridge implements Region {
   }
 
   @Override
-  public MultiResponse multi(MultiRequest multi) throws IOException {
-    final MultiResponse multiResponse = new MultiResponse();
-    final List<MutationProto> mutations = new ArrayList<>();
-
-    for (RegionAction regionAction : multi.getRegionActionList()) {
-      for (Action actionUnion : regionAction.getActionList()) {
-        if (actionUnion.getMutation() != null) {
-          mutations.add(actionUnion.getMutation());
-        } else {
-          throw new IOException("Unsupported atomic action type: " + actionUnion);
-        }
-      }
-    }
-
-    if (!mutations.isEmpty()) {
-      final MutationProto firstMutate = mutations.get(0);
-      final byte[] row = firstMutate.getRow().array();
-      final RowMutations rm = new RowMutations(row);
-      for (MutationProto mutate : mutations) {
-        final MutationProto.MutationType type = mutate.getMutateType();
-        switch (mutate.getMutateType()) {
-          case PUT:
-            rm.add(ReverseProtobufUtil.toPut(mutate));
-            break;
-          case DELETE:
-            rm.add(ReverseProtobufUtil.toDelete(mutate));
-            break;
-          default:
-            throw new IOException("mutate supports atomic put and/or delete, not "+ type.name());
-        }
-      }
-    }
-    return multiResponse;
+  public void multi(MultiRequest multi) throws IOException {
+    throw new IOException("Disabled");
   }
 
   @Override
