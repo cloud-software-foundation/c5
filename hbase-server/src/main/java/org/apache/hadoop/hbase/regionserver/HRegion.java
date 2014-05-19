@@ -186,7 +186,7 @@ import com.google.protobuf.Service;
  * defines the keyspace for this HRegion.
  */
 @InterfaceAudience.Private
-public class HRegion implements HeapSize { // , Writable{
+public class HRegion implements HeapSize, HRegionInterface { // , Writable{
   public static final Log LOG = LogFactory.getLog(HRegion.class);
 
   public static final String LOAD_CFS_ON_DEMAND_CONFIG_KEY =

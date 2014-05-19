@@ -194,7 +194,6 @@ public class RegionServerTest {
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
-    Cell cell = new KeyValue(Bytes.toBytes("row"), Bytes.toBytes("cf"), Bytes.toBytes("cq"), Bytes.toBytes("value"));
     c5db.client.generated.Result result = new c5db.client.generated.Result();
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
@@ -212,6 +211,61 @@ public class RegionServerTest {
 
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
   }
+
+  @Test
+  public void shouldBeAbleToHandleExistsTrue() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
+    GetRequest getRequest = new GetRequest(regionSpecifier, get);
+
+    context.checking(new Expectations() {{
+      oneOf(tabletModule).getTablet("testTable");
+      will(returnValue(tablet));
+
+      oneOf(tablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).exists(with(any(Get.class)));
+      will(returnValue(true));
+
+      oneOf(ctx).writeAndFlush(with(any(Response.class)));
+
+    }});
+
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+  }
+
+
+  @Test
+  public void shouldBeAbleToHandleExistsFalse() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
+    GetRequest getRequest = new GetRequest(regionSpecifier, get);
+
+    context.checking(new Expectations() {{
+      oneOf(tabletModule).getTablet("testTable");
+      will(returnValue(tablet));
+
+      oneOf(tablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).exists(with(any(Get.class)));
+      will(returnValue(false));
+
+      oneOf(ctx).writeAndFlush(with(any(Response.class)));
+
+    }});
+
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+  }
+
 
   @Test
   public void shouldBeAbleToHandleMutate() throws Exception {

@@ -80,7 +80,8 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     }
 
     final Region region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
-    MultiResponse multiResponse = region.multi(call.getMulti());
+    region.multi(call.getMulti());
+    MultiResponse multiResponse = new MultiResponse();
     final Response response = new Response(Response.Command.MULTI,
         call.getCommandId(),
         null,
