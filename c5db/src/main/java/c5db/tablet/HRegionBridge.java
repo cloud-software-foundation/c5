@@ -17,6 +17,7 @@
 
 package c5db.tablet;
 
+import c5db.regionserver.ReverseProtobufUtil;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -35,13 +36,9 @@ import java.io.IOException;
 public class HRegionBridge implements Region {
 
   private HRegion theRegion;
+
   public HRegionBridge(final HRegion theRegion) {
     this.theRegion = theRegion;
-  }
-
-  @Override
-  public Result get(final Get get) throws IOException {
-    return theRegion.get(get);
   }
 
   @Override
@@ -63,5 +60,18 @@ public class HRegionBridge implements Region {
 
     }
     return null;
+  }
+
+  @Override
+  public boolean exists(c5db.client.generated.Get get) throws IOException {
+    final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
+    Result result = this.getTheRegion().get(serverGet);
+    return result.getExists();
+  }
+
+  @Override
+  public c5db.client.generated.Result get(c5db.client.generated.Get get) throws IOException {
+    final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
+    return ReverseProtobufUtil.toResult(this.getTheRegion().get(serverGet));
   }
 }

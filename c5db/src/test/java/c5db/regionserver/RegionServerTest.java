@@ -118,27 +118,6 @@ public class RegionServerTest {
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
   }
 
-
-  @Test(expected = IOException.class)
-  public void shouldQuietlyHandleInvalidGet() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-    Get get = new Get();
-    GetRequest getRequest = new GetRequest(regionSpecifier, get);
-
-    context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
-      will(returnValue(tablet));
-
-      oneOf(tablet).getRegion();
-      will(returnValue(region));
-    }});
-
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
-  }
-
-
   @Test(expected = IOException.class)
   public void shouldHandleGetCommandRequestWithNullArgument() throws Exception {
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, null, null, null, null));
@@ -173,7 +152,7 @@ public class RegionServerTest {
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
     Cell cell = new KeyValue(Bytes.toBytes("row"), Bytes.toBytes("cf"), Bytes.toBytes("cq"), Bytes.toBytes("value"));
-    Result result = Result.create(new Cell[]{cell});
+    c5db.client.generated.Result result = new c5db.client.generated.Result();
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
@@ -181,7 +160,7 @@ public class RegionServerTest {
       oneOf(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
+      oneOf(region).get(with(any(Get.class)));
       will(returnValue(result));
 
       oneOf(ctx).writeAndFlush(with(any(Response.class)));

@@ -17,8 +17,14 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
+import c5db.client.generated.Column;
+import c5db.client.generated.Filter;
+import c5db.client.generated.Get;
+import c5db.client.generated.NameBytesPair;
 import c5db.client.generated.RegionInfo;
+import c5db.client.generated.Result;
 import c5db.client.generated.TableName;
+import c5db.client.generated.TimeRange;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
@@ -29,9 +35,7 @@ import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.jetlang.channels.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,14 +76,35 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   boolean metaExists(Region region) {
     // TODO We should make sure the meta is well formed
-    Get get = new Get(C5ServerConstants.META_ROW);
-    Result result;
+    ByteBuffer row = ByteBuffer.wrap(C5ServerConstants.META_ROW);
+    List<Column> column = new ArrayList<>();
+    List<NameBytesPair> attribute = new ArrayList<>();
+    Filter filter = new Filter();
+    TimeRange timeRange = new TimeRange();
+    int maxVersions = 1;
+    boolean cacheBlocks = true;
+    int storeLimit = 1;
+    int storeOffset = 0;
+    boolean existenceOnly = true;
+    boolean closestRowBefore = false;
+
+    Get get = new Get(row,
+        column,
+        attribute,
+        filter,
+        timeRange,
+        maxVersions,
+        cacheBlocks,
+        storeLimit,
+        storeOffset,
+        existenceOnly,
+        closestRowBefore);
+
     try {
-      result = region.get(get);
+      return region.exists(get);
     } catch (IOException e) {
       return false;
     }
-    return !(result == null) && result.size() > 0;
   }
 
   private List<Long> shuffleListAndReturnMetaRegionPeers(final List<Long> peers) {

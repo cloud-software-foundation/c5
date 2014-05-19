@@ -20,9 +20,7 @@ package c5db.tablet;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
@@ -44,17 +42,19 @@ public interface Region {
    * Mock out the creator interface - then create/return mock region interfaces.
    */
 
-  Result get(Get get) throws IOException;
-
   void put(Put put) throws IOException;
 
   HRegion getTheRegion();
 
   RegionScanner getScanner(Scan scan);
 
+  boolean exists(c5db.client.generated.Get get) throws IOException;
+
+  c5db.client.generated.Result get(c5db.client.generated.Get get) throws IOException;
+
   /**
-     * Constructor arguments basically.
-     */
+   * Constructor arguments basically.
+   */
   public interface Creator {
     Region getHRegion(
         Path basePath,

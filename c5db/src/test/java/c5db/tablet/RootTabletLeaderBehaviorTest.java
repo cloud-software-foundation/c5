@@ -19,15 +19,15 @@ package c5db.tablet;
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.CommandMatchers;
+import c5db.client.generated.Get;
+import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import io.protostuff.Message;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.MemoryChannel;
 import org.jmock.Expectations;
@@ -38,6 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,10 +71,10 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).get(with(any(Get.class)));
-      will(returnValue(Result.create(new Cell[]{})));
+      oneOf(region).exists(with(any(Get.class)));
+      will(returnValue(false));
 
-      oneOf(hRegionTablet).getPeers();
+          oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
 
       oneOf(region).put(with(any(Put.class)));
@@ -99,8 +100,8 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).get(with(any(Get.class)));
-      will(returnValue(Result.create(new Cell[]{})));
+      oneOf(region).exists(with(any(Get.class)));
+      will(returnValue(false));
 
       oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
@@ -132,15 +133,13 @@ public class RootTabletLeaderBehaviorTest {
   @Test
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws Throwable {
     MemoryChannel<CommandRpcRequest> memoryChannel = new MemoryChannel<>();
-    Cell bonkCell = new KeyValue(Bytes.toBytes("123"), 0l);
-    Result results = Result.create(new Cell[]{bonkCell});
 
     context.checking(new Expectations() {{
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).get(with(any(Get.class)));
-      will(returnValue(results));
+      oneOf(region).exists(with(any(Get.class)));
+      will(returnValue(true));
 
       never(hRegionTablet).getPeers();
       never(c5Server).isSingleNodeMode();
