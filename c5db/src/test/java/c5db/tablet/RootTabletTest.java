@@ -19,7 +19,9 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
+import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
+import c5db.client.generated.MutationProto;
 import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
@@ -34,7 +36,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Put;
+
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -178,7 +180,8 @@ public class RootTabletTest {
         oneOf(server).isSingleNodeMode();
         will(returnValue(true));
 
-        allowing(region).put(with(any(Put.class)));
+        allowing(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+        will(returnValue(true));
 
         // Post put we send a command over the command commandRpcRequestChannel
         oneOf(server).getCommandChannel();

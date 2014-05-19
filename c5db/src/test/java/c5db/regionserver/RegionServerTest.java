@@ -186,7 +186,8 @@ public class RegionServerTest {
       oneOf(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).put(with(any(org.apache.hadoop.hbase.client.Put.class)));
+      oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+      will(returnValue(true));
 
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
 
