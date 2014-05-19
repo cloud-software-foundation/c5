@@ -23,15 +23,22 @@ import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutateResponse;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
+import c5db.client.generated.Result;
+import c5db.client.generated.Scan;
+import c5db.client.generated.ScanRequest;
+import c5db.client.generated.ScanResponse;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -42,6 +49,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -55,14 +64,13 @@ public class C5DatabaseTest {
   private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
-  private final byte[] row = Bytes.toBytes("row");
 
   private SingleNodeTableInterface singleNodeTableInterface;
-  private SettableFuture callFuture;
+  private SettableFuture<Response> callFuture;
 
 
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException {
     context.checking(new Expectations() {
       {
         oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
@@ -94,9 +102,8 @@ public class C5DatabaseTest {
   }
 
   @Test
-  public void mutateMe()
-      throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    context.checking(new Expectations() {
+  public void mutateMe() {
+      context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));
@@ -144,4 +151,56 @@ public class C5DatabaseTest {
     Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null);
     callFuture.set(response);
   }
+
+
+  @Test
+  public void scanMe() {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).callScan(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        ByteBuffer.wrap(new byte[]{0x00}));
+
+    Scan scan = new Scan();
+    long scannerId = 100;
+    int numberOfRows = 100;
+    boolean closeScanner = false;
+    long nextCallSeq = 101;
+
+    ScanRequest scanRequest = new ScanRequest(regionSpecifier, scan, scannerId, numberOfRows, closeScanner, nextCallSeq);
+    singleNodeTableInterface.scan(scanRequest);
+
+    List<Integer> cellsPerResult = new ArrayList<>();
+
+    boolean moreResults = false;
+    int ttl = 0;
+    List<Result> results = new ArrayList<>();
+    ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, ttl, results);
+
+    Response response = new Response(Response.Command.SCAN, 1l, null, null, scanResponse, null);
+    callFuture.set(response);
+  }
+
+  @Test
+  public void multiMe() {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    List<RegionAction> regionActions = new ArrayList<>();
+    MultiRequest multiRequest = new MultiRequest(regionActions);
+    singleNodeTableInterface.multiRequest(multiRequest);
+
+    List<RegionActionResult> results = new ArrayList<>();
+    MultiResponse multiResponse = new MultiResponse(results);
+    Response response = new Response(Response.Command.MULTI, 1l, null, null, null, multiResponse);
+    callFuture.set(response);
+  }
+
 }
