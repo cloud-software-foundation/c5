@@ -65,7 +65,7 @@ public class ScanRunnableTest {
     Call call = new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
     context.checking(new Expectations() {
       {
-        oneOf(region).getScanner(with(any(org.apache.hadoop.hbase.client.Scan.class)));
+        oneOf(region).getScanner(with(any(Scan.class)));
         will(returnValue(regionScanner));
 
       }
@@ -115,7 +115,6 @@ public class ScanRunnableTest {
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
     });
-
 
     scanRunnable.onMessage(3);
   }

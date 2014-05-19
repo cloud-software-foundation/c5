@@ -17,10 +17,7 @@
 
 package c5db.regionserver;
 
-import c5db.client.generated.Action;
 import c5db.client.generated.Call;
-import c5db.client.generated.Cell;
-import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
@@ -28,18 +25,11 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutateResponse;
-import c5db.client.generated.MutationProto;
-import c5db.client.generated.RegionAction;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.RowMutations;
-import org.apache.hadoop.hbase.filter.ByteArrayComparable;
-import org.apache.hadoop.hbase.filter.CompareFilter;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
@@ -49,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The main netty handler for the RegionServer functionality. Maps protocol buffer calls to an action against a HRegion
@@ -85,45 +74,13 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
 
   private void multi(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final MultiRequest request = call.getMulti();
-    final MultiResponse multiResponse = new MultiResponse();
-    final List<MutationProto> mutations = new ArrayList<>();
-    if (request== null){
+
+    if (request == null) {
       throw new IOException("Poorly specified multi. There is no actual get data in the RPC");
     }
 
-    for (RegionAction regionAction : request.getRegionActionList()) {
-      for (Action actionUnion : regionAction.getActionList()) {
-        if (actionUnion.getMutation() != null) {
-          mutations.add(actionUnion.getMutation());
-        } else {
-          throw new IOException("Unsupported atomic action type: " + actionUnion);
-        }
-      }
-    }
-
-    if (!mutations.isEmpty()) {
-      final MutationProto firstMutate = mutations.get(0);
-      final byte[] row = firstMutate.getRow().array();
-      final RowMutations rm = new RowMutations(row);
-      for (MutationProto mutate : mutations) {
-        final MutationProto.MutationType type = mutate.getMutateType();
-        switch (mutate.getMutateType()) {
-          case PUT:
-            rm.add(ReverseProtobufUtil.toPut(mutate));
-            break;
-          case DELETE:
-            rm.add(ReverseProtobufUtil.toDelete(mutate));
-            break;
-          default:
-            throw new RuntimeException(
-                "mutate supports atomic put and/or delete, not "
-                    + type.name()
-            );
-        }
-      }
-      final Region region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
-      region.getTheRegion().mutateRow(rm);
-    }
+    final Region region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
+    MultiResponse multiResponse = region.multi(call.getMulti());
     final Response response = new Response(Response.Command.MULTI,
         call.getCommandId(),
         null,
@@ -136,7 +93,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private void mutate(ChannelHandlerContext ctx, Call call) throws RegionNotFoundException, IOException {
     final MutateRequest mutateIn = call.getMutate();
 
-    if (mutateIn == null){
+    if (mutateIn == null) {
       throw new IOException("Poorly specified mutate. There is no actual get data in the RPC");
     }
 
@@ -157,7 +114,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private void scan(ChannelHandlerContext ctx, Call call) throws IOException,
       RegionNotFoundException {
     final ScanRequest scanIn = call.getScan();
-    if (scanIn == null){
+    if (scanIn == null) {
       throw new IOException("Poorly specified scan. There is no actual get data in the RPC");
     }
 
@@ -193,7 +150,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
 
   private void get(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final GetRequest getRequest = call.getGet();
-    if (getRequest == null){
+    if (getRequest == null) {
       throw new IOException("Poorly specified getRequest. There is no actual get data in the RPC");
     }
     final Get getIn = getRequest.getGet();
@@ -208,12 +165,12 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       final GetResponse getResponse = new GetResponse(new c5db.client.generated.Result(new ArrayList<>(), 0, exists));
       final Response response = new Response(Response.Command.GET, call.getCommandId(), getResponse, null, null, null);
       ctx.writeAndFlush(response);
-      } else {
+    } else {
       final c5db.client.generated.Result getResult = region.get(getRequest.getGet());
       final GetResponse getResponse = new GetResponse(getResult);
       final Response response = new Response(Response.Command.GET, call.getCommandId(), getResponse, null, null, null);
       ctx.writeAndFlush(response);
-      }
+    }
   }
 
   @Override

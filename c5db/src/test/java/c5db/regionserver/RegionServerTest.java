@@ -16,15 +16,25 @@
  */
 package c5db.regionserver;
 
+import c5db.client.FakeHTable;
 import c5db.client.ProtobufUtil;
+import c5db.client.generated.Action;
+import c5db.client.generated.ByteArrayComparable;
 import c5db.client.generated.Call;
+import c5db.client.generated.Comparator;
+import c5db.client.generated.CompareType;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
+import c5db.client.generated.MultiRequest;
+import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
+import c5db.client.generated.Scan;
+import c5db.client.generated.ScanRequest;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
@@ -34,12 +44,14 @@ import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
@@ -52,6 +64,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -142,6 +157,34 @@ public class RegionServerTest {
   }
 
   @Test
+  public void shouldBeAbleToScan() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+    ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l,10,false,11l);
+    RegionScanner regionScanner = context.mock(RegionScanner.class);
+    context.checking(new Expectations() {{
+      oneOf(tabletModule).getTablet("testTable");
+      will(returnValue(tablet));
+
+      oneOf(tablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).getScanner(with(any(Scan.class)));
+      will(returnValue(regionScanner));
+
+      allowing(regionScanner).nextRaw(with(any(List.class)));
+      will(returnValue(false));
+
+      allowing(ctx).writeAndFlush(with(any(Response.class)));
+
+      allowing(regionScanner).close();
+    }});
+
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.SCAN, 1, null, null, scanRequest, null));
+  }
+
+  @Test
   public void shouldBeAbleToHandleGet() throws Exception {
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
@@ -194,6 +237,71 @@ public class RegionServerTest {
     }});
 
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+  }
+
+  @Test
+  public void shouldBeAbleToHandleMutateWithCondition() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    Condition condition = new Condition(ByteBuffer.wrap(Bytes.toBytes("row")),
+        ByteBuffer.wrap(Bytes.toBytes("cf")),
+        ByteBuffer.wrap(Bytes.toBytes("cq")),
+        CompareType.EQUAL,
+        FakeHTable.toComparator(new ByteArrayComparable(ByteBuffer.wrap(Bytes.toBytes("value")))));
+    MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, condition);
+
+    context.checking(new Expectations() {{
+      oneOf(tabletModule).getTablet("testTable");
+      will(returnValue(tablet));
+
+      oneOf(tablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+      will(returnValue(true));
+
+      oneOf(ctx).writeAndFlush(with(any(Response.class)));
+
+    }});
+
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+  }
+
+  @Test
+  public void shouldBeAbleToHandleMulti() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
+
+    List<RegionAction> regionActionList = new ArrayList<>();
+    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(0, mutation, null))));
+    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(1, mutation, null))));
+    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(2, null, get))));
+    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(3, mutation, get))));
+
+
+    MultiRequest multiRequest = new MultiRequest(regionActionList);
+
+    context.checking(new Expectations() {{
+      oneOf(tabletModule).getTablet("testTable");
+      will(returnValue(tablet));
+
+      oneOf(tablet).getRegion();
+      will(returnValue(region));
+
+      oneOf(region).multi(with(any(MultiRequest.class)));
+      will(returnValue(new MultiResponse()));
+      oneOf(ctx).writeAndFlush(with(any(Response.class)));
+
+    }});
+
+    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MULTI, 1, null, null, null, multiRequest));
   }
 
 }

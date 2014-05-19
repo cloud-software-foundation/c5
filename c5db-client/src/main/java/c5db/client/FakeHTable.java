@@ -83,7 +83,7 @@ public class FakeHTable implements AutoCloseable {
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
   }
 
-  private static Comparator toComparator(ByteArrayComparable comparator) {
+  public static Comparator toComparator(ByteArrayComparable comparator) {
     return new Comparator(comparator.getClass().getName(), comparator.getValue());
   }
 
