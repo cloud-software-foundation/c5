@@ -19,6 +19,8 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
+import c5db.client.generated.Get;
+import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -32,7 +34,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.hamcrest.BaseMatcher;
@@ -171,8 +172,8 @@ public class RootTabletTest {
     context.checking(new Expectations() {
       {
         // Return 0 entries from the root table for Meta
-        oneOf(region).get(with(any(Get.class)));
-        will(returnValue(org.apache.hadoop.hbase.client.Result.create(new ArrayList<>())));
+        oneOf(region).exists(with(any(Get.class)));
+        will(returnValue( false));
 
         oneOf(server).isSingleNodeMode();
         will(returnValue(true));

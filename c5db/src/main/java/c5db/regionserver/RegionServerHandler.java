@@ -19,6 +19,7 @@ package c5db.regionserver;
 
 import c5db.client.generated.Action;
 import c5db.client.generated.Call;
+import c5db.client.generated.Cell;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
@@ -289,23 +290,17 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       throw new IOException("Unable to find region");
     }
 
-    try {
-      final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(getIn);
-      final Result regionResult = region.get(serverGet);
-      final c5db.client.generated.Result result;
-
-      if (getIn.getExistenceOnly()) {
-        result = new c5db.client.generated.Result(new ArrayList<>(), 0, regionResult.getExists());
-      } else {
-        result = ReverseProtobufUtil.toResult(regionResult);
-      }
-      final GetResponse getResponse = new GetResponse(result);
+    if (getIn.getExistenceOnly()) {
+      final boolean exists = region.exists(getRequest.getGet());
+      final GetResponse getResponse = new GetResponse(new c5db.client.generated.Result(new ArrayList<>(), 0, exists));
       final Response response = new Response(Response.Command.GET, call.getCommandId(), getResponse, null, null, null);
       ctx.writeAndFlush(response);
-    } catch (NullPointerException e) {
-      String msg = "Poorly specified getRequest. We can't convert it to a protobuf as some fields are not specified";
-      throw new IOException(msg);
-    }
+      } else {
+      final c5db.client.generated.Result getResult = region.get(getRequest.getGet());
+      final GetResponse getResponse = new GetResponse(getResult);
+      final Response response = new Response(Response.Command.GET, call.getCommandId(), getResponse, null, null, null);
+      ctx.writeAndFlush(response);
+      }
   }
 
   @Override
