@@ -79,32 +79,9 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   boolean metaExists(Region region) {
     // TODO We should make sure the meta is well formed
-    ByteBuffer row = ByteBuffer.wrap(C5ServerConstants.META_ROW);
-    List<Column> column = new ArrayList<>();
-    List<NameBytesPair> attribute = new ArrayList<>();
-    Filter filter = new Filter();
-    TimeRange timeRange = new TimeRange();
-    int maxVersions = 1;
-    boolean cacheBlocks = true;
-    int storeLimit = 1;
-    int storeOffset = 0;
-    boolean existenceOnly = true;
-    boolean closestRowBefore = false;
-
-    Get get = new Get(row,
-        column,
-        attribute,
-        filter,
-        timeRange,
-        maxVersions,
-        cacheBlocks,
-        storeLimit,
-        storeOffset,
-        existenceOnly,
-        closestRowBefore);
-
+    org.apache.hadoop.hbase.client.Get get = new org.apache.hadoop.hbase.client.Get(C5ServerConstants.META_ROW);
     try {
-      return region.exists(get);
+      return region.exists(ProtobufUtil.toGet(get, true));
     } catch (IOException e) {
       return false;
     }
@@ -147,6 +124,6 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     put.add(HConstants.CATALOG_FAMILY,
         HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
-    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT,put), new Condition());
+    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 }

@@ -57,6 +57,7 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -198,13 +199,8 @@ public class ProtobufUtil {
       for (Cell cell : cells) {
         KeyValue kv = KeyValueUtil.ensureKeyValue(cell);
         cellCount.add(1);
-        ByteBuffer qualifier = ByteBuffer.wrap(cell.getQualifierArray(),
-            cell.getQualifierOffset(),
-            cell.getQualifierLength());
-
-        ByteBuffer value = ByteBuffer.wrap(cell.getValueArray(),
-            cell.getValueOffset(),
-            cell.getValueLength());
+        ByteBuffer qualifier = ByteBuffer.wrap(cell.getQualifier());
+        ByteBuffer value = ByteBuffer.wrap(cell.getValue());
 
         MutationProto.DeleteType deleteType;
         if (type == MutationProto.MutationType.DELETE) {

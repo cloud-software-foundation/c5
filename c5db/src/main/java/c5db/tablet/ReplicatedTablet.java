@@ -190,10 +190,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             // update the meta table with my leader status
           }
         } catch (Exception e) {
-          LOG.error(e.getLocalizedMessage());
-          LOG.error(e.getLocalizedMessage());
-          LOG.error(e.getLocalizedMessage());
-          LOG.error(e.getLocalizedMessage());
+          LOG.error("Error setting tablet state to leader", e);
         }
         break;
     }
