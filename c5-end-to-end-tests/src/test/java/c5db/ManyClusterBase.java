@@ -105,7 +105,8 @@ public class ManyClusterBase {
       new File(nodeBasePath.toUri()).mkdirs();
       System.setProperty(C5ServerConstants.C5_CFG_PATH, nodeBasePath.toString());
 
-      System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(31337 + random.nextInt(1000)));
+      System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME,
+          String.valueOf(31337 + random.nextInt(1000)));
       System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000 + random.nextInt(1000)));
 
       C5Server server = Main.startC5Server(new String[]{});

@@ -81,10 +81,7 @@ public class MiniClusterBase {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
 
     System.setProperty(C5ServerConstants.C5_CFG_PATH, MiniClusterBase.testFolder.getRoot().getAbsolutePath());
-    int webServerPort = 9091 + rnd.nextInt(100);
     System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
-
-    System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME, String.valueOf(webServerPort));
 
     server = Main.startC5Server(new String[]{});
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
