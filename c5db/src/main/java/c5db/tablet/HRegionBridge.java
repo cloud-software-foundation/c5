@@ -17,20 +17,32 @@
 
 package c5db.tablet;
 
+import c5db.client.generated.Action;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
-import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.NameBytesPair;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Result;
+import c5db.client.generated.ResultOrException;
 import c5db.regionserver.ReverseProtobufUtil;
+import com.google.protobuf.ByteString;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegionInterface;
+import org.apache.hadoop.hbase.regionserver.MultiRowMutationProcessor;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
@@ -46,7 +58,6 @@ public class HRegionBridge implements Region {
   public HRegionBridge(final HRegionInterface theRegion) {
     this.theRegion = theRegion;
   }
-
 
   @Override
   public boolean mutate(MutationProto mutation, Condition condition) throws IOException {
@@ -82,7 +93,7 @@ public class HRegionBridge implements Region {
     final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
     final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
 
-    success = this.getTheRegion().checkAndMutate(row,
+    success = theRegion.checkAndMutate(row,
         cf,
         cq,
         compareOp,
@@ -94,7 +105,7 @@ public class HRegionBridge implements Region {
 
   private boolean simplePut(MutationProto mutation) {
     try {
-      this.getTheRegion().put(ReverseProtobufUtil.toPut(mutation));
+      theRegion.put(ReverseProtobufUtil.toPut(mutation));
     } catch (IOException e) {
       LOG.error(e.getLocalizedMessage());
       return false;
@@ -112,7 +123,7 @@ public class HRegionBridge implements Region {
     final CompareFilter.CompareOp compareOp = CompareFilter.CompareOp.valueOf(condition.getCompareType().name());
     final ByteArrayComparable comparator = ReverseProtobufUtil.toComparator(condition.getComparator());
 
-    success = this.getTheRegion().checkAndMutate(row,
+    success = theRegion.checkAndMutate(row,
         cf,
         cq,
         compareOp,
@@ -124,7 +135,7 @@ public class HRegionBridge implements Region {
 
   private boolean simpleDelete(MutationProto mutation) {
     try {
-      this.getTheRegion().delete(ReverseProtobufUtil.toDelete(mutation));
+      theRegion.delete(ReverseProtobufUtil.toDelete(mutation));
     } catch (IOException e) {
       LOG.error(e.getLocalizedMessage());
       return false;
@@ -133,32 +144,178 @@ public class HRegionBridge implements Region {
   }
 
   @Override
-  public HRegionInterface getTheRegion() {
-    return theRegion;
-  }
-
-
-  @Override
   public boolean exists(Get get) throws IOException {
     final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
-    org.apache.hadoop.hbase.client.Result result = this.getTheRegion().get(serverGet);
+    org.apache.hadoop.hbase.client.Result result = theRegion.get(serverGet);
     return result.getExists();
   }
 
   @Override
   public Result get(Get get) throws IOException {
     final org.apache.hadoop.hbase.client.Get serverGet = ReverseProtobufUtil.toGet(get);
-    return ReverseProtobufUtil.toResult(this.getTheRegion().get(serverGet));
-  }
-
-  @Override
-  public void multi(MultiRequest multi) throws IOException {
-    throw new IOException("Disabled");
+    return ReverseProtobufUtil.toResult(theRegion.get(serverGet));
   }
 
   @Override
   public RegionScanner getScanner(c5db.client.generated.Scan scan) throws IOException {
-    return getTheRegion().getScanner(ReverseProtobufUtil.toScan(scan));
+    return theRegion.getScanner(ReverseProtobufUtil.toScan(scan));
   }
 
+  @Override
+  public RegionActionResult processRegionAction(RegionAction regionAction) {
+    RegionActionResult regionActionResult;
+    if (regionAction.getAtomic()) {
+      regionActionResult = processActionsAtomically(regionAction);
+    } else {
+      regionActionResult = processActionsInParallel(regionAction);
+    }
+    return regionActionResult;
+  }
+
+  private RegionActionResult processActionsAtomically(RegionAction regionAction) {
+    byte[] rowToLock = null;
+    Collection<Mutation> mutations = new ArrayList<>();
+    List<ResultOrException> resultOrExceptions = new ArrayList<>();
+
+    for (Action action : regionAction.getActionList()) {
+      boolean hasGet = false;
+      boolean hasMutation = false;
+
+      if (action.getGet() != null) {
+        hasGet = true;
+      }
+
+      if (action.getMutation() != null) {
+        hasMutation = true;
+      }
+
+      if (hasGet && hasMutation) {
+        String errorMsg = "We have mutations and a get, this is an invalid action";
+        NameBytesPair exception = buildException(new IOException(errorMsg));
+        return new RegionActionResult(new ArrayList<>(), exception);
+      } else if (!hasGet && !hasMutation) {
+        String errorMsg = "We have neither mutations or a get, this is an invalid action";
+        NameBytesPair exception = buildException(new IOException(errorMsg));
+        return new RegionActionResult(new ArrayList<>(), exception);
+      } else if (rowToLock == null && hasMutation) {
+        rowToLock = action.getMutation().getRow().array();
+      }
+      if (hasMutation) {
+        if (!Arrays.equals(rowToLock, action.getMutation().getRow().array())) {
+          String errorMsg = "Attempting multi row atomic transaction";
+          NameBytesPair exception = buildException(new IOException(errorMsg));
+          return new RegionActionResult(new ArrayList<>(), exception);
+        } else {
+          switch (action.getMutation().getMutateType()) {
+            case APPEND:
+              return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Append not supported")));
+            case INCREMENT:
+              return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Increment not supported")));
+            case PUT:
+              try {
+                mutations.add(ReverseProtobufUtil.toPut(action.getMutation()));
+                resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
+              } catch (IOException e) {
+                NameBytesPair exception = buildException(e);
+                return new RegionActionResult(resultOrExceptions, exception);
+              }
+              break;
+            case DELETE:
+              mutations.add(ReverseProtobufUtil.toDelete(action.getMutation()));
+              resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
+              break;
+          }
+        }
+      }
+
+    }
+    MultiRowMutationProcessor proc = new MultiRowMutationProcessor(mutations, Arrays.asList(rowToLock));
+    try {
+      theRegion.processRowsWithLocks(proc);
+    } catch (IOException e) {
+      return new RegionActionResult(new ArrayList<>(), buildException(e));
+    }
+
+
+    for (Action action : regionAction.getActionList()) {
+      Get get = action.getGet();
+      if (get != null) {
+        try {
+          Result result = get(get);
+          resultOrExceptions.add(new ResultOrException(action.getIndex(), result, null));
+        } catch (IOException e) {
+          resultOrExceptions.add(new ResultOrException(action.getIndex(), null, buildException(e)));
+        }
+      }
+    }
+
+    return new RegionActionResult(resultOrExceptions, null);
+  }
+
+  private RegionActionResult processActionsInParallel(RegionAction regionAction) {
+    ResultOrException[] actionMap = regionAction
+        .getActionList()
+        .parallelStream()
+        .map(this::processAction)
+        .toArray(ResultOrException[]::new);
+    return new RegionActionResult(Arrays.asList(actionMap), null);
+  }
+
+  private ResultOrException processAction(Action action) {
+    boolean hasGet = false;
+    boolean hasMutation = false;
+
+    if (action.getGet() != null) {
+      hasGet = true;
+    }
+
+    if (action.getMutation() != null) {
+      hasMutation = true;
+    }
+
+    if (hasGet && hasMutation) {
+      String errorMsg = "We have mutations and a get, this is an invalid action";
+      NameBytesPair exception = buildException(new IOException(errorMsg));
+      return new ResultOrException(action.getIndex(), null, exception);
+    } else if (hasGet) {
+      Result result = null;
+      NameBytesPair nameBytesPair = null;
+      try {
+        result = get(action.getGet());
+      } catch (IOException e) {
+        nameBytesPair = buildException(e);
+      }
+      return new ResultOrException(action.getIndex(), result, nameBytesPair);
+    } else if (hasMutation) {
+      Result result = null;
+      NameBytesPair nameBytesPair = null;
+      try {
+        boolean processed = mutate(action.getMutation(), new Condition());
+        if (!processed) {
+          throw new IOException("Mutation not processed");
+        } else {
+          result = new Result();
+        }
+      } catch (IOException e) {
+        nameBytesPair = buildException(e);
+      }
+      return new ResultOrException(action.getIndex(), result, nameBytesPair);
+    } else {
+      String errorMsg = "We have a blank action. Please supply get or mutate";
+      NameBytesPair exception = buildException(new IOException(errorMsg));
+      return new ResultOrException(action.getIndex(), null, exception);
+    }
+  }
+
+  /**
+   * @param t The exception to stringify.
+   * @return NameValuePair of the exception name to stringified version os exception.
+   */
+
+  //private ResultOrException processAction(Action action)
+  private NameBytesPair buildException(final Throwable t) {
+    return new NameBytesPair(
+        t.getClass().getName(),
+        ByteString.copyFromUtf8(StringUtils.stringifyException(t)).asReadOnlyByteBuffer());
+  }
 }

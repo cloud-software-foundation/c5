@@ -38,13 +38,13 @@ import org.apache.hadoop.hbase.util.Bytes;
 /**
  * A <code>MultiRowProcessor</code> that performs multiple puts and deletes.
  */
-class MultiRowMutationProcessor extends BaseRowProcessor<MultiRowMutationProcessorRequest,
+public class MultiRowMutationProcessor extends BaseRowProcessor<MultiRowMutationProcessorRequest,
 MultiRowMutationProcessorResponse> {
   Collection<byte[]> rowsToLock;
   Collection<Mutation> mutations;
 
-  MultiRowMutationProcessor(Collection<Mutation> mutations,
-                            Collection<byte[]> rowsToLock) {
+  public MultiRowMutationProcessor(Collection<Mutation> mutations,
+                                   Collection<byte[]> rowsToLock) {
     this.rowsToLock = rowsToLock;
     this.mutations = mutations;
   }
