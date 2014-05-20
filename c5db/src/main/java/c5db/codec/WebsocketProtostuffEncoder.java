@@ -22,12 +22,16 @@ import c5db.client.generated.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.protostuff.LowCopyProtobufOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -38,11 +42,12 @@ import java.util.List;
 public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response> {
 
   private static final long MAX_SIZE = C5ServerConstants.MAX_CONTENT_LENGTH_HTTP_AGG;
+  private static final Logger LOG = LoggerFactory.getLogger(WebsocketProtostuffEncoder.class);
 
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
                         Response response,
-                        List<Object> objects) throws Exception {
+                        List<Object> objects) throws IOException {
     final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
     Response.getSchema().writeTo(lcpo, response);
     final long size = lcpo.buffer.size();

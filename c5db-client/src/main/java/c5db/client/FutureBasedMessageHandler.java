@@ -39,9 +39,11 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
     switch (msg.getCommand()) {
+      case MULTI:
+        futures.get(msg.getCommandId()).set(msg);
+        break;
       case MUTATE:
-        final SettableFuture<Response> f = futures.get(msg.getCommandId());
-        f.set(msg);
+        futures.get(msg.getCommandId()).set(msg);
         break;
       case SCAN:
         final long scannerId = msg.getScan().getScannerId();

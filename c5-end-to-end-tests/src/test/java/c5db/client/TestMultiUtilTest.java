@@ -18,8 +18,11 @@ package c5db.client;
 
 import c5db.MiniClusterBase;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.core.IsNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,7 +38,7 @@ public class TestMultiUtilTest extends MiniClusterBase {
   private final byte[] row1 = Bytes.toBytes("row1");
   private final byte[] row2 = Bytes.toBytes("row2");
 
-  @Test()
+  @Test
   public void testMultiPut() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);
     assertThat(DataHelper.valueReadFromDB(table, row), is(not(equalTo(value))));
@@ -43,7 +46,7 @@ public class TestMultiUtilTest extends MiniClusterBase {
     assertThat(DataHelper.valueReadFromDB(table, row2), is(equalTo(value)));
   }
 
-  @Test()
+  @Test
   public void testScan() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);
     ResultScanner resultScanner = DataHelper.getScanner(table, new byte[]{});
@@ -51,7 +54,7 @@ public class TestMultiUtilTest extends MiniClusterBase {
     assertThat(DataHelper.nextResult(resultScanner), is(equalTo(value)));
   }
 
-  @Test()
+  @Test
   public void testMultiDelete() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);
     List<Delete> deletes = new ArrayList<>();
@@ -60,5 +63,26 @@ public class TestMultiUtilTest extends MiniClusterBase {
     table.delete(deletes);
     assertThat(DataHelper.valueReadFromDB(table, row1), is(not(equalTo(value))));
     assertThat(DataHelper.valueReadFromDB(table, row2), is(not(equalTo(value))));
+  }
+
+
+  @Test
+  public void testMultiRowAtomicMagic() throws IOException {
+    RowMutations rowMutations = new RowMutations(row1);
+    byte[] cf = Bytes.toBytes("cf");
+    byte[] cq = Bytes.toBytes("cq");
+
+    rowMutations.add(new Put(row1).add(cf, cq, value));
+    rowMutations.add(new Put(row1).add(cf, Bytes.add(cq,cq), value));
+
+    table.mutateRow(rowMutations);
+
+    assertThat(DataHelper.valueReadFromDB(table, row1), is(equalTo(value)));
+    rowMutations = new RowMutations(row1);
+    rowMutations.add(new Delete(row1).deleteFamily(cf));
+    table.mutateRow(rowMutations);
+
+    assertThat(DataHelper.valueReadFromDB(table, row1), IsNull.nullValue());
+
   }
 }

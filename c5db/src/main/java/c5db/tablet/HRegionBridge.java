@@ -34,11 +34,13 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegionInterface;
 import org.apache.hadoop.hbase.regionserver.MultiRowMutationProcessor;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -181,11 +183,11 @@ public class HRegionBridge implements Region {
       boolean hasGet = false;
       boolean hasMutation = false;
 
-      if (action.getGet() != null) {
+      if (action.getGet() != null && action.getGet().getRow() != null) {
         hasGet = true;
       }
 
-      if (action.getMutation() != null) {
+      if (action.getMutation() != null && action.getMutation().getRow() != null) {
         hasMutation = true;
       }
 
@@ -198,7 +200,7 @@ public class HRegionBridge implements Region {
         NameBytesPair exception = buildException(new IOException(errorMsg));
         return new RegionActionResult(new ArrayList<>(), exception);
       } else if (rowToLock == null && hasMutation) {
-        rowToLock = action.getMutation().getRow().array();
+        rowToLock = action.getMutation().getRow().array().clone();
       }
       if (hasMutation) {
         if (!Arrays.equals(rowToLock, action.getMutation().getRow().array())) {
@@ -239,7 +241,7 @@ public class HRegionBridge implements Region {
 
     for (Action action : regionAction.getActionList()) {
       Get get = action.getGet();
-      if (get != null) {
+      if (get != null && get.getRow() != null) {
         try {
           Result result = get(get);
           resultOrExceptions.add(new ResultOrException(action.getIndex(), result, null));
@@ -316,6 +318,6 @@ public class HRegionBridge implements Region {
   private NameBytesPair buildException(final Throwable t) {
     return new NameBytesPair(
         t.getClass().getName(),
-        ByteString.copyFromUtf8(StringUtils.stringifyException(t)).asReadOnlyByteBuffer());
+        ByteBuffer.wrap(Bytes.toBytes(StringUtils.stringifyException(t))));
   }
 }
