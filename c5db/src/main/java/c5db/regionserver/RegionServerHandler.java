@@ -25,6 +25,8 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutateResponse;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.tablet.Region;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main netty handler for the RegionServer functionality. Maps protocol buffer calls to an action against a HRegion
@@ -75,13 +78,16 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private void multi(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final MultiRequest request = call.getMulti();
 
+    List<RegionActionResult> regionActionResults = new ArrayList<>();
     if (request == null) {
       throw new IOException("Poorly specified multi. There is no actual get data in the RPC");
     }
-
-    final Region region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
-    region.multi(call.getMulti());
-    MultiResponse multiResponse = new MultiResponse();
+    for (RegionAction regionAction : request.getRegionActionList()) {
+      final Region region = regionServerService.getOnlineRegion(regionAction.getRegion());
+      RegionActionResult regionActionResponse = region.processRegionAction(regionAction);
+      regionActionResults.add(regionActionResponse);
+    }
+    MultiResponse multiResponse = new MultiResponse(regionActionResults);
     final Response response = new Response(Response.Command.MULTI,
         call.getCommandId(),
         null,
