@@ -61,7 +61,7 @@ public class FakeHTable implements AutoCloseable {
   private byte[] regionName;
   private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
-  private byte[] tableName;
+  public byte[] tableName;
 
   /**
    * A mock HTable Client
@@ -135,7 +135,7 @@ public class FakeHTable implements AutoCloseable {
         throw new IOException("Unable to find scanner");
       }
       return scanner.get();
-    } catch (ExecutionException | InterruptedException e){
+    } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }
   }
@@ -173,9 +173,13 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void put(List<Put> puts) throws IOException {
-    for (Put put : puts) {
-      this.put(put);
-    }
+    puts.parallelStream().forEach(put -> {
+      try {
+        this.put(put);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   public void delete(Delete delete) throws IOException {

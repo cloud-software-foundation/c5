@@ -52,4 +52,5 @@ public interface HRegionInterface {
 
   void processRowsWithLocks(RowProcessor<?, ?> processor) throws IOException;
 
+  OperationStatus[] batchMutate(Mutation[] putArray) throws IOException;
 }

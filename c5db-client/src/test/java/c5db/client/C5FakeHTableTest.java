@@ -68,8 +68,11 @@ public class C5FakeHTableTest {
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
   private final byte[] row = Bytes.toBytes("row");
+  private final byte[] cf = Bytes.toBytes("cf");
+  private final byte[] cq = Bytes.toBytes("cq");
+  private final byte[] value = Bytes.toBytes("value");
   private SingleNodeTableInterface singleNodeTableInterface;
-  private SettableFuture callFuture;
+  private SettableFuture<Response> callFuture;
   private FakeHTable hTable;
 
   @Before
@@ -262,4 +265,32 @@ public class C5FakeHTableTest {
     callFuture.set(new Response());
     hTable.mutateRow(rm);
   }
+
+  @Test
+  public void canCheckAndPut() throws IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    callFuture.set(response);
+    hTable.checkAndPut(row, cf, cq, value, new Put(row));
+  }
+
+  @Test
+  public void canCheckAndDelete() throws IOException {
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnValue(callFuture));
+      }
+    });
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    callFuture.set(response);
+    hTable.checkAndDelete(row, cf, cq, value, new Delete(row));
+  }
+
+
 }

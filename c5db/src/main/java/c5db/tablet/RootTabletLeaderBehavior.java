@@ -18,16 +18,10 @@ package c5db.tablet;
 
 import c5db.C5ServerConstants;
 import c5db.client.ProtobufUtil;
-import c5db.client.generated.Column;
 import c5db.client.generated.Condition;
-import c5db.client.generated.Filter;
-import c5db.client.generated.Get;
 import c5db.client.generated.MutationProto;
-import c5db.client.generated.NameBytesPair;
 import c5db.client.generated.RegionInfo;
-import c5db.client.generated.Result;
 import c5db.client.generated.TableName;
-import c5db.client.generated.TimeRange;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
@@ -75,7 +69,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     } else {
       // Check to see if you can take root
     }
- }
+  }
 
   boolean metaExists(Region region) {
     // TODO We should make sure the meta is well formed
@@ -89,7 +83,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private List<Long> shuffleListAndReturnMetaRegionPeers(final List<Long> peers) {
     Collections.shuffle(new ArrayList<>(peers));
-    return peers.subList(0, (int)numberOfMetaPeers);
+    return peers.subList(0, (int) numberOfMetaPeers);
   }
 
   @FiberOnly
@@ -102,6 +96,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     commandRpcRequestChannel.publish(commandRpcRequest);
 
   }
+
   private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
     Put put = new Put(C5ServerConstants.META_ROW);
     org.apache.hadoop.hbase.TableName hbaseDatabaseName = SystemTableNames.metaTableName();

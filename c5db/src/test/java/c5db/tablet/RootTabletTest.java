@@ -22,7 +22,6 @@ import c5db.C5ServerConstants;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.MutationProto;
-import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -36,12 +35,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
@@ -57,7 +54,6 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
@@ -175,7 +171,7 @@ public class RootTabletTest {
       {
         // Return 0 entries from the root table for Meta
         oneOf(region).exists(with(any(Get.class)));
-        will(returnValue( false));
+        will(returnValue(false));
 
         oneOf(server).isSingleNodeMode();
         will(returnValue(true));
@@ -193,7 +189,7 @@ public class RootTabletTest {
     stateMemoryChannel.publish(Replicator.State.LEADER);
     assertEventually(stateChangeChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
 
-    assertEventually(commandListener , hasSubmoduleWithCommand(C5ServerConstants.START_META));
+    assertEventually(commandListener, hasSubmoduleWithCommand(C5ServerConstants.START_META));
 
   }
 
@@ -210,7 +206,7 @@ public class RootTabletTest {
 
     @Override
     public boolean matches(Object o) {
-      CommandRpcRequest commandRpcRequest  = (CommandRpcRequest) o;
+      CommandRpcRequest commandRpcRequest = (CommandRpcRequest) o;
       ModuleSubCommand moduleSubCommand = (ModuleSubCommand) commandRpcRequest.message;
       return moduleSubCommand.getSubCommand().startsWith(command);
     }

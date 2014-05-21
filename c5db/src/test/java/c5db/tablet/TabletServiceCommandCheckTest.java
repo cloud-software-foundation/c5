@@ -42,7 +42,6 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -226,7 +225,8 @@ public class TabletServiceCommandCheckTest {
     tabletService.tabletRegistry.getTablets().put("hbase:meta,fake", metaTablet);
     context.checking(new Expectations() {
       {
-        oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(true));
 
         will(returnValue(replicationFuture));

@@ -49,7 +49,10 @@ import com.google.common.util.concurrent.ListenableFuture;
  */
 interface TableInterface extends AutoCloseable {
   ListenableFuture<Response> get(GetRequest get);
+
   ListenableFuture<Long> scan(ScanRequest scanRequest);
+
   ListenableFuture<Response> mutate(MutateRequest mutateRequest);
+
   ListenableFuture<Response> multiRequest(MultiRequest multiRequest);
 }

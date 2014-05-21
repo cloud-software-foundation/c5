@@ -23,10 +23,13 @@ import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A simple handler to handle inbound responses from the C5 server.
@@ -35,6 +38,7 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
   private static final ClientScannerManager CLIENT_SCANNER_MANAGER = ClientScannerManager.INSTANCE;
   private final ConcurrentHashMap<Long, SettableFuture<Response>> futures = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Long, SettableFuture<Long>> scannerFutures = new ConcurrentHashMap<>();
+  private final AtomicLong inFlightCalls = new AtomicLong(0);
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
@@ -73,6 +77,27 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
     SettableFuture<Response> settableFuture = SettableFuture.create();
     futures.put(request.getCommandId(), settableFuture);
     channel.writeAndFlush(request);
+    return settableFuture;
+  }
+
+  @Override
+  public ListenableFuture<Response> buffer(final Call request, final Channel channel) {
+    SettableFuture<Response> settableFuture = SettableFuture.create();
+    futures.put(request.getCommandId(), settableFuture);
+    // Keep track of how many outstanding requests we have and limit it.
+    ChannelFuture future = channel.write(request);
+    future.addListener(objectFuture -> inFlightCalls.decrementAndGet());
+
+    if (inFlightCalls.incrementAndGet() > C5Constants.IN_FLIGHT_CALLS) {
+      System.out.println("Backing off:" + C5Constants.IN_FLIGHT_CALLS);
+      try {
+        future.get();
+      } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+    }
+
     return settableFuture;
   }
 

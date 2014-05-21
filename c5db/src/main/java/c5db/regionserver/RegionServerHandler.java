@@ -25,19 +25,21 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutateResponse;
+import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.tablet.Region;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,8 +50,6 @@ import java.util.List;
  * and then provides a response to the caller.
  */
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
-  private static final Logger LOG = LoggerFactory.getLogger(RegionServerHandler.class);
-
   private final RegionServerService regionServerService;
   private final ScannerManager scanManager = ScannerManager.INSTANCE;
 
@@ -105,16 +105,43 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     }
 
     final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
-    boolean success = region.mutate(mutateIn.getMutation(), mutateIn.getCondition());
-    MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), success);
+    if (mutateIn.getMutation().getMutateType().equals(MutationProto.MutationType.PUT) &&
+        (mutateIn.getCondition() == null || mutateIn.getCondition().getRow() == null)) {
+      Futures.addCallback(region.batchMutate(mutateIn.getMutation()), new FutureCallback<Boolean>() {
+        @Override
+        public void onSuccess(Boolean result) {
+          MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), true);
+          final Response response = new Response(Response.Command.MUTATE,
+              call.getCommandId(),
+              null,
+              mutateResponse,
+              null,
+              null);
+          ctx.writeAndFlush(response);
 
-    final Response response = new Response(Response.Command.MUTATE,
-        call.getCommandId(),
-        null,
-        mutateResponse,
-        null,
-        null);
-    ctx.writeAndFlush(response);
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+          t.toString();
+        }
+      });
+      //TODO check success
+
+    } else {
+      boolean success = region.mutate(mutateIn.getMutation(), mutateIn.getCondition());
+
+      //TODO check success
+      MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), success);
+
+      final Response response = new Response(Response.Command.MUTATE,
+          call.getCommandId(),
+          null,
+          mutateResponse,
+          null,
+          null);
+      ctx.writeAndFlush(response);
+    }
   }
 
 
@@ -183,5 +210,12 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   @Override
   public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
     ctx.flush();
+  }
+
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+      throws Exception {
+    super.exceptionCaught(ctx, cause);
+    Log.warn(cause);
   }
 }

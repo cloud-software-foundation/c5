@@ -103,7 +103,7 @@ public class C5DatabaseTest {
 
   @Test
   public void mutateMe() {
-      context.checking(new Expectations() {
+    context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnValue(callFuture));

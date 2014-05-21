@@ -55,7 +55,6 @@ class DataHelper {
         .stream()
         .map(result -> result.getValue(cf, cq)).collect(toList());
     return values.toArray(new byte[values.size()][]);
-
   }
 
   static Boolean[] valuesExistsInDB(FakeHTable hTable, byte[][] row) throws IOException {
@@ -84,6 +83,17 @@ class DataHelper {
   static void putRowInDB(FakeHTable hTable, byte[] row) throws IOException {
     Put put = new Put(row);
     put.add(cf, cq, MiniClusterBase.value);
+    hTable.put(put);
+  }
+
+  static void deleteRowFamilyInDB(FakeHTable hTable, byte[] row) throws IOException {
+    Delete delete = new Delete(row);
+    delete.deleteFamily(cf);
+    hTable.delete(delete);
+  }
+
+  static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
+    Put put = new Put(row).add(cf, cq, new byte[1024 * 1024 * 64]);
     hTable.put(put);
   }
 

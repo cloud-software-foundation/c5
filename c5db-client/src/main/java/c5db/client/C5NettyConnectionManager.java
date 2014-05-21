@@ -18,8 +18,10 @@ package c5db.client;
 
 import c5db.client.codec.WebsocketProtostuffEncoder;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -43,12 +45,13 @@ import java.util.concurrent.TimeoutException;
 public class C5NettyConnectionManager implements C5ConnectionManager {
   private final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
   private final Bootstrap bootstrap = new Bootstrap();
+
   private final EventLoopGroup group = new NioEventLoopGroup();
   private URI uri;
 
   public C5NettyConnectionManager() {
     bootstrap.group(group);
-
+    bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
     try {
       uri = new URI("ws://0.0.0.0:8080/websocket");

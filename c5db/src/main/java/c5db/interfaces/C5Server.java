@@ -31,6 +31,7 @@ import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -104,7 +105,7 @@ public interface C5Server extends Service {
 
   public Channel<ModuleStateChange> getModuleStateChangeChannel();
 
-  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException;
+  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException, TimeoutException;
 
   public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
 

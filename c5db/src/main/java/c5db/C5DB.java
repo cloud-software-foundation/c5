@@ -44,6 +44,7 @@ import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.protostuff.Message;
 import org.jetlang.channels.Channel;
@@ -63,7 +64,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -85,10 +89,11 @@ public class C5DB extends AbstractService implements C5Server {
 
   private Fiber serverFiber;
   private PoolFiberFactory fiberPool;
-  private NioEventLoopGroup bossGroup;
-  private NioEventLoopGroup workerGroup;
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workerGroup;
 
   private final Map<ModuleType, C5Module> allModules = new HashMap<>();
+  private ExecutorService executor;
 
 
   public C5DB(ConfigDirectory configDirectory) throws IOException {
@@ -158,10 +163,10 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException {
+  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException, TimeoutException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
     serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
-    return future.get();
+    return future.get(1, TimeUnit.SECONDS);
   }
 
   @Override
@@ -201,7 +206,7 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public int getMinQuorumSize(){
+  public int getMinQuorumSize() {
     return this.minQuorumSize;
   }
 
@@ -233,9 +238,11 @@ public class C5DB extends AbstractService implements C5Server {
 
     try {
       serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
-      fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-      bossGroup = new NioEventLoopGroup(1);
-      workerGroup = new NioEventLoopGroup();
+      int processors = Runtime.getRuntime().availableProcessors();
+      executor = Executors.newFixedThreadPool(processors);
+      fiberPool = new PoolFiberFactory(executor);
+      bossGroup = new NioEventLoopGroup(processors / 3);
+      workerGroup = new NioEventLoopGroup(processors / 3);
 
       commandChannel.subscribe(serverFiber, message -> {
         try {

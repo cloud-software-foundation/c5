@@ -82,7 +82,7 @@ public class Main {
     if (hasControlRpcPropertyPortSet()) {
       controlRpcServerPort = getControlRpcPropertyPortSet();
     } else {
-      controlRpcServerPort= C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
+      controlRpcServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
     }
 
     C5Server instance = new C5DB(cfgDir);
