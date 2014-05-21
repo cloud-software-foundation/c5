@@ -27,15 +27,21 @@ import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Result;
 import c5db.client.generated.ResultOrException;
 import c5db.regionserver.ReverseProtobufUtil;
-import com.google.protobuf.ByteString;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.hbase.client.Mutation;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegionInterface;
 import org.apache.hadoop.hbase.regionserver.MultiRowMutationProcessor;
+import org.apache.hadoop.hbase.regionserver.OperationStatus;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.StringUtils;
+import org.jetlang.channels.MemoryChannel;
+import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +51,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
@@ -54,36 +66,103 @@ import java.util.List;
  */
 public class HRegionBridge implements Region {
   private static final Logger LOG = LoggerFactory.getLogger(HRegionBridge.class);
-
+  LinkedTransferQueue<Map.Entry<SettableFuture<Boolean>, MutationProto>> batchExecutor = new LinkedTransferQueue<>();
   private HRegionInterface theRegion;
+  int processors = Runtime.getRuntime().availableProcessors();
+  PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(processors * 2));
+  Fiber batcher = poolFiberFactory.create();
+  MemoryChannel<Map.Entry<SettableFuture<Boolean>, MutationProto>> memoryChannel = new MemoryChannel<>();
 
   public HRegionBridge(final HRegionInterface theRegion) {
     this.theRegion = theRegion;
+    batcher.start();
+    batcher.scheduleAtFixedRate(() -> {
+      long begin = System.currentTimeMillis();
+      if (batchExecutor.size() == 0) {
+        return;
+      }
+      ArrayList<Map.Entry<SettableFuture<Boolean>, MutationProto>> arrayList = new ArrayList<>(10000);
+      batchExecutor.drainTo(arrayList, 10000);
+      batchMutateHelper(arrayList);
+      long time = System.currentTimeMillis() - begin;
+      if (time > 100) {
+        LOG.error("batchMutate took longer than 100ms:" + time + " ms");
+      }
+    }, 0l, 1l, TimeUnit.MILLISECONDS);
+
+  }
+
+
+  private void batchMutateHelper(List<Map.Entry<SettableFuture<Boolean>, MutationProto>> message) {
+
+    List<Put> puts = message.parallelStream()
+        .map(entry -> {
+          try {
+            return ReverseProtobufUtil.toPut(entry.getValue());
+          } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+          }
+        })
+        .collect(Collectors.toList());
+
+    OperationStatus[] mutationResult = null;
+    try {
+      mutationResult = theRegion.batchMutate(puts.toArray(new Mutation[puts.size()]));
+    } catch (IOException e) {
+      crash(e);
+    }
+
+    Arrays.stream(mutationResult).parallel().forEach(operationStatus -> {
+      switch (operationStatus.getOperationStatusCode()) {
+        case SUCCESS:
+          break;
+        default:
+          crash("error! writing", operationStatus);
+          break;
+      }
+    });
+
+    message.parallelStream().forEach(f -> f.getKey().set(true));
+  }
+
+  private void crash(String s, OperationStatus operationStatus) {
+    LOG.error(s, operationStatus);
+    System.exit(0);
+  }
+
+  private void crash(Throwable t) {
+    LOG.error("crashing due to exception", t);
+    System.exit(0);
   }
 
   @Override
-  public boolean mutate(MutationProto mutation, Condition condition) throws IOException {
-    final MutationProto.MutationType type = mutation.getMutateType();
-    boolean success;
+  public ListenableFuture<Boolean> batchMutate(MutationProto mutateProto) throws IOException {
+    SettableFuture<Boolean> future = SettableFuture.create();
+    batchExecutor.put(new TreeMap.SimpleEntry<>(future, mutateProto));
+    return future;
+  }
+
+
+  @Override
+  public boolean mutate(MutationProto mutateProto, Condition condition) throws IOException {
+    final MutationProto.MutationType type = mutateProto.getMutateType();
     switch (type) {
       case PUT:
         if (condition == null || condition.getRow() == null) {
-          success = simplePut(mutation);
+          return simplePut(mutateProto);
         } else {
-          success = checkAndPut(mutation, condition);
+          return checkAndPut(mutateProto, condition);
         }
-        break;
       case DELETE:
         if (condition == null || condition.getRow() == null) {
-          success = simpleDelete(mutation);
+          return simpleDelete(mutateProto);
         } else {
-          success = checkAndDelete(mutation, condition);
+          return checkAndDelete(mutateProto, condition);
         }
-        break;
       default:
         throw new IOException("mutate supports atomic put and/or delete, not " + type.name());
     }
-    return success;
   }
 
   private boolean checkAndPut(MutationProto mutation, Condition condition) throws IOException {

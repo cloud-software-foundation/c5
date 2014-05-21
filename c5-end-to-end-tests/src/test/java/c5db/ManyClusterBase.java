@@ -50,8 +50,6 @@ import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -76,7 +74,7 @@ public class ManyClusterBase {
   private int userTabletOn;
 
   @AfterClass()
-  public static void afterClass() throws ExecutionException, InterruptedException {
+  public static void afterClass() throws ExecutionException, InterruptedException, TimeoutException {
 
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {

@@ -100,7 +100,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     fiber.execute(() -> {
       ListenableFuture<C5Module> future = server.getModule(ModuleType.Discovery);
       C5Futures.addCallback(future, module -> {
-        discoveryModule = (DiscoveryModule)module;
+        discoveryModule = (DiscoveryModule) module;
 
         discoveryModule.getNewNodeNotifications().subscribe(fiber, this::newNodeVisible);
       }, this::handleThrowable, fiber);
@@ -108,7 +108,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
     fiber.execute(() -> {
       ListenableFuture<C5Module> future = server.getModule(ModuleType.Tablet);
       C5Futures.addCallback(future, module -> {
-        tabletModule = (TabletModule)module;
+        tabletModule = (TabletModule) module;
 
         tabletModule.getTabletStateChanges().subscribe(fiber, this::tabletStateChanges);
       }, this::handleThrowable, fiber);
@@ -142,7 +142,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
       resources.setBaseResource(Resource.newResource(webResourcesUrl));
 
       HandlerList topHandlerList = new HandlerList();
-      topHandlerList.setHandlers(new Handler[] {
+      topHandlerList.setHandlers(new Handler[]{
           servletContexts,
           resources
       });

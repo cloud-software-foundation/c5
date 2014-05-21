@@ -311,7 +311,7 @@ public class OLogShim implements Syncable, HLog {
 
     @Override
     public long groupCommitDelay() {
-      return 50;
+      return 10;
     }
   }
 

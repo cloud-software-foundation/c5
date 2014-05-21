@@ -271,6 +271,8 @@ public class RegionServerTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
 
+    SettableFuture<Boolean> mutateSuccess = SettableFuture.create();
+
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
@@ -278,14 +280,18 @@ public class RegionServerTest {
       oneOf(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
-      will(returnValue(true));
-
-      oneOf(ctx).writeAndFlush(with(any(Response.class)));
-
+      oneOf(region).batchMutate(with(any(MutationProto.class)));
+      will(returnValue(mutateSuccess));
     }});
-
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+
+    context.checking(new Expectations() {
+      {
+        allowing(ctx).writeAndFlush(with(any(Response.class)));
+      }
+    });
+    mutateSuccess.set(true);
+
   }
 
   @Test

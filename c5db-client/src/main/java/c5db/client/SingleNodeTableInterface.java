@@ -24,15 +24,17 @@ import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
-import org.apache.hadoop.hbase.HRegionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static c5db.client.generated.Call.Command.GET;
+import static c5db.client.generated.Call.Command.MULTI;
+import static c5db.client.generated.Call.Command.MUTATE;
+import static c5db.client.generated.Call.Command.SCAN;
 
 
 /**
@@ -41,11 +43,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SingleNodeTableInterface implements TableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(SingleNodeTableInterface.class);
   private final AtomicLong commandId = new AtomicLong(0);
-  private final Map<String, HRegionInfo> scannerCache = new HashMap<>();
   private final C5ConnectionManager c5ConnectionManager;
-  private Channel channel;
+  public Channel channel;
   private MessageHandler handler;
-  private byte[] tableName;
 
   /**
    * C5Table is the main entry points for clients of C5DB
@@ -62,37 +62,26 @@ public class SingleNodeTableInterface implements TableInterface {
     this.c5ConnectionManager = c5ConnectionManager;
     this.channel = c5ConnectionManager.getOrCreateChannel(hostname, port);
     this.handler = channel.pipeline().get(FutureBasedMessageHandler.class);
-
   }
 
   @Override
   public ListenableFuture<Response> get(final GetRequest get) {
-    return handler.call(new Call(Call.Command.GET,
-            commandId.incrementAndGet(),
-            get,
-            null,
-            null,
-            null),
-        channel
-    );
+    return handler.call(new Call(GET, commandId.incrementAndGet(), get, null, null, null), channel);
   }
 
   @Override
   public ListenableFuture<Long> scan(ScanRequest scanRequest) {
-    return handler.callScan(new Call(Call.Command.SCAN, commandId.incrementAndGet(), null, null, scanRequest, null),
-        channel);
+    return handler.callScan(new Call(SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
   }
 
   @Override
   public ListenableFuture<Response> mutate(MutateRequest mutateRequest) {
-    return handler.call(new Call(Call.Command.MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null),
-        channel);
+    return handler.call(new Call(MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
   }
 
   @Override
   public ListenableFuture<Response> multiRequest(MultiRequest multiRequest) {
-    return handler.call(new Call(Call.Command.MULTI, commandId.incrementAndGet(), null, null, null, multiRequest),
-        channel);
+    return handler.call(new Call(MULTI, commandId.incrementAndGet(), null, null, null, multiRequest), channel);
   }
 
   @Override
@@ -101,7 +90,16 @@ public class SingleNodeTableInterface implements TableInterface {
       c5ConnectionManager.close();
     } catch (InterruptedException e) {
       LOG.error("Unable to close, interrupted");
+      e.printStackTrace();
+      System.exit(1);
     }
   }
 
+  public ListenableFuture<Response> bufferMutate(MutateRequest mutateRequest) {
+    return handler.buffer(new Call(MUTATE, commandId.incrementAndGet(), null, mutateRequest, null, null), channel);
+  }
+
+  public void flushHandler() {
+    channel.flush();
+  }
 }

@@ -35,8 +35,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -62,8 +62,8 @@ public class ControlService extends AbstractService implements ControlModule {
 
   private final C5Server server;
   private final Fiber serviceFiber;
-  private final NioEventLoopGroup acceptConnectionGroup;
-  private final NioEventLoopGroup ioWorkerGroup;
+  private final EventLoopGroup acceptConnectionGroup;
+  private final EventLoopGroup ioWorkerGroup;
   private final int modulePort;
 
   private DiscoveryModule discoveryModule;
@@ -71,8 +71,8 @@ public class ControlService extends AbstractService implements ControlModule {
 
   public ControlService(C5Server server,
                         Fiber serviceFiber,
-                        NioEventLoopGroup acceptConnectionGroup,
-                        NioEventLoopGroup ioWorkerGroup,
+                        EventLoopGroup acceptConnectionGroup,
+                        EventLoopGroup ioWorkerGroup,
                         int modulePort) {
     this.server = server;
     this.serviceFiber = serviceFiber;
@@ -174,13 +174,14 @@ public class ControlService extends AbstractService implements ControlModule {
         module -> {
           discoveryModule = (DiscoveryModule) module;
           startHttpRpc();
-        }, this::notifyFailed, serviceFiber));
+        }, this::notifyFailed, serviceFiber
+    ));
   }
 
   private void startHttpRpc() {
     try {
       ServerBootstrap serverBootstrap = new ServerBootstrap();
-      serverBootstrap.group(acceptConnectionGroup, ioWorkerGroup)
+      ServerBootstrap serverBootstrap1 = serverBootstrap.group(acceptConnectionGroup, ioWorkerGroup)
           .channel(NioServerSocketChannel.class)
           .option(ChannelOption.SO_REUSEADDR, true)
           .option(ChannelOption.SO_BACKLOG, 100)

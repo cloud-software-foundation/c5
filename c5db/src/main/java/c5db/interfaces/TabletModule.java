@@ -21,8 +21,6 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
-import c5db.tablet.Region;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.jetlang.channels.Channel;
 
 import java.util.Collection;

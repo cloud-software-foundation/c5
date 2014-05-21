@@ -28,8 +28,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
@@ -44,10 +44,10 @@ import java.net.InetSocketAddress;
  * It doesn't do any timeouts, or anything of such a nature.
  */
 public class SimpleControlClient {
-  private final NioEventLoopGroup ioWorkerGroup;
+  private final EventLoopGroup ioWorkerGroup;
   private final Bootstrap client = new Bootstrap();
 
-  public SimpleControlClient(NioEventLoopGroup ioWorkerGroup) {
+  public SimpleControlClient(EventLoopGroup ioWorkerGroup) {
 
     this.ioWorkerGroup = ioWorkerGroup;
 

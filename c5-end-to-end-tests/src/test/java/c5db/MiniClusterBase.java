@@ -25,6 +25,7 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
@@ -46,6 +47,7 @@ import org.mortbay.log.Log;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
@@ -67,9 +69,22 @@ public class MiniClusterBase {
   }
 
   @AfterClass
-  public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module : server.getModules().values()) {
-      module.stopAndWait();
+  public static void afterClass() {
+    ImmutableMap<ModuleType, C5Module> modules = null;
+    try {
+      modules = server.getModules();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (TimeoutException e) {
+      e.printStackTrace();
+    }
+
+    if (modules != null) {
+      for (C5Module module : modules.values()) {
+        module.stopAndWait();
+      }
     }
     Service.State state = server.stopAndWait();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
@@ -85,7 +100,7 @@ public class MiniClusterBase {
 
     server = Main.startC5Server(new String[]{});
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
+    TabletModule tabletServer = (TabletModule) tabletServerFuture.get(1, TimeUnit.SECONDS);
     stateChanges = tabletServer.getTabletStateChanges();
 
     Fiber receiver = new ThreadFiber();

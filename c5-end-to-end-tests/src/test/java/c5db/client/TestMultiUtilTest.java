@@ -17,7 +17,6 @@
 package c5db.client;
 
 import c5db.MiniClusterBase;
-import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
@@ -26,8 +25,6 @@ import org.hamcrest.core.IsNull;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static c5db.testing.BytesMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -57,10 +54,10 @@ public class TestMultiUtilTest extends MiniClusterBase {
   @Test
   public void testMultiDelete() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);
-    List<Delete> deletes = new ArrayList<>();
-    deletes.add(new Delete(row1));
-    deletes.add(new Delete(row2));
-    table.delete(deletes);
+    assertThat(DataHelper.valueReadFromDB(table, row1), is(equalTo(value)));
+    assertThat(DataHelper.valueReadFromDB(table, row2), is(equalTo(value)));
+    DataHelper.deleteRowFamilyInDB(table, row1);
+    DataHelper.deleteRowFamilyInDB(table, row2);
     assertThat(DataHelper.valueReadFromDB(table, row1), is(not(equalTo(value))));
     assertThat(DataHelper.valueReadFromDB(table, row2), is(not(equalTo(value))));
   }
@@ -73,16 +70,12 @@ public class TestMultiUtilTest extends MiniClusterBase {
     byte[] cq = Bytes.toBytes("cq");
 
     rowMutations.add(new Put(row1).add(cf, cq, value));
-    rowMutations.add(new Put(row1).add(cf, Bytes.add(cq,cq), value));
+    rowMutations.add(new Put(row1).add(cf, Bytes.add(cq, cq), value));
 
     table.mutateRow(rowMutations);
 
     assertThat(DataHelper.valueReadFromDB(table, row1), is(equalTo(value)));
-    rowMutations = new RowMutations(row1);
-    rowMutations.add(new Delete(row1).deleteFamily(cf));
-    table.mutateRow(rowMutations);
-
+    DataHelper.deleteRowFamilyInDB(table, row1);
     assertThat(DataHelper.valueReadFromDB(table, row1), IsNull.nullValue());
-
   }
 }

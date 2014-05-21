@@ -37,11 +37,12 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Handles the base page display
  */
-@WebServlet(urlPatterns = { "/" })
+@WebServlet(urlPatterns = {"/"})
 public class StatusServlet extends HttpServlet {
   private WebAdminService service;
 
@@ -68,7 +69,7 @@ public class StatusServlet extends HttpServlet {
       template.execute(writer, templateContext);
       writer.flush();
 
-    } catch (ExecutionException |InterruptedException e) {
+    } catch (ExecutionException | InterruptedException | TimeoutException e) {
       throw new IOException("Getting status", e);
     }
   }
