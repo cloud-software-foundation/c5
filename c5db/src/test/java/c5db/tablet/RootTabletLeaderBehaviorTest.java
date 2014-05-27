@@ -25,6 +25,7 @@ import c5db.client.generated.MutationProto;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
+import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import io.protostuff.Message;
 import org.jetlang.channels.MemoryChannel;
 import org.jmock.Expectations;

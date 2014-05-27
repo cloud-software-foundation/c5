@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.tablet;
+package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
 import c5db.client.ProtobufUtil;
@@ -27,6 +27,8 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.Region;
+import c5db.tablet.SystemTableNames;
 import c5db.util.FiberOnly;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
