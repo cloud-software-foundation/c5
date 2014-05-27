@@ -28,6 +28,7 @@ import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Scan;
+import c5db.tablet.hregionbridge.HRegionBridge;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;

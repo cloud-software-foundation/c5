@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.tablet;
+package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
 import c5db.interfaces.C5Module;

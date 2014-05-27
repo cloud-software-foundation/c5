@@ -20,6 +20,7 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
+import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
 import com.google.common.util.concurrent.SettableFuture;
 import org.jetlang.channels.Request;
 import org.jmock.Expectations;

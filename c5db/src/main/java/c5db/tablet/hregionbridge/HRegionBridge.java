@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.tablet;
+package c5db.tablet.hregionbridge;
 
 import c5db.client.generated.Action;
 import c5db.client.generated.Condition;
@@ -27,6 +27,7 @@ import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Result;
 import c5db.client.generated.ResultOrException;
 import c5db.regionserver.ReverseProtobufUtil;
+import c5db.tablet.Region;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.hbase.client.Mutation;
