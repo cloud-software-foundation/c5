@@ -36,6 +36,7 @@ import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +54,12 @@ public class OLogShim implements Syncable, HLog {
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final UUID uuid;
   private final Replicator replicatorInstance;
+  private final Fiber fiber;
 
-  public OLogShim(Replicator replicatorInstance) {
+  public OLogShim(Replicator replicatorInstance, Fiber fiber) {
     this.uuid = UUID.randomUUID();
     this.replicatorInstance = replicatorInstance;
+    this.fiber = fiber;
     String tabletId = replicatorInstance.getQuorumId();
   }
 
