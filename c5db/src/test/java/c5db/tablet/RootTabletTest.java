@@ -130,6 +130,9 @@ public class RootTabletTest {
         allowing(replicator).getEventChannel();
         will(returnValue(new MemoryChannel<>()));
 
+        allowing(replicator).getCommitNoticeChannel();
+
+        allowing(replicator).getId();
       }
     });
   }

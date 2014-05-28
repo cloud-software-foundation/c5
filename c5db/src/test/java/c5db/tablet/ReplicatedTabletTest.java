@@ -145,6 +145,9 @@ public class ReplicatedTabletTest {
       allowing(replicator).getEventChannel();
       will(returnValue(replicatorEventChannel));
 
+      allowing(replicator).getCommitNoticeChannel();
+
+      allowing(replicator).getId();
     }});
   }
 
