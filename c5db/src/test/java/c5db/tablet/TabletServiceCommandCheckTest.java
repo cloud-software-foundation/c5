@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
@@ -187,7 +188,7 @@ public class TabletServiceCommandCheckTest {
     ListenableFuture<Service.State> future = tabletService.start();
     future.get();
     Channel channel = new MemoryChannel();
-    Channel stateChangeChannel = new MemoryChannel();
+    Channel eventMemoryChannel = new MemoryChannel();
     context.checking(new Expectations() {
       {
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
@@ -196,8 +197,8 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(channel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventMemoryChannel));
 
         allowing(replicator).getCommitNoticeChannel();
 
@@ -238,8 +239,8 @@ public class TabletServiceCommandCheckTest {
         allowing(replicator).getStateChannel();
         will(returnValue(channel));
 
-        allowing(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        allowing(replicator).getEventChannel();
+        will(returnValue(eventMemoryChannel));
 
         allowing(replicator).start();
         allowing(replicator).getQuorumId();
@@ -303,7 +304,7 @@ public class TabletServiceCommandCheckTest {
     SettableFuture<Replicator> replicationFuture = SettableFuture.create();
 
     Channel channel = new MemoryChannel();
-    Channel stateChangeChannel = new MemoryChannel();
+    Channel eventMemoryChannel = new MemoryChannel();
 
     context.checking(new Expectations() {{
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
@@ -312,8 +313,8 @@ public class TabletServiceCommandCheckTest {
       allowing(replicator).getStateChannel();
       will(returnValue(channel));
 
-      allowing(replicator).getStateChangeChannel();
-      will(returnValue(stateChangeChannel));
+      allowing(replicator).getEventChannel();
+      will(returnValue(eventMemoryChannel));
 
       allowing(replicator).getCommitNoticeChannel();
 
