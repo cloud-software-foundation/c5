@@ -75,7 +75,7 @@ public interface Replicator {
     LEADER,
   }
 
-  public Channel<ReplicatorInstanceEvent> getStateChangeChannel();
+  public Channel<ReplicatorInstanceEvent> getEventChannel();
 
   /**
    * Get the Replicator's commit notice channel. By matching these issued IndexCommitNotices

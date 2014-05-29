@@ -127,7 +127,7 @@ public class RootTabletTest {
         allowing(replicator).getStateChannel();
         will(returnValue(stateMemoryChannel));
 
-        allowing(replicator).getStateChangeChannel();
+        allowing(replicator).getEventChannel();
         will(returnValue(new MemoryChannel<>()));
 
         allowing(replicator).getCommitNoticeChannel();
