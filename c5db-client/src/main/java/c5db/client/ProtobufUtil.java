@@ -139,8 +139,10 @@ public class ProtobufUtil {
       Map<byte[], NavigableSet<byte[]>> families = get.getFamilyMap();
       for (Map.Entry<byte[], NavigableSet<byte[]>> family : families.entrySet()) {
         List<ByteBuffer> qualifiers = new ArrayList<>();
-        for (byte[] qualifier : family.getValue()) {
-          qualifiers.add(ByteBuffer.wrap(qualifier));
+        if (family.getValue() != null) {
+          for (byte[] qualifier : family.getValue()) {
+            qualifiers.add(ByteBuffer.wrap(qualifier));
+          }
         }
 
         Column column = new Column(ByteBuffer.wrap(family.getKey()), qualifiers);
