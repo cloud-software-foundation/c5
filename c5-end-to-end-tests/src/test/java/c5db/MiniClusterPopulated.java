@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class MiniClusterPopulated extends MiniClusterBase {
 
-  public int NUMBER_OF_ROWS = 101;
+  public int NUMBER_OF_ROWS = 1024;
   @Before
   public void initTable() throws IOException {
     for (int i =0;i != NUMBER_OF_ROWS;i++){

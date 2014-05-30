@@ -61,4 +61,5 @@ public class C5ServerConstants {
   public static final byte[] META_START_KEY = {0x00};
   public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   public static final int MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG = 100000;
+
 }
