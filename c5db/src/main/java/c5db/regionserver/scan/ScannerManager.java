@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.regionserver;
+package c5db.regionserver.scan;
 
 import org.jetlang.channels.Channel;
 
