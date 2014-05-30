@@ -18,6 +18,7 @@
 package c5db.regionserver.scan;
 
 
+import c5db.C5ServerConstants;
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
@@ -69,7 +70,7 @@ public class ScanRunnable implements Callback<Integer> {
     List<Integer> cellsPerResult = new ArrayList<>();
     ByteBuffer previousRow = null;
     while (!this.close && numberOfMsgsLeft > 0) {
-      int rowsToSend = 0;
+      int rowBufferedToSend = 0;
       boolean moreResults;
       do {
         List<Cell> rawCells = new ArrayList<>();
@@ -77,7 +78,8 @@ public class ScanRunnable implements Callback<Integer> {
         try {
           // Arguably you should only return numberOfMessages, but I figure it can't hurt that
           // much to pass them up
-          moreResults = scanner.nextRaw(rawCells);
+          int messagesForPath = numberOfMessagesToSend > 10 ? 10 : numberOfMessagesToSend;
+          moreResults = scanner.nextRaw(rawCells, messagesForPath);
           if (!moreResults) {
             this.scanner.close();
             this.close = true;
@@ -105,13 +107,13 @@ public class ScanRunnable implements Callback<Integer> {
           cellsPerResult.add(cells.size());
           scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
         }
-        rowsToSend++;
+        rowBufferedToSend += rawCells.size();
         // Our super advanced scanning algorithm. Could be greatly improved
-      } while (moreResults && rowsToSend < 100 && numberOfMessagesToSend - rowsToSend > 0);
+      } while (moreResults && rowBufferedToSend < 100 && numberOfMessagesToSend - rowBufferedToSend > 0);
       ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
       Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
       ctx.writeAndFlush(response);
-      numberOfMsgsLeft -= rowsToSend;
+      numberOfMsgsLeft -= rowBufferedToSend;
     }
   }
 
