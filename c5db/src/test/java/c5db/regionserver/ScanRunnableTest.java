@@ -32,6 +32,7 @@ import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import c5db.regionserver.scan.ScanRunnable;
 
 import java.io.IOException;
 import java.util.ArrayList;

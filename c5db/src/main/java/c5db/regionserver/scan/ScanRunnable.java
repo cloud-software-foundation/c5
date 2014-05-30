@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.regionserver;
+package c5db.regionserver.scan;
 
 
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
 import c5db.client.generated.ScanResponse;
+import c5db.regionserver.ReverseProtobufUtil;
 import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;

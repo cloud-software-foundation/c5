@@ -39,7 +39,9 @@ import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
-import org.mortbay.log.Log;
+
+import c5db.regionserver.scan.ScanRunnable;
+import c5db.regionserver.scan.ScannerManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -149,7 +151,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       RegionNotFoundException {
     final ScanRequest scanIn = call.getScan();
     if (scanIn == null) {
-      throw new IOException("Poorly specified scan. There is no actual get data in the RPC");
+      throw new IOException("Poorly specified c5db.regionserver.scan. There is no actual get data in the RPC");
     }
 
     final long scannerId;
@@ -216,6 +218,6 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
       throws Exception {
     super.exceptionCaught(ctx, cause);
-    Log.warn(cause);
+
   }
 }
