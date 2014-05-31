@@ -94,7 +94,7 @@ public class ReverseProtobufUtil {
   }
 
   public static c5db.client.generated.Cell toCell(final Cell kv) {
-    ByteBuffer row = ByteBuffer.wrap(kv.getFamilyArray(), kv.getRowOffset(), kv.getRowLength());
+    ByteBuffer row = ByteBuffer.wrap(kv.getRowArray(), kv.getRowOffset(), kv.getRowLength());
     ByteBuffer family = ByteBuffer.wrap(kv.getFamilyArray(), kv.getFamilyOffset(), kv.getFamilyLength());
     ByteBuffer qualifier = ByteBuffer.wrap(kv.getQualifierArray(), kv.getQualifierOffset(), kv.getQualifierLength());
     long timestamp = kv.getTimestamp();
