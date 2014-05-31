@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class MiniClusterPopulated extends MiniClusterBase {
 
-  public int NUMBER_OF_ROWS = 10240;
+  public int NUMBER_OF_ROWS = 1024 * 100 ;
 
   @Before
   public void initTable() throws IOException {
@@ -32,6 +32,9 @@ public class MiniClusterPopulated extends MiniClusterBase {
       Put put = new Put(Bytes.toBytes(i));
       put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
       this.table.put(put);
+      if (i % 1024 == 0){
+        System.out.print("#");
+      }
     }
   }
 }
