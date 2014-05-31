@@ -16,6 +16,8 @@
  */
 package c5db.client;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A class to abstract all of the magic numbers for our client
  */
@@ -28,6 +30,7 @@ public final class C5Constants {
   public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
   public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
   public static final int IN_FLIGHT_CALLS = 100000;
+  public static final long CREATE_SCANNER_TIMEOUT = 1000;
 
   private C5Constants() {
     throw new UnsupportedOperationException();

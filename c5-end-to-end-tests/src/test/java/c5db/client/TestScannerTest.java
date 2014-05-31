@@ -20,6 +20,7 @@ import c5db.MiniClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,7 +28,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
+
 
 public class TestScannerTest extends MiniClusterPopulated {
 
@@ -36,15 +39,20 @@ public class TestScannerTest extends MiniClusterPopulated {
     int i = 0;
     Result result;
 
-    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
+    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{}));
+    int previous_row = -1;
+
     do {
       result = scanner.next();
-      if (result != null){
+      if (result != null) {
+        int rowInt = Bytes.toInt(result.getRow());
+        assertThat(rowInt, greaterThan(previous_row));
+        System.out.print(rowInt + ",");
+        previous_row = rowInt;
         i++;
       }
     } while (result != null);
     scanner.close();
     assertThat(i, is(this.NUMBER_OF_ROWS));
-
   }
 }

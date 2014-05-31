@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 
@@ -129,14 +130,21 @@ public class FakeHTable implements AutoCloseable {
         0L);
     ListenableFuture<ClientScanner> scanner;
     try {
-      Long scanResult = c5AsyncDatabase.scan(scanRequest).get();
+      ListenableFuture<Long> scanResultFuture = c5AsyncDatabase.scan(scanRequest);
+      long scanResult = scanResultFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
       scanner = clientScannerManager.get(scanResult);
-      if (scanner == null) {
-        throw new IOException("Unable to find scanner");
-      }
-      return scanner.get();
-    } catch (ExecutionException | InterruptedException e) {
+    } catch (ExecutionException | TimeoutException | InterruptedException e) {
       throw new IOException(e);
+    }
+
+    if (scanner == null) {
+      throw new IOException("The scanner disappeared from the clientScannerManager");
+    }
+
+    try {
+      return scanner.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new IOException("The scanner disappeared from the clientScannerManager");
     }
   }
 

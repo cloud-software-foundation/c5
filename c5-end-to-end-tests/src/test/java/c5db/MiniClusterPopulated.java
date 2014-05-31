@@ -24,15 +24,14 @@ import java.io.IOException;
 
 public class MiniClusterPopulated extends MiniClusterBase {
 
-  public int NUMBER_OF_ROWS = 1024;
+  public int NUMBER_OF_ROWS = 10240;
+
   @Before
   public void initTable() throws IOException {
-    for (int i =0;i != NUMBER_OF_ROWS;i++){
+    for (int i = 0; i != NUMBER_OF_ROWS; i++) {
       Put put = new Put(Bytes.toBytes(i));
       put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
       this.table.put(put);
     }
-
-
   }
 }
