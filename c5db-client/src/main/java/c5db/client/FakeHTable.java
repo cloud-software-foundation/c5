@@ -73,6 +73,8 @@ public class FakeHTable implements AutoCloseable {
   AtomicLong outstandingMutations = new AtomicLong(0);
   ExecutorService executor = Executors.newSingleThreadExecutor();
   List<Throwable> throwablesToThrow = new ArrayList<>();
+  private boolean autoFlush = false;
+  private boolean clearBufferOnFail = false;
 
   /**
    * A mock HTable Client
@@ -180,14 +182,36 @@ public class FakeHTable implements AutoCloseable {
     return results.toArray(new Boolean[results.size()]);
   }
 
+  public void flushCommits() throws IOException {
+    try {
+      executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
+  public void setAutoFlush(boolean autoFlush) {
+    this.clearBufferOnFail = true;
+    this.autoFlush = autoFlush;
+  }
+
+  public boolean isAutoFlush() {
+    return this.autoFlush;
+  }
+
+  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
+    setAutoFlush(autoFlush);
+    this.clearBufferOnFail = clearBufferOnFail;
+  }
+
+  public void setAutoFlushTo(boolean autoFlush) {
+    this.autoFlush = autoFlush;
+  }
+
   public void put(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    while (outstandingMutations.get() > NUMBER_OF_SIMUL_MUTATIONS) {
-      try {
-        executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
-      } catch (InterruptedException e) {
-        throw new IOException(e);
-      }
+    while (this.autoFlush && outstandingMutations.get() > NUMBER_OF_SIMUL_MUTATIONS) {
+      flushCommits();
     }
     ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
     outstandingMutations.incrementAndGet();
@@ -196,12 +220,14 @@ public class FakeHTable implements AutoCloseable {
       public void onSuccess(Response result) {
         outstandingMutations.decrementAndGet();
         if (!result.getMutate().getProcessed()) {
+          executor.shutdownNow();
           throwablesToThrow.add(new IOException("Mutation not processed:" + result));
         }
       }
 
       @Override
       public void onFailure(Throwable t) {
+        executor.shutdownNow();
         throwablesToThrow.add(t);
       }
     }, executor);
@@ -291,6 +317,11 @@ public class FakeHTable implements AutoCloseable {
 
   @Override
   public void close() {
+    try {
+      flushCommits();
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+    }
     if (throwablesToThrow.size() > 0) {
       LOG.error("Unable to close properly, we have exceptions");
       throwablesToThrow.parallelStream().forEach(throwable -> LOG.error(throwable.getMessage()));
