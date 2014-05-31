@@ -109,7 +109,7 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        oneOf(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
         will(addElements(keyValue));
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
@@ -132,7 +132,7 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        exactly(3).of(regionScanner).nextRaw(with(any(List.class)));
+        oneOf(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
         will(addElements(kvs.toArray()));
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }

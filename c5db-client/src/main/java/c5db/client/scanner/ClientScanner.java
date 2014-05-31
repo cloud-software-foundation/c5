@@ -93,7 +93,7 @@ public class ClientScanner extends AbstractClientScanner {
         // If we have plenty of room for another request
         if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
             // And we have less than two requests worth in the queue
-            && 2 * this.outStandingRequests < requestSize) {
+            && 3 * this.outStandingRequests < requestSize) {
           getMoreRows();
         }
       }
@@ -138,10 +138,8 @@ public class ClientScanner extends AbstractClientScanner {
     for (c5db.client.generated.Result result : response.getResultsList()) {
       scanResults.add(result);
       for (Cell cell: result.getCellList()){
-        System.out.print("!" + Bytes.toInt(cell.getRow().array()) +"@");
-
+        this.outStandingRequests--;
       }
-      this.outStandingRequests--;
     }
     if (!this.isClosed && !response.getMoreResults()) {
       this.close();
