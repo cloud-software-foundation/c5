@@ -76,22 +76,6 @@ public class FakeHTable extends c5db.client.FakeHTable implements HTableInterfac
     throw new IOException("We don't support getClosestRow");
   }
 
-  @Override
-  public boolean isAutoFlush() {
-    LOG.error("we auto flush by default");
-    return true;
-  }
-
-  @Override
-  public void setAutoFlush(boolean autoFlush) {
-    LOG.error("Unspported");
-
-  }
-
-  @Override
-  public void flushCommits() throws IOException {
-    LOG.error("we auto flush by default");
-  }
 
   @Override
   public CoprocessorRpcChannel coprocessorService(byte[] row) {
@@ -107,16 +91,6 @@ public class FakeHTable extends c5db.client.FakeHTable implements HTableInterfac
 
   @Override
   public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey, byte[] endKey, Batch.Call<T, R> callable, Batch.Callback<R> callback) throws Throwable {
-    LOG.error("Unspported");
-  }
-
-  @Override
-  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
-    LOG.error("Unspported");
-  }
-
-  @Override
-  public void setAutoFlushTo(boolean autoFlush) {
     LOG.error("Unspported");
   }
 
