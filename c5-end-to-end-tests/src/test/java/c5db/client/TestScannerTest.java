@@ -38,7 +38,6 @@ public class TestScannerTest extends MiniClusterPopulated {
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     for (int j = 0; j != SCANNER_TRIALS; j++) {
-      System.out.println("SCanner trials");
       int i = 0;
       Result result;
 
@@ -50,7 +49,6 @@ public class TestScannerTest extends MiniClusterPopulated {
         if (result != null) {
           int rowInt = Bytes.toInt(result.getRow());
           assertThat(rowInt, greaterThan(previous_row));
-          System.out.print(rowInt + ",");
           previous_row = rowInt;
           i++;
         }
