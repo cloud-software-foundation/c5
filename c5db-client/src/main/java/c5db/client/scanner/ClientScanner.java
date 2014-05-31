@@ -39,6 +39,7 @@ package c5db.client.scanner;
 import c5db.client.C5Constants;
 import c5db.client.ProtobufUtil;
 import c5db.client.RequestConverter;
+import c5db.client.generated.Cell;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.ScanResponse;
@@ -46,6 +47,7 @@ import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -134,6 +136,10 @@ public class ClientScanner extends AbstractClientScanner {
   public void add(ScanResponse response) {
     for (c5db.client.generated.Result result : response.getResultsList()) {
       scanResults.add(result);
+      for (Cell cell: result.getCellList()){
+        System.out.print("!" + Bytes.toInt(cell.getRow().array()) +"@");
+
+      }
       this.outStandingRequests--;
     }
     if (!this.isClosed && !response.getMoreResults()) {
