@@ -66,11 +66,11 @@ public class ScanRunnable implements Callback<Integer> {
       return;
     }
     long numberOfMsgsLeft = numberOfMessagesToSend;
-    List<Result> scanResults = new ArrayList<>();
     List<Integer> cellsPerResult = new ArrayList<>();
     ByteBuffer previousRow = null;
     while (!this.close && numberOfMsgsLeft > 0) {
-      int rowBufferedToSend = 0;
+     List<Result> scanResults = new ArrayList<>();
+     int rowBufferedToSend = 0;
       boolean moreResults;
       do {
         List<Cell> rawCells = new ArrayList<>();
