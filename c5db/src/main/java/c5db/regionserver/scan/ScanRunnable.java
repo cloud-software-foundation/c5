@@ -18,7 +18,6 @@
 package c5db.regionserver.scan;
 
 
-import c5db.C5ServerConstants;
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
@@ -65,12 +64,13 @@ public class ScanRunnable implements Callback<Integer> {
     if (this.close) {
       return;
     }
-    long numberOfMsgsLeft = numberOfMessagesToSend;
-    List<Integer> cellsPerResult = new ArrayList<>();
+    long numberOfMessagesLeftToSend = numberOfMessagesToSend;
     ByteBuffer previousRow = null;
-    while (!this.close && numberOfMsgsLeft > 0) {
-     List<Result> scanResults = new ArrayList<>();
-     int rowBufferedToSend = 0;
+    while (!this.close && numberOfMessagesLeftToSend > 0) {
+      List<Integer> cellsPerResult = new ArrayList<>();
+      List<Result> scanResults = new ArrayList<>();
+
+      int rowBufferedToSend = 0;
       boolean moreResults;
       do {
         List<Cell> rawCells = new ArrayList<>();
@@ -91,11 +91,11 @@ public class ScanRunnable implements Callback<Integer> {
 
         List<c5db.client.generated.Cell> cells = new ArrayList<>();
         for (Cell cell : rawCells) {
-          ByteBuffer cellBufferRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
+          ByteBuffer rawRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
           // If we are not the first one and we are a different row than the previous
           cells.add(ReverseProtobufUtil.toCell(cell));
 
-          if (!(previousRow == null || previousRow.compareTo(cellBufferRow) == 0)) {
+          if (!(previousRow == null || previousRow.compareTo(rawRow) == 0)) {
             cellsPerResult.add(cells.size());
             scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
             cells = new ArrayList<>();
@@ -113,7 +113,7 @@ public class ScanRunnable implements Callback<Integer> {
       ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
       Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
       ctx.writeAndFlush(response);
-      numberOfMsgsLeft -= rowBufferedToSend;
+      numberOfMessagesLeftToSend -= rowBufferedToSend;
     }
   }
 
