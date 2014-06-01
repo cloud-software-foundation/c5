@@ -158,6 +158,7 @@ public class RegionServerTest {
         regionLocation);
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l, 10, false, 11l);
     RegionScanner regionScanner = context.mock(RegionScanner.class);
+
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
@@ -167,6 +168,12 @@ public class RegionServerTest {
 
       oneOf(region).getScanner(with(any(Scan.class)));
       will(returnValue(regionScanner));
+
+      oneOf(server).getFiberFactory(with(any((Consumer.class))));
+      will(returnValue(c5FiberFactory));
+
+      oneOf(c5FiberFactory).create();
+      will(returnValue(fiberFactory.create()));
 
       allowing(regionScanner).nextRaw(with(any(List.class)));
       will(returnValue(false));

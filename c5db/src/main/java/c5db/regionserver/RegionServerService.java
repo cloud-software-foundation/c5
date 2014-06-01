@@ -48,12 +48,16 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.eclipse.jetty.util.MultiException;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 /**
  * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
@@ -188,4 +192,14 @@ public class RegionServerService extends AbstractService implements RegionServer
     return super.toString() + '{' + "port = " + port + '}';
   }
 
+  Fiber getNewFiber() throws Exception {
+    List<Throwable> throwables = new ArrayList<>();
+    C5FiberFactory ff = server.getFiberFactory(throwables::add);
+    if (throwables.size() > 0){
+      MultiException exception = new MultiException();
+      throwables.forEach(exception::add);
+      throw exception;
+    }
+    return ff.create();
+  }
 }
