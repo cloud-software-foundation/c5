@@ -192,7 +192,7 @@ public class ManyClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     table.close();
   }
 

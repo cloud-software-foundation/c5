@@ -27,6 +27,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -85,13 +86,11 @@ public class SingleNodeTableInterface implements TableInterface {
   }
 
   @Override
-  public void close() {
+  public void close() throws IOException {
     try {
       c5ConnectionManager.close();
     } catch (InterruptedException e) {
-      LOG.error("Unable to close, interrupted");
-      e.printStackTrace();
-      System.exit(1);
+      throw new IOException(e);
     }
   }
 

@@ -56,12 +56,14 @@ public class PopulatorTest extends MiniClusterBase {
         batchSize = Integer.parseInt(args[1]);
 
       }
+      table.setAutoFlush(false);
       compareToHBasePut(table,
           Bytes.toBytes("cf"),
           Bytes.toBytes("cq"),
           Bytes.toBytes("value"),
           numberOfBatches,
           batchSize);
+      table.flushCommits();
       long end = System.currentTimeMillis();
       System.out.println("time:" + (end - start));
 

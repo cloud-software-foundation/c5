@@ -90,7 +90,7 @@ public class C5DatabaseTest {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
 
     context.checking(new Expectations() {
       {

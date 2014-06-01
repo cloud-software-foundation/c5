@@ -44,6 +44,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -121,7 +122,7 @@ public class MiniClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     table.close();
   }
 

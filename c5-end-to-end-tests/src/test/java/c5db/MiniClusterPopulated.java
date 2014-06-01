@@ -28,6 +28,8 @@ public class MiniClusterPopulated extends MiniClusterBase {
 
   @Before
   public void initTable() throws IOException {
+    table.setAutoFlush(false);
+    table.setWriteBufferSize(100000);
     for (int i = 0; i != NUMBER_OF_ROWS; i++) {
       Put put = new Put(Bytes.toBytes(i));
       put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
@@ -36,5 +38,6 @@ public class MiniClusterPopulated extends MiniClusterBase {
         System.out.print("#");
       }
     }
+    table.flushCommits();
   }
 }
