@@ -49,7 +49,6 @@ import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.regionserver.AddElementsActionReturnTrue.addElements;
 
 
 public class ScanRunnableTest {
@@ -100,7 +99,7 @@ public class ScanRunnableTest {
   }
 
   @Test
-  public void scannerCanDeliverASingleMessageOnlyOnce() throws InterruptedException, IOException {
+  public void userRequestsOneRowButManyToReturneOnlyCalledOnce() throws InterruptedException, IOException {
     byte[] row = Bytes.toBytes("row");
     byte[] cf = Bytes.toBytes("cf");
     byte[] cq = Bytes.toBytes("cq");
@@ -109,8 +108,8 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
-        will(addElements(keyValue));
+        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        will(AddElementsActionReturnTrue.addElements(keyValue));
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
     });
@@ -119,10 +118,10 @@ public class ScanRunnableTest {
 
 
   @Test
-  public void scannerCanDeliverWithMultipleOnMessageInvocation() throws InterruptedException, IOException {
+  public void userRequestsThreeButOnlyOneToReturn() throws InterruptedException, IOException {
     ArrayList<KeyValue> kvs = new ArrayList<>();
+    byte[] row = Bytes.toBytes("foo");
     for (int i = 0; i != 10000; i++) {
-      byte[] row = Bytes.toBytes(i);
       byte[] cf = Bytes.toBytes(i);
       byte[] cq = Bytes.toBytes(i);
       byte[] value = Bytes.toBytes(i);
@@ -132,8 +131,9 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
-        will(addElements(kvs.toArray()));
+        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        will(AddElementsActionReturnFalse.addElements(kvs.toArray()));
+        oneOf(regionScanner).close();
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
     });
@@ -146,12 +146,13 @@ public class ScanRunnableTest {
     ArrayList<KeyValue> kvs = new ArrayList<>();
 
     byte[] cf = Bytes.toBytes("cf");
-    byte[] cq = Bytes.toBytes("cq");
     byte[] value = Bytes.toBytes("value");
 
+
+    int rows = 1;
     Integer count = 3;
     for (int i = 0; i != count; i++) {
-      kvs.add(new KeyValue(Bytes.toBytes(i), cf, cq, value));
+      kvs.add(new KeyValue(Bytes.toBytes("row"), cf, Bytes.toBytes(i), value));
     }
 
     MemoryChannel<Integer> memoryChannel = new MemoryChannel<>();
@@ -163,8 +164,8 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
-        will(addElements(kvs.toArray()));
+        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        will(AddElementsActionReturnTrue.addElements(kvs.toArray()));
 
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
         will(new CustomAction("desc") {
@@ -176,34 +177,7 @@ public class ScanRunnableTest {
         });
       }
     });
-    memoryChannel.publish(count);
+    memoryChannel.publish(rows);
     assertEventually(listener, matcher);
-
-    int bigCount = 1000;
-    kvs.clear();
-
-    for (int i = 0; i != bigCount / 100; i++) {
-      kvs.add(new KeyValue(Bytes.toBytes(i), cf, cq, value));
-    }
-
-    context.checking(new Expectations() {
-      {
-        exactly(100).of(regionScanner).nextRaw(with(any(List.class)), with(any(Integer.class)));
-        will(addElements(kvs.toArray()));
-
-        exactly(10).of(ctx).writeAndFlush(with(any(Response.class)));
-        will(new CustomAction("desc") {
-          @Override
-          public Object invoke(Invocation invocation) throws Throwable {
-            testChannel.publish(123);
-            return null;
-          }
-        });
-      }
-    });
-    memoryChannel.publish(bigCount);
-    for (int i =0; i!= 10; i++) {
-      assertEventually(listener, matcher);
-    }
   }
 }

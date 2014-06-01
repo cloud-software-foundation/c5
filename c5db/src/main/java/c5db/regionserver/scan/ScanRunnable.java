@@ -28,22 +28,26 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.jetlang.core.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Creates a runnable in the background so that the regionserver always has a setup of scanner results
  * ready to send back to the user. It directly sends the data back through netty back to the user.
  */
 public class ScanRunnable implements Callback<Integer> {
+  private static final int MAX_ROWS_TO_SEND_IN_A_SCAN_RESPONSE = 100;
   private final long scannerId;
   private final Call call;
   private final ChannelHandlerContext ctx;
   private final RegionScanner scanner;
   private boolean close;
+  private static final Logger LOG = LoggerFactory.getLogger(ScanRunnable.class);
 
   public ScanRunnable(final ChannelHandlerContext ctx,
                       final Call call,
@@ -64,59 +68,66 @@ public class ScanRunnable implements Callback<Integer> {
     if (this.close) {
       return;
     }
+
     long numberOfMessagesLeftToSend = numberOfMessagesToSend;
-    ByteBuffer previousRow = null;
+
     while (!this.close && numberOfMessagesLeftToSend > 0) {
       List<Integer> cellsPerResult = new ArrayList<>();
       List<Result> scanResults = new ArrayList<>();
-
       int rowBufferedToSend = 0;
-      boolean moreResults;
-      do {
-        List<Cell> rawCells = new ArrayList<>();
 
+      while (!this.close
+          && rowBufferedToSend < MAX_ROWS_TO_SEND_IN_A_SCAN_RESPONSE
+          && numberOfMessagesToSend - rowBufferedToSend > 0) {
+        Result result = null;
         try {
-          // Arguably you should only return numberOfMessages, but I figure it can't hurt that
-          // much to pass them up
-          int messagesForPath = numberOfMessagesToSend > 10 ? 10 : numberOfMessagesToSend;
-          moreResults = scanner.nextRaw(rawCells, messagesForPath);
-          if (!moreResults) {
-            this.scanner.close();
-            this.close = true;
-          }
+          result = getNextRow();
+          rowBufferedToSend++;
         } catch (IOException e) {
           e.printStackTrace();
-          return;
         }
+        scanResults.add(result);
+        if (result != null) {
+          cellsPerResult.add(result.getCellList().size());
+        }
+      }
 
-        List<c5db.client.generated.Cell> cells = new ArrayList<>();
-        for (Cell cell : rawCells) {
-          ByteBuffer rawRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
-          // If we are not the first one and we are a different row than the previous
-          cells.add(ReverseProtobufUtil.toCell(cell));
-
-          if (!(previousRow == null || previousRow.compareTo(rawRow) == 0)) {
-            cellsPerResult.add(cells.size());
-            scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
-            cells = new ArrayList<>();
-          }
-          previousRow = ByteBuffer.wrap(cell.getRowArray(), cell.getRowOffset(), cell.getRowLength());
-        }
-        // Add the last one
-        if (cells.size() > 0) {
-          cellsPerResult.add(cells.size());
-          scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
-        }
-        rowBufferedToSend += rawCells.size();
-        // Our super advanced scanning algorithm. Could be greatly improved
-      } while (moreResults && rowBufferedToSend < 100 && numberOfMessagesToSend - rowBufferedToSend > 0);
-      ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
-      Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
-      ctx.writeAndFlush(response);
-      numberOfMessagesLeftToSend -= rowBufferedToSend;
+      numberOfMessagesLeftToSend = sendScannerResponse(numberOfMessagesLeftToSend,
+          cellsPerResult,
+          scanResults,
+          rowBufferedToSend,
+          !this.close);
     }
   }
 
+  private Result getNextRow() throws IOException {
+    boolean moreResults;
+    List<Cell> rawCells = new ArrayList<>();
+    // Get a row worth of results
+    moreResults = scanner.nextRaw(rawCells);
+    List<c5db.client.generated.Cell> protoCells = rawCells
+        .stream()
+        .map(ReverseProtobufUtil::toCell)
+        .collect(Collectors.toList());
+
+    if (!moreResults) {
+      this.scanner.close();
+      this.close = true;
+    }
+    return new Result(protoCells, protoCells.size(), protoCells.size() > 0);
+  }
+
+  private long sendScannerResponse(long numberOfMessagesLeftToSend,
+                                   List<Integer> cellsPerResult,
+                                   List<Result> scanResults,
+                                   int rowBufferedToSend,
+                                   boolean moreResults) {
+    ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
+    Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
+    ctx.writeAndFlush(response);
+    numberOfMessagesLeftToSend -= rowBufferedToSend;
+    return numberOfMessagesLeftToSend;
+  }
 }
 
 

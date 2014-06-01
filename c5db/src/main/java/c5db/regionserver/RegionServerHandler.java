@@ -147,8 +147,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   }
 
 
-  private void scan(ChannelHandlerContext ctx, Call call) throws IOException,
-      RegionNotFoundException {
+  private void scan(ChannelHandlerContext ctx, Call call) throws Exception {
     final ScanRequest scanIn = call.getScan();
     if (scanIn == null) {
       throw new IOException("Poorly specified c5db.regionserver.scan. There is no actual get data in the RPC");
@@ -160,7 +159,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     Channel<Integer> channel = scanManager.getChannel(scannerId);
     // New Scanner
     if (null == channel) {
-      final Fiber fiber = new ThreadFiber();
+      final Fiber fiber = this.regionServerService.getNewFiber();
       fiber.start();
       channel = new MemoryChannel<>();
       Region region = regionServerService.getOnlineRegion(call.getScan().getRegion());
@@ -168,6 +167,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       channel.subscribe(fiber, scanRunnable);
       scanManager.addChannel(scannerId, channel);
     }
+    // TODO receive exceptions
     channel.publish(numberOfRowsToSend);
   }
 
