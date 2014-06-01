@@ -57,7 +57,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 
 /**
@@ -185,11 +184,18 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void flushCommits() throws IOException {
-    waitForOutstandingPuts();
+    waitForRunningPutsToComplete();
     checkBufferedThrowables();
+    if (!this.autoFlush) {
+      this.autoFlush = true;
+      while (this.outstandingMutations.get() > 0) {
+        waitForRunningPutsToComplete();
+      }
+      this.autoFlush = false;
+    }
   }
 
-  private void waitForOutstandingPuts() throws IOException {
+  private void waitForRunningPutsToComplete() throws IOException {
     try {
       executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
@@ -198,7 +204,7 @@ public class FakeHTable implements AutoCloseable {
   }
 
   private void checkBufferedThrowables() {
-    if (throwablesToThrow.size() > 0){
+    if (throwablesToThrow.size() > 0) {
       IOException exception = new IOException("We built up some exceptions while buffering writes");
       throwablesToThrow.forEach(exception::addSuppressed);
       throwablesToThrow.clear();
@@ -247,7 +253,8 @@ public class FakeHTable implements AutoCloseable {
   private void bufferPut(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
     while (outstandingMutations.get() > bufferSize) {
-      flushCommits();
+      waitForRunningPutsToComplete();
+      checkBufferedThrowables();
     }
     ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
     outstandingMutations.incrementAndGet();
