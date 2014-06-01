@@ -185,11 +185,19 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void flushCommits() throws IOException {
+    waitForOutstandingPuts();
+    checkBufferedThrowables();
+  }
+
+  private void waitForOutstandingPuts() throws IOException {
     try {
       executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       throw new IOException(e);
     }
+  }
+
+  private void checkBufferedThrowables() {
     if (throwablesToThrow.size() > 0){
       IOException exception = new IOException("We built up some exceptions while buffering writes");
       throwablesToThrow.forEach(exception::addSuppressed);
@@ -228,7 +236,7 @@ public class FakeHTable implements AutoCloseable {
     ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
     try {
       Response result = mutationFuture.get();
-      if (!result.getMutate().getProcessed()) {
+      if (result == null || result.getMutate() == null || !result.getMutate().getProcessed()) {
         throw new IOException("Mutation not processed");
       }
     } catch (InterruptedException | ExecutionException e) {
