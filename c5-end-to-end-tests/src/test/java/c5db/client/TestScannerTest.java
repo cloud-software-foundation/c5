@@ -22,6 +22,8 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -33,11 +35,13 @@ import static org.hamcrest.core.Is.is;
 
 
 public class TestScannerTest extends MiniClusterPopulated {
+  private static final Logger LOG = LoggerFactory.getLogger(TestScannerTest.class);
 
   int SCANNER_TRIALS = 10;
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     for (int j = 0; j != SCANNER_TRIALS; j++) {
+      LOG.info("starting scanner trial:" + j);
       int i = 0;
       Result result;
 
@@ -48,7 +52,7 @@ public class TestScannerTest extends MiniClusterPopulated {
         result = scanner.next();
         if (result != null) {
           int rowInt = Bytes.toInt(result.getRow());
-          assertThat(rowInt, greaterThan(previous_row));
+          assertThat(rowInt, is(previous_row + 1));
           previous_row = rowInt;
           i++;
         }
