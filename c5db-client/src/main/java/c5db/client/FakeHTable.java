@@ -84,7 +84,7 @@ public class FakeHTable implements AutoCloseable {
    */
   public FakeHTable(String hostname, int port, ByteString tableName)
       throws InterruptedException, TimeoutException, ExecutionException {
-    c5AsyncDatabase = new SingleNodeTableInterface(hostname, port);
+    c5AsyncDatabase = new ExplicitNodeCaller(hostname, port);
 
     this.tableName = tableName.toByteArray();
     regionName = tableName.toByteArray();

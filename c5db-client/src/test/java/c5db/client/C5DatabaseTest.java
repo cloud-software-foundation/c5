@@ -65,7 +65,7 @@ public class C5DatabaseTest {
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
 
-  private SingleNodeTableInterface singleNodeTableInterface;
+  private ExplicitNodeCaller singleNodeTableInterface;
   private SettableFuture<Response> callFuture;
 
 
@@ -85,7 +85,7 @@ public class C5DatabaseTest {
       }
     });
 
-    singleNodeTableInterface = new SingleNodeTableInterface("fake", 0, c5ConnectionManager);
+    singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
     callFuture = SettableFuture.create();
   }
 

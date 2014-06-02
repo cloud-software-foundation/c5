@@ -71,7 +71,7 @@ public class C5FakeHTableTest {
   private final byte[] cf = Bytes.toBytes("cf");
   private final byte[] cq = Bytes.toBytes("cq");
   private final byte[] value = Bytes.toBytes("value");
-  private SingleNodeTableInterface singleNodeTableInterface;
+  private ExplicitNodeCaller singleNodeTableInterface;
   private SettableFuture<Response> callFuture;
   private FakeHTable hTable;
 
@@ -91,7 +91,7 @@ public class C5FakeHTableTest {
       }
     });
 
-    singleNodeTableInterface = new SingleNodeTableInterface("fake", 0, c5ConnectionManager);
+    singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
     hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Doesntexist"));
     callFuture = SettableFuture.create();
   }

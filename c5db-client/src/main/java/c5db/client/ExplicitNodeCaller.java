@@ -41,8 +41,8 @@ import static c5db.client.generated.Call.Command.SCAN;
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class SingleNodeTableInterface implements TableInterface {
-  private static final Logger LOG = LoggerFactory.getLogger(SingleNodeTableInterface.class);
+public class ExplicitNodeCaller implements TableInterface {
+  private static final Logger LOG = LoggerFactory.getLogger(ExplicitNodeCaller.class);
   private final AtomicLong commandId = new AtomicLong(0);
   private final C5ConnectionManager c5ConnectionManager;
   public Channel channel;
@@ -52,12 +52,12 @@ public class SingleNodeTableInterface implements TableInterface {
    * C5Table is the main entry points for clients of C5DB
    */
 
-  public SingleNodeTableInterface(String hostname, int port)
+  public ExplicitNodeCaller(String hostname, int port)
       throws InterruptedException, ExecutionException, TimeoutException {
     this(hostname, port, new C5NettyConnectionManager());
   }
 
-  public SingleNodeTableInterface(String hostname, int port, C5ConnectionManager c5ConnectionManager)
+  public ExplicitNodeCaller(String hostname, int port, C5ConnectionManager c5ConnectionManager)
       throws InterruptedException, ExecutionException, TimeoutException {
     // TODO Route data so we don't need to connect to meta
     this.c5ConnectionManager = c5ConnectionManager;
