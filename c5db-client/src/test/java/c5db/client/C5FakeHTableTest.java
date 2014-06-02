@@ -50,11 +50,17 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertTrue;
 
 public class C5FakeHTableTest {
 
@@ -92,7 +98,7 @@ public class C5FakeHTableTest {
     });
 
     singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
-    hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Doesntexist"));
+    hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Does Not Exist"));
     callFuture = SettableFuture.create();
   }
 
@@ -148,6 +154,160 @@ public class C5FakeHTableTest {
     callFuture.set(response);
     hTable.put(new Put(row));
   }
+
+  @Test(expected = TimeoutException.class)
+  public void manyPutsBlocksIfNotEnoughRoom()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    hTable.setAutoFlush(false);
+
+    try {
+      long messagesToPut = hTable.getWriteBufferSize() + 1;
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+        context.checking(new Expectations() {
+          {
+            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        executorService.submit(() -> {
+          hTable.put(new Put(row));
+          return null;
+        }).get(2, TimeUnit.SECONDS);
+      }
+      // We should never get here
+      assertTrue(1 == 0);
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
+  @Test(expected = TimeoutException.class)
+  public void testManyPutsFailsWithoutResponseWithAutoFlush()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    long messagesToPut = 2;
+    for (int i = 0; i != messagesToPut; i++) {
+      SettableFuture<Response> response = SettableFuture.create();
+      context.checking(new Expectations() {
+        {
+          allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+          will(returnValue(response));
+        }
+      });
+      executorService.submit(() -> {
+        hTable.put(new Put(row));
+        return null;
+      }).get(2, TimeUnit.SECONDS);
+    }
+    // We should never get here
+    assertTrue(1 == 0);
+  }
+
+  @Test(expected = TimeoutException.class)
+  public void testFlushCommittedWillBlock()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    hTable.setAutoFlush(false);
+    try {
+      long messagesToPut = 100;
+      hTable.setWriteBufferSize(messagesToPut);
+      ArrayBlockingQueue<SettableFuture<Response>> futures = new ArrayBlockingQueue<>((int) messagesToPut);
+
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+        context.checking(new Expectations() {
+          {
+            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        hTable.put(new Put(row));
+        futures.add(response);
+      }
+      Future<Object> flushFuture = executorService.submit(() -> {
+        hTable.flushCommits();
+        return null;
+      });
+
+      // Remove one entry from the top
+      futures.remove();
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
+
+      flushFuture.get(2, TimeUnit.SECONDS);
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
+  @Test
+  public void testFlushWillClear()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    hTable.setAutoFlush(false);
+    try {
+      long messagesToPut = 100;
+      hTable.setWriteBufferSize(messagesToPut);
+      ArrayBlockingQueue<SettableFuture<Response>> futures = new ArrayBlockingQueue<>((int) messagesToPut);
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+        context.checking(new Expectations() {
+          {
+            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        hTable.put(new Put(row));
+        futures.add(response);
+      }
+
+      Future<Object> flushFuture = executorService.submit(() -> {
+        hTable.flushCommits();
+        return null;
+      });
+
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
+      flushFuture.get();
+
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
+
+  @Test
+  public void manyPutsDoNotBlockIfRoom()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+
+    hTable.setAutoFlush(false);
+
+    try {
+      int messagesToPut = 999;
+      ArrayBlockingQueue<SettableFuture<Response>> futures = new ArrayBlockingQueue<>(messagesToPut);
+      hTable.setWriteBufferSize(messagesToPut);
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+
+        context.checking(new Expectations() {
+          {
+            oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        hTable.put(new Put(row));
+        futures.add(response);
+      }
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
 
   @Test
   public void putsCanSucceed()
@@ -291,6 +451,4 @@ public class C5FakeHTableTest {
     callFuture.set(response);
     hTable.checkAndDelete(row, cf, cq, value, new Delete(row));
   }
-
-
 }

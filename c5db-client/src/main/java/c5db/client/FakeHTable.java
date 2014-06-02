@@ -256,7 +256,7 @@ public class FakeHTable implements AutoCloseable {
 
   private void bufferPut(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    while (outstandingMutations.get() > bufferSize) {
+    while (outstandingMutations.get() >= bufferSize) {
       waitForRunningPutsToComplete();
       checkBufferedThrowables();
     }
