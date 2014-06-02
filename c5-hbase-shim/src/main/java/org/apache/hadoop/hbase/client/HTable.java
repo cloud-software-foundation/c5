@@ -19,6 +19,7 @@
  */
 package org.apache.hadoop.hbase.client;
 
+import c5db.client.FakeHTable;
 import com.google.protobuf.Service;
 import io.protostuff.ByteString;
 import org.apache.hadoop.conf.Configuration;
@@ -35,14 +36,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-
 /**
  * The main client entry point for putting data into C5. Equivalent to HTablet from HBase.
  */
-public class FakeHTable extends c5db.client.FakeHTable implements HTableInterface {
-  private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
+public class HTable extends FakeHTable implements HTableInterface {
+  private static final Logger LOG = LoggerFactory.getLogger(HTable.class);
 
-  public FakeHTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
+  public HTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
     super(hostname, port, tableName);
   }
 
