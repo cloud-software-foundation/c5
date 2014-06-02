@@ -28,7 +28,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -87,17 +86,7 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
     // Keep track of how many outstanding requests we have and limit it.
     ChannelFuture future = channel.write(request);
     future.addListener(objectFuture -> inFlightCalls.decrementAndGet());
-
-    if (inFlightCalls.incrementAndGet() > C5Constants.IN_FLIGHT_CALLS) {
-      System.out.println("Backing off:" + C5Constants.IN_FLIGHT_CALLS);
-      try {
-        future.get();
-      } catch (InterruptedException | ExecutionException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }
-
+    future.awaitUninterruptibly();
     return settableFuture;
   }
 
