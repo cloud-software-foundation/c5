@@ -69,6 +69,7 @@ public class C5FakeHTableTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private final MessageHandler messageHandler = context.mock(MessageHandler.class);
   private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
@@ -158,7 +159,6 @@ public class C5FakeHTableTest {
   @Test(expected = TimeoutException.class)
   public void manyPutsBlocksIfNotEnoughRoom()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
     hTable.setAutoFlush(false);
 
     try {
@@ -209,7 +209,7 @@ public class C5FakeHTableTest {
   @Test(expected = TimeoutException.class)
   public void testFlushCommittedWillBlock()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     hTable.setAutoFlush(false);
     try {
       long messagesToPut = 100;
@@ -246,7 +246,7 @@ public class C5FakeHTableTest {
   @Test
   public void testFlushWillClear()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     hTable.setAutoFlush(false);
     try {
       long messagesToPut = 100;
@@ -451,4 +451,86 @@ public class C5FakeHTableTest {
     callFuture.set(response);
     hTable.checkAndDelete(row, cf, cq, value, new Delete(row));
   }
+
+  @Test
+  public void putsClearIfWeHaveAnError()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    hTable.setAutoFlush(false, true);
+
+    try {
+      hTable.setWriteBufferSize(200);
+      long messagesToPut = hTable.getWriteBufferSize();
+      ArrayBlockingQueue<SettableFuture<Response>> futures = new ArrayBlockingQueue<>((int) messagesToPut);
+
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+        context.checking(new Expectations() {
+          {
+            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        Put put = new Put(new byte[1]);
+        hTable.put(put);
+        futures.add(response);
+      }
+
+      futures.remove().setException(new IOException("foo"));
+
+      // Should only complete if queue is cleared by errors
+      for (int i = 0; i != messagesToPut ; i++) {
+        Put put = new Put(new byte[1]);
+        hTable.put(put);
+      }
+
+
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
+  @Test(expected = TimeoutException.class)
+  public void putsDoNotClearIfWeHaveAnErrorIfClearOnErrorIsOff()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    hTable.setAutoFlush(false, false);
+
+    try {
+      hTable.setWriteBufferSize(200);
+      long messagesToPut = hTable.getWriteBufferSize();
+      ArrayBlockingQueue<SettableFuture<Response>> futures = new ArrayBlockingQueue<>((int) messagesToPut);
+
+      for (int i = 0; i != messagesToPut; i++) {
+        SettableFuture<Response> response = SettableFuture.create();
+        context.checking(new Expectations() {
+          {
+            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            will(returnValue(response));
+          }
+        });
+        Put put = new Put(new byte[1]);
+        hTable.put(put);
+        futures.add(response);
+      }
+
+      futures.remove().setException(new IOException("foo"));
+
+
+      executorService.submit(() -> {
+        for (int i = 0; i != messagesToPut; i++) {
+          Put put = new Put(new byte[1]);
+          try {
+            hTable.put(put);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }).get(1, TimeUnit.SECONDS);
+
+
+    } finally {
+      hTable.setAutoFlush(true);
+    }
+  }
+
+
 }
