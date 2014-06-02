@@ -16,7 +16,7 @@
  */
 package c5db;
 
-import c5db.client.SingleNodeTableInterface;
+import c5db.client.ExplicitNodeCaller;
 import c5db.client.generated.Condition;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -58,7 +57,7 @@ public class AsyncWriteTest extends MiniClusterBase {
         0l,
         null);
 
-    SingleNodeTableInterface singleNodeTable = new SingleNodeTableInterface("localhost", getRegionServerPort());
+    ExplicitNodeCaller singleNodeTable = new ExplicitNodeCaller("localhost", getRegionServerPort());
 
     Fiber flusher = new ThreadFiber();
     flusher.start();
@@ -74,7 +73,7 @@ public class AsyncWriteTest extends MiniClusterBase {
   private void sendProto(RegionSpecifier regionSpecifier,
                          ByteBuffer cf,
                          List<MutationProto.ColumnValue.QualifierValue> qualifierValue,
-                         SingleNodeTableInterface singleNodeTable,
+                         ExplicitNodeCaller singleNodeTable,
                          int row) throws ExecutionException, InterruptedException {
     MutationProto mutationProto = new MutationProto(ByteBuffer.wrap(Bytes.toBytes(row)),
         MutationProto.MutationType.PUT,
