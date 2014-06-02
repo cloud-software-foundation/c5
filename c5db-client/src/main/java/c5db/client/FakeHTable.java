@@ -275,6 +275,7 @@ public class FakeHTable implements AutoCloseable {
       @Override
       public void onFailure(@NotNull Throwable t) {
         throwablesToThrow.add(t);
+        LOG.error("Put failed: " + t.getMessage());
         clearBufferIfSet();
       }
 
