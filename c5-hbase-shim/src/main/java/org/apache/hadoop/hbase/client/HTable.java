@@ -108,16 +108,20 @@ public class HTable extends FakeHTable implements HTableInterface {
     return null;
   }
 
+  @Override
   public void batch(List<? extends Row> actions, Object[] results) {
   }
 
+  @Override
   public Object[] batch(List<? extends Row> actions) {
     return new Object[0];
   }
 
+  @Override
   public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) {
   }
 
+  @Override
   public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) {
     return new Object[0];
   }
