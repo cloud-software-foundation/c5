@@ -152,12 +152,15 @@ public class FakeHTable implements AutoCloseable {
     }
 
     if (scanner == null) {
-      throw new IOException("The scanner disappeared from the clientScannerManager");
+      String errorMessage = "The scanner disappeared from the clientScannerManager";
+      LOG.error(errorMessage);
+      throw new IOException(errorMessage);
     }
 
     try {
       return scanner.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      LOG.error(e.getMessage());
       throw new IOException("The scanner disappeared from the clientScannerManager");
     }
   }

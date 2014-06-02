@@ -19,6 +19,7 @@ package c5db.client.codec;
 import c5db.client.C5Constants;
 import c5db.client.generated.Call;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
@@ -27,6 +28,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.protostuff.LowCopyProtobufOutput;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
@@ -45,39 +47,37 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
     final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
     Call.getSchema().writeTo(lcpo, call);
     final long size = lcpo.buffer.size();
+    List<ByteBuffer> buffers = lcpo.buffer.finish();
+    ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
+    try {
+      if (size < MAX_SIZE) {
+        final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
+        objects.add(frame.copy());
 
-    if (size < MAX_SIZE) {
-      ByteBuf byteBuf = channelHandlerContext.alloc().buffer((int) size);
-      lcpo.buffer.finish().stream().forEach(byteBuf::writeBytes);
-      final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
-      objects.add(frame);
-    //  byteBuf.release();
+      } else {
+        long remaining = size;
+        boolean first = true;
 
-    } else {
-      long remaining = size;
-      boolean first = true;
-      ByteBuf byteBuf = channelHandlerContext.alloc().buffer((int) size);
-      lcpo.buffer.finish().stream().forEach(byteBuf::writeBytes);
-
-      while (remaining > 0) {
-
-        WebSocketFrame frame;
-        if (remaining > MAX_SIZE) {
-          final ByteBuf slice = byteBuf.copy((int) (size - remaining), (int) MAX_SIZE);
-          if (first) {
-            frame = new BinaryWebSocketFrame(false, 0, slice);
-            first = false;
+        while (remaining > 0) {
+          WebSocketFrame frame;
+          if (remaining > MAX_SIZE) {
+            final ByteBuf slice = byteBuf.slice((int) (size - remaining), (int) MAX_SIZE);
+            if (first) {
+              frame = new BinaryWebSocketFrame(false, 0, slice);
+              first = false;
+            } else {
+              frame = new ContinuationWebSocketFrame(false, 0, slice);
+            }
+            remaining -= MAX_SIZE;
           } else {
-            frame = new ContinuationWebSocketFrame(false, 0, slice);
+            frame = new ContinuationWebSocketFrame(true, 0, byteBuf.slice((int) (size - remaining), (int) remaining));
+            remaining = 0;
           }
-          remaining -= MAX_SIZE;
-        } else {
-          frame = new ContinuationWebSocketFrame(true, 0, byteBuf.copy((int) (size - remaining), (int) remaining));
-          remaining = 0;
+          objects.add(frame.copy());
         }
-        objects.add(frame);
       }
-  //    byteBuf.release();
+    } finally {
+      byteBuf.release();
     }
   }
 
