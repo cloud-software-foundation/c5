@@ -208,6 +208,7 @@ public class FakeHTable implements AutoCloseable {
       IOException exception = new IOException("We built up some exceptions while buffering writes");
       throwablesToThrow.forEach(exception::addSuppressed);
       throwablesToThrow.clear();
+      clearBufferIfSet();
     }
   }
 
@@ -270,10 +271,19 @@ public class FakeHTable implements AutoCloseable {
 
       @Override
       public void onFailure(@NotNull Throwable t) {
-        executor.shutdownNow();
         throwablesToThrow.add(t);
+        clearBufferIfSet();
       }
+
     }, executor);
+  }
+  
+  private void clearBufferIfSet() {
+    if (clearBufferOnFail){
+      LOG.error("Had a failure clearing buffer");
+      executor.shutdownNow();
+      outstandingMutations.set(0);
+    }
   }
 
   public void put(List<Put> puts) throws IOException {
