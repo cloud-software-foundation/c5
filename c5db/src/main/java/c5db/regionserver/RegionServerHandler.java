@@ -46,6 +46,8 @@ import c5db.regionserver.scan.ScannerManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The main netty handler for the RegionServer functionality. Maps protocol buffer calls to an action against a HRegion
@@ -54,7 +56,7 @@ import java.util.List;
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private final RegionServerService regionServerService;
   private final ScannerManager scanManager = ScannerManager.INSTANCE;
-
+  AtomicLong scannerCounter = new AtomicLong(0);
   public RegionServerHandler(RegionServerService myService) {
     this.regionServerService = myService;
   }
@@ -177,9 +179,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       scannerId = scanIn.getScannerId();
     } else {
       // Make a scanner with an Id not 0
-      do {
-        scannerId = System.currentTimeMillis();
-      } while (scannerId == 0);
+      scannerId = this.scannerCounter.incrementAndGet();
     }
     return scannerId;
   }
