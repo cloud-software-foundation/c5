@@ -48,15 +48,18 @@ import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jetlang.fibers.Fiber;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class ClientScanner extends AbstractClientScanner {
   private final Channel ch;
   private final long scannerId;
   private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>();
   private final long commandId;
+  private final Fiber fiber;
   private boolean isClosed = false;
 
   private int requestSize = C5Constants.DEFAULT_INIT_SCAN;
@@ -66,15 +69,25 @@ public class ClientScanner extends AbstractClientScanner {
    * Create a new ClientScanner for the specified table
    * Note that the passed {@link org.apache.hadoop.hbase.client.Scan}'s start row maybe changed changed.
    */
-  ClientScanner(Channel channel, final long scannerId, final long commandId) {
+  ClientScanner(Channel channel, Fiber fiber, final long scannerId, final long commandId) {
     ch = channel;
     this.scannerId = scannerId;
     this.commandId = commandId;
+    this.fiber = fiber;
+    this.fiber.start();
+    long scannerUpdateRate = 100;
+
+    this.fiber.scheduleWithFixedDelay(() -> {
+      if (!isClosed) {
+        optimizeRequestRate();
+        getMoreRowsIfSpace();
+      }
+    }, 0l, scannerUpdateRate, TimeUnit.MILLISECONDS);
+
   }
 
   @Override
   public Result next() throws IOException {
-
     if (this.isClosed && this.scanResults.isEmpty()) {
       return null;
     }
@@ -82,28 +95,24 @@ public class ClientScanner extends AbstractClientScanner {
     c5db.client.generated.Result result;
     do {
       result = scanResults.poll();
-
-      if (!this.isClosed) {
-        // If we don't have enough pending outstanding increase our rate
-        if (this.outStandingRequests < .5 * requestSize && requestSize < C5Constants.MAX_REQUEST_SIZE) {
-          requestSize = requestSize * 2;
-        }
-        final int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
-
-        // If we have plenty of room for another request
-        if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
-            // And we have less than two requests worth in the queue
-            && 3 * this.outStandingRequests < requestSize) {
-          getMoreRows();
-        }
-      }
     } while (result == null && !this.isClosed);
+    return result == null ? null : ProtobufUtil.toResult(result);
+  }
 
-    if (result == null) {
-      return null;
+  private void getMoreRowsIfSpace() {
+    final int queueSpace = C5Constants.MAX_CACHE_SZ - this.scanResults.size();
+    // If we have plenty of room for another request
+    if (queueSpace * 1.5 > (requestSize + this.outStandingRequests)
+        // And we have less than two requests worth in the queue
+        && 3 * this.outStandingRequests < requestSize) {
+      getMoreRows();
     }
+  }
 
-    return ProtobufUtil.toResult(result);
+  private void optimizeRequestRate() {
+    if (this.outStandingRequests < .5 * requestSize && requestSize < C5Constants.MAX_REQUEST_SIZE) {
+      requestSize = requestSize * 2;
+    }
   }
 
   private void getMoreRows() {
@@ -132,6 +141,7 @@ public class ClientScanner extends AbstractClientScanner {
   @Override
   public void close() {
     this.isClosed = true;
+    this.fiber.dispose();
   }
 
   public void add(ScanResponse response) {
