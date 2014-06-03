@@ -19,13 +19,18 @@ package c5db.client.scanner;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
+import org.jetlang.fibers.PoolFiberFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public enum ClientScannerManager {
   INSTANCE;
+  ExecutorService executorService = Executors.newSingleThreadExecutor();
+  PoolFiberFactory poolFiberFactory = new PoolFiberFactory(executorService);
 
   private ConcurrentHashMap<Long, SettableFuture<ClientScanner>> scannerMap = new ConcurrentHashMap<>();
 
@@ -34,7 +39,7 @@ public enum ClientScannerManager {
       throw new IOException("Scanner already created");
     }
 
-    final ClientScanner scanner = new ClientScanner(channel, scannerId, commandId);
+    final ClientScanner scanner = new ClientScanner(channel, poolFiberFactory.create(), scannerId, commandId);
     SettableFuture<ClientScanner> clientScannerSettableFuture = SettableFuture.create();
     clientScannerSettableFuture.set(scanner);
     scannerMap.put(scannerId, clientScannerSettableFuture);
