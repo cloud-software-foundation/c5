@@ -96,6 +96,7 @@ class DataHelper {
   static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
     Put put = new Put(row).add(cf, cq, new byte[1024 * 1024 * 64]);
     hTable.put(put);
+    hTable.flushCommits();
   }
 
   static void putRowAndValueIntoDatabase(FakeHTable hTable,
@@ -104,11 +105,13 @@ class DataHelper {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
     hTable.put(put);
+    hTable.flushCommits();
   }
 
   static void putsRowInDB(FakeHTable hTable, byte[][] rows, byte[] value) throws IOException {
     Stream<Put> puts = Arrays.asList(rows).stream().map(row -> new Put(row).add(cf, cq, value));
     hTable.put(puts.collect(toList()));
+    hTable.flushCommits();
   }
 
   static boolean checkAndPutRowAndValueIntoDatabase(FakeHTable hTable,

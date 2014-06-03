@@ -66,7 +66,6 @@ public class AsyncWriteTest extends MiniClusterBase {
     for (int i = 0; i != TO_SEND; i++) {
       sendProto(regionSpecifier, cf, Arrays.asList(qualifierValue), singleNodeTable, i);
     }
-    System.out.println("buffered");
     countDownLatch.await();
   }
 

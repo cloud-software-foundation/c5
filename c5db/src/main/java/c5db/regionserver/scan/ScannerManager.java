@@ -39,4 +39,8 @@ public enum ScannerManager {
   public void addChannel(long scannerId, Channel<Integer> channel) {
     scannerMap.put(scannerId, channel);
   }
+
+  public void clearAll() {
+    scannerMap = new ConcurrentHashMap<>();
+  }
 }

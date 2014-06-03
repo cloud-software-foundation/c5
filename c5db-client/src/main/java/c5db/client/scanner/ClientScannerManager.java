@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 public enum ClientScannerManager {
   INSTANCE;
 
-  private final ConcurrentHashMap<Long, SettableFuture<ClientScanner>> scannerMap = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Long, SettableFuture<ClientScanner>> scannerMap = new ConcurrentHashMap<>();
 
   public ClientScanner createAndGet(Channel channel, long scannerId, long commandId) throws IOException {
     if (hasScanner(scannerId)) {
@@ -47,5 +47,9 @@ public enum ClientScannerManager {
 
   public boolean hasScanner(long scannerId) {
     return scannerMap.containsKey(scannerId);
+  }
+
+  public void clearAll() {
+    scannerMap = new ConcurrentHashMap<>();
   }
 }

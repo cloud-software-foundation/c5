@@ -17,7 +17,6 @@
 package c5db;
 
 import c5db.client.FakeHTable;
-import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -27,6 +26,7 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.scan.ScannerManager;
 import c5db.util.TabletNameHelpers;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -75,12 +75,20 @@ public class MiniClusterBase {
   }
 
   @AfterClass
-  public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module : server.getModules().values()) {
-      module.stop().get(1, TimeUnit.SECONDS);
+  public static void afterClass() {
+    ImmutableMap<ModuleType, C5Module> modules = null;
+    try {
+      modules = server.getModules();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (TimeoutException e) {
+      e.printStackTrace();
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
+
   }
 
   @BeforeClass
@@ -132,7 +140,7 @@ public class MiniClusterBase {
   }
 
   @Before
-  public void before() throws InterruptedException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
@@ -156,12 +164,7 @@ public class MiniClusterBase {
     commandChannel.publish(createTableCommand);
     latch.await();
 
-    try {
-      table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
-          TabletNameHelpers.toByteString(clientTableName));
-    } catch (TimeoutException | ExecutionException e) {
-      e.printStackTrace();
-    }
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
   }
