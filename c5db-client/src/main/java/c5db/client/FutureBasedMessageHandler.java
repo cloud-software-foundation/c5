@@ -86,7 +86,10 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
     // Keep track of how many outstanding requests we have and limit it.
     ChannelFuture future = channel.write(request);
     future.addListener(objectFuture -> inFlightCalls.decrementAndGet());
-    future.awaitUninterruptibly();
+    if (inFlightCalls.get() > C5Constants.IN_FLIGHT_CALLS){
+      future.awaitUninterruptibly();
+    }
+
     return settableFuture;
   }
 
