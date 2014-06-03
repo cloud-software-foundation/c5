@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.client.FakeHTable;
+import c5db.client.scanner.ClientScannerManager;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -24,6 +25,7 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.scan.ScannerManager;
 import c5db.tablet.TabletService;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
@@ -84,7 +86,8 @@ public class ManyClusterBase {
       Service.State state = server.stopAndWait();
     }
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
+    ScannerManager.INSTANCE.clearAll();
+    ClientScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass
