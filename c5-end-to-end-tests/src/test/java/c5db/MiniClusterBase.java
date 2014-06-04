@@ -17,7 +17,6 @@
 package c5db;
 
 import c5db.client.FakeHTable;
-import c5db.client.scanner.ClientScannerManager;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
@@ -85,7 +84,6 @@ public class MiniClusterBase {
     Service.State state = server.stopAndWait();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     ScannerManager.INSTANCE.clearAll();
-    ClientScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass

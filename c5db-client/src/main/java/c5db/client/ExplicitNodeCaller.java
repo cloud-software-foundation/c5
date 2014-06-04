@@ -43,10 +43,11 @@ import static c5db.client.generated.Call.Command.SCAN;
  */
 public class ExplicitNodeCaller implements TableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(ExplicitNodeCaller.class);
+
   private final AtomicLong commandId = new AtomicLong(0);
   private final C5ConnectionManager c5ConnectionManager;
-  public Channel channel;
-  private MessageHandler handler;
+  private final Channel channel;
+  private final MessageHandler handler;
 
   /**
    * C5Table is the main entry points for clients of C5DB
@@ -71,7 +72,8 @@ public class ExplicitNodeCaller implements TableInterface {
   }
 
   @Override
-  public ListenableFuture<Long> scan(ScanRequest scanRequest) {
+  public ListenableFuture<c5db.client.scanner.C5ClientScanner> scan(ScanRequest scanRequest)
+      throws InterruptedException, ExecutionException, TimeoutException {
     return handler.callScan(new Call(SCAN, commandId.incrementAndGet(), null, null, scanRequest, null), channel);
   }
 
@@ -101,4 +103,5 @@ public class ExplicitNodeCaller implements TableInterface {
   public void flushHandler() {
     channel.flush();
   }
+
 }

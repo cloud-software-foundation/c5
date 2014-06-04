@@ -15,34 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db;
+package matchers;
 
-import c5db.interfaces.replication.IndexCommitNotice;
+import c5db.interfaces.tablet.Tablet;
+import c5db.interfaces.tablet.TabletStateChange;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-public class IndexCommitMatchers {
-  public static IndexCommitNoticeMatcher hasCommitNoticeIndexValueAtLeast(long indexValue) {
-    return new IndexCommitNoticeMatcher(indexValue);
+/**
+ * Matchers for instances of {@link c5db.interfaces.tablet.TabletStateChange}
+ */
+public class TabletMatchers {
+  public static Matcher<TabletStateChange> hasMessageWithState(Tablet.State state) {
+    return new StateMatcher(state);
   }
 
-  public static class IndexCommitNoticeMatcher extends TypeSafeMatcher<IndexCommitNotice> {
-    private final long minimumIndexValue;
+  public static class StateMatcher extends TypeSafeMatcher<TabletStateChange> {
 
-    public IndexCommitNoticeMatcher(long minimumIndexValue) {
-      this.minimumIndexValue = minimumIndexValue;
+    private final Tablet.State state;
+
+    public StateMatcher(Tablet.State state) {
+      this.state = state;
     }
 
     @Override
-    protected boolean matchesSafely(IndexCommitNotice item) {
-      return item.committedIndex >= minimumIndexValue;
+    protected boolean matchesSafely(TabletStateChange item) {
+      return item.state.equals(state);
     }
 
     @Override
     public void describeTo(Description description) {
-      description.appendText("a commit notice index that is ")
-          .appendValue(minimumIndexValue);
+      description.appendText("a state that is")
+          .appendValue(state);
     }
   }
-
 }

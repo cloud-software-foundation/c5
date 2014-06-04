@@ -28,8 +28,8 @@ import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
+import c5db.client.scanner.C5ClientScanner;
 import c5db.client.scanner.ClientScanner;
-import c5db.client.scanner.ClientScannerManager;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -66,7 +66,6 @@ public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
   private long bufferSize = 100;
-  private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private byte[] regionName;
   private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
@@ -142,26 +141,12 @@ public class FakeHTable implements AutoCloseable {
         C5Constants.DEFAULT_INIT_SCAN,
         false,
         0L);
-    ListenableFuture<ClientScanner> scanner;
     try {
-      ListenableFuture<Long> scanResultFuture = c5AsyncDatabase.scan(scanRequest);
-      long scanResult = scanResultFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
-      scanner = clientScannerManager.get(scanResult);
-    } catch (ExecutionException | TimeoutException | InterruptedException e) {
-      throw new IOException(e);
-    }
-
-    if (scanner == null) {
-      String errorMessage = "The scanner disappeared from the clientScannerManager";
-      LOG.error(errorMessage);
-      throw new IOException(errorMessage);
-    }
-
-    try {
-      return scanner.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
+      ListenableFuture<C5ClientScanner> scanResultFuture = c5AsyncDatabase.scan(scanRequest);
+      C5ClientScanner c5ClientScanner = scanResultFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
+      return new ClientScanner(c5ClientScanner);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
-      LOG.error(e.getMessage());
-      throw new IOException("The scanner disappeared from the clientScannerManager");
+      throw new IOException(e);
     }
   }
 
@@ -281,9 +266,9 @@ public class FakeHTable implements AutoCloseable {
 
     }, executor);
   }
-  
+
   private void clearBufferIfSet() {
-    if (clearBufferOnFail){
+    if (clearBufferOnFail) {
       LOG.error("Had a failure clearing buffer");
       executor.shutdownNow();
       outstandingMutations.set(0);

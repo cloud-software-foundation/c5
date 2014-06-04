@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db;
+package matchers;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

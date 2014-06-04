@@ -29,8 +29,8 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.List;
 
-import static c5db.FutureMatchers.resultsIn;
-import static c5db.FutureMatchers.resultsInException;
+import static matchers.FutureMatchers.resultsIn;
+import static matchers.FutureMatchers.resultsInException;
 import static c5db.log.LogTestUtil.aSeqNum;
 import static c5db.log.LogTestUtil.anOLogEntry;
 import static c5db.log.LogTestUtil.emptyEntryList;

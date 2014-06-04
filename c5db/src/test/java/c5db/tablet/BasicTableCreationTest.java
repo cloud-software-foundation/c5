@@ -58,7 +58,7 @@ import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.TabletMatchers.hasMessageWithState;
+import static matchers.TabletMatchers.hasMessageWithState;
 
 public class BasicTableCreationTest {
 

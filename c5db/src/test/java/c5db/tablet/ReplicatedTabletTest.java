@@ -48,7 +48,7 @@ import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.TabletMatchers.hasMessageWithState;
+import static matchers.TabletMatchers.hasMessageWithState;
 
 /**
  * TDD/unit test for tablet.

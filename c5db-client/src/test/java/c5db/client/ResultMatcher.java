@@ -15,18 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.testing;
+package c5db.client;
+
+
+import org.apache.hadoop.hbase.client.Result;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 
 /**
- * Hamcrest matcher static functions to facilitate byte comparisons.
+ * A Hamcrest matcher for results
  */
-public class BytesMatchers {
+public class ResultMatcher extends TypeSafeMatcher<Result> {
+  private final Result precond;
 
-  public static BytesEqualMatcher equal(byte[] expectedValue) {
-    return new BytesEqualMatcher(expectedValue);
+
+  public ResultMatcher(Result precond) {
+    this.precond = precond;
   }
 
-  public static BytesEqualMatcher equalTo(byte[] expectedValue) {
-    return equal(expectedValue);
+
+  @Override
+  protected boolean matchesSafely(Result item) {
+    return item.listCells().size() == precond.listCells().size()
+        && item.getExists() == precond.getExists()
+        && item.toString().equals(precond.toString());
+
+  }
+
+  @Override
+  public void describeTo(Description description) {
+    description.appendText("a result ").appendText(precond.toString());
   }
 }

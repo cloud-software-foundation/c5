@@ -18,7 +18,7 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
-import c5db.CommandMatchers;
+import matchers.CommandMatchers;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.MutationProto;

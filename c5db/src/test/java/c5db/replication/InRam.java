@@ -51,8 +51,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
-import static c5db.RpcMatchers.RequestMatcher;
-import static c5db.RpcMatchers.RequestMatcher.anAppendRequest;
+import static matchers.RpcMatchers.RequestMatcher;
+import static matchers.RpcMatchers.RequestMatcher.anAppendRequest;
 import static c5db.interfaces.replication.Replicator.State.FOLLOWER;
 import static c5db.replication.ReplicationMatchers.aNoticeMatchingPeerAndCommitIndex;
 import static c5db.replication.ReplicationMatchers.aQuorumChangeCommitNotice;
@@ -75,7 +75,7 @@ import static org.hamcrest.core.IsNot.not;
 /**
  * A class for tests of the behavior of multiple interacting ReplicatorInstance nodes,
  */
-public class InRamTest {
+public class InRam {
   private static final int TEST_TIMEOUT = 10; // maximum timeout allowed for any election (seconds)
   private static final int ELECTION_TIMEOUT = 100; // milliseconds of lost contact before a follower deposes a leader
   private static final long OFFSET_STAGGERING_MILLIS = 250; // offset between different peers' clocks

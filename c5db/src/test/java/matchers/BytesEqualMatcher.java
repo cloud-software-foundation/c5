@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.testing;
+package matchers;
 
 import org.apache.hadoop.hbase.util.Bytes;
 import org.hamcrest.Description;

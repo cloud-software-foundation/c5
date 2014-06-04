@@ -14,32 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package c5db.client.scanner;
 
-package c5db;
+import c5db.client.generated.Result;
+import c5db.client.generated.ScanResponse;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import java.io.IOException;
 
-import java.util.List;
+public interface C5ClientScanner {
+  Result next() throws InterruptedException;
 
-public class CollectionMatchers {
-  public static <T extends Comparable<T>> Matcher<List<T>> isNondecreasing() {
-    return new TypeSafeMatcher<List<T>>() {
-      @Override
-      protected boolean matchesSafely(List<T> list) {
-        for (int i = 1; i < list.size(); i++) {
-          if (list.get(i).compareTo(list.get(i - 1)) < 0) {
-            return false;
-          }
-        }
-        return true;
-      }
+  Result[] next(int nbRows) throws IOException, InterruptedException;
 
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("a list whose elements are nondecreasing");
-      }
-    };
-  }
+  void close() throws InterruptedException;
+
+  void add(ScanResponse response) throws InterruptedException;
 }

@@ -23,8 +23,7 @@ import c5db.client.generated.Cell;
 import c5db.client.generated.CellType;
 import c5db.client.generated.MutateResponse;
 import c5db.client.generated.Response;
-import c5db.client.generated.ScanResponse;
-import c5db.client.scanner.ClientScannerManager;
+import c5db.client.scanner.C5ClientScanner;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -35,7 +34,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
-import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -365,51 +363,55 @@ public class C5FakeHTableTest {
   }
 
   @Test
-  public void canScan() throws IOException, InterruptedException, ExecutionException {
-    SettableFuture<Long> callFuture = SettableFuture.create();
+  public void canScan() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    C5ClientScanner c5ClientScanner = context.mock(C5ClientScanner.class);
+
+    ArrayList<c5db.client.generated.Result> results = new ArrayList<>();
+
+    ByteBuffer cf = ByteBuffer.wrap(Bytes.toBytes("cf"));
+    ByteBuffer cq = ByteBuffer.wrap(Bytes.toBytes("cq"));
+    ByteBuffer value = ByteBuffer.wrap(Bytes.toBytes("value"));
+    for (int i = 0; i != 10000; i++) {
+      ByteBuffer row = ByteBuffer.wrap(Bytes.toBytes(i));
+      results.add(new c5db.client.generated.Result(Arrays.asList(new Cell(row, cf, cq, 0l, CellType.PUT, value)), 1, true));
+    }
+
+
+    SettableFuture<C5ClientScanner> scanFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
+        allowing(channel).writeAndFlush(with(any(Call.class)));
         oneOf(messageHandler).callScan(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnValue(scanFuture));
+      }
+    });
+    scanFuture.set(c5ClientScanner);
+    context.checking(new Expectations() {
+      {
+        oneOf(c5ClientScanner).next();
+        will(returnValue(results.get(0)));
       }
     });
 
-    long scannerId = 10l;
-    ClientScannerManager.INSTANCE.createAndGet(channel, scannerId, 1);
-    callFuture.set(scannerId);
-    ResultScanner scanner = hTable.getScanner(new Scan());
+    ResultScanner scanner = hTable.getScanner(Bytes.toBytes("cf"));
+    Result result = scanner.next();
+    ResultMatcher resultMatchers = new ResultMatcher(ProtobufUtil.toResult(results.get(0)));
+    assertThat(result, resultMatchers);
 
-
-    List<Integer> cellsPerResult = Arrays.asList(1);
-
-    Cell cell = new Cell(
-        ByteBuffer.wrap(Bytes.toBytes("row")),
-        ByteBuffer.wrap(Bytes.toBytes("cf")),
-        ByteBuffer.wrap(Bytes.toBytes("cq")),
-        0l,
-        CellType.PUT,
-        ByteBuffer.wrap(Bytes.toBytes("value")));
-    List<Cell> kv = Arrays.asList(cell);
-    List<c5db.client.generated.Result> scanResults = Arrays.asList(new c5db.client.generated.Result(kv, 1, true));
-    ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, true, 0, scanResults);
-
-    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
-
-    kv = Arrays.asList(cell);
-    scanResults = Arrays.asList(new c5db.client.generated.Result(kv, 1, true));
-    scanResponse = new ScanResponse(cellsPerResult, scannerId, false, 0, scanResults);
-
-    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
-    scanResponse = new ScanResponse(Arrays.asList(0), scannerId, false, 0, new ArrayList<>());
-    ClientScannerManager.INSTANCE.get(scannerId).get().add(scanResponse);
-    Result result;
-    int counter = 0;
-    do {
-      result = scanner.next();
-      counter++;
-    } while (result != null);
-
-    assertThat(counter, is(3));
+    List<c5db.client.generated.Result> aHundredResults = results.subList(1, 101);
+    context.checking(new Expectations() {
+      {
+        oneOf(c5ClientScanner).next(100);
+        will(returnValue(aHundredResults.stream().toArray(c5db.client.generated.Result[]::new)));
+      }
+    });
+    assertThat(c5ClientScanner.next(100).length, is(100));
+    context.checking(new Expectations() {
+      {
+        oneOf(c5ClientScanner).close();
+      }
+    });
+    scanner.close();
   }
 
   @Test
@@ -478,7 +480,7 @@ public class C5FakeHTableTest {
       futures.remove().setException(new IOException("foo"));
 
       // Should only complete if queue is cleared by errors
-      for (int i = 0; i != messagesToPut ; i++) {
+      for (int i = 0; i != messagesToPut; i++) {
         Put put = new Put(new byte[1]);
         hTable.put(put);
       }

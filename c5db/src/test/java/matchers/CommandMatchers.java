@@ -1,4 +1,4 @@
-package c5db;/*
+package matchers;/*
  * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@ package c5db;/*
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import c5db.C5ServerConstants;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;

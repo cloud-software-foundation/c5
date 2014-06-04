@@ -34,7 +34,7 @@ import static c5db.client.DataHelper.valueExistsInDB;
 import static c5db.client.DataHelper.valueReadFromDB;
 import static c5db.client.DataHelper.valuesExistsInDB;
 import static c5db.client.DataHelper.valuesReadFromDB;
-import static c5db.testing.BytesMatchers.equalTo;
+import static matchers.BytesMatchers.equalTo;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
