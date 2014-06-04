@@ -24,7 +24,6 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.scan.ScannerManager;
 import c5db.tablet.TabletService;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
@@ -85,7 +84,7 @@ public class ManyClusterBase {
       Service.State state = server.stopAndWait();
     }
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-    ScannerManager.INSTANCE.clearAll();
+
   }
 
   @BeforeClass

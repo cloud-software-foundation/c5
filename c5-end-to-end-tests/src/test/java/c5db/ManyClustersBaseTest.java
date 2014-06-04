@@ -17,8 +17,8 @@
 package c5db;
 
 import c5db.client.FakeHTable;
-import matchers.ScanMatchers;
 import io.protostuff.ByteString;
+import matchers.ScanMatchers;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;

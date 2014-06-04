@@ -49,6 +49,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.util.MultiException;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +57,9 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 /**
  * The service handler for the RegionServer class. Responsible for handling the internal lifecycle
@@ -66,7 +67,7 @@ import java.util.function.Consumer;
  */
 public class RegionServerService extends AbstractService implements RegionServerModule {
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
-
+  private final ScannerManager scanManager = new ScannerManager();
   private final Fiber fiber;
   private final EventLoopGroup acceptGroup;
   private final EventLoopGroup workerGroup;
@@ -101,7 +102,7 @@ public class RegionServerService extends AbstractService implements RegionServer
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
       Futures.addCallback(f, new FutureCallback<C5Module>() {
         @Override
-        public void onSuccess(final C5Module result) {
+        public void onSuccess(@NotNull final C5Module result) {
           tabletModule = (TabletModule) result;
           bootstrap.group(acceptGroup, workerGroup)
               .option(ChannelOption.SO_REUSEADDR, true)
@@ -136,7 +137,7 @@ public class RegionServerService extends AbstractService implements RegionServer
         }
 
         @Override
-        public void onFailure(Throwable t) {
+        public void onFailure(@NotNull Throwable t) {
           notifyFailed(t);
         }
       }, fiber);
@@ -199,11 +200,27 @@ public class RegionServerService extends AbstractService implements RegionServer
   Fiber getNewFiber() throws Exception {
     List<Throwable> throwables = new ArrayList<>();
     C5FiberFactory ff = server.getFiberFactory(throwables::add);
-    if (throwables.size() > 0){
+    if (throwables.size() > 0) {
       MultiException exception = new MultiException();
       throwables.forEach(exception::add);
       throw exception;
     }
     return ff.create();
+  }
+
+  public ScannerManager getScanManager() {
+    return scanManager;
+  }
+
+  public class ScannerManager {
+    private final ConcurrentHashMap<Long, org.jetlang.channels.Channel<Integer>> scannerMap = new ConcurrentHashMap<>();
+
+    public org.jetlang.channels.Channel<Integer> getChannel(long scannerId) {
+      return scannerMap.get(scannerId);
+    }
+
+    public void addChannel(long scannerId, org.jetlang.channels.Channel<Integer> channel) {
+      scannerMap.put(scannerId, channel);
+    }
   }
 }

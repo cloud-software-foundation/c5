@@ -30,24 +30,20 @@ import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
+import c5db.regionserver.scan.ScanRunnable;
 import c5db.tablet.Region;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.ThreadFiber;
-
-import c5db.regionserver.scan.ScanRunnable;
-import c5db.regionserver.scan.ScannerManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The main netty handler for the RegionServer functionality. Maps protocol buffer calls to an action against a HRegion
@@ -55,7 +51,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private final RegionServerService regionServerService;
-  private final ScannerManager scanManager = ScannerManager.INSTANCE;
+
+
   public RegionServerHandler(RegionServerService myService) {
     this.regionServerService = myService;
   }
@@ -112,7 +109,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
         (mutateIn.getCondition() == null || mutateIn.getCondition().getRow() == null)) {
       Futures.addCallback(region.batchMutate(mutateIn.getMutation()), new FutureCallback<Boolean>() {
         @Override
-        public void onSuccess(Boolean result) {
+        public void onSuccess(@NotNull Boolean result) {
           MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), true);
           final Response response = new Response(Response.Command.MUTATE,
               call.getCommandId(),
@@ -125,8 +122,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
         }
 
         @Override
-        public void onFailure(Throwable t) {
-          t.toString();
+        public void onFailure(@NotNull Throwable t) {
         }
       });
       //TODO check success
@@ -156,7 +152,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
 
     final long scannerId = getScannerId(scanIn);
     final Integer numberOfRowsToSend = scanIn.getNumberOfRows();
-    Channel<Integer> channel = scanManager.getChannel(scannerId);
+    Channel<Integer> channel = regionServerService.getScanManager().getChannel(scannerId);
     // New Scanner
     if (null == channel) {
       final Fiber fiber = this.regionServerService.getNewFiber();
@@ -165,7 +161,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       Region region = regionServerService.getOnlineRegion(call.getScan().getRegion());
       final ScanRunnable scanRunnable = new ScanRunnable(ctx, call, scannerId, region);
       channel.subscribe(fiber, scanRunnable);
-      scanManager.addChannel(scannerId, channel);
+      regionServerService.getScanManager().addChannel(scannerId, channel);
     }
     // TODO receive exceptions
     channel.publish(numberOfRowsToSend);
@@ -218,4 +214,5 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     super.exceptionCaught(ctx, cause);
 
   }
+
 }

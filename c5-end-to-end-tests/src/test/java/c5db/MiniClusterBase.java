@@ -25,7 +25,8 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.scan.ScannerManager;
+
+import c5db.regionserver.RegionServerHandler;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
@@ -83,7 +84,6 @@ public class MiniClusterBase {
     }
     Service.State state = server.stopAndWait();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-    ScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass
