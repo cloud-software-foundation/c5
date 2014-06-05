@@ -16,7 +16,7 @@
  */
 package c5db.client;
 
-import c5db.client.codec.WebsocketProtostuffEncoder;
+import c5db.client.codec.websocket.WebsocketProtostuffEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;

@@ -214,5 +214,4 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     super.exceptionCaught(ctx, cause);
 
   }
-
 }

@@ -14,50 +14,53 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client.codec;
 
-import c5db.client.C5Constants;
-import c5db.client.generated.Call;
+package c5db.codec.websocket;
+
+import c5db.C5ServerConstants;
+import c5db.client.generated.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.protostuff.LowCopyProtobufOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
-  private static final long MAX_SIZE = C5Constants.MAX_CONTENT_LENGTH_HTTP_AGG;
-  private final WebSocketClientHandshaker handShaker;
+/**
+ * A specialized Protostuff encoder used to serialize Protostuff into a WebSocketStream and map them to a Response
+ * object. Special care must be paid to handle chunking websocket files transparently for the user.
+ */
+public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response> {
 
-  public WebsocketProtostuffEncoder(WebSocketClientHandshaker handShaker) {
-    this.handShaker = handShaker;
-  }
+  private static final long MAX_SIZE = C5ServerConstants.MAX_CONTENT_LENGTH_HTTP_AGG;
+  private static final Logger LOG = LoggerFactory.getLogger(WebsocketProtostuffEncoder.class);
 
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
-                        Call call,
-                        List<Object> objects) throws Exception {
+                        Response response,
+                        List<Object> objects) throws IOException {
 
     final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
-    Call.getSchema().writeTo(lcpo, call);
+    Response.getSchema().writeTo(lcpo, response);
     final long size = lcpo.buffer.size();
+
     List<ByteBuffer> buffers = lcpo.buffer.finish();
     ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
     try {
       if (size < MAX_SIZE) {
         final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
         objects.add(frame.copy());
-
       } else {
         long remaining = size;
         boolean first = true;
-
         while (remaining > 0) {
           WebSocketFrame frame;
           if (remaining > MAX_SIZE) {
@@ -79,9 +82,6 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
     } finally {
       byteBuf.release();
     }
-  }
 
-  public WebSocketClientHandshaker getHandShaker() {
-    return handShaker;
   }
 }

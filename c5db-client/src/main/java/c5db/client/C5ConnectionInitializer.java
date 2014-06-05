@@ -16,8 +16,8 @@
  */
 package c5db.client;
 
-import c5db.client.codec.WebsocketProtostuffDecoder;
-import c5db.client.codec.WebsocketProtostuffEncoder;
+import c5db.client.codec.websocket.WebsocketProtostuffDecoder;
+import c5db.client.codec.websocket.WebsocketProtostuffEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
