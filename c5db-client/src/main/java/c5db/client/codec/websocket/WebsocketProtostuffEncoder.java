@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client.codec;
+package c5db.client.codec.websocket;
 
 import c5db.client.C5Constants;
 import c5db.client.generated.Call;

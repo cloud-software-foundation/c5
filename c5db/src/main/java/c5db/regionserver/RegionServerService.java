@@ -19,8 +19,8 @@ package c5db.regionserver;
 
 import c5db.C5ServerConstants;
 import c5db.client.generated.RegionSpecifier;
-import c5db.codec.WebsocketProtostuffDecoder;
-import c5db.codec.WebsocketProtostuffEncoder;
+import c5db.codec.websocket.WebsocketProtostuffDecoder;
+import c5db.codec.websocket.WebsocketProtostuffEncoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -77,7 +77,6 @@ public class RegionServerService extends AbstractService implements RegionServer
   private TabletModule tabletModule;
   private Channel listenChannel;
   public final AtomicLong scannerCounter;
-
 
   public RegionServerService(EventLoopGroup acceptGroup,
                              EventLoopGroup workerGroup,

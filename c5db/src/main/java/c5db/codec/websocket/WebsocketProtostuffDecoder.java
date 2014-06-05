@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.codec;
+package c5db.codec.websocket;
 
 import c5db.client.generated.Call;
 import io.netty.channel.ChannelHandlerContext;
