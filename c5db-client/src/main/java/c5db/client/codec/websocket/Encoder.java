@@ -31,21 +31,19 @@ import io.protostuff.LowCopyProtobufOutput;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
+public class Encoder extends MessageToMessageEncoder<LowCopyProtobufOutput> {
   private static final long MAX_SIZE = C5Constants.MAX_CONTENT_LENGTH_HTTP_AGG;
   private final WebSocketClientHandshaker handShaker;
 
-  public WebsocketProtostuffEncoder(WebSocketClientHandshaker handShaker) {
+  public Encoder(WebSocketClientHandshaker handShaker) {
     this.handShaker = handShaker;
   }
 
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
-                        Call call,
+                        LowCopyProtobufOutput lcpo,
                         List<Object> objects) throws Exception {
 
-    final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
-    Call.getSchema().writeTo(lcpo, call);
     final long size = lcpo.buffer.size();
     List<ByteBuffer> buffers = lcpo.buffer.finish();
     ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));

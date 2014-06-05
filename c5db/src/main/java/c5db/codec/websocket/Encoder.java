@@ -18,10 +18,10 @@
 package c5db.codec.websocket;
 
 import c5db.C5ServerConstants;
-import c5db.client.generated.Response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
@@ -30,34 +30,30 @@ import io.protostuff.LowCopyProtobufOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-/**
- * A specialized Protostuff encoder used to serialize Protostuff into a WebSocketStream and map them to a Response
- * object. Special care must be paid to handle chunking websocket files transparently for the user.
- */
-public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response> {
+
+public class Encoder extends MessageToMessageEncoder<LowCopyProtobufOutput> {
 
   private static final long MAX_SIZE = C5ServerConstants.MAX_CONTENT_LENGTH_HTTP_AGG;
-  private static final Logger LOG = LoggerFactory.getLogger(WebsocketProtostuffEncoder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Encoder.class);
 
   @Override
-  protected void encode(ChannelHandlerContext channelHandlerContext,
-                        Response response,
-                        List<Object> objects) throws IOException {
-
-    final LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
-    Response.getSchema().writeTo(lcpo, response);
-    final long size = lcpo.buffer.size();
+  protected void encode(ChannelHandlerContext ctx, LowCopyProtobufOutput lcpo, List<Object> out) throws Exception {
 
     List<ByteBuffer> buffers = lcpo.buffer.finish();
+
+    long size = lcpo.buffer.size();
+    if (size > Integer.MAX_VALUE) {
+      throw new EncoderException("Serialized form was too large, actual size: " + size);
+    }
     ByteBuf byteBuf = Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[buffers.size()]));
+
     try {
       if (size < MAX_SIZE) {
         final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
-        objects.add(frame.copy());
+        out.add(frame.copy());
       } else {
         long remaining = size;
         boolean first = true;
@@ -76,7 +72,7 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Response
             frame = new ContinuationWebSocketFrame(true, 0, byteBuf.slice((int) (size - remaining), (int) remaining));
             remaining = 0;
           }
-          objects.add(frame.copy());
+          out.add(frame.copy());
         }
       }
     } finally {

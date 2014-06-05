@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.codec;
+package c5db.codec.protostuff;
 
+import c5db.codec.protostuff.Encoder;
+import c5db.codec.protostuff.Decoder;
 import io.netty.buffer.ByteBuf;
 import io.protostuff.Input;
 import io.protostuff.Message;
@@ -190,12 +192,12 @@ public class ProtostuffCodecTest {
   public void testSerDe() throws Exception {
 
     SerObj o = new SerObj(11, "hello world", System.currentTimeMillis(), 4.455);
-    ProtostuffEncoder<SerObj> enc = new ProtostuffEncoder<>();
+    Encoder<SerObj> enc = new Encoder<>();
     List<Object> objs = new ArrayList<>();
     enc.encode(null, o, objs);
     assertEquals(1, objs.size());
 
-    ProtostuffDecoder<SerObj> dec = new ProtostuffDecoder<>(o);
+    Decoder<SerObj> dec = new Decoder<>(o);
     List<Object> results = new ArrayList<>();
     dec.decode(null, (ByteBuf) objs.get(0), results);
 

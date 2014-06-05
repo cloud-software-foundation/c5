@@ -17,10 +17,9 @@
 
 package c5db.regionserver;
 
-import c5db.C5ServerConstants;
 import c5db.client.generated.RegionSpecifier;
-import c5db.codec.websocket.WebsocketProtostuffDecoder;
-import c5db.codec.websocket.WebsocketProtostuffEncoder;
+
+import c5db.codec.websocket.Initializer;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -34,19 +33,12 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.util.MultiException;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +80,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.server = server;
     C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
-    bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+//    bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
     scannerCounter = new AtomicLong(0);
   }
 
@@ -99,48 +91,41 @@ public class RegionServerService extends AbstractService implements RegionServer
     fiber.execute(() -> {
       // we need the tablet module:
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
-      Futures.addCallback(f, new FutureCallback<C5Module>() {
-        @Override
-        public void onSuccess(@NotNull final C5Module result) {
-          tabletModule = (TabletModule) result;
-          bootstrap.group(acceptGroup, workerGroup)
-              .option(ChannelOption.SO_REUSEADDR, true)
-              .childOption(ChannelOption.TCP_NODELAY, true)
-              .channel(NioServerSocketChannel.class)
-              .childHandler(new ChannelInitializer<SocketChannel>() {
-                              @Override
-                              protected void initChannel(SocketChannel ch) throws Exception {
-                                ChannelPipeline p = ch.pipeline();
-                                p.addLast("http-server-codec", new HttpServerCodec());
-                                p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                                p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                                p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
-                                p.addLast("encoder", new WebsocketProtostuffEncoder());
-                                p.addLast("handler", new RegionServerHandler(RegionServerService.this));
-                              }
-                            }
-              );
+      allowWebsocketHandlers(f);
 
-          bootstrap.bind(port).addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-              if (future.isSuccess()) {
-                listenChannel = future.channel();
-                notifyStarted();
-              } else {
-                LOG.error("Unable to find Region Server to {} {}", port, future.cause());
-                notifyFailed(future.cause());
-              }
-            }
-          });
-        }
-
-        @Override
-        public void onFailure(@NotNull Throwable t) {
-          notifyFailed(t);
-        }
-      }, fiber);
     });
+  }
+
+  private void allowWebsocketHandlers(ListenableFuture<C5Module> f) {
+    Futures.addCallback(f, new FutureCallback<C5Module>() {
+      @Override
+      public void onSuccess(@NotNull final C5Module result) {
+        tabletModule = (TabletModule) result;
+        bootstrap.group(acceptGroup, workerGroup)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .childOption(ChannelOption.TCP_NODELAY, true)
+            .channel(NioServerSocketChannel.class)
+            .childHandler(new Initializer(RegionServerService.this));
+
+        bootstrap.bind(port).addListener(new ChannelFutureListener() {
+          @Override
+          public void operationComplete(ChannelFuture future) throws Exception {
+            if (future.isSuccess()) {
+              listenChannel = future.channel();
+              notifyStarted();
+            } else {
+              LOG.error("Unable to find Region Server to {} {}", port, future.cause());
+              notifyFailed(future.cause());
+            }
+          }
+        });
+      }
+
+      @Override
+      public void onFailure(@NotNull Throwable t) {
+        notifyFailed(t);
+      }
+    }, fiber);
   }
 
   @Override
