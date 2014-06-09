@@ -108,23 +108,24 @@ public class HTable extends FakeHTable implements HTableInterface {
     return null;
   }
 
-  @Override
-  public void batch(List<? extends Row> actions, Object[] results) {
-  }
-
+  @Deprecated
   @Override
   public Object[] batch(List<? extends Row> actions) {
-    return new Object[0];
+    throw new RuntimeException("We don't support these legacy operations");
+  }
+
+  @Deprecated
+  @Override
+  public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) {
+    throw new RuntimeException("We don't support these legacy operations");
   }
 
   @Override
   public <R> void batchCallback(List<? extends Row> actions, Object[] results, Batch.Callback<R> callback) {
+    throw new RuntimeException("We don't support these legacy operations");
   }
 
-  @Override
-  public <R> Object[] batchCallback(List<? extends Row> actions, Batch.Callback<R> callback) {
-    return new Object[0];
-  }
+
 
 
 }

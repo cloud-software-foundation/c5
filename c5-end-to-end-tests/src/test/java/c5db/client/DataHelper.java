@@ -26,9 +26,12 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -93,7 +96,7 @@ class DataHelper {
     hTable.delete(delete);
   }
 
-  static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
+  static void put64kRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
     Put put = new Put(row).add(cf, cq, new byte[1024 * 64]);
     hTable.put(put);
     hTable.flushCommits();
@@ -109,8 +112,15 @@ class DataHelper {
   }
 
   static void putsRowInDB(FakeHTable hTable, byte[][] rows, byte[] value) throws IOException {
-    Stream<Put> puts = Arrays.asList(rows).stream().map(row -> new Put(row).add(cf, cq, value));
-    hTable.put(puts.collect(toList()));
+
+    List<Put> puts = Arrays.asList(rows).stream().map(row -> {
+      Put put = new Put(row);
+      put.add(cf, cq, value);
+      return put;
+    }).collect(Collectors.toList());
+
+    Object[] results = new Object[puts.size()];
+    hTable.batch(puts, results);
     hTable.flushCommits();
   }
 

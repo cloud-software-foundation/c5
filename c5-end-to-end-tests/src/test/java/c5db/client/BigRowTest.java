@@ -24,7 +24,7 @@ import java.io.IOException;
 public class BigRowTest extends MiniClusterBase {
   @Test
   public void shouldBeAbleToCreateABigRow() throws IOException {
-    DataHelper.putBigRowInDatabase(table, row);
+    DataHelper.put64kRowInDatabase(table, row);
   }
 
 }

@@ -25,11 +25,13 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.C5ClientScanner;
 import c5db.client.scanner.ClientScanner;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -39,8 +41,10 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -57,6 +61,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 
 /**
@@ -380,4 +385,24 @@ public class FakeHTable implements AutoCloseable {
     return this.tableName;
   }
 
+
+  public void batch(final List<? extends Row> actions, final Object[] results) throws  IOException {
+
+    try {
+      RegionAction regionAction = RequestConverter.buildRegionAction(regionName, actions);
+      List<RegionAction> regionActions = Arrays.asList(regionAction);
+      Response response = c5AsyncDatabase.multiRequest(new MultiRequest(regionActions)).get();
+      List<RegionActionResult> actionResultList = response.getMulti().getRegionActionResultList();
+      if (actionResultList.size() > results.length){
+        throw new IOException("The results array passed in is not large enough to store all of our results");
+      }
+      int counter = 0;
+      for (RegionActionResult actionResult: actionResultList){
+        results[counter++] = actionResult;
+      }
+
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+  }
 }

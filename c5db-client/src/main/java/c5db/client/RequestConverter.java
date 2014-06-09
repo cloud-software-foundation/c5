@@ -44,11 +44,15 @@ import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
 import org.apache.hadoop.hbase.DoNotRetryIOException;
+import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
+import org.apache.hadoop.hbase.protobuf.generated.ClientProtos;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -153,5 +157,40 @@ public final class RequestConverter {
 
     }
     return new RegionAction(region, true, actions);
+  }
+
+  /**
+   * Create a protocol buffer multi request for a list of actions.
+   * Propagates Actions original index.
+   *
+   * @param regionName
+   * @param actionsIn
+   * @return a multi request
+   * @throws IOException
+   */
+  public static <R> RegionAction buildRegionAction(final byte[] regionName,
+                                                   final List<? extends Row> actionsIn)
+      throws IOException {
+
+    List<Action> actions = new ArrayList<>();
+    int index = 0;
+    for (Row row: actionsIn) {
+      Action action;
+      if (row instanceof Get) {
+        Get g = (Get) row;
+        action = new Action(index, null, ProtobufUtil.toGet(g, false));
+      } else if (row instanceof Put) {
+        Put p = (Put) row;
+        action = new Action(index, ProtobufUtil.toMutation(MutationProto.MutationType.PUT, p), null);
+      } else if (row instanceof Delete) {
+        Delete d = (Delete) row;
+        action = new Action(index, ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, d), null);
+      } else {
+        throw new DoNotRetryIOException("Multi doesn't support " + row.getClass().getName());
+      }
+      actions.add(action);
+
+    }
+    return new RegionAction(RequestConverter.buildRegionSpecifier(regionName), true, actions);
   }
 }

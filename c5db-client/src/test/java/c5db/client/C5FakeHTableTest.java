@@ -21,8 +21,11 @@ package c5db.client;
 import c5db.client.generated.Call;
 import c5db.client.generated.Cell;
 import c5db.client.generated.CellType;
+import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateResponse;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
+import c5db.client.generated.ResultOrException;
 import c5db.client.scanner.C5ClientScanner;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
@@ -33,8 +36,10 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.Matcher;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -59,6 +64,7 @@ import java.util.concurrent.TimeoutException;
 import static c5db.FutureActions.returnFutureWithValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertTrue;
 
 public class C5FakeHTableTest {
@@ -532,5 +538,61 @@ public class C5FakeHTableTest {
     }
   }
 
+  @Test
+  public void batchCanSucceed() throws IOException {
 
+    List<ResultOrException> resultOrExceptions = new ArrayList<>();
+    resultOrExceptions.add(new ResultOrException(0, new c5db.client.generated.Result(), null));
+
+    List<RegionActionResult> regionActionResults = new ArrayList<>();
+    regionActionResults.add(new RegionActionResult(resultOrExceptions, null));
+
+    Response response = new Response(Response.Command.MULTI, 1l, null, null, null,
+        new MultiResponse(regionActionResults));
+
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnFutureWithValue(response));
+      }
+    });
+    List<Row> rows = new ArrayList<>();
+    rows.add(new Put(row));
+    rows.add(new Get(row));
+    Object[] results = new Object[2];
+    hTable.batch(rows, results);
+    assertThat(results.length , is(equalTo(2)));
+    RegionActionResult roe = (RegionActionResult) results[0];
+    RegionActionResult in = new RegionActionResult(resultOrExceptions, null);
+    assertThat(roe.toString(), is(in.toString()));
+  }
+
+  @Test(expected = IOException.class)
+  public void batchFailsWithWrongSizedResult() throws IOException {
+
+    List<ResultOrException> resultOrExceptions = new ArrayList<>();
+    resultOrExceptions.add(new ResultOrException(0, new c5db.client.generated.Result(), null));
+
+    List<RegionActionResult> regionActionResults = new ArrayList<>();
+    regionActionResults.add(new RegionActionResult(resultOrExceptions, null));
+
+    Response response = new Response(Response.Command.MULTI, 1l, null, null, null,
+        new MultiResponse(regionActionResults));
+
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnFutureWithValue(response));
+      }
+    });
+    List<Row> rows = new ArrayList<>();
+    rows.add(new Put(row));
+    rows.add(new Get(row));
+    Object[] results = new Object[0];
+    hTable.batch(rows, results);
+    assertThat(results.length , is(equalTo(2)));
+    RegionActionResult roe = (RegionActionResult) results[0];
+    RegionActionResult in = new RegionActionResult(resultOrExceptions, null);
+    assertThat(roe.toString(), is(in.toString()));
+  }
 }
