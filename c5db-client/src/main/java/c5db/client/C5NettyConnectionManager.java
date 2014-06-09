@@ -37,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -44,7 +45,7 @@ import java.util.concurrent.TimeoutException;
  * A class which manages all of the outbound connections from a client to a set of regions/tablets.
  */
 public class C5NettyConnectionManager implements C5ConnectionManager {
-  private final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
+  private final ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
   private final Bootstrap bootstrap = new Bootstrap();
 
   private final EventLoopGroup group = new NioEventLoopGroup();
@@ -94,6 +95,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
   public Channel getOrCreateChannel(String host, int port)
       throws InterruptedException, ExecutionException, TimeoutException {
     final String hash = getHostPortHash(host, port);
+
     if (!regionChannelMap.containsKey(hash)) {
       final Channel channel = connect(host, port);
       regionChannelMap.put(hash, channel);
@@ -128,7 +130,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
   @Override
   public void close() throws InterruptedException {
     final List<ChannelFuture> channels = new ArrayList<>();
-    for (Channel channel : regionChannelMap.getValues()) {
+    for (Channel channel : regionChannelMap.values()) {
       final ChannelFuture channelFuture = channel.close();
       channels.add(channelFuture);
     }
