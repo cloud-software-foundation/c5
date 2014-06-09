@@ -328,7 +328,7 @@ public class QuorumDelegatingLogPerformanceMeasurement {
    * Recursively construct sequence of messages. All messages sizes are stored log 2, so a 128 byte message
    * is represented by 7. The sequence is built recursively, each sequence containing three copies of the
    * previous sequence:
-   * <p>
+   * <p/>
    * First sequence:     7
    * Second sequence:    7, 8, 7, 7, 8
    * Third sequence:    (7, 8, 7, 7, 8), 9, (7, 8, 7, 7, 8), (7, 8, 7, 7, 8), 9

@@ -18,19 +18,15 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
-import c5db.CommandMatchers;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.MutationProto;
-import c5db.client.generated.Result;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
+import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import io.protostuff.Message;
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
+import matchers.CommandMatchers;
 import org.jetlang.channels.MemoryChannel;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -40,7 +36,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -76,7 +71,7 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(region).exists(with(any(Get.class)));
       will(returnValue(false));
 
-          oneOf(hRegionTablet).getPeers();
+      oneOf(hRegionTablet).getPeers();
       will(returnValue(fakePeers));
 
       oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));

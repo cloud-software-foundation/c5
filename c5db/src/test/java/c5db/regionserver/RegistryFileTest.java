@@ -37,8 +37,6 @@ public class RegistryFileTest {
     try {
       registryFile = new RegistryFile(Paths.get("/tmp"));
       registryFile.truncate();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }

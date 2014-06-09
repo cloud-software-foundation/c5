@@ -26,9 +26,12 @@ import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
+import c5db.client.scanner.C5ClientScanner;
 import c5db.client.scanner.ClientScanner;
-import c5db.client.scanner.ClientScannerManager;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
@@ -39,6 +42,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +52,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -57,11 +65,16 @@ import java.util.concurrent.TimeoutException;
 public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
-  private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
+  private long bufferSize = 100;
   private byte[] regionName;
   private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
   private byte[] tableName;
+  private final AtomicLong outstandingMutations = new AtomicLong(0);
+  private final ExecutorService executor = Executors.newSingleThreadExecutor();
+  private final List<Throwable> throwablesToThrow = new ArrayList<>();
+  private boolean autoFlush = true;
+  private boolean clearBufferOnFail = false;
 
   /**
    * A mock HTable Client
@@ -70,7 +83,8 @@ public class FakeHTable implements AutoCloseable {
    */
   public FakeHTable(String hostname, int port, ByteString tableName)
       throws InterruptedException, TimeoutException, ExecutionException {
-    c5AsyncDatabase = new SingleNodeTableInterface(hostname, port);
+    c5AsyncDatabase = new ExplicitNodeCaller(hostname, port);
+
     this.tableName = tableName.toByteArray();
     regionName = tableName.toByteArray();
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
@@ -127,15 +141,11 @@ public class FakeHTable implements AutoCloseable {
         C5Constants.DEFAULT_INIT_SCAN,
         false,
         0L);
-    ListenableFuture<ClientScanner> scanner;
     try {
-      Long scanResult = c5AsyncDatabase.scan(scanRequest).get();
-      scanner = clientScannerManager.get(scanResult);
-      if (scanner == null) {
-        throw new IOException("Unable to find scanner");
-      }
-      return scanner.get();
-    } catch (ExecutionException | InterruptedException e){
+      ListenableFuture<C5ClientScanner> scanResultFuture = c5AsyncDatabase.scan(scanRequest);
+      C5ClientScanner c5ClientScanner = scanResultFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
+      return new ClientScanner(c5ClientScanner);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException(e);
     }
   }
@@ -161,14 +171,107 @@ public class FakeHTable implements AutoCloseable {
     return results.toArray(new Boolean[results.size()]);
   }
 
-  public void put(Put put) throws IOException {
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    try {
-      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
-        throw new IOException("Not processed");
+  public void flushCommits() throws IOException {
+    waitForRunningPutsToComplete();
+    checkBufferedThrowables();
+    if (!this.autoFlush) {
+      this.autoFlush = true;
+      while (this.outstandingMutations.get() > 0) {
+        waitForRunningPutsToComplete();
       }
-    } catch (Exception e) {
+      this.autoFlush = false;
+    }
+  }
+
+  private void waitForRunningPutsToComplete() throws IOException {
+    try {
+      executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
       throw new IOException(e);
+    }
+  }
+
+  private void checkBufferedThrowables() {
+    if (throwablesToThrow.size() > 0) {
+      IOException exception = new IOException("We built up some exceptions while buffering writes");
+      throwablesToThrow.forEach(exception::addSuppressed);
+      throwablesToThrow.clear();
+      clearBufferIfSet();
+    }
+  }
+
+  public void setAutoFlush(boolean autoFlush) {
+    this.clearBufferOnFail = true;
+    this.autoFlush = autoFlush;
+  }
+
+  public boolean isAutoFlush() {
+    return this.autoFlush;
+  }
+
+  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
+    setAutoFlush(autoFlush);
+    this.clearBufferOnFail = clearBufferOnFail;
+  }
+
+  public void setAutoFlushTo(boolean autoFlush) {
+    this.autoFlush = autoFlush;
+  }
+
+  public void put(Put put) throws IOException {
+    if (this.autoFlush) {
+      syncPut(put);
+    } else {
+      bufferPut(put);
+    }
+  }
+
+  private void syncPut(Put put) throws IOException {
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
+    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+    try {
+      Response result = mutationFuture.get();
+      if (result == null || result.getMutate() == null || !result.getMutate().getProcessed()) {
+        throw new IOException("Mutation not processed");
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private void bufferPut(Put put) throws IOException {
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
+    while (outstandingMutations.get() >= bufferSize) {
+      waitForRunningPutsToComplete();
+      checkBufferedThrowables();
+    }
+    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+    outstandingMutations.incrementAndGet();
+    Futures.addCallback(mutationFuture, new FutureCallback<Response>() {
+      @Override
+      public void onSuccess(@NotNull Response result) {
+        outstandingMutations.decrementAndGet();
+        if (!result.getMutate().getProcessed()) {
+          executor.shutdownNow();
+          throwablesToThrow.add(new IOException("Mutation not processed:" + result));
+        }
+      }
+
+      @Override
+      public void onFailure(@NotNull Throwable t) {
+        throwablesToThrow.add(t);
+        LOG.error("Put failed: " + t.getMessage());
+        clearBufferIfSet();
+      }
+
+    }, executor);
+  }
+
+  private void clearBufferIfSet() {
+    if (clearBufferOnFail) {
+      LOG.error("Had a failure clearing buffer");
+      executor.shutdownNow();
+      outstandingMutations.set(0);
     }
   }
 
@@ -251,13 +354,27 @@ public class FakeHTable implements AutoCloseable {
 
 
   @Override
-  public void close() {
-    try {
-      c5AsyncDatabase.close();
-    } catch (Exception e) {
-      LOG.error("Error closing:" + e);
+  public void close() throws IOException {
+    flushCommits();
+    if (throwablesToThrow.size() > 0) {
+      IOException exception = new IOException();
+      this.throwablesToThrow.stream().forEach(exception::addSuppressed);
+      throw exception;
     }
+
+    c5AsyncDatabase.close();
   }
+
+
+  public long getWriteBufferSize() {
+    return bufferSize;
+  }
+
+  public void setWriteBufferSize(long writeBufferSize) throws IOException {
+    flushCommits();
+    this.bufferSize = writeBufferSize;
+  }
+
 
   public byte[] getTableName() {
     return this.tableName;

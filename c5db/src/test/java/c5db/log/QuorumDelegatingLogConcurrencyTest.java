@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 import static c5db.ConcurrencyTestUtil.runAConcurrencyTestSeveralTimes;
 import static c5db.ConcurrencyTestUtil.runNTimesAndWaitForAllToComplete;
-import static c5db.FutureMatchers.resultsIn;
+import static matchers.FutureMatchers.resultsIn;
 import static c5db.log.LogTestUtil.someConsecutiveEntries;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.hamcrest.MatcherAssert.assertThat;

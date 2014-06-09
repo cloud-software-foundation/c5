@@ -24,6 +24,8 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
+import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
+import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.util.concurrent.ListenableFuture;

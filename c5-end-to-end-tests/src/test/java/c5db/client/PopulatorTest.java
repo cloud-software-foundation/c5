@@ -49,19 +49,22 @@ public class PopulatorTest extends MiniClusterBase {
     try (FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, port, tableName)) {
       long start = System.currentTimeMillis();
 
-      int numberOfBatches = 1;
-      int batchSize = 1024;
+      int numberOfBatches = 1024;
+      int batchSize = 100;
       if (args.length == 2) {
         numberOfBatches = Integer.parseInt(args[0]);
         batchSize = Integer.parseInt(args[1]);
 
       }
+      table.setAutoFlush(false);
+      table.setWriteBufferSize(numberOfBatches * batchSize);
       compareToHBasePut(table,
           Bytes.toBytes("cf"),
           Bytes.toBytes("cq"),
           Bytes.toBytes("value"),
           numberOfBatches,
           batchSize);
+      table.flushCommits();
       long end = System.currentTimeMillis();
       System.out.println("time:" + (end - start));
 

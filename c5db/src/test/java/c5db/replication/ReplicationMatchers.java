@@ -17,7 +17,7 @@
 
 package c5db.replication;
 
-import c5db.RpcMatchers;
+import matchers.RpcMatchers;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import org.hamcrest.Description;
@@ -83,10 +83,10 @@ class ReplicationMatchers {
     };
   }
 
-  static Matcher<InRamTest.PeerController> theLeader() {
-    return new TypeSafeMatcher<InRamTest.PeerController>() {
+  static Matcher<InRam.PeerController> theLeader() {
+    return new TypeSafeMatcher<InRam.PeerController>() {
       @Override
-      protected boolean matchesSafely(InRamTest.PeerController peer) {
+      protected boolean matchesSafely(InRam.PeerController peer) {
         return peer.isCurrentLeader();
       }
 
@@ -97,10 +97,10 @@ class ReplicationMatchers {
     };
   }
 
-  static Matcher<InRamTest.PeerController> hasCommittedEntriesUpTo(long index) {
-    return new TypeSafeMatcher<InRamTest.PeerController>() {
+  static Matcher<InRam.PeerController> hasCommittedEntriesUpTo(long index) {
+    return new TypeSafeMatcher<InRam.PeerController>() {
       @Override
-      protected boolean matchesSafely(InRamTest.PeerController peer) {
+      protected boolean matchesSafely(InRam.PeerController peer) {
         return peer.hasCommittedEntriesUpTo(index);
       }
 
@@ -111,12 +111,12 @@ class ReplicationMatchers {
     };
   }
 
-  static Matcher<InRamTest.PeerController> willCommitEntriesUpTo(long index) {
-    return new TypeSafeMatcher<InRamTest.PeerController>() {
+  static Matcher<InRam.PeerController> willCommitEntriesUpTo(long index) {
+    return new TypeSafeMatcher<InRam.PeerController>() {
       Throwable matchException;
 
       @Override
-      protected boolean matchesSafely(InRamTest.PeerController peer) {
+      protected boolean matchesSafely(InRam.PeerController peer) {
         try {
           peer.waitForCommit(index);
           assert peer.log.getLastIndex() >= index;
@@ -132,7 +132,7 @@ class ReplicationMatchers {
       }
 
       @Override
-      public void describeMismatchSafely(InRamTest.PeerController peer, Description description) {
+      public void describeMismatchSafely(InRam.PeerController peer, Description description) {
         if (matchException != null) {
           description.appendValue(matchException.toString());
         }
@@ -140,12 +140,12 @@ class ReplicationMatchers {
     };
   }
 
-  static Matcher<InRamTest.PeerController> willRespondToAnAppendRequest() {
-    return new TypeSafeMatcher<InRamTest.PeerController>() {
+  static Matcher<InRam.PeerController> willRespondToAnAppendRequest() {
+    return new TypeSafeMatcher<InRam.PeerController>() {
       Throwable matchException;
 
       @Override
-      protected boolean matchesSafely(InRamTest.PeerController peer) {
+      protected boolean matchesSafely(InRam.PeerController peer) {
         try {
           peer.waitForAppendReply();
         } catch (Exception e) {
@@ -160,7 +160,7 @@ class ReplicationMatchers {
       }
 
       @Override
-      public void describeMismatchSafely(InRamTest.PeerController peer, Description description) {
+      public void describeMismatchSafely(InRam.PeerController peer, Description description) {
         if (matchException != null) {
           description.appendValue(matchException.toString());
         }
@@ -168,12 +168,12 @@ class ReplicationMatchers {
     };
   }
 
-  static Matcher<InRamTest.PeerController> willSend(RpcMatchers.RequestMatcher requestMatcher) {
-    return new TypeSafeMatcher<InRamTest.PeerController>() {
+  static Matcher<InRam.PeerController> willSend(RpcMatchers.RequestMatcher requestMatcher) {
+    return new TypeSafeMatcher<InRam.PeerController>() {
       Throwable matchException;
 
       @Override
-      protected boolean matchesSafely(InRamTest.PeerController peer) {
+      protected boolean matchesSafely(InRam.PeerController peer) {
         try {
           peer.waitForRequest(requestMatcher);
         } catch (Exception e) {
@@ -188,7 +188,7 @@ class ReplicationMatchers {
       }
 
       @Override
-      public void describeMismatchSafely(InRamTest.PeerController peer, Description description) {
+      public void describeMismatchSafely(InRam.PeerController peer, Description description) {
         if (matchException != null) {
           description.appendValue(matchException.toString());
         }

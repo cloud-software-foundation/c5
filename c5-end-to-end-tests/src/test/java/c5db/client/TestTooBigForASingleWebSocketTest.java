@@ -26,7 +26,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static c5db.testing.BytesMatchers.equalTo;
+import static matchers.BytesMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -73,6 +73,7 @@ public class TestTooBigForASingleWebSocketTest extends MiniClusterBase {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
     table.put(put);
+    table.flushCommits();
   }
 
 }

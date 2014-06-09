@@ -20,7 +20,7 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
-import com.google.common.util.concurrent.SettableFuture;
+import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
 import org.jetlang.channels.Request;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static c5db.FutureActions.returnFutureWithValue;
+
 public class MetaTabletLeaderBehaviorTest {
 
   @Rule
@@ -40,13 +42,12 @@ public class MetaTabletLeaderBehaviorTest {
   private Tablet hRegionTablet;
   private C5Server c5Server;
   private ControlModule controlRpcModule;
-  private SettableFuture<ControlModule> controlRpcFuture;
+
 
   @Before
   public void before() throws IOException {
     hRegionTablet = context.mock(Tablet.class, "mockHRegionTablet");
     c5Server = context.mock(C5Server.class, "mockC5Server");
-    controlRpcFuture = SettableFuture.create();
     controlRpcModule = context.mock(ControlModule.class);
   }
 
@@ -57,7 +58,7 @@ public class MetaTabletLeaderBehaviorTest {
       will(returnValue(1l));
 
       oneOf(c5Server).getModule(ModuleType.ControlRpc);
-      will(returnValue(controlRpcFuture));
+      will(returnFutureWithValue(controlRpcModule));
 
       oneOf(c5Server).getNodeId();
       will(returnValue(1l));
@@ -65,7 +66,6 @@ public class MetaTabletLeaderBehaviorTest {
       oneOf(controlRpcModule).doMessage(with(any(Request.class)));
     }});
     MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(hRegionTablet, c5Server);
-    controlRpcFuture.set(controlRpcModule);
     metaTabletLeaderBehavior.start();
   }
 }

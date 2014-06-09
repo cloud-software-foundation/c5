@@ -193,7 +193,7 @@ public class ControlServiceTest {
   public void embeddedClientBadDNSLoopup() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
-      will(returnFutureWithNodeInfo(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME")));
+      will(returnFutureWithNodeInfo(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME.")));
     }});
     ReplyWaiter<CommandRpcRequest<?>, CommandReply> waiter = new ReplyWaiter<>(rpcRequest());
 

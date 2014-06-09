@@ -16,36 +16,49 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.MiniClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class TestScannerTest extends MiniClusterBase {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.core.Is.is;
 
+
+public class TestScannerTest extends MiniClusterPopulated {
+  private static final Logger LOG = LoggerFactory.getLogger(TestScannerTest.class);
+
+  int SCANNER_TRIALS = 10;
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    int i = 0;
-    Result result;
+    for (int j = 0; j != SCANNER_TRIALS; j++) {
+      LOG.info("starting scanner trial:" + j);
+      int i = 0;
+      Result result;
 
-    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
-    do {
-      i++;
-      if (i % 1024 == 0) {
-        System.out.print("#");
-        System.out.flush();
-      }
-      if (i % (1024 * 80) == 0) {
-        System.out.println("");
-      }
-      result = scanner.next();
-    } while (result != null);
-    scanner.close();
+      ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{}));
+      int previous_row = -1;
 
+      do {
+        result = scanner.next();
+        if (result != null) {
+          int rowInt = Bytes.toInt(result.getRow());
+          assertThat(rowInt, is(previous_row + 1));
+          previous_row = rowInt;
+          i++;
+        }
+      } while (result != null);
+      scanner.close();
+      assertThat(i, is(this.NUMBER_OF_ROWS));
+    }
   }
 }

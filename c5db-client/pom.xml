@@ -62,7 +62,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>hbase-server</artifactId>
-         </dependency>
+        </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
@@ -109,6 +109,18 @@
             <artifactId>annotations</artifactId>
             <version>12.0</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jetlang</groupId>
+            <artifactId>jetlang</artifactId>
+            <version>${jetlang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-testing-utils</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 

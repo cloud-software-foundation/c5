@@ -17,6 +17,7 @@
 
 package c5db.replication;
 
+import c5db.C5ServerConstants;
 import c5db.interfaces.replication.IllegalQuorumBootstrapException;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
@@ -46,7 +47,6 @@ import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +95,8 @@ public class ReplicatorInstance implements Replicator {
    * state used by leader
    */
 
-  private final BlockingQueue<InternalReplicationRequest> logRequests = new ArrayBlockingQueue<>(100);
+  private final BlockingQueue<InternalReplicationRequest> logRequests =
+      new ArrayBlockingQueue<>(C5ServerConstants.MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG);
 
   // this is the next index from our log we need to send to each peer, kept track of on a per-peer basis.
   private final Map<Long, Long> peersNextIndex = new HashMap<>();
@@ -328,7 +329,7 @@ public class ReplicatorInstance implements Replicator {
   /**
    * Call this method on each replicator in a new quorum in order to establish the quorum
    * configuration and elect a leader.
-   * <p>
+   * <p/>
    * Before a quorum (a group of cooperating replicators) may process replication requests
    * it must elect a leader. But a leader cannot elect itself unless it's aware of its peers,
    * which requires it to log a quorum configuration entry containing that peer set. This
@@ -407,7 +408,9 @@ public class ReplicatorInstance implements Replicator {
    * or null if it was not possible to submit the request without blocking.
    */
   @FiberOnly
-  private @Nullable ListenableFuture<Long> offerQuorumChangeRequest(QuorumConfiguration quorumConfig) {
+  private
+  @Nullable
+  ListenableFuture<Long> offerQuorumChangeRequest(QuorumConfiguration quorumConfig) {
     if (this.quorumConfig.equals(quorumConfig)) {
       logger.warn("got a request to change quorum to but I'm already in that quorum config {} ", quorumConfig);
       return null;

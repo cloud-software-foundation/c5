@@ -23,9 +23,14 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
 
   ListenableFuture<Response> call(Call request, Channel channel);
 
-  ListenableFuture<Long> callScan(Call request, Channel channel);
+  ListenableFuture<Response> buffer(Call request, Channel channel);
+
+  ListenableFuture<c5db.client.scanner.C5ClientScanner> callScan(Call request, Channel channel) throws InterruptedException, ExecutionException, TimeoutException;
 }

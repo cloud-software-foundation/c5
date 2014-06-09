@@ -37,12 +37,10 @@ import c5db.util.PoolFiberFactoryWithExecutor;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -67,7 +65,8 @@ import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.TabletMatchers.hasMessageWithState;
+import static c5db.FutureActions.returnFutureWithValue;
+import static matchers.TabletMatchers.hasMessageWithState;
 
 public class TabletServiceCommandCheckTest {
 
@@ -78,10 +77,6 @@ public class TabletServiceCommandCheckTest {
     setThreadingPolicy(new Synchroniser());
   }};
   private final Channel<NewNodeVisible> newNodeNotificationChannel = new MemoryChannel<>();
-  private final SettableFuture<ImmutableMap<Long, NodeInfo>> stateFuture = SettableFuture.create();
-  private final SettableFuture<Replicator> replicationFuture = SettableFuture.create();
-  private final SettableFuture<DiscoveryModule> discoveryServiceFuture = SettableFuture.create();
-  private final SettableFuture<ReplicationModule> replicationServiceFuture = SettableFuture.create();
   private final C5FiberFactory fiberFactory = getFiberFactory(this::notifyFailed);
   private C5Server c5Server;
   private TabletService tabletService;
@@ -155,29 +150,27 @@ public class TabletServiceCommandCheckTest {
 
   @Test
   public void testCreateTable() throws Throwable {
+
+    Map<Long, NodeInfo> nodeStates = new HashMap<>();
+    nodeStates.put(1l, new NodeInfo(new Availability()));
+
     context.checking(new Expectations() {
       {
         // Prepare for the TabletService.doStart
         oneOf(c5Server).getModule(with(ModuleType.Discovery));
-        will(returnValue(discoveryServiceFuture));
-
-        // Prepare to set the regionModule for the TabletService
-        discoveryServiceFuture.set(discoveryModule);
+        will(returnFutureWithValue(discoveryModule));
 
         oneOf(c5Server).getModule(with(ModuleType.Replication));
-        will(returnValue(replicationServiceFuture));
+        will(returnFutureWithValue(replicationModule));
 
-        replicationServiceFuture.set(replicationModule);
-
-        // Begin bootstrap
-        oneOf(c5Server).isSingleNodeMode();
+        allowing(c5Server).isSingleNodeMode();
         will(returnValue(true));
 
         oneOf(discoveryModule).getNewNodeNotifications();
         will(returnValue(newNodeNotificationChannel));
 
         oneOf(discoveryModule).getState();
-        will(returnValue(stateFuture));
+        will(returnFutureWithValue(ImmutableMap.copyOf(nodeStates)));
 
         oneOf(c5Server).getConfigDirectory();
         will(returnValue(config));
@@ -192,7 +185,7 @@ public class TabletServiceCommandCheckTest {
     context.checking(new Expectations() {
       {
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicationFuture));
+        will(returnFutureWithValue(replicator));
 
         oneOf(replicator).getStateChannel();
         will(returnValue(channel));
@@ -204,16 +197,8 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicator).getQuorumId();
         will(returnValue("1"));
 
-        allowing(c5Server).isSingleNodeMode();
-        will(returnValue(true));
       }
     });
-
-    Map<Long, NodeInfo> nodeStates = new HashMap<>();
-    nodeStates.put(1l, new NodeInfo(new Availability()));
-    stateFuture.set(ImmutableMap.copyOf(nodeStates));
-    replicationFuture.set(replicator);
-
     Tablet metaTablet = context.mock(Tablet.class);
     Region metaRegion = context.mock(Region.class);
     context.checking(new Expectations() {
@@ -226,10 +211,11 @@ public class TabletServiceCommandCheckTest {
     tabletService.tabletRegistry.getTablets().put("hbase:meta,fake", metaTablet);
     context.checking(new Expectations() {
       {
-        oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(true));
 
-        will(returnValue(replicationFuture));
+        will(returnFutureWithValue(replicator));
 
         allowing(replicator).getStateChannel();
         will(returnValue(channel));
@@ -267,15 +253,10 @@ public class TabletServiceCommandCheckTest {
 
         // Prepare for the TabletService.doStart
         oneOf(c5Server).getModule(with(ModuleType.Discovery));
-        will(returnValue(discoveryServiceFuture));
-
-        // Prepare to set the regionModule for the TabletService
-        discoveryServiceFuture.set(discoveryModule);
+        will(returnFutureWithValue(discoveryModule));
 
         oneOf(c5Server).getModule(with(ModuleType.Replication));
-        will(returnValue(replicationServiceFuture));
-
-        replicationServiceFuture.set(replicationModule);
+        will(returnFutureWithValue(replicationModule));
 
         // Begin bootstrap
         oneOf(c5Server).isSingleNodeMode();
@@ -285,7 +266,7 @@ public class TabletServiceCommandCheckTest {
         will(returnValue(newNodeNotificationChannel));
 
         oneOf(discoveryModule).getState();
-        will(returnValue(stateFuture));
+        will(returnFutureWithValue(true));
 
         oneOf(c5Server).getConfigDirectory();
         will(returnValue(config));
@@ -294,16 +275,14 @@ public class TabletServiceCommandCheckTest {
 
 
     // Prepare the config directory
-    ListenableFuture<Service.State> future = tabletService.start();
-    future.get();
-    SettableFuture<Replicator> replicationFuture = SettableFuture.create();
+    tabletService.start().get();
 
     Channel channel = new MemoryChannel();
     Channel stateChangeChannel = new MemoryChannel();
 
     context.checking(new Expectations() {{
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-      will(returnValue(replicationFuture));
+      will(returnFutureWithValue(replicator));
 
       allowing(replicator).getStateChannel();
       will(returnValue(channel));
@@ -319,7 +298,7 @@ public class TabletServiceCommandCheckTest {
 
     }});
     AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
-    replicationFuture.set(replicator);
+
 
     tabletService.acceptCommand(addMetaEntryToRoot());
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));

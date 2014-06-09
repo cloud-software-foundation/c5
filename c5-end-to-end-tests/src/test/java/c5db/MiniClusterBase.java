@@ -25,6 +25,9 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+
+import c5db.regionserver.RegionServerHandler;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import io.protostuff.ByteString;
@@ -43,9 +46,11 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class MiniClusterBase {
@@ -68,12 +73,17 @@ public class MiniClusterBase {
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module : server.getModules().values()) {
-      module.stopAndWait();
+    ImmutableMap<ModuleType, C5Module> modules = null;
+
+    modules = server.getModules();
+
+    if (modules != null) {
+      for (C5Module module : modules.values()) {
+        module.stopAndWait();
+      }
     }
     Service.State state = server.stopAndWait();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
   }
 
   @BeforeClass
@@ -85,7 +95,7 @@ public class MiniClusterBase {
 
     server = Main.startC5Server(new String[]{});
     ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
-    TabletModule tabletServer = (TabletModule) tabletServerFuture.get();
+    TabletModule tabletServer = (TabletModule) tabletServerFuture.get(1, TimeUnit.SECONDS);
     stateChanges = tabletServer.getTabletStateChanges();
 
     Fiber receiver = new ThreadFiber();
@@ -106,12 +116,12 @@ public class MiniClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     table.close();
   }
 
   @Before
-  public void before() throws InterruptedException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
@@ -134,11 +144,7 @@ public class MiniClusterBase {
     commandChannel.publish(createTableCommand);
     latch.await();
 
-    try {
-      table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
-    } catch (TimeoutException | ExecutionException e) {
-      e.printStackTrace();
-    }
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
   }

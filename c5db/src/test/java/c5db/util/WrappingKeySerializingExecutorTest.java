@@ -17,7 +17,7 @@
 
 package c5db.util;
 
-import c5db.CollectionMatchers;
+import matchers.CollectionMatchers;
 import org.hamcrest.Matcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -38,8 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 import static c5db.ConcurrencyTestUtil.runAConcurrencyTestSeveralTimes;
 import static c5db.ConcurrencyTestUtil.runNTimesAndWaitForAllToComplete;
-import static c5db.FutureMatchers.resultsIn;
-import static c5db.FutureMatchers.resultsInException;
+import static matchers.FutureMatchers.resultsIn;
+import static matchers.FutureMatchers.resultsInException;
 import static com.google.common.util.concurrent.MoreExecutors.sameThreadExecutor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;

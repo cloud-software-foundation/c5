@@ -17,8 +17,8 @@
 
 package c5db.replication;
 
-import c5db.codec.ProtostuffDecoder;
-import c5db.codec.ProtostuffEncoder;
+import c5db.codec.protostuff.Decoder;
+import c5db.codec.protostuff.Encoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -52,10 +52,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -209,8 +209,8 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
   private final int port;
   private final C5Server server;
   private final Fiber fiber;
-  private final NioEventLoopGroup bossGroup;
-  private final NioEventLoopGroup workerGroup;
+  private final EventLoopGroup bossGroup;
+  private final EventLoopGroup workerGroup;
 
   private final Map<Long, Channel> connections = new HashMap<>();
   private final Map<String, ReplicatorInstance> replicatorInstances = new HashMap<>();
@@ -233,8 +233,8 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
   private long messageIdGen = 1;
 
-  public ReplicatorService(NioEventLoopGroup bossGroup,
-                           NioEventLoopGroup workerGroup,
+  public ReplicatorService(EventLoopGroup bossGroup,
+                           EventLoopGroup workerGroup,
                            int port, C5Server server) {
     this.bossGroup = bossGroup;
     this.workerGroup = workerGroup;
@@ -504,10 +504,10 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
                 protected void initChannel(SocketChannel ch) throws Exception {
                   ChannelPipeline p = ch.pipeline();
                   p.addLast("frameDecode", new ProtobufVarint32FrameDecoder());
-                  p.addLast("pbufDecode", new ProtostuffDecoder<>(ReplicationWireMessage.getSchema()));
+                  p.addLast("pbufDecode", new Decoder<>(ReplicationWireMessage.getSchema()));
 
                   p.addLast("frameEncode", new ProtobufVarint32LengthFieldPrepender());
-                  p.addLast("pbufEncoder", new ProtostuffEncoder<ReplicationWireMessage>());
+                  p.addLast("pbufEncoder", new Encoder<ReplicationWireMessage>());
 
                   p.addLast(new MessageHandler());
                 }
@@ -583,7 +583,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
   }
 
   protected void failModule(Throwable t) {
-    LOG.error("ReplicatorService failure, shutting down all ReplicatorInstances",t);
+    LOG.error("ReplicatorService failure, shutting down all ReplicatorInstances", t);
     try {
       replicatorInstances.values().forEach(ReplicatorInstance::dispose);
       fiber.dispose();

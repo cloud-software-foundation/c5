@@ -30,7 +30,8 @@ import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.HRegionServicesBridge;
+import c5db.tablet.hregionbridge.HRegionBridge;
+import c5db.tablet.hregionbridge.HRegionServicesBridge;
 import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
@@ -50,7 +51,6 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
-
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -158,13 +158,13 @@ public class TabletService extends AbstractService implements TabletModule {
                 (basePath, regionInfo, tableDescriptor, log, conf) -> {
                   HRegion hregion = null;
                   HRegionServicesBridge hRegionBridge = new HRegionServicesBridge(conf);
-                    hregion = HRegion.openHRegion(new org.apache.hadoop.fs.Path(basePath.toString()),
-                        regionInfo,
-                        tableDescriptor,
-                        log,
-                        conf,
-                        hRegionBridge,
-                        null);
+                  hregion = HRegion.openHRegion(new org.apache.hadoop.fs.Path(basePath.toString()),
+                      regionInfo,
+                      tableDescriptor,
+                      log,
+                      conf,
+                      hRegionBridge,
+                      null);
                   return new HRegionBridge(hregion);
                 }
             );

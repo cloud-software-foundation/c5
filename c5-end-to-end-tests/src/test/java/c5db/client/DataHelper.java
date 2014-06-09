@@ -55,7 +55,6 @@ class DataHelper {
         .stream()
         .map(result -> result.getValue(cf, cq)).collect(toList());
     return values.toArray(new byte[values.size()][]);
-
   }
 
   static Boolean[] valuesExistsInDB(FakeHTable hTable, byte[][] row) throws IOException {
@@ -87,17 +86,31 @@ class DataHelper {
     hTable.put(put);
   }
 
+  static void deleteRowFamilyInDB(FakeHTable hTable, byte[] row) throws IOException {
+    Delete delete = new Delete(row);
+    delete.deleteFamily(cf);
+    hTable.delete(delete);
+  }
+
+  static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
+    Put put = new Put(row).add(cf, cq, new byte[1024 * 64]);
+    hTable.put(put);
+    hTable.flushCommits();
+  }
+
   static void putRowAndValueIntoDatabase(FakeHTable hTable,
                                          byte[] row,
                                          byte[] valuePutIntoDatabase) throws IOException {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
     hTable.put(put);
+    hTable.flushCommits();
   }
 
   static void putsRowInDB(FakeHTable hTable, byte[][] rows, byte[] value) throws IOException {
     Stream<Put> puts = Arrays.asList(rows).stream().map(row -> new Put(row).add(cf, cq, value));
     hTable.put(puts.collect(toList()));
+    hTable.flushCommits();
   }
 
   static boolean checkAndPutRowAndValueIntoDatabase(FakeHTable hTable,

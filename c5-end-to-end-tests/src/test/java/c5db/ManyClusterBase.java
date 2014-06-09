@@ -50,8 +50,6 @@ import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -65,7 +63,7 @@ import java.util.concurrent.TimeoutException;
 public class ManyClusterBase {
   static int metaOnPort;
   private static Channel<CommandRpcRequest<?>> commandChannel;
-  private static List<C5Server> servers = new ArrayList<>();
+  private static final List<C5Server> servers = new ArrayList<>();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
 
@@ -76,7 +74,7 @@ public class ManyClusterBase {
   private int userTabletOn;
 
   @AfterClass()
-  public static void afterClass() throws ExecutionException, InterruptedException {
+  public static void afterClass() throws ExecutionException, InterruptedException, TimeoutException {
 
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {
@@ -100,14 +98,16 @@ public class ManyClusterBase {
     Random random = new Random();
 
     final CountDownLatch latch = new CountDownLatch(1);
+    int webServerPort = 31337 + random.nextInt(1000);
+    int controlServerPort = 20000 + random.nextInt(1000);
     for (int i = 0; i != 3; i++) {
       Path nodeBasePath = Paths.get(testFolder.getRoot().getAbsolutePath(), String.valueOf(random.nextInt()));
       new File(nodeBasePath.toUri()).mkdirs();
       System.setProperty(C5ServerConstants.C5_CFG_PATH, nodeBasePath.toString());
 
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME,
-          String.valueOf(31337 + random.nextInt(1000)));
-      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000 + random.nextInt(1000)));
+          String.valueOf(webServerPort++));
+      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort++));
 
       C5Server server = Main.startC5Server(new String[]{});
       servers.add(server);
@@ -194,7 +194,7 @@ public class ManyClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     table.close();
   }
 

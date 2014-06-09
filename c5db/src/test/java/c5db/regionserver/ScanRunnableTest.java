@@ -16,18 +16,28 @@
  */
 package c5db.regionserver;
 
+import c5db.AsyncChannelAsserts;
 import c5db.client.generated.Call;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.Scan;
 import c5db.client.generated.ScanRequest;
+import c5db.regionserver.scan.ScanRunnable;
 import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.jetlang.channels.MemoryChannel;
+import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
+import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.action.CustomAction;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +47,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static c5db.regionserver.AddElementsActionReturnTrue.addElements;
+import static c5db.AsyncChannelAsserts.assertEventually;
+import static c5db.AsyncChannelAsserts.listenTo;
+
 
 public class ScanRunnableTest {
   private final RegionScanner regionScanner;
@@ -48,6 +60,17 @@ public class ScanRunnableTest {
   private final ChannelHandlerContext ctx = context.mock(ChannelHandlerContext.class);
   private final Region region = context.mock(Region.class);
   private ScanRunnable scanRunnable;
+  Matcher matcher = new TypeSafeDiagnosingMatcher() {
+    @Override
+    protected boolean matchesSafely(Object item, Description mismatchDescription) {
+      return true;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+
+    }
+  };
 
   public ScanRunnableTest() {
     regionScanner = context.mock(RegionScanner.class);
@@ -76,7 +99,7 @@ public class ScanRunnableTest {
   }
 
   @Test
-  public void scannerCanDeliverASingleMessageOnlyOnce() throws InterruptedException, IOException {
+  public void userRequestsOneRowButManyToReturneOnlyCalledOnce() throws InterruptedException, IOException {
     byte[] row = Bytes.toBytes("row");
     byte[] cf = Bytes.toBytes("cf");
     byte[] cq = Bytes.toBytes("cq");
@@ -86,21 +109,19 @@ public class ScanRunnableTest {
     context.checking(new Expectations() {
       {
         oneOf(regionScanner).nextRaw(with(any(List.class)));
-        will(addElements(keyValue));
+        will(AddElementsActionReturnTrue.addElements(keyValue));
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
     });
-
-
     scanRunnable.onMessage(1);
   }
 
 
   @Test
-  public void scannerCanDeliverWithMultipleOnMessageInvocation() throws InterruptedException, IOException {
+  public void userRequestsThreeButOnlyOneToReturn() throws InterruptedException, IOException {
     ArrayList<KeyValue> kvs = new ArrayList<>();
+    byte[] row = Bytes.toBytes("foo");
     for (int i = 0; i != 10000; i++) {
-      byte[] row = Bytes.toBytes(i);
       byte[] cf = Bytes.toBytes(i);
       byte[] cq = Bytes.toBytes(i);
       byte[] value = Bytes.toBytes(i);
@@ -110,8 +131,9 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        exactly(3).of(regionScanner).nextRaw(with(any(List.class)));
-        will(addElements(kvs.toArray()));
+        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        will(AddElementsActionReturnFalse.addElements(kvs.toArray()));
+        oneOf(regionScanner).close();
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
     });
@@ -119,5 +141,43 @@ public class ScanRunnableTest {
     scanRunnable.onMessage(3);
   }
 
+  @Test
+  public void scanRunnableCanReactOnChannel() throws Throwable {
+    ArrayList<KeyValue> kvs = new ArrayList<>();
 
+    byte[] cf = Bytes.toBytes("cf");
+    byte[] value = Bytes.toBytes("value");
+
+
+    int rows = 1;
+    Integer count = 3;
+    for (int i = 0; i != count; i++) {
+      kvs.add(new KeyValue(Bytes.toBytes("row"), cf, Bytes.toBytes(i), value));
+    }
+
+    MemoryChannel<Integer> memoryChannel = new MemoryChannel<>();
+    Fiber fiber = new ThreadFiber();
+    fiber.start();
+    memoryChannel.subscribe(fiber, scanRunnable);
+    MemoryChannel testChannel = new MemoryChannel();
+    AsyncChannelAsserts.ChannelListener listener = listenTo(testChannel);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        will(AddElementsActionReturnTrue.addElements(kvs.toArray()));
+
+        oneOf(ctx).writeAndFlush(with(any(Response.class)));
+        will(new CustomAction("desc") {
+          @Override
+          public Object invoke(Invocation invocation) throws Throwable {
+            testChannel.publish(123);
+            return null;
+          }
+        });
+      }
+    });
+    memoryChannel.publish(rows);
+    assertEventually(listener, matcher);
+  }
 }

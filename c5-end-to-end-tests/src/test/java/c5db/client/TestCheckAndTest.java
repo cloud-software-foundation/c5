@@ -25,7 +25,7 @@ import static c5db.client.DataHelper.checkAndDeleteRowAndValueIntoDatabase;
 import static c5db.client.DataHelper.checkAndPutRowAndValueIntoDatabase;
 import static c5db.client.DataHelper.putRowAndValueIntoDatabase;
 import static c5db.client.DataHelper.valueReadFromDB;
-import static c5db.testing.BytesMatchers.equalTo;
+import static matchers.BytesMatchers.equalTo;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;

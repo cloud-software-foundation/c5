@@ -16,10 +16,13 @@
  */
 package c5db.client;
 
-import c5db.client.codec.WebsocketProtostuffEncoder;
+import c5db.client.codec.websocket.Encoder;
+import c5db.client.codec.websocket.Initializer;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -34,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -41,14 +45,15 @@ import java.util.concurrent.TimeoutException;
  * A class which manages all of the outbound connections from a client to a set of regions/tablets.
  */
 public class C5NettyConnectionManager implements C5ConnectionManager {
-  private final RegionChannelMap regionChannelMap = RegionChannelMap.INSTANCE;
+  private final ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
   private final Bootstrap bootstrap = new Bootstrap();
+
   private final EventLoopGroup group = new NioEventLoopGroup();
   private URI uri;
 
   public C5NettyConnectionManager() {
     bootstrap.group(group);
-
+    bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
     try {
       uri = new URI("ws://0.0.0.0:8080/websocket");
@@ -69,7 +74,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
         null,
         false,
         new DefaultHttpHeaders());
-    final C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
+    final Initializer initializer = new Initializer(handShaker);
     bootstrap.channel(NioSocketChannel.class).handler(initializer);
 
     final ChannelFuture future = bootstrap.connect(host, port);
@@ -90,6 +95,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
   public Channel getOrCreateChannel(String host, int port)
       throws InterruptedException, ExecutionException, TimeoutException {
     final String hash = getHostPortHash(host, port);
+
     if (!regionChannelMap.containsKey(hash)) {
       final Channel channel = connect(host, port);
       regionChannelMap.put(hash, channel);
@@ -111,7 +117,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
 
   private boolean isHandShakeConnected(Channel channel) {
     final ChannelPipeline pipeline = channel.pipeline();
-    final WebsocketProtostuffEncoder encoder = pipeline.get(WebsocketProtostuffEncoder.class);
+    final Encoder encoder = pipeline.get(Encoder.class);
     return encoder.getHandShaker().isHandshakeComplete();
   }
 
@@ -124,7 +130,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
   @Override
   public void close() throws InterruptedException {
     final List<ChannelFuture> channels = new ArrayList<>();
-    for (Channel channel : regionChannelMap.getValues()) {
+    for (Channel channel : regionChannelMap.values()) {
       final ChannelFuture channelFuture = channel.close();
       channels.add(channelFuture);
     }

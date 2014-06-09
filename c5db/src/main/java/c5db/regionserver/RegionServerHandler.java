@@ -25,30 +25,33 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutateResponse;
+import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
+import c5db.regionserver.scan.ScanRunnable;
 import c5db.tablet.Region;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.ThreadFiber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main netty handler for the RegionServer functionality. Maps protocol buffer calls to an action against a HRegion
  * and then provides a response to the caller.
  */
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
-  private static final Logger LOG = LoggerFactory.getLogger(RegionServerHandler.class);
-
   private final RegionServerService regionServerService;
-  private final ScannerManager scanManager = ScannerManager.INSTANCE;
+
 
   public RegionServerHandler(RegionServerService myService) {
     this.regionServerService = myService;
@@ -75,13 +78,16 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private void multi(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
     final MultiRequest request = call.getMulti();
 
+    List<RegionActionResult> regionActionResults = new ArrayList<>();
     if (request == null) {
       throw new IOException("Poorly specified multi. There is no actual get data in the RPC");
     }
-
-    final Region region = regionServerService.getOnlineRegion(request.getRegionActionList().get(0).getRegion());
-    region.multi(call.getMulti());
-    MultiResponse multiResponse = new MultiResponse();
+    for (RegionAction regionAction : request.getRegionActionList()) {
+      final Region region = regionServerService.getOnlineRegion(regionAction.getRegion());
+      RegionActionResult regionActionResponse = region.processRegionAction(regionAction);
+      regionActionResults.add(regionActionResponse);
+    }
+    MultiResponse multiResponse = new MultiResponse(regionActionResults);
     final Response response = new Response(Response.Command.MULTI,
         call.getCommandId(),
         null,
@@ -99,40 +105,65 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
     }
 
     final Region region = regionServerService.getOnlineRegion(call.getMutate().getRegion());
-    boolean success = region.mutate(mutateIn.getMutation(), mutateIn.getCondition());
-    MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), success);
+    if (mutateIn.getMutation().getMutateType().equals(MutationProto.MutationType.PUT) &&
+        (mutateIn.getCondition() == null || mutateIn.getCondition().getRow() == null)) {
+      Futures.addCallback(region.batchMutate(mutateIn.getMutation()), new FutureCallback<Boolean>() {
+        @Override
+        public void onSuccess(@NotNull Boolean result) {
+          MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), true);
+          final Response response = new Response(Response.Command.MUTATE,
+              call.getCommandId(),
+              null,
+              mutateResponse,
+              null,
+              null);
+          ctx.writeAndFlush(response);
 
-    final Response response = new Response(Response.Command.MUTATE,
-        call.getCommandId(),
-        null,
-        mutateResponse,
-        null,
-        null);
-    ctx.writeAndFlush(response);
+        }
+
+        @Override
+        public void onFailure(@NotNull Throwable t) {
+        }
+      });
+      //TODO check success
+
+    } else {
+      boolean success = region.mutate(mutateIn.getMutation(), mutateIn.getCondition());
+
+      //TODO check success
+      MutateResponse mutateResponse = new MutateResponse(new c5db.client.generated.Result(), success);
+
+      final Response response = new Response(Response.Command.MUTATE,
+          call.getCommandId(),
+          null,
+          mutateResponse,
+          null,
+          null);
+      ctx.writeAndFlush(response);
+    }
   }
 
 
-  private void scan(ChannelHandlerContext ctx, Call call) throws IOException,
-      RegionNotFoundException {
+  private void scan(ChannelHandlerContext ctx, Call call) throws Exception {
     final ScanRequest scanIn = call.getScan();
     if (scanIn == null) {
-      throw new IOException("Poorly specified scan. There is no actual get data in the RPC");
+      throw new IOException("Poorly specified c5db.regionserver.scan. There is no actual get data in the RPC");
     }
 
-    final long scannerId;
-    scannerId = getScannerId(scanIn);
+    final long scannerId = getScannerId(scanIn);
     final Integer numberOfRowsToSend = scanIn.getNumberOfRows();
-    Channel<Integer> channel = scanManager.getChannel(scannerId);
+    Channel<Integer> channel = regionServerService.getScanManager().getChannel(scannerId);
     // New Scanner
     if (null == channel) {
-      final Fiber fiber = new ThreadFiber();
+      final Fiber fiber = this.regionServerService.getNewFiber();
       fiber.start();
       channel = new MemoryChannel<>();
       Region region = regionServerService.getOnlineRegion(call.getScan().getRegion());
       final ScanRunnable scanRunnable = new ScanRunnable(ctx, call, scannerId, region);
       channel.subscribe(fiber, scanRunnable);
-      scanManager.addChannel(scannerId, channel);
+      regionServerService.getScanManager().addChannel(scannerId, channel);
     }
+    // TODO receive exceptions
     channel.publish(numberOfRowsToSend);
   }
 
@@ -142,9 +173,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       scannerId = scanIn.getScannerId();
     } else {
       // Make a scanner with an Id not 0
-      do {
-        scannerId = System.currentTimeMillis();
-      } while (scannerId == 0);
+      scannerId = this.regionServerService.scannerCounter.incrementAndGet();
     }
     return scannerId;
   }
@@ -177,5 +206,12 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   @Override
   public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
     ctx.flush();
+  }
+
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+      throws Exception {
+    super.exceptionCaught(ctx, cause);
+
   }
 }

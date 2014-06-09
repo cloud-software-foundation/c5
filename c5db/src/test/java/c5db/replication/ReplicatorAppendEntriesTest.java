@@ -52,8 +52,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
-import static c5db.IndexCommitMatchers.hasCommitNoticeIndexValueAtLeast;
-import static c5db.RpcMatchers.ReplyMatcher.anAppendReply;
+import static matchers.IndexCommitMatchers.hasCommitNoticeIndexValueAtLeast;
+import static matchers.RpcMatchers.ReplyMatcher.anAppendReply;
 import static c5db.interfaces.replication.Replicator.State;
 import static c5db.log.LogTestUtil.LogSequenceBuilder;
 import static c5db.log.LogTestUtil.aSeqNum;

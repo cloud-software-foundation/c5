@@ -21,12 +21,15 @@ package c5db.client;
  */
 public final class C5Constants {
   public static final int DEFAULT_INIT_SCAN = 100;
-  public static final int MAX_REQUEST_SIZE = 1000000;
+  public static final int MAX_REQUEST_SIZE = 100000;
   public static final int MAX_CACHE_SZ = MAX_REQUEST_SIZE * 2;
   public static final int TEST_PORT = 31337;
   public static final long TIMEOUT = 10000;
   public static final int MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
   public static final int MAX_RESPONSE_SIZE = Integer.MAX_VALUE;
+  public static final int IN_FLIGHT_CALLS = 100000;
+  public static final long CREATE_SCANNER_TIMEOUT = 10000;
+  public static final long TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR = 1000;
 
   private C5Constants() {
     throw new UnsupportedOperationException();

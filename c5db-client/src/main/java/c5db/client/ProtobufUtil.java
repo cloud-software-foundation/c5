@@ -57,7 +57,6 @@ import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -140,8 +139,10 @@ public class ProtobufUtil {
       Map<byte[], NavigableSet<byte[]>> families = get.getFamilyMap();
       for (Map.Entry<byte[], NavigableSet<byte[]>> family : families.entrySet()) {
         List<ByteBuffer> qualifiers = new ArrayList<>();
-        for (byte[] qualifier : family.getValue()) {
-          qualifiers.add(ByteBuffer.wrap(qualifier));
+        if (family.getValue() != null) {
+          for (byte[] qualifier : family.getValue()) {
+            qualifiers.add(ByteBuffer.wrap(qualifier));
+          }
         }
 
         Column column = new Column(ByteBuffer.wrap(family.getKey()), qualifiers);
