@@ -56,6 +56,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static c5db.FutureActions.returnFutureWithValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
@@ -77,7 +78,6 @@ public class C5FakeHTableTest {
   private final byte[] cq = Bytes.toBytes("cq");
   private final byte[] value = Bytes.toBytes("value");
   private ExplicitNodeCaller singleNodeTableInterface;
-  private SettableFuture<Response> callFuture;
   private FakeHTable hTable;
 
   @Before
@@ -98,7 +98,6 @@ public class C5FakeHTableTest {
 
     singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
     hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Does Not Exist"));
-    callFuture = SettableFuture.create();
   }
 
   @After
@@ -118,10 +117,9 @@ public class C5FakeHTableTest {
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(new Response()));
       }
     });
-    callFuture.set(new Response());
     hTable.put(new Put(row));
 
   }
@@ -129,28 +127,28 @@ public class C5FakeHTableTest {
   @Test(expected = IOException.class)
   public void putShouldThrowErrorIfMutationFailed()
       throws InterruptedException, ExecutionException, TimeoutException, MutationFailedException, IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, false), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, false), null, null);
-    callFuture.set(response);
     hTable.put(new Put(row));
   }
 
   @Test
   public void putCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
     hTable.put(new Put(row));
   }
 
@@ -310,42 +308,44 @@ public class C5FakeHTableTest {
   @Test
   public void putsCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
+
     hTable.put(Arrays.asList(new Put(row)));
   }
 
   @Test
   public void deleteCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
     hTable.delete(new Delete(row));
   }
 
   @Test
   public void deletesCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
+
     hTable.delete(Arrays.asList(new Delete(row)));
   }
 
@@ -355,10 +355,9 @@ public class C5FakeHTableTest {
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(new Response()));
       }
     });
-    callFuture.set(new Response());
     hTable.get(new Get(row));
   }
 
@@ -419,38 +418,37 @@ public class C5FakeHTableTest {
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(new Response()));
       }
     });
 
     RowMutations rm = new RowMutations(Bytes.toBytes("row"));
-    callFuture.set(new Response());
     hTable.mutateRow(rm);
   }
 
   @Test
   public void canCheckAndPut() throws IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
     hTable.checkAndPut(row, cf, cq, value, new Put(row));
   }
 
   @Test
   public void canCheckAndDelete() throws IOException {
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
     hTable.checkAndDelete(row, cf, cq, value, new Delete(row));
   }
 

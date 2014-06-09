@@ -24,7 +24,6 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.TabletStateChange;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -48,6 +47,7 @@ import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
+import static c5db.FutureActions.returnFutureWithValue;
 import static matchers.TabletMatchers.hasMessageWithState;
 
 /**
@@ -67,8 +67,6 @@ public class ReplicatedTabletTest {
   final Region.Creator regionCreator = context.mock(Region.Creator.class);
   final Region region = context.mock(Region.class);
   final C5Server server = context.mock(C5Server.class);
-
-  final SettableFuture<Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
   final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
@@ -106,9 +104,8 @@ public class ReplicatedTabletTest {
         regionCreator);
     tabletStateChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
 
-    future.set(replicator);
     tabletStateChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
-    stateChannel= new MemoryChannel<>();
+    stateChannel = new MemoryChannel<>();
     replicatorStateChangeChannel = new MemoryChannel<>();
 
     context.checking(new Expectations() {
@@ -119,7 +116,7 @@ public class ReplicatedTabletTest {
         will(returnValue(regionName));
 
         oneOf(replicationModule).createReplicator(regionName, peerList);
-        will(returnValue(future));
+        will(returnFutureWithValue(replicator));
         then(state.is("opening"));
 
         oneOf(replicator).start();
@@ -133,7 +130,7 @@ public class ReplicatedTabletTest {
             with(same(conf)));
         will(returnValue(region));
         then(state.is("opened"));
-        stateChannel= new MemoryChannel<>();
+        stateChannel = new MemoryChannel<>();
         replicatorStateChangeChannel = new MemoryChannel<ReplicatorInstanceEvent>();
       }
     });

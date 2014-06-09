@@ -18,7 +18,6 @@ package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
-import matchers.CommandMatchers;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.MutationProto;
@@ -27,6 +26,7 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import io.protostuff.Message;
+import matchers.CommandMatchers;
 import org.jetlang.channels.MemoryChannel;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;

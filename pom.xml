@@ -24,6 +24,7 @@
         <module>hbase-prefix-tree</module>
         <module>c5-proto</module>
         <module>c5-hbase-shim</module>
+        <module>c5db-testing-utils</module>
     </modules>
 
     <properties>

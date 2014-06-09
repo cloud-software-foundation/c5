@@ -35,7 +35,6 @@ import c5db.util.C5FiberFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
@@ -58,6 +57,7 @@ import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
+import static c5db.FutureActions.returnFutureWithValue;
 import static matchers.TabletMatchers.hasMessageWithState;
 
 public class BasicTableCreationTest {
@@ -68,9 +68,7 @@ public class BasicTableCreationTest {
   }};
 
   private final int QUORUM_SIZE = 1;
-  private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
-  private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
-  private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
+
   private final MemoryChannel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
   private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
   private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
@@ -81,11 +79,13 @@ public class BasicTableCreationTest {
   private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
   private final Replicator replicator = context.mock(Replicator.class);
   private final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newSingleThreadExecutor());
-  private SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
   private TabletService tabletService;
 
   @Before
   public void before() throws Throwable {
+    Map<Long, NodeInfo> nodeStates = new HashMap<>();
+    nodeStates.put(1l, new NodeInfo(new Availability()));
+
     context.checking(new Expectations() {
       {
         oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
@@ -93,20 +93,12 @@ public class BasicTableCreationTest {
 
         oneOf(c5FiberFactory).create();
         will(returnValue(poolFiberFactory.create()));
-      }
-    });
-    tabletService = new TabletService(c5Server);
-    SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
-    replicatorSettableFuture.set(replicator);
-
-    context.checking(new Expectations() {
-      {
 
         oneOf(c5Server).getModule(ModuleType.Discovery);
-        will(returnValue(discoveryModuleFuture));
+        will(returnFutureWithValue(discoveryModule));
 
         oneOf(c5Server).getModule(ModuleType.Replication);
-        will(returnValue(replicatorModuleFuture));
+        will(returnFutureWithValue(replicationModule));
 
         allowing(c5Server).getConfigDirectory();
         will(returnValue(configDirectory));
@@ -127,21 +119,14 @@ public class BasicTableCreationTest {
             with(any(String.class)),
             with.is(anything()));
         allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
+
+        oneOf(discoveryModule).getState();
+        will(returnFutureWithValue(ImmutableMap.copyOf(nodeStates)));
       }
     });
 
+    tabletService = new TabletService(c5Server);
     ListenableFuture<Service.State> future = tabletService.start();
-
-    discoveryModuleFuture.set(discoveryModule);
-
-    context.checking(new Expectations() {{
-      oneOf(discoveryModule).getState();
-      will(returnValue(nodeNotificationsCallback));
-    }});
-
-    Map<Long, NodeInfo> nodeStates = new HashMap<>();
-    nodeStates.put(1l, new NodeInfo(new Availability()));
-    nodeNotificationsCallback.set(ImmutableMap.copyOf(nodeStates));
 
     Fiber fiber = poolFiberFactory.create();
     context.checking(new Expectations() {{
@@ -151,7 +136,7 @@ public class BasicTableCreationTest {
       will(returnValue(fiber));
 
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-      will(returnValue(replicatorSettableFuture));
+      will(returnFutureWithValue(replicator));
 
       oneOf(replicator).getStateChannel();
       will(returnValue(stateChannel));
@@ -167,7 +152,7 @@ public class BasicTableCreationTest {
     AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
         = listenTo(tabletService.getTabletStateChanges());
 
-    replicatorModuleFuture.set(replicationModule);
+
     future.get();
     assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
 
@@ -184,14 +169,13 @@ public class BasicTableCreationTest {
   public void shouldCreateMetaEntryAppropriatelyOnTableCreation() throws Throwable {
 
     final Fiber startMetaFiber1 = poolFiberFactory.create();
-    replicatorSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
         oneOf(c5FiberFactory).create();
         will(returnValue(startMetaFiber1));
 
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicatorSettableFuture));
+        will(returnFutureWithValue(replicator));
 
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
@@ -208,18 +192,15 @@ public class BasicTableCreationTest {
     });
 
     tabletService.acceptCommand(C5ServerConstants.START_META + ":1");
-    replicatorSettableFuture.set(replicator);
 
     AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
         = listenTo(tabletService.getTabletStateChanges());
 
-    replicatorModuleFuture.set(replicationModule);
     assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
 
     tabletService.getTablet("hbase:meta");
     final Fiber startUserTableFiber1 = poolFiberFactory.create();
 
-    SettableFuture<Long> longSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
 
@@ -227,7 +208,7 @@ public class BasicTableCreationTest {
         will(returnValue(startUserTableFiber1));
 
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicatorSettableFuture));
+        will(returnFutureWithValue(replicator));
 
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
@@ -241,7 +222,7 @@ public class BasicTableCreationTest {
         will(returnValue("hbase:tabletName,\\x00,1.33578e495f8173aac4be480afe41410a."));
 
         allowing(replicator).logData(with(any(List.class)));
-        will(returnValue(longSettableFuture));
+        will(returnFutureWithValue(1l));
       }
     });
     ByteString tableName = ByteString.copyFromUtf8("tabletName");
@@ -249,7 +230,6 @@ public class BasicTableCreationTest {
     AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
 
     tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName, nodeId));
-    replicatorSettableFuture.set(replicator);
     assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
 
   }

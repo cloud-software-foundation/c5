@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static c5db.FutureActions.returnFutureWithValue;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -82,8 +83,6 @@ public class C5DatabaseTest {
   private final Channel channel = context.mock(Channel.class);
 
   private ExplicitNodeCaller singleNodeTableInterface;
-  private SettableFuture<Response> callFuture;
-
 
   @Before
   public void before() throws InterruptedException, ExecutionException, TimeoutException {
@@ -102,7 +101,7 @@ public class C5DatabaseTest {
     });
 
     singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
-    callFuture = SettableFuture.create();
+
   }
 
   @After
@@ -119,10 +118,12 @@ public class C5DatabaseTest {
 
   @Test
   public void mutateMe() {
+
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
 
@@ -131,30 +132,31 @@ public class C5DatabaseTest {
 
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, new MutationProto(), null);
     singleNodeTableInterface.mutate(mutateRequest);
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
+
 
     Condition condition = new Condition();
     mutateRequest = new MutateRequest(regionSpecifier, new MutationProto(), condition);
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
 
     singleNodeTableInterface.mutate(mutateRequest);
-    response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
-    callFuture.set(response);
+
+
   }
 
   @Test
   public void getMe()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+
+    Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null);
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
+        will(returnFutureWithValue(response));
       }
     });
 
@@ -164,8 +166,8 @@ public class C5DatabaseTest {
     Get get = new Get();
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
     singleNodeTableInterface.get(getRequest);
-    Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null);
-    callFuture.set(response);
+
+
   }
 
 
@@ -235,20 +237,21 @@ public class C5DatabaseTest {
 
   @Test
   public void multiMe() {
-    context.checking(new Expectations() {
-      {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
-        will(returnValue(callFuture));
-      }
-    });
     List<RegionAction> regionActions = new ArrayList<>();
     MultiRequest multiRequest = new MultiRequest(regionActions);
-    singleNodeTableInterface.multiRequest(multiRequest);
 
     List<RegionActionResult> results = new ArrayList<>();
     MultiResponse multiResponse = new MultiResponse(results);
+
     Response response = new Response(Response.Command.MULTI, 1l, null, null, null, multiResponse);
-    callFuture.set(response);
+    context.checking(new Expectations() {
+      {
+        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        will(returnFutureWithValue(response));
+      }
+    });
+    singleNodeTableInterface.multiRequest(multiRequest);
+
   }
 
 }

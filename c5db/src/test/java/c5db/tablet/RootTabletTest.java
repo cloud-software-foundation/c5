@@ -29,7 +29,6 @@ import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.Message;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -58,6 +57,7 @@ import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
+import static c5db.FutureActions.returnFutureWithValue;
 import static matchers.TabletMatchers.hasMessageWithState;
 
 /**
@@ -78,7 +78,6 @@ public class RootTabletTest {
   private final Region.Creator regionCreator = context.mock(Region.Creator.class);
   private final Region region = context.mock(Region.class);
   private final C5Server server = context.mock(C5Server.class);
-  private final SettableFuture<Replicator> future = SettableFuture.create();
 
   // Value objects for the test.
   private final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
@@ -114,7 +113,6 @@ public class RootTabletTest {
         tabletFiber,
         replicationModule,
         regionCreator);
-    future.set(replicator);
     stateChangeChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
     stateMemoryChannel = new MemoryChannel<>();
     commandMemoryChannel = new MemoryChannel<>();
@@ -147,7 +145,7 @@ public class RootTabletTest {
     context.checking(new Expectations() {
       {
         oneOf(replicationModule).createReplicator(regionName, peerList);
-        will(returnValue(future));
+        will(returnFutureWithValue(replicator));
         then(state.is("opening"));
 
         oneOf(replicator).start();
