@@ -168,14 +168,12 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   }
 
   private long getScannerId(ScanRequest scanIn) {
-    long scannerId;
     if (scanIn.getScannerId() > 0) {
-      scannerId = scanIn.getScannerId();
+      return scanIn.getScannerId();
     } else {
       // Make a scanner with an Id not 0
-      scannerId = this.regionServerService.scannerCounter.incrementAndGet();
+      return this.regionServerService.scannerCounter.incrementAndGet();
     }
-    return scannerId;
   }
 
   private void get(ChannelHandlerContext ctx, Call call) throws IOException, RegionNotFoundException {
