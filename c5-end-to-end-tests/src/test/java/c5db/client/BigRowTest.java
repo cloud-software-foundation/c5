@@ -21,6 +21,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+/**
+ * A simple class that makes sure we can commit 65535 bytes.
+ */
 public class BigRowTest extends MiniClusterBase {
   @Test
   public void shouldBeAbleToCreateABigRow() throws IOException {
