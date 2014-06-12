@@ -23,7 +23,6 @@ public class C5ServerConstants {
 
   public static final String WAL_ROOT_DIRECTORY_NAME = "wal";
   public static final String WAL_LOG_FILE_SUBDIRECTORY_NAME = "logs";
-  public static final String ARCHIVE_DIR = "old_wal";
   public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
 

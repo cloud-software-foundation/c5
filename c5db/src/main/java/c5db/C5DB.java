@@ -234,7 +234,7 @@ public class C5DB extends AbstractService implements C5Server {
   protected void doStart() {
     try {
       // TODO this should be done as part of the log file service startup, if at all.
-      new LogFileService(configDirectory.getBaseConfigPath()).clearOldArchivedLogs(0);
+      new LogFileService(configDirectory.getBaseConfigPath()).clearAllLogs();
     } catch (IOException e) {
       notifyFailed(e);
     }
