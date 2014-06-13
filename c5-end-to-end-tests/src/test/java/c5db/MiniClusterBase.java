@@ -88,7 +88,7 @@ public class MiniClusterBase {
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-
+    ScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass

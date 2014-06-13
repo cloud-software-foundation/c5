@@ -45,6 +45,8 @@ import c5db.client.generated.ScanRequest;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
@@ -52,7 +54,7 @@ import java.io.IOException;
 interface TableInterface extends AutoCloseable {
   ListenableFuture<Response> get(GetRequest get);
 
-  ListenableFuture<Long> scan(ScanRequest scanRequest);
+  ListenableFuture<c5db.client.scanner.C5ClientScanner> scan(ScanRequest scanRequest) throws ExecutionException, InterruptedException, TimeoutException;
 
   ListenableFuture<Response> mutate(MutateRequest mutateRequest);
 

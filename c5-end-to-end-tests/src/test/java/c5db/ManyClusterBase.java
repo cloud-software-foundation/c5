@@ -63,7 +63,7 @@ import java.util.concurrent.TimeoutException;
 public class ManyClusterBase {
   private static int metaOnPort;
   private static Channel<CommandRpcRequest<?>> commandChannel;
-  private static List<C5Server> servers = new ArrayList<>();
+  private static final List<C5Server> servers = new ArrayList<>();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
   private static long metaOnNode;
@@ -89,7 +89,6 @@ public class ManyClusterBase {
     servers = new ArrayList<>();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     ScannerManager.INSTANCE.clearAll();
-    ClientScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass
@@ -104,6 +103,8 @@ public class ManyClusterBase {
     Random random = new Random();
 
     final CountDownLatch latch = new CountDownLatch(1);
+    int webServerPort = 31337 + random.nextInt(1000);
+    int controlServerPort = 20000 + random.nextInt(1000);
     for (int i = 0; i != 3; i++) {
       Path nodeBasePath = Paths.get(testFolder.getRoot().getAbsolutePath(), String.valueOf(random.nextInt()));
       boolean success = new File(nodeBasePath.toUri()).mkdirs();
@@ -113,8 +114,8 @@ public class ManyClusterBase {
       System.setProperty(C5ServerConstants.C5_CFG_PATH, nodeBasePath.toString());
 
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME,
-          String.valueOf(31337 + random.nextInt(1000)));
-      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(20000 + random.nextInt(1000)));
+          String.valueOf(webServerPort++));
+      System.setProperty(C5ServerConstants.CONTROL_SERVER_PORT_PROPERTY_NAME, String.valueOf(controlServerPort++));
 
       C5Server server = Main.startC5Server(new String[]{});
       servers.add(server);

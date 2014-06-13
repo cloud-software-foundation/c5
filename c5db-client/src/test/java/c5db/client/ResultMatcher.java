@@ -14,23 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.client;
 
-import c5db.client.generated.Call;
-import c5db.client.generated.Response;
-import com.google.common.util.concurrent.ListenableFuture;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInboundHandler;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import org.apache.hadoop.hbase.client.Result;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 
-public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
+/**
+ * A Hamcrest matcher for results
+ */
+public class ResultMatcher extends TypeSafeMatcher<Result> {
+  private final Result precond;
 
-  ListenableFuture<Response> call(Call request, Channel channel);
 
-  ListenableFuture<Response> buffer(Call request, Channel channel);
+  public ResultMatcher(Result precond) {
+    this.precond = precond;
+  }
 
-  ListenableFuture<c5db.client.scanner.C5ClientScanner> callScan(Call request, Channel channel) throws InterruptedException, ExecutionException, TimeoutException;
+
+  @Override
+  protected boolean matchesSafely(Result item) {
+    return item.listCells().size() == precond.listCells().size()
+        && item.getExists() == precond.getExists()
+        && item.toString().equals(precond.toString());
+
+  }
+
+  @Override
+  public void describeTo(Description description) {
+    description.appendText("a result ").appendText(precond.toString());
+  }
 }
