@@ -26,7 +26,8 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.scan.ScannerManager;
+
+import c5db.regionserver.RegionServerHandler;
 import c5db.util.TabletNameHelpers;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -88,7 +89,6 @@ public class MiniClusterBase {
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-    ScannerManager.INSTANCE.clearAll();
   }
 
   @BeforeClass

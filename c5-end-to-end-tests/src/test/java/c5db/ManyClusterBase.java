@@ -24,7 +24,6 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-import c5db.regionserver.scan.ScannerManager;
 import c5db.tablet.TabletService;
 import c5db.util.TabletNameHelpers;
 import io.protostuff.ByteString;
@@ -88,7 +87,7 @@ public class ManyClusterBase {
     }
     servers = new ArrayList<>();
     Log.warn("-----------------------------------------------------------------------------------------------------------");
-    ScannerManager.INSTANCE.clearAll();
+
   }
 
   @BeforeClass
