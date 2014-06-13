@@ -45,7 +45,6 @@ public class AsyncWriteTest extends MiniClusterBase {
 
   private static final int TO_SEND = 100000;
   CountDownLatch countDownLatch = new CountDownLatch(TO_SEND);
-  AtomicLong outStandingRequests = new AtomicLong(0);
 
   @Test
   public void testPopulator() throws ExecutionException, InterruptedException, TimeoutException {
@@ -68,6 +67,7 @@ public class AsyncWriteTest extends MiniClusterBase {
     for (int i = 0; i != TO_SEND; i++) {
       sendProto(regionSpecifier, cf, Arrays.asList(qualifierValue), singleNodeTable, i);
     }
+    System.out.println("buffered");
     countDownLatch.await();
   }
 
@@ -87,12 +87,10 @@ public class AsyncWriteTest extends MiniClusterBase {
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutationProto, new Condition());
 
     ListenableFuture<Response> future = singleNodeTable.bufferMutate(mutateRequest);
-    this.outStandingRequests.incrementAndGet();
 
     Futures.addCallback(future, new FutureCallback<Response>() {
       @Override
       public void onSuccess(Response result) {
-        outStandingRequests.decrementAndGet();
         countDownLatch.countDown();
       }
 
