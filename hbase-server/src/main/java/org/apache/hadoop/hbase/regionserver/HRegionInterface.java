@@ -44,10 +44,13 @@ public interface HRegionInterface {
 
   void put(Put put) throws IOException;
 
-
   Result get(Get get) throws IOException;
 
   RegionScanner getScanner(Scan scan) throws IOException;
 
   void mutateRow(RowMutations rm) throws IOException;
+
+  void processRowsWithLocks(RowProcessor<?, ?> processor) throws IOException;
+
+  OperationStatus[] batchMutate(Mutation[] putArray) throws IOException;
 }

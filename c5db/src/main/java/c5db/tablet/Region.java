@@ -19,16 +19,15 @@ package c5db.tablet;
 
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
-import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Result;
 import c5db.client.generated.Scan;
-
+import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
@@ -41,6 +40,9 @@ import java.nio.file.Path;
  * Provides our abstraction to HRegion.
  */
 public interface Region {
+
+  ListenableFuture<Boolean> batchMutate(MutationProto mutateProto) throws IOException;
+
   /**
    * Creates instances of Region.  This exists to make mocking and testing
    * easier.
@@ -50,15 +52,13 @@ public interface Region {
 
   boolean mutate(MutationProto mutateProto, Condition condition) throws IOException;
 
-  org.apache.hadoop.hbase.regionserver.HRegionInterface getTheRegion();
-
   boolean exists(Get get) throws IOException;
 
   Result get(Get get) throws IOException;
 
-  void multi(MultiRequest multi) throws IOException;
-
   RegionScanner getScanner(Scan scan) throws IOException;
+
+  RegionActionResult processRegionAction(RegionAction regionAction);
 
   /**
    * Constructor arguments basically.

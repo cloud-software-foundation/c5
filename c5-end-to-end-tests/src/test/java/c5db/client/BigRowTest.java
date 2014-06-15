@@ -17,38 +17,14 @@
 package c5db.client;
 
 import c5db.MiniClusterBase;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
 
-public class TestFlushTest extends MiniClusterBase {
-
-
+public class BigRowTest extends MiniClusterBase {
   @Test
-  public void testFlush() throws IOException {
-    Random random = new Random();
-    byte[] randomBytes = new byte[1024 * 1024];
-    random.nextBytes(randomBytes);
-    byte[] cf = Bytes.toBytes("cf");
-    byte[] cq = Bytes.toBytes("cq");
-
-    ArrayList<Put> puts = new ArrayList<>();
-    for (int j = 1; j != 24; j++) {
-      for (int i = 1; i != 12; i++) {
-        puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, randomBytes));
-      }
-
-      for (Put put : puts) {
-        table.put(put);
-      }
-
-      puts.clear();
-    }
-
+  public void shouldBeAbleToCreateABigRow() throws IOException {
+    DataHelper.putBigRowInDatabase(table, row);
   }
 
 }

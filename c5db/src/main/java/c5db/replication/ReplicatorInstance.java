@@ -17,6 +17,7 @@
 
 package c5db.replication;
 
+import c5db.C5ServerConstants;
 import c5db.interfaces.replication.IllegalQuorumBootstrapException;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
@@ -48,7 +49,6 @@ import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +97,8 @@ public class ReplicatorInstance implements Replicator {
    * state used by leader
    */
 
-  private final BlockingQueue<InternalReplicationRequest> logRequests = new ArrayBlockingQueue<>(100);
+  private final BlockingQueue<InternalReplicationRequest> logRequests =
+      new ArrayBlockingQueue<>(C5ServerConstants.MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG);
 
   // this is the next index from our log we need to send to each peer, kept track of on a per-peer basis.
   private final Map<Long, Long> peersNextIndex = new HashMap<>();
@@ -387,6 +388,11 @@ public class ReplicatorInstance implements Replicator {
             e)
     );
     fiber.dispose(); // kill us forever.
+  }
+
+  private void setState(State state) {
+    myState = state;
+    stateMemoryChannel.publish(state);
   }
 
   /**
@@ -854,7 +860,7 @@ public class ReplicatorInstance implements Replicator {
     lastRPC = info.currentTimeMillis();
     // increment term.
     setCurrentTerm(currentTerm + 1);
-    myState = State.CANDIDATE;
+    setState(State.CANDIDATE);
 
     RequestVote msg = new RequestVote(currentTerm, myId, log.getLastIndex(), log.getLastTerm());
 
@@ -971,7 +977,7 @@ public class ReplicatorInstance implements Replicator {
   @FiberOnly
   private void becomeFollower() {
     boolean wasLeader = myState == State.LEADER;
-    myState = State.FOLLOWER;
+    setState(State.FOLLOWER);
 
     if (wasLeader) {
       stateChangeChannel.publish(
@@ -999,8 +1005,7 @@ public class ReplicatorInstance implements Replicator {
   private void becomeLeader() {
     logger.warn("I AM THE LEADER NOW, commence AppendEntries RPCs term = {}", currentTerm);
 
-    myState = State.LEADER;
-    stateMemoryChannel.publish(State.LEADER);
+    setState(State.LEADER);
 
     // Page 7, para 5
     long myNextLog = log.getLastIndex() + 1;

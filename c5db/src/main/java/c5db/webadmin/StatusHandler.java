@@ -38,6 +38,7 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Servlet. Yes.
@@ -50,7 +51,8 @@ public class StatusHandler extends AbstractHandler {
   }
 
   @Override
-  public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+  public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException {
     if (!target.equals("/")) {
       return;
     }
@@ -69,7 +71,7 @@ public class StatusHandler extends AbstractHandler {
       DiscoveryModule discoveryModule = (DiscoveryModule) service.getServer().getModule(ModuleType.Discovery).get();
       ListenableFuture<ImmutableMap<Long, NodeInfo>> nodeFuture =
           discoveryModule.getState();
-      ImmutableMap<Long,NodeInfo> nodes = nodeFuture.get();
+      ImmutableMap<Long, NodeInfo> nodes = nodeFuture.get();
 
       TabletModule tabletModule = (TabletModule) service.getServer().getModule(ModuleType.Tablet).get();
       Collection<Tablet> tablets = tabletModule.getTablets();
@@ -78,7 +80,7 @@ public class StatusHandler extends AbstractHandler {
       template.execute(writer, templateContext);
       writer.flush();
 
-    } catch (ExecutionException|InterruptedException e) {
+    } catch (ExecutionException | InterruptedException | TimeoutException e) {
       throw new IOException("Getting status", e);
     }
   }

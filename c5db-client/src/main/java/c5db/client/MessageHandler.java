@@ -27,5 +27,7 @@ public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
 
   ListenableFuture<Response> call(Call request, Channel channel);
 
+  ListenableFuture<Response> buffer(Call request, Channel channel);
+
   ListenableFuture<Long> callScan(Call request, Channel channel);
 }

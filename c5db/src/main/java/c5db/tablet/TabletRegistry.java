@@ -130,7 +130,6 @@ public class TabletRegistry {
     configDirectory.writePeersToFile(quorumName, peerList);
 
     Fiber tabletFiber = fiberFactory.create();
-    
     Tablet newTablet = tabletFactory.create(
         c5server,
         regionInfo,

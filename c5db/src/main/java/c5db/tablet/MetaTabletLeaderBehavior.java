@@ -37,7 +37,7 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaTabletLeaderBehavior.class);
   private final ListenableFuture<C5Module> f;
-  private final  Request<CommandRpcRequest<?>, CommandReply> request;
+  private final Request<CommandRpcRequest<?>, CommandReply> request;
 
   public MetaTabletLeaderBehavior(final Tablet tablet, final C5Server server) {
     String metaLeader = C5ServerConstants.SET_META_LEADER + " : " + server.getNodeId();

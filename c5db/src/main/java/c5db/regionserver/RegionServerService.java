@@ -34,13 +34,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -62,16 +63,16 @@ public class RegionServerService extends AbstractService implements RegionServer
   private static final Logger LOG = LoggerFactory.getLogger(RegionServerService.class);
 
   private final Fiber fiber;
-  private final NioEventLoopGroup acceptGroup;
-  private final NioEventLoopGroup workerGroup;
+  private final EventLoopGroup acceptGroup;
+  private final EventLoopGroup workerGroup;
   private final int port;
   private final C5Server server;
   private final ServerBootstrap bootstrap = new ServerBootstrap();
   private TabletModule tabletModule;
   private Channel listenChannel;
 
-  public RegionServerService(NioEventLoopGroup acceptGroup,
-                             NioEventLoopGroup workerGroup,
+  public RegionServerService(EventLoopGroup acceptGroup,
+                             EventLoopGroup workerGroup,
                              int port,
                              C5Server server) {
     this.acceptGroup = acceptGroup;
@@ -80,6 +81,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.server = server;
     C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
+    bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
   }
 
   @Override

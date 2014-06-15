@@ -46,7 +46,6 @@ import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
-import org.mortbay.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -138,7 +137,7 @@ public class ClientScanner extends AbstractClientScanner {
       scanResults.add(result);
       this.outStandingRequests--;
     }
-    if (! this.isClosed && !response.getMoreResults()) {
+    if (!this.isClosed && !response.getMoreResults()) {
       this.close();
     }
 

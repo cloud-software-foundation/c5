@@ -33,7 +33,7 @@ public class SystemTableNames {
   }
 
   public static TableName metaTableName() {
-    return  TableName.valueOf(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR, "meta");
+    return TableName.valueOf(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR, "meta");
   }
   public static TableName rootTableName() {
     return HTableDescriptor.ROOT_TABLE_NAME;

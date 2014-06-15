@@ -29,9 +29,12 @@ import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.Graph;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,27 +49,41 @@ import java.util.Set;
 public class ModuleDeps {
   private static final Logger LOG = LoggerFactory.getLogger(ModuleDeps.class);
 
+  public static List<ModuleType> getModuleReverseDependencyOrder(Collection<Class<?>> startThese)
+      throws ClassNotFoundException {
+    List<ModuleType> moduleTypeList = new ArrayList<>(startThese.size());
 
-  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(String... startThese) throws ClassNotFoundException {
-    Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
-    Map<ModuleType, Class<?>> typeClassMap = new HashMap<>();
-
-    Queue<Class<?>> q = new LinkedList<>();
-    for (String name : startThese) {
-      Class<?> c = Class.forName(name);
-      q.add(c);
+    for (Graph.Node<ModuleType> node : Iterables.concat(createGraph(startThese))) {
+      moduleTypeList.add(node.type);
     }
 
+    return moduleTypeList;
+  }
+
+  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(String... startThese) throws ClassNotFoundException {
+    List<Class<?>> classList = new LinkedList<>();
+
+    for (String name : startThese) {
+      Class<?> c = Class.forName(name);
+      classList.add(c);
+    }
+
+    return createGraph(classList);
+  }
+
+  public static List<ImmutableList<Graph.Node<ModuleType>>> createGraph(Collection<Class<?>> startThese)
+      throws ClassNotFoundException {
+    Map<ModuleType, Graph.Node<ModuleType>> allNodes = new HashMap<>();
+    Queue<Class<?>> queue = new LinkedList<>(startThese);
+
     Class<?> parent;
-    while ((parent = q.poll()) != null) {
+    while ((parent = queue.poll()) != null) {
       ModuleTypeBinding mt = parent.getAnnotation(ModuleTypeBinding.class);
 
       if (mt == null) {
         LOG.warn("Module interface {} has no type annotation - skipping", parent);
         continue;
       }
-
-      typeClassMap.put(mt.value(), parent);
 
       ModuleType type = mt.value();
       Graph.Node<ModuleType> node = allNodes.get(type);
@@ -95,7 +112,7 @@ public class ModuleDeps {
         }
         node.dependencies.add(depNode);
         // add to the queue:
-        q.add(dep);
+        queue.add(dep);
       }
     }
 

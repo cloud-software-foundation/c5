@@ -18,7 +18,6 @@
 package c5db.regionserver;
 
 
-import c5db.C5ServerConstants;
 import c5db.client.generated.Call;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
@@ -26,8 +25,6 @@ import c5db.client.generated.ScanResponse;
 import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.jetlang.core.Callback;
 
@@ -52,7 +49,7 @@ public class ScanRunnable implements Callback<Integer> {
                       final long scannerId,
                       final Region region) throws IOException {
     super();
-    assert(call.getScan() != null);
+    assert (call.getScan() != null);
 
     this.ctx = ctx;
     this.call = call;
@@ -107,16 +104,11 @@ public class ScanRunnable implements Callback<Integer> {
           cellsPerResult.add(cells.size());
           scanResults.add(new Result(cells, cells.size(), cells.size() > 0));
         }
-
         rowsToSend++;
-
-      } while (moreResults
-          && rowsToSend < C5ServerConstants.MSG_SIZE
-          && numberOfMessagesToSend - rowsToSend > 0);
-
+        // Our super advanced scanning algorithm. Could be greatly improved
+      } while (moreResults && rowsToSend < 100 && numberOfMessagesToSend - rowsToSend > 0);
       ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
       Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
-
       ctx.writeAndFlush(response);
       numberOfMsgsLeft -= rowsToSend;
     }

@@ -87,6 +87,17 @@ class DataHelper {
     hTable.put(put);
   }
 
+  static void deleteRowFamilyInDB(FakeHTable hTable, byte[] row) throws IOException {
+    Delete delete = new Delete(row);
+    delete.deleteFamily(cf);
+    hTable.delete(delete);
+  }
+
+  static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
+    Put put = new Put(row).add(cf, cq, new byte[1024 * 1024 * 64]);
+    hTable.put(put);
+  }
+
   static void putRowAndValueIntoDatabase(FakeHTable hTable,
                                          byte[] row,
                                          byte[] valuePutIntoDatabase) throws IOException {

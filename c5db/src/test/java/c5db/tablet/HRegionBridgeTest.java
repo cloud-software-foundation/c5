@@ -23,42 +23,33 @@ import c5db.client.generated.ByteArrayComparable;
 import c5db.client.generated.CompareType;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
-import c5db.client.generated.MultiRequest;
-import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Scan;
-import c5db.client.generated.ScanRequest;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegionInterface;
+import org.apache.hadoop.hbase.regionserver.MultiRowMutationProcessor;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.core.IsNull;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.management.Query;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import static javax.management.Query.not;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class HRegionBridgeTest {
   @Rule
@@ -66,22 +57,23 @@ public class HRegionBridgeTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  HRegionInterface hRegionInterface = context.mock(HRegionInterface.class);
-  HRegionBridge hRegionBridge = new HRegionBridge(hRegionInterface);
+  private final HRegionInterface hRegionInterface = context.mock(HRegionInterface.class);
+  private final HRegionBridge hRegionBridge = new HRegionBridge(hRegionInterface);
 
   @Test
-  public void testMutate() throws Exception {
+  public void shouldBeAbleToMutate() throws Exception {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     context.checking(new Expectations() {
       {
         oneOf(hRegionInterface).put(with(any(Put.class)));
-      }});
+      }
+    });
 
-     hRegionBridge.mutate(mutation, new Condition());
-   }
+    hRegionBridge.mutate(mutation, new Condition());
+  }
 
   @Test
-  public void testDeleteWithFailCondition() throws Exception {
+  public void shouldSkipDeleteWhenConditionDoesNotPass() throws Exception {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
     context.checking(new Expectations() {
       {
@@ -93,7 +85,8 @@ public class HRegionBridgeTest {
             with(any(Mutation.class)),
             with(any(boolean.class)));
         will(returnValue(false));
-      }});
+      }
+    });
 
     Condition condition = new Condition(ByteBuffer.wrap(Bytes.toBytes("row")),
         ByteBuffer.wrap(Bytes.toBytes("cf")),
@@ -106,7 +99,7 @@ public class HRegionBridgeTest {
   }
 
   @Test
-  public void testDeleteWithPassingCondition() throws Exception {
+  public void shouldDeleteWhenConditionPasses() throws Exception {
 
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
     context.checking(new Expectations() {
@@ -119,7 +112,8 @@ public class HRegionBridgeTest {
             with(any(Mutation.class)),
             with(any(boolean.class)));
         will(returnValue(true));
-      }});
+      }
+    });
 
     Condition condition = new Condition(ByteBuffer.wrap(Bytes.toBytes("row")),
         ByteBuffer.wrap(Bytes.toBytes("cf")),
@@ -132,7 +126,7 @@ public class HRegionBridgeTest {
 
 
   @Test
-  public void testPutWithFailCondition() throws Exception {
+  public void shouldSkipPutWhenConditionFails() throws Exception {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     context.checking(new Expectations() {
       {
@@ -144,7 +138,8 @@ public class HRegionBridgeTest {
             with(any(Mutation.class)),
             with(any(boolean.class)));
         will(returnValue(false));
-      }});
+      }
+    });
 
     Condition condition = new Condition(ByteBuffer.wrap(Bytes.toBytes("row")),
         ByteBuffer.wrap(Bytes.toBytes("cf")),
@@ -157,7 +152,7 @@ public class HRegionBridgeTest {
   }
 
   @Test
-  public void testPutWithPassingCondition() throws Exception {
+  public void shouldPutWhenConditionPasses() throws Exception {
 
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     context.checking(new Expectations() {
@@ -170,7 +165,8 @@ public class HRegionBridgeTest {
             with(any(Mutation.class)),
             with(any(boolean.class)));
         will(returnValue(true));
-      }});
+      }
+    });
 
     Condition condition = new Condition(ByteBuffer.wrap(Bytes.toBytes("row")),
         ByteBuffer.wrap(Bytes.toBytes("cf")),
@@ -182,101 +178,412 @@ public class HRegionBridgeTest {
   }
 
   @Test
-   public void testGetTheRegion() throws Exception {
-    hRegionBridge.getTheRegion();
-   }
-
-   @Test
-   public void testExistsTrue() throws Exception {
-     Result result = Result.create(new ArrayList<>());
-     result.setExists(true);
-     context.checking(new Expectations() {
-       {
-         oneOf(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
-         will(returnValue(result));
-       }});
-     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
-     assertThat(hRegionBridge.exists(get), is(true));
-   }
+  public void existShouldTrueWhenResultExists() throws Exception {
+    Result result = Result.create(new ArrayList<>());
+    result.setExists(true);
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
+        will(returnValue(result));
+      }
+    });
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
+    assertThat(hRegionBridge.exists(get), is(true));
+  }
 
   @Test
-  public void testExistsFalse() throws Exception {
+  public void existShouldFalseWhenResultDoesNotExists() throws Exception {
     Result result = Result.create(new ArrayList<>());
     result.setExists(false);
     context.checking(new Expectations() {
       {
         oneOf(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
         will(returnValue(result));
-      }});
+      }
+    });
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
     assertThat(hRegionBridge.exists(get), is(false));
   }
 
-   @Test
-   public void testGet() throws Exception {
-     Result result = Result.create(new ArrayList<>());
-     result.setExists(true);
-     context.checking(new Expectations() {
-       {
-         oneOf(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
-         will(returnValue(result));
-       }});
-     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
-     hRegionBridge.get(get);
-
-   }
-
-   @Test(expected = IOException.class)
-   public void testInvalidMulti() throws Exception {
-     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-         regionLocation);
-
-     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
-     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
-
-     List<RegionAction> regionActionList = new ArrayList<>();
-     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(0, mutation, null))));
-     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(1, mutation, null))));
-     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(2, null, get))));
-     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(3, mutation, get))));
-
-
-     MultiRequest multiRequest = new MultiRequest(regionActionList);
-
-     hRegionBridge.multi(multiRequest);
-   }
-
-  @Ignore
   @Test
-  public void testMulti() throws Exception {
+  public void shouldServeSimpleGet() throws Exception {
+    Result result = Result.create(new ArrayList<>());
+    result.setExists(true);
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
+        will(returnValue(result));
+      }
+    });
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
+    hRegionBridge.get(get);
+
+  }
+
+  @Test
+  public void shouldEasilyDoSimpleAtomicMutationMulti() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(new Action(0, mutation, null))));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(1));
+  }
+
+
+  @Test
+  public void shouldEasilyDoAtomicMutationOnlyMultiPut() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+
+  @Test
+  public void shouldEasilyDoAtomicMutationOnlyMultiDelete() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+  @Test
+  public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutatePut() throws Exception {
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         regionLocation);
 
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
-    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
+    MutationProto badMutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow2")));
 
-    List<RegionAction> regionActionList = new ArrayList<>();
-    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(0, mutation, null))));
-    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(1, mutation, null))));
-    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(2, mutation, get))));
-
-
-    MultiRequest multiRequest = new MultiRequest(regionActionList);
-
-    hRegionBridge.multi(multiRequest);
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, badMutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.notNullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(0));
   }
 
-   @Test
-   public void testGetScanner() throws Exception {
-     RegionScanner mockScanner = context.mock(RegionScanner.class);
-     context.checking(new Expectations() {
-       {
-         oneOf(hRegionInterface).getScanner(with(any(org.apache.hadoop.hbase.client.Scan.class)));
-         will(returnValue(mockScanner));
-       }});
+  @Test
+  public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutateDelete() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
 
-     hRegionBridge.getScanner(new Scan());
-   }
- }
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    MutationProto badMutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow2")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, badMutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.notNullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(0));
+  }
+
+  @Test
+  public void shouldFailWhenWeTryToAtomicMutateAndGet() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), false);
+    Get exists = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), true);
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, get),
+            new Action(1, mutation, exists))
+    ));
+    assertThat(actions.getException(), IsNull.notNullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(0));
+  }
+
+  @Test
+  public void shouldReturnGetsAndDoSimpleAtomicMultiMutation() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+
+    MutationProto mutationPut = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    MutationProto mutationDelete = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), false);
+    Get exists = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), true);
+    Result result = Result.create(new ArrayList<>());
+    result.setExists(true);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+        exactly(2).of(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
+        will(returnValue(result));
+      }
+    });
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, null, get),
+            new Action(1, mutationPut, null),
+            new Action(2, null, exists),
+            new Action(3, mutationDelete, null))
+    ));
+
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(4));
+  }
+
+
+  @Test
+  public void testGetScanner() throws Exception {
+    RegionScanner mockScanner = context.mock(RegionScanner.class);
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).getScanner(with(any(org.apache.hadoop.hbase.client.Scan.class)));
+        will(returnValue(mockScanner));
+      }
+    });
+
+    hRegionBridge.getScanner(new Scan());
+  }
+
+  @Test
+  public void shouldEasilyDoSimpleMutationMulti() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).put(with(any(Put.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(new Action(0, mutation, null))));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(1));
+  }
+
+
+  @Test
+  public void shouldEasilyDoMutationOnlyMultiPut() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        exactly(3).of(hRegionInterface).put(with(any(Put.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+
+  @Test
+  public void shouldEasilyDoMutationOnlyMultiDelete() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).delete(with(any(Delete.class)));
+        oneOf(hRegionInterface).delete(with(any(Delete.class)));
+        oneOf(hRegionInterface).delete(with(any(Delete.class)));
+      }
+    });
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+  @Test
+  public void shouldBeAbleToProcessMultiRowNonAtomicPut() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    MutationProto mutation2 = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow2")));
+
+    context.checking(new Expectations() {
+      {
+        exactly(3).of(hRegionInterface).put(with(any(Put.class)));
+
+      }
+    });
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation2, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+  @Test
+  public void shouldBeAbleToProcessMultiRowNonAtomicDelete() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    MutationProto mutation2 = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow2")));
+
+
+    context.checking(new Expectations() {
+      {
+        exactly(3).of(hRegionInterface).delete(with(any(Delete.class)));
+
+      }
+    });
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(
+            new Action(0, mutation, null),
+            new Action(1, mutation, null),
+            new Action(2, mutation2, null))
+    ));
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(3));
+  }
+
+  @Test
+  public void shouldFailWhenWeTryToMutateAndGet() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), false);
+    Get exists = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), true);
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        true,
+        Arrays.asList(
+            new Action(0, mutation, get),
+            new Action(1, mutation, exists))
+    ));
+    assertThat(actions.getException(), IsNull.notNullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(0));
+  }
+
+  @Test
+  public void shouldReturnGetsAndDoSimpleMultiMutation() throws Exception {
+    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
+    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
+        regionLocation);
+
+    MutationProto mutationPut = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
+    MutationProto mutationDelete = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), false);
+    Get exists = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow2")), true);
+    Result result = Result.create(new ArrayList<>());
+    result.setExists(true);
+
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).delete(with(any(Delete.class)));
+        oneOf(hRegionInterface).put(with(any(Put.class)));
+        exactly(2).of(hRegionInterface).get(with(any(org.apache.hadoop.hbase.client.Get.class)));
+        will(returnValue(result));
+      }
+    });
+
+    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+        false,
+        Arrays.asList(
+            new Action(0, null, get),
+            new Action(1, mutationPut, null),
+            new Action(2, null, exists),
+            new Action(3, mutationDelete, null))
+    ));
+
+    assertThat(actions.getException(), IsNull.nullValue());
+    assertThat(actions.getResultOrExceptionList().size(), is(4));
+  }
+
+}

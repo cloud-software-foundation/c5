@@ -49,8 +49,8 @@ public class PopulatorTest extends MiniClusterBase {
     try (FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, port, tableName)) {
       long start = System.currentTimeMillis();
 
-      int numberOfBatches = 1;
-      int batchSize = 1024;
+      int numberOfBatches = 100;
+      int batchSize = 10;
       if (args.length == 2) {
         numberOfBatches = Integer.parseInt(args[0]);
         batchSize = Integer.parseInt(args[1]);

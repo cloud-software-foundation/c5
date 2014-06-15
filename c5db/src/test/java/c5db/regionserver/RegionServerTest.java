@@ -21,16 +21,15 @@ import c5db.client.ProtobufUtil;
 import c5db.client.generated.Action;
 import c5db.client.generated.ByteArrayComparable;
 import c5db.client.generated.Call;
-import c5db.client.generated.Comparator;
 import c5db.client.generated.CompareType;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.MultiRequest;
-import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.Scan;
@@ -44,13 +43,9 @@ import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -59,7 +54,6 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -162,7 +156,7 @@ public class RegionServerTest {
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         regionLocation);
-    ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l,10,false,11l);
+    ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l, 10, false, 11l);
     RegionScanner regionScanner = context.mock(RegionScanner.class);
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
@@ -277,6 +271,8 @@ public class RegionServerTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
 
+    SettableFuture<Boolean> mutateSuccess = SettableFuture.create();
+
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
@@ -284,14 +280,18 @@ public class RegionServerTest {
       oneOf(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
-      will(returnValue(true));
-
-      oneOf(ctx).writeAndFlush(with(any(Response.class)));
-
+      oneOf(region).batchMutate(with(any(MutationProto.class)));
+      will(returnValue(mutateSuccess));
     }});
-
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+
+    context.checking(new Expectations() {
+      {
+        allowing(ctx).writeAndFlush(with(any(Response.class)));
+      }
+    });
+    mutateSuccess.set(true);
+
   }
 
   @Test
@@ -325,7 +325,6 @@ public class RegionServerTest {
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
   }
 
-  @Ignore
   @Test
   public void shouldBeAbleToHandleMulti() throws Exception {
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
@@ -337,22 +336,23 @@ public class RegionServerTest {
 
     List<RegionAction> regionActionList = new ArrayList<>();
     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(0, mutation, null))));
-    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(1, mutation, null))));
+    regionActionList.add(new RegionAction(regionSpecifier, false, Arrays.asList(new Action(1, mutation, null))));
     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(2, null, get))));
-    regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(3, mutation, get))));
+    regionActionList.add(new RegionAction(regionSpecifier, false, Arrays.asList(new Action(3, mutation, get))));
 
 
     MultiRequest multiRequest = new MultiRequest(regionActionList);
 
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      exactly(4).of(tabletModule).getTablet("testTable");
       will(returnValue(tablet));
 
-      oneOf(tablet).getRegion();
+      exactly(4).of(tablet).getRegion();
       will(returnValue(region));
 
-      oneOf(region).multi(with(any(MultiRequest.class)));
-      will(returnValue(new MultiResponse()));
+      exactly(4).of(region).processRegionAction(with(any(RegionAction.class)));
+      will(returnValue(new RegionActionResult()));
+
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
 
     }});
