@@ -85,9 +85,7 @@ public class AsyncWriteTest extends MiniClusterBase {
         null,
         1);
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutationProto, new Condition());
-
     ListenableFuture<Response> future = singleNodeTable.bufferMutate(mutateRequest);
-
     Futures.addCallback(future, new FutureCallback<Response>() {
       @Override
       public void onSuccess(Response result) {

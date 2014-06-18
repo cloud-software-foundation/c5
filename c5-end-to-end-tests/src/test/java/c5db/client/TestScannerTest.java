@@ -34,25 +34,29 @@ import static org.hamcrest.core.Is.is;
 
 public class TestScannerTest extends MiniClusterPopulated {
 
+  int SCANNER_TRIALS = 10;
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    int i = 0;
-    Result result;
+    for (int j = 0; j != SCANNER_TRIALS; j++) {
+      System.out.println("SCanner trials");
+      int i = 0;
+      Result result;
 
-    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{}));
-    int previous_row = -1;
+      ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{}));
+      int previous_row = -1;
 
-    do {
-      result = scanner.next();
-      if (result != null) {
-        int rowInt = Bytes.toInt(result.getRow());
-        assertThat(rowInt, greaterThan(previous_row));
-        System.out.print(rowInt + ",");
-        previous_row = rowInt;
-        i++;
-      }
-    } while (result != null);
-    scanner.close();
-    assertThat(i, is(this.NUMBER_OF_ROWS));
+      do {
+        result = scanner.next();
+        if (result != null) {
+          int rowInt = Bytes.toInt(result.getRow());
+          assertThat(rowInt, greaterThan(previous_row));
+          System.out.print(rowInt + ",");
+          previous_row = rowInt;
+          i++;
+        }
+      } while (result != null);
+      scanner.close();
+      assertThat(i, is(this.NUMBER_OF_ROWS));
+    }
   }
 }

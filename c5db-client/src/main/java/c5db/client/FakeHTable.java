@@ -26,9 +26,12 @@ import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import c5db.client.scanner.ClientScanner;
 import c5db.client.scanner.ClientScannerManager;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
@@ -48,8 +51,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -58,11 +64,15 @@ import java.util.concurrent.TimeoutException;
 public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
+  public static final int NUMBER_OF_SIMUL_MUTATIONS = 10000;
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private byte[] regionName;
   private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
   public byte[] tableName;
+  AtomicLong outstandingMutations = new AtomicLong(0);
+  ExecutorService executor = Executors.newSingleThreadExecutor();
+  List<Throwable> throwablesToThrow = new ArrayList<>();
 
   /**
    * A mock HTable Client
@@ -72,6 +82,7 @@ public class FakeHTable implements AutoCloseable {
   public FakeHTable(String hostname, int port, ByteString tableName)
       throws InterruptedException, TimeoutException, ExecutionException {
     c5AsyncDatabase = new SingleNodeTableInterface(hostname, port);
+
     this.tableName = tableName.toByteArray();
     regionName = tableName.toByteArray();
     regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
@@ -171,13 +182,29 @@ public class FakeHTable implements AutoCloseable {
 
   public void put(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    try {
-      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
-        throw new IOException("Not processed");
+    while (outstandingMutations.get() > NUMBER_OF_SIMUL_MUTATIONS) {
+      try {
+        executor.awaitTermination(C5Constants.TIME_TO_WAIT_FOR_MUTATIONS_TO_CLEAR, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        throw new IOException(e);
       }
-    } catch (Exception e) {
-      throw new IOException(e);
     }
+    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+    outstandingMutations.incrementAndGet();
+    Futures.addCallback(mutationFuture, new FutureCallback<Response>() {
+      @Override
+      public void onSuccess(Response result) {
+        outstandingMutations.decrementAndGet();
+        if (!result.getMutate().getProcessed()) {
+          throwablesToThrow.add(new IOException("Mutation not processed:" + result));
+        }
+      }
+
+      @Override
+      public void onFailure(Throwable t) {
+        throwablesToThrow.add(t);
+      }
+    }, executor);
   }
 
   public void put(List<Put> puts) throws IOException {
@@ -260,6 +287,10 @@ public class FakeHTable implements AutoCloseable {
 
   @Override
   public void close() {
+    if (throwablesToThrow.size() > 0) {
+      LOG.error("Unable to close properly, we have exceptions");
+      throwablesToThrow.parallelStream().forEach(throwable -> LOG.error(throwable.getMessage()));
+    }
     try {
       c5AsyncDatabase.close();
     } catch (Exception e) {
