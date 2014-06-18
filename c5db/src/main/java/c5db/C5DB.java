@@ -59,7 +59,10 @@ import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -90,9 +93,9 @@ public class C5DB extends AbstractService implements C5Server {
 
   private final Map<ModuleType, C5Module> allModules = new HashMap<>();
 
+  public C5DB(Long nodeId) throws Exception {
 
-  public C5DB(ConfigDirectory configDirectory) throws IOException {
-    this.configDirectory = configDirectory;
+    this.configDirectory = createConfigDirectory(nodeId);
 
     String data = configDirectory.getNodeId();
     long toNodeId = 0;
@@ -261,6 +264,28 @@ public class C5DB extends AbstractService implements C5Server {
     fiberPool.dispose();
 
     notifyStopped();
+  }
+
+  private ConfigDirectory createConfigDirectory(Long nodeId) throws Exception {
+    String username = System.getProperty("user.name");
+
+    File dataDir = new File("/data");
+    String dataCfgPath = dataDir.toString() + "/c5-" + Long.toString(nodeId);
+    String tmpCfgPath = "/tmp/" + username + "/c5-" + Long.toString(nodeId);
+    String reqCfgPath = System.getProperty(C5ServerConstants.C5_CFG_PATH);
+    Path cfgPath;
+
+    if (reqCfgPath != null) {
+      cfgPath = Paths.get(reqCfgPath);
+    } else if (dataDir.exists() && dataDir.isDirectory() && dataDir.canRead() && dataDir.canWrite()) {
+      cfgPath = Paths.get(dataCfgPath);
+    } else {
+      cfgPath = Paths.get(tmpCfgPath);
+    }
+
+    ConfigDirectory cfgDir = new NioFileConfigDirectory(cfgPath);
+    cfgDir.setNodeIdFile(Long.toString(nodeId));
+    return cfgDir;
   }
 
   private void processCommandMessage(CommandRpcRequest<?> msg) throws Exception {
