@@ -17,14 +17,26 @@
 package c5db;
 
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
+import c5db.interfaces.DiscoveryModule;
+import c5db.interfaces.LogModule;
+import c5db.interfaces.RegionServerModule;
+import c5db.interfaces.ReplicationModule;
+import c5db.interfaces.TabletModule;
+import c5db.interfaces.WebAdminModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
+import c5db.module_cfg.ModuleDeps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * CLI Entry point for the C5DB server.
@@ -85,7 +97,10 @@ public class Main {
       controlRpcServerPort = C5ServerConstants.CONTROL_RPC_PROPERTY_PORT;
     }
 
-    C5Server instance = new C5DB(cfgDir);
+    int replicationPort = portRandomizer.nextInt(C5ServerConstants.REPLICATOR_PORT_RANGE)
+        + C5ServerConstants.REPLICATOR_PORT_MIN;
+
+    C5Server instance = new C5DB(nodeId);
     instance.start();
 
     // issue startup commands here that are common/we always want:
