@@ -47,6 +47,7 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -295,6 +296,12 @@ public class HRegionBridgeTest {
 
   @Test
   public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutatePut() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+      }
+    });
+
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         regionLocation);
@@ -302,19 +309,23 @@ public class HRegionBridgeTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutationProto badMutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow2")));
 
+    List<Action> regionActions = Arrays.asList(
+        new Action(0, mutation, null),
+        new Action(1, mutation, null),
+        new Action(2, badMutation, null));
     RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
-        true,
-        Arrays.asList(
-            new Action(0, mutation, null),
-            new Action(1, mutation, null),
-            new Action(2, badMutation, null))
-    ));
-    assertThat(actions.getException(), IsNull.notNullValue());
-    assertThat(actions.getResultOrExceptionList().size(), is(0));
+        true,regionActions));
+    assertThat(actions.getResultOrExceptionList().size(), is(regionActions.size()));
   }
 
   @Test
   public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutateDelete() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(hRegionInterface).processRowsWithLocks(with(any(MultiRowMutationProcessor.class)));
+      }
+    });
+
     ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         regionLocation);
@@ -322,15 +333,13 @@ public class HRegionBridgeTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow")));
     MutationProto badMutation = ProtobufUtil.toMutation(MutationProto.MutationType.DELETE, new Delete(Bytes.toBytes("fakeRow2")));
 
-    RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
+    RegionAction regionAction = new RegionAction(regionSpecifier,
         true,
-        Arrays.asList(
-            new Action(0, mutation, null),
+        Arrays.asList(new Action(0, mutation, null),
             new Action(1, mutation, null),
-            new Action(2, badMutation, null))
-    ));
-    assertThat(actions.getException(), IsNull.notNullValue());
-    assertThat(actions.getResultOrExceptionList().size(), is(0));
+            new Action(2, badMutation, null)));
+    RegionActionResult actions = hRegionBridge.processRegionAction(regionAction);
+    assertThat(actions.getResultOrExceptionList().size(), is(regionAction.getActionList().size()));
   }
 
   @Test

@@ -254,7 +254,7 @@ public class HRegionBridge implements Region {
   }
 
   private RegionActionResult processActionsAtomically(RegionAction regionAction) {
-    byte[] rowToLock = null;
+    ArrayList<byte[]> rowsToLock = new ArrayList<>();
     Collection<Mutation> mutations = new ArrayList<>();
     List<ResultOrException> resultOrExceptions = new ArrayList<>();
 
@@ -278,45 +278,37 @@ public class HRegionBridge implements Region {
         String errorMsg = "We have neither mutations or a get, this is an invalid action";
         NameBytesPair exception = buildException(new IOException(errorMsg));
         return new RegionActionResult(new ArrayList<>(), exception);
-      } else if (rowToLock == null && hasMutation) {
-        rowToLock = action.getMutation().getRow().array().clone();
       }
       if (hasMutation) {
-        if (!Arrays.equals(rowToLock, action.getMutation().getRow().array())) {
-          String errorMsg = "Attempting multi row atomic transaction";
-          NameBytesPair exception = buildException(new IOException(errorMsg));
-          return new RegionActionResult(new ArrayList<>(), exception);
-        } else {
-          switch (action.getMutation().getMutateType()) {
-            case APPEND:
-              return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Append not supported")));
-            case INCREMENT:
-              return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Increment not supported")));
-            case PUT:
-              try {
-                mutations.add(ReverseProtobufUtil.toPut(action.getMutation()));
-                resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
-              } catch (IOException e) {
-                NameBytesPair exception = buildException(e);
-                return new RegionActionResult(resultOrExceptions, exception);
-              }
-              break;
-            case DELETE:
-              mutations.add(ReverseProtobufUtil.toDelete(action.getMutation()));
+        switch (action.getMutation().getMutateType()) {
+          case APPEND:
+            return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Append not supported")));
+          case INCREMENT:
+            return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Increment not supported")));
+          case PUT:
+            try {
+              rowsToLock.add(action.getMutation().getRow().array());
+              mutations.add(ReverseProtobufUtil.toPut(action.getMutation()));
               resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
-              break;
-          }
+            } catch (IOException e) {
+              NameBytesPair exception = buildException(e);
+              return new RegionActionResult(resultOrExceptions, exception);
+            }
+            break;
+          case DELETE:
+            rowsToLock.add(action.getMutation().getRow().array());
+            mutations.add(ReverseProtobufUtil.toDelete(action.getMutation()));
+            resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
+            break;
         }
       }
-
     }
-    MultiRowMutationProcessor proc = new MultiRowMutationProcessor(mutations, Arrays.asList(rowToLock));
+    MultiRowMutationProcessor proc = new MultiRowMutationProcessor(mutations, rowsToLock);
     try {
       theRegion.processRowsWithLocks(proc);
     } catch (IOException e) {
       return new RegionActionResult(new ArrayList<>(), buildException(e));
     }
-
 
     for (Action action : regionAction.getActionList()) {
       Get get = action.getGet();
