@@ -18,11 +18,13 @@ package c5db.interfaces;
 
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleType;
 import org.jetlang.channels.Request;
 
 /**
  *
  */
+@ModuleTypeBinding(value = ModuleType.ControlRpc)
 public interface ControlModule extends C5Module {
 
   void doMessage(Request<CommandRpcRequest<?>, CommandReply> request);
