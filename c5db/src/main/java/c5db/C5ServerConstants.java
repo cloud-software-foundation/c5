@@ -33,6 +33,7 @@ public class C5ServerConstants {
   public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
   public static final int DEFAULT_QUORUM_SIZE = 3;
   public static final String C5_CFG_PATH = "c5.cfgPath";
+  public static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
 
   // We use this column qualifier in system tables to mark the leader
   public static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUALIFIER");
