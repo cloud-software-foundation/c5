@@ -20,9 +20,9 @@ package c5db.log;
 import c5db.generated.RegionWalEntry;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
-import c5db.interfaces.replication.ReplicatorInstanceEvent;
-import c5db.replication.ReplicatorInfoPersistence;
-import c5db.replication.ReplicatorInformation;
+import c5db.replication.ReplicatorReceipt;
+import com.google.common.primitives.Ints;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.LinkBuffer;
 import io.protostuff.LowCopyProtostuffOutput;
 import org.apache.hadoop.fs.Syncable;
@@ -34,17 +34,26 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
-import org.jetlang.channels.Channel;
-import org.jetlang.channels.MemoryChannel;
+import org.eclipse.jetty.util.BlockingArrayQueue;
+import org.jetbrains.annotations.NotNull;
+import org.jetlang.channels.ChannelSubscription;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static c5db.C5ServerConstants.WAL_SYNC_TIMEOUT_SECONDS;
 
 /**
  * A distributed WriteAheadLog using c5's replication algorithm
@@ -52,15 +61,29 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OLogShim implements Syncable, HLog {
   private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
   private final AtomicLong logSeqNum = new AtomicLong(0);
-  private final UUID uuid;
   private final Replicator replicatorInstance;
-  private final Fiber fiber;
+
+  // When logging, place all receipts in this queue. Then, when performing sync, reconcile all
+  // queued receipts with received commit notices. To prevent this queue and the commit notice
+  // queue from growing without bound, the client of this class must sync regularly. That's
+  // something the client would need to do anyway in order to determine whether its writes are
+  // succeeding.
+  private final BlockingQueue<ListenableFuture<ReplicatorReceipt>> receiptFutureQueue = new LinkedBlockingQueue<>();
+
+  // When the OLogShim's Replicator issues a commit notice, keep track of it in this queue.
+  // Then, when performing sync, make use of these notices.
+  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new BlockingArrayQueue<>();
+
+  // Keep track of the most recent IndexCommitNotice that was withdrawn from the commitNoticeQueue.
+  private IndexCommitNotice lastCommitNotice;
 
   public OLogShim(Replicator replicatorInstance, Fiber fiber) {
-    this.uuid = UUID.randomUUID();
     this.replicatorInstance = replicatorInstance;
-    this.fiber = fiber;
-    String tabletId = replicatorInstance.getQuorumId();
+    long replicatorId = replicatorInstance.getId();
+
+    replicatorInstance.getCommitNoticeChannel().subscribe(
+        new ChannelSubscription<>(fiber, commitNoticeQueue::add,
+            (notice) -> notice.replicatorId == replicatorId));
   }
 
   //TODO fix so we don't always insert a huge amount of data
@@ -107,12 +130,7 @@ public class OLogShim implements Syncable, HLog {
 
   @Override
   public byte[][] rollWriter() throws IOException {
-    // TODO this is not passed thru to underlying OLog implementation.
-//        try {
-//            roll();
-//        } catch (ExecutionException | InterruptedException e) {
-//            throw new IOException(e);
-//        }
+    // TODO this is not passed through to underlying OLog implementation.
     return null;
   }
 
@@ -125,20 +143,13 @@ public class OLogShim implements Syncable, HLog {
   @Override
   public void close() throws IOException {
     // TODO take this as a clue to turn off the ReplicationInstance we depend on.
-
   }
 
+  @Override
   public void closeAndDelete() throws IOException {
     // TODO still need more info to make this reasonably successful.
     close();
     // TODO can't delete at this level really.  Maybe we need to mark
-    // that this quorumId is no longer useful?
-//        boolean success = this.logPath.toFile().delete();
-//        if (!success) {
-//            throw new IOException("Unable to close and delete: "
-//                    + this.logPath.toFile().toString());
-//        }
-
   }
 
   @Override
@@ -158,7 +169,22 @@ public class OLogShim implements Syncable, HLog {
 
   @Override
   public void sync() throws IOException {
-    // TODO make this wait for the most recently written log-id to be made visible.
+    // TODO how should this handle a case where some writes succeed and others fail?
+    // TODO currently it throws an exception, but that can lead to the appearance that a successful write failed
+    List<ListenableFuture<ReplicatorReceipt>> receiptList = new ArrayList<>();
+    receiptFutureQueue.drainTo(receiptList);
+
+    try {
+      for (ListenableFuture<ReplicatorReceipt> receiptFuture : receiptList) {
+        ReplicatorReceipt receipt = receiptFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        IndexCommitNotice commitNotice = waitForCommitNotice(receipt.seqNum);
+        if (commitNotice.term != receipt.term) {
+          throw new IOException("OLogShim#sync: term returned by logData differs from term of IndexCommitNotice");
+        }
+      }
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new IOException(e);
+    }
   }
 
   @Override
@@ -168,11 +194,11 @@ public class OLogShim implements Syncable, HLog {
 
   @Override
   // TODO this is a problematic call because the replication algorithm is in charge of the log-ids. We must
-  // TODO  depreciate this call, and bubble the consequences thruout the system.
+  // TODO  depreciate this call, and bubble the consequences throughout the system.
   public void setSequenceNumber(long newValue) {
     for (long id = this.logSeqNum.get(); id < newValue &&
         !this.logSeqNum.compareAndSet(id, newValue); id = this.logSeqNum.get()) {
-      LOG.debug("Changed sequenceid from " + id + " to " + newValue);
+      LOG.debug("Changed sequenceId from " + id + " to " + newValue);
     }
   }
 
@@ -188,7 +214,7 @@ public class OLogShim implements Syncable, HLog {
                      WALEdit edits,
                      long now,
                      HTableDescriptor htd) throws IOException {
-    this.append(info, tableName, edits, uuid, now, htd);
+    this.appendSync(info, tableName, edits, now, htd);
   }
 
   @Override
@@ -198,140 +224,94 @@ public class OLogShim implements Syncable, HLog {
                      long now,
                      HTableDescriptor htd,
                      boolean isInMemstore) throws IOException {
-    this.append(info, tableName, edits, uuid, now, htd);
+    this.appendSync(info, tableName, edits, now, htd);
   }
 
   @Override
   public long appendNoSync(HRegionInfo info,
                            TableName tableName,
-                           WALEdit edits, List<UUID> clusterIds,
+                           WALEdit edit, List<UUID> clusterIds,
                            long now,
                            HTableDescriptor htd) throws IOException {
-    //ReplicatorInstance replicator = getReplicator(info);
+    try {
+      List<ByteBuffer> entryBytes = serializeWalEdit(info.getRegionNameAsString(), edit);
 
-    for (KeyValue edit : edits.getKeyValues()) {
-      RegionWalEntry entry = new RegionWalEntry(
-          info.getRegionNameAsString(),
-          ByteBuffer.wrap(edit.getRow()),
-          ByteBuffer.wrap(edit.getFamily()),
-          ByteBuffer.wrap(edit.getQualifier()),
-          ByteBuffer.wrap(edit.getValue()),
-          edit.getTimestamp());
-      try {
-        // our replicator knows what quorumId/tabletId we are.
-        replicatorInstance.logData(serializeEntry(entry));
-      } catch (InterruptedException e) {
-        throw new IOException(e);
-      }
+      // our replicator knows what quorumId/tabletId we are.
+      ListenableFuture<ReplicatorReceipt> receiptFuture = replicatorInstance.logData(entryBytes);
+      receiptFutureQueue.add(receiptFuture);
+    } catch (InterruptedException e) {
+      throw new IOException(e);
     }
     return 0;
   }
 
-  private static List<ByteBuffer> serializeEntry(RegionWalEntry entry) throws IOException {
-    LinkBuffer linkBuffer = new LinkBuffer();
-    LowCopyProtostuffOutput lcpo = new LowCopyProtostuffOutput(linkBuffer);
-    RegionWalEntry.getSchema().writeTo(lcpo, entry);
-    return linkBuffer.finish();
-  }
-
-  private Channel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
-  private Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
-
-//    private ReplicatorInstance getReplicator(HRegionInfo info) {
-//        if (replicatorLookup.containsKey(info.getRegionNameAsString())) {
-//            return replicators.get(replicatorLookup.get(info.getRegionNameAsString()));
-//        }
-//        long plusMillis = 0;
-//
-//        // Some concurrent magic TODO
-//        long peerId = replicatorLookup.size();
-//        replicatorLookup.put(info.getRegionNameAsString(), peerId);
-//        peerIds.add(peerId);
-//
-//
-//        ReplicatorInstance replicator = new ReplicatorInstance(fiberPool.create(),
-//                peerId,
-//                "foobar",
-//                peerIds,
-//                new InRamLog(),
-//                new Info(plusMillis),
-//                new Persister(),
-//                rpcChannel,
-//                stateChangeChannel,
-//                commitNoticeChannel);
-//        replicators.put(peerId, replicator);
-//        return replicator;
-//    }
-
-//    private Mooring getMooring(String quorumId) {
-//        if (this.moorings.containsKey(quorumId)) {
-//            return this.moorings.get(quorumId);
-//        }
-////        Mooring mooring = new Mooring(this, quorumId);
-////        this.moorings.put(quorumId, mooring);
-////        return mooring;
-//        return null;
-//    }
-
-  public long append(HRegionInfo info,
-                     TableName tableName,
-                     WALEdit edits,
-                     UUID clusterId,
-                     long now,
-                     HTableDescriptor htd) throws IOException {
-    appendNoSync(info, tableName, edits, null, now, htd);
-    this.sync();
-    return ++now;
-  }
-
-  // TODO XXX passthru no longer valid, this call does the wrong thing now.
+  // TODO XXX passthrough no longer valid, this call does the wrong thing now.
+  @Override
   public long getFilenum() {
     return 0;
   }
 
-  public static class Info implements ReplicatorInformation {
+  private void appendSync(HRegionInfo info,
+                          TableName tableName,
+                          WALEdit edits,
+                          long now,
+                          HTableDescriptor htd) throws IOException {
+    appendNoSync(info, tableName, edits, null, now, htd);
+    this.sync();
+  }
 
-    public final long offset;
+  private static List<ByteBuffer> serializeWalEdit(String regionInfo, WALEdit edit) throws IOException {
+    final List<ByteBuffer> buffers = new ArrayList<>();
 
-    public Info(long offset) {
-      this.offset = offset;
+    for (KeyValue keyValue : edit.getKeyValues()) {
+      @SuppressWarnings("deprecation")
+      final RegionWalEntry entry = new RegionWalEntry(
+          regionInfo,
+          ByteBuffer.wrap(keyValue.getRow()),
+          ByteBuffer.wrap(keyValue.getFamily()),
+          ByteBuffer.wrap(keyValue.getQualifier()),
+          ByteBuffer.wrap(keyValue.getValue()),
+          keyValue.getTimestamp());
+      addLengthPrependedEntryBuffersToList(entry, buffers);
     }
+    return buffers;
+  }
 
-    @Override
-    public long currentTimeMillis() {
-      return System.currentTimeMillis() + offset;
-    }
+  private static void addLengthPrependedEntryBuffersToList(RegionWalEntry entry, List<ByteBuffer> buffers)
+      throws IOException {
+    LinkBuffer entryBuffer = new LinkBuffer();
+    LowCopyProtostuffOutput lcpo = new LowCopyProtostuffOutput(entryBuffer);
+    RegionWalEntry.getSchema().writeTo(lcpo, entry);
 
-    @Override
-    public long electionCheckRate() {
-      return 100;
-    }
+    final int length = Ints.checkedCast(lcpo.buffer.size());
+    final LinkBuffer lengthBuf = new LinkBuffer().writeVarInt32(length);
 
-    @Override
-    public long electionTimeout() {
-      return 1000;
-    }
+    buffers.addAll(lengthBuf.finish());
+    buffers.addAll(entryBuffer.finish());
+  }
 
-    @Override
-    public long groupCommitDelay() {
-      return 10;
+  private IndexCommitNotice waitForCommitNotice(long index) throws IOException, InterruptedException, TimeoutException {
+    while (true) {
+      if (lastCommitNotice == null || lastCommitNotice.lastIndex < index) {
+        lastCommitNotice = pollWithTimeoutException(commitNoticeQueue, WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+      } else if (index < lastCommitNotice.firstIndex) {
+        LOG.error("weird, requested to wait for a notice with index {} but that's prior to the latest commit notice {}",
+            index, lastCommitNotice);
+        throw new IOException("waitForCommitNotice");
+
+      } else {
+        return lastCommitNotice;
+      }
     }
   }
 
-  public static class Persister implements ReplicatorInfoPersistence {
-    @Override
-    public long readCurrentTerm(String quorumId) {
-      return 0;  //To change body of implemented methods use File | Settings | File Templates.
+  private <T> T pollWithTimeoutException(BlockingQueue<T> queue, long timeout, @NotNull TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+    T result = queue.poll(timeout, unit);
+    if (result == null) {
+      throw new TimeoutException("pollWithTimeoutException");
     }
-
-    @Override
-    public long readVotedFor(String quorumId) {
-      return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void writeCurrentTermAndVotedFor(String quorumId, long currentTerm, long votedFor) {
-      //To change body of implemented methods use File | Settings | File Templates.
-    }
+    return result;
   }
 }
