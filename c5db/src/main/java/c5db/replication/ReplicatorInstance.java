@@ -89,7 +89,7 @@ public class ReplicatorInstance implements Replicator {
   private final ReplicatorLog log;
   private final long myElectionTimeout;
 
-  final ReplicatorInformation info;
+  final ReplicatorClock clock;
   final ReplicatorInfoPersistence persister;
 
   /**
@@ -134,7 +134,7 @@ public class ReplicatorInstance implements Replicator {
                             final long myId,
                             final String quorumId,
                             ReplicatorLog log,
-                            ReplicatorInformation info,
+                            ReplicatorClock clock,
                             ReplicatorInfoPersistence persister,
                             RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel,
                             final Channel<ReplicatorInstanceEvent> eventChannel,
@@ -145,13 +145,13 @@ public class ReplicatorInstance implements Replicator {
     this.logger = getNewLogger();
     this.sendRpcChannel = sendRpcChannel;
     this.log = log;
-    this.info = info;
+    this.clock = clock;
     this.persister = persister;
     this.eventChannel = eventChannel;
     this.commitNoticeChannel = commitNoticeChannel;
     Random r = new Random();
-    this.myElectionTimeout = r.nextInt((int) info.electionTimeout()) + info.electionTimeout();
-    this.lastRPC = info.currentTimeMillis();
+    this.myElectionTimeout = r.nextInt((int) clock.electionTimeout()) + clock.electionTimeout();
+    this.lastRPC = clock.currentTimeMillis();
     this.lastCommittedIndex = 0;
 
     refreshQuorumConfigurationFromLog();
@@ -166,7 +166,7 @@ public class ReplicatorInstance implements Replicator {
                 ReplicatorInstance.this,
                 0,
                 0,
-                info.currentTimeMillis(),
+                clock.currentTimeMillis(),
                 null, null)
         );
       } catch (IOException e) {
@@ -178,8 +178,8 @@ public class ReplicatorInstance implements Replicator {
     commitNoticeChannel.subscribe(fiber, this::onCommit);
     incomingChannel.subscribe(fiber, this::onIncomingMessage);
 
-    electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection, info.electionCheckRate(),
-        info.electionCheckRate(), TimeUnit.MILLISECONDS);
+    electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection, clock.electionCheckRate(),
+        clock.electionCheckRate(), TimeUnit.MILLISECONDS);
 
     logger.debug("primed");
   }
@@ -191,7 +191,7 @@ public class ReplicatorInstance implements Replicator {
                      final long myId,
                      final String quorumId,
                      ReplicatorLog log,
-                     ReplicatorInformation info,
+                     ReplicatorClock clock,
                      ReplicatorInfoPersistence persister,
                      RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel,
                      final Channel<ReplicatorInstanceEvent> eventChannel,
@@ -208,17 +208,17 @@ public class ReplicatorInstance implements Replicator {
     this.logger = getNewLogger();
     this.sendRpcChannel = sendRpcChannel;
     this.log = log;
-    this.info = info;
+    this.clock = clock;
     this.persister = persister;
     this.eventChannel = eventChannel;
     this.commitNoticeChannel = commitNoticeChannel;
-    this.myElectionTimeout = info.electionTimeout();
-    this.lastRPC = info.currentTimeMillis();
+    this.myElectionTimeout = clock.electionTimeout();
+    this.lastRPC = clock.currentTimeMillis();
 
     commitNoticeChannel.subscribe(fiber, this::onCommit);
     incomingChannel.subscribe(fiber, this::onIncomingMessage);
     electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection,
-        info.electionCheckRate(), info.electionCheckRate(), TimeUnit.MILLISECONDS);
+        clock.electionCheckRate(), clock.electionCheckRate(), TimeUnit.MILLISECONDS);
 
     logger.debug("primed");
 
@@ -380,7 +380,7 @@ public class ReplicatorInstance implements Replicator {
             this,
             0,
             0,
-            info.currentTimeMillis(),
+            clock.currentTimeMillis(),
             null,
             e)
     );
@@ -535,7 +535,7 @@ public class ReplicatorInstance implements Replicator {
 
       if (votedFor == 0 || votedFor == message.getRequest().from) {
         setVotedFor(message.getRequest().from);
-        lastRPC = info.currentTimeMillis();
+        lastRPC = clock.currentTimeMillis();
         vote = true;
       }
     }
@@ -575,7 +575,7 @@ public class ReplicatorInstance implements Replicator {
     }
 
     // 4. reset election timeout
-    lastRPC = info.currentTimeMillis();
+    lastRPC = clock.currentTimeMillis();
 
     long theLeader = appendMessage.getLeaderId();
     if (whosLeader != theLeader) {
@@ -656,7 +656,7 @@ public class ReplicatorInstance implements Replicator {
             this,
             whosLeader,
             currentTerm,
-            info.currentTimeMillis(),
+            clock.currentTimeMillis(),
             null, null)
     );
   }
@@ -737,7 +737,7 @@ public class ReplicatorInstance implements Replicator {
       return;
     }
 
-    if (lastRPC + this.myElectionTimeout < info.currentTimeMillis()
+    if (lastRPC + this.myElectionTimeout < clock.currentTimeMillis()
         && quorumConfig.allPeers().contains(myId)) {
       logger.trace("timed out checking on election, try new election");
       if (myState == State.CANDIDATE) {
@@ -756,12 +756,12 @@ public class ReplicatorInstance implements Replicator {
             this,
             0,
             0,
-            info.currentTimeMillis(),
+            clock.currentTimeMillis(),
             null, null)
     );
 
     // Start new election "timer".
-    lastRPC = info.currentTimeMillis();
+    lastRPC = clock.currentTimeMillis();
 
     PreElectionPoll msg = new PreElectionPoll(currentTerm, myId, log.getLastIndex(), log.getLastTerm());
 
@@ -851,12 +851,12 @@ public class ReplicatorInstance implements Replicator {
             this,
             0,
             0,
-            info.currentTimeMillis(),
+            clock.currentTimeMillis(),
             null, null)
     );
 
     // Start new election "timer".
-    lastRPC = info.currentTimeMillis();
+    lastRPC = clock.currentTimeMillis();
     // increment term.
     setCurrentTerm(currentTerm + 1);
     setState(State.CANDIDATE);
@@ -985,7 +985,7 @@ public class ReplicatorInstance implements Replicator {
               this,
               0,
               0,
-              info.currentTimeMillis(),
+              clock.currentTimeMillis(),
               null, null));
     }
 
@@ -1025,7 +1025,7 @@ public class ReplicatorInstance implements Replicator {
             this,
             myId,
             currentTerm,
-            info.currentTimeMillis(),
+            clock.currentTimeMillis(),
             null, null)
     );
 
@@ -1042,7 +1042,7 @@ public class ReplicatorInstance implements Replicator {
         logger.error("Exception in consumeQueue: ", t);
         failReplicatorInstance(t);
       }
-    }, 0, info.groupCommitDelay(), TimeUnit.MILLISECONDS);
+    }, 0, clock.groupCommitDelay(), TimeUnit.MILLISECONDS);
   }
 
   @FiberOnly
@@ -1310,7 +1310,7 @@ public class ReplicatorInstance implements Replicator {
               this,
               0,
               0,
-              info.currentTimeMillis(),
+              clock.currentTimeMillis(),
               quorumConfig,
               null));
     }
