@@ -51,6 +51,8 @@ public class C5ServerConstants {
   public static final int REPLICATOR_PORT_MIN = 1024;
   public static final int REPLICATOR_PORT_RANGE = 30000;
 
+  public static final int REPLICATOR_BASE_ELECTION_TIMEOUT_MILLISECONDS = 1000;
+
   public static final int DEFAULT_REGION_SERVER_PORT_MIN = 8080;
   public static final int REGION_SERVER_PORT_RANGE = 1000;
 
