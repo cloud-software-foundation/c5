@@ -281,12 +281,13 @@ public class InRamTest {
     leader().changeQuorum(secondPeerSet);
     sim.createAndStartReplicators(secondPeerSet);
 
+    waitForALeaderWithId(isIn(secondPeerSet));
+    leader().log(someData());
+
     peers(secondPeerSet).forEach((peer) ->
         assertThat(peer,
             willCommitConfiguration(
                 QuorumConfiguration.of(secondPeerSet))));
-
-    waitForALeaderWithId(isIn(secondPeerSet));
   }
 
   @Test
