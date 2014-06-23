@@ -174,7 +174,6 @@ public class ReplicatorInstance implements Replicator {
 
     commitNoticeChannel.subscribe(fiber, this::onCommit);
     incomingChannel.subscribe(fiber, this::onIncomingMessage);
-
     electionChecker = fiber.scheduleWithFixedDelay(this::checkOnElection, clock.electionCheckRate(),
         clock.electionCheckRate(), TimeUnit.MILLISECONDS);
   }
@@ -191,9 +190,7 @@ public class ReplicatorInstance implements Replicator {
                      RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel,
                      final Channel<ReplicatorInstanceEvent> eventChannel,
                      final Channel<IndexCommitNotice> commitNoticeChannel,
-                     State state,
-                     long lastCommittedIndex,
-                     long leaderId) {
+                     State state) {
 
     this.fiber = fiber;
     this.myId = myId;
@@ -214,8 +211,6 @@ public class ReplicatorInstance implements Replicator {
         clock.electionCheckRate(), clock.electionCheckRate(), TimeUnit.MILLISECONDS);
 
     this.myState = state;
-    this.lastCommittedIndex = lastCommittedIndex;
-    this.whosLeader = leaderId;
 
     refreshQuorumConfigurationFromLog();
 
