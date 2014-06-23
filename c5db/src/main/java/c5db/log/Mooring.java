@@ -58,13 +58,11 @@ public class Mooring implements ReplicatorLog {
 
     try {
       // TODO maybe move this from the constructor to an 'open' method
-      final OLogEntry lastEntry = log.openAsync(quorumId).get(LOG_TIMEOUT, TimeUnit.SECONDS);
-      if (lastEntry == null) {
-        this.currentTerm = this.lastIndex = 0;
-      } else {
-        this.currentTerm = lastEntry.getElectionTerm();
-        this.lastIndex = lastEntry.getSeqNum();
-      }
+      log.openAsync(quorumId)
+          .get(LOG_TIMEOUT, TimeUnit.SECONDS);
+
+      currentTerm = log.getLastTerm(quorumId);
+      lastIndex = log.getNextSeqNum(quorumId) - 1;
 
       setQuorumConfigFromLog();
 
@@ -91,11 +89,6 @@ public class Mooring implements ReplicatorLog {
     updateCachedTermAndIndex(oLogEntries);
 
     return log.logEntry(oLogEntries, quorumId);
-  }
-
-  @Override
-  public ListenableFuture<LogEntry> getLogEntry(long index) {
-    return Futures.transform(log.getLogEntry(index, quorumId), OLogEntry::toProtostuff);
   }
 
   @Override
@@ -126,8 +119,9 @@ public class Mooring implements ReplicatorLog {
 
     lastIndex = max(entryIndex - 1, 0);
     currentTerm = log.getLogTerm(lastIndex, quorumId);
+    ListenableFuture<Boolean> truncateFuture = log.truncateLog(entryIndex, quorumId);
     setQuorumConfigFromLog();
-    return log.truncateLog(entryIndex, quorumId);
+    return truncateFuture;
   }
 
   @Override
@@ -141,11 +135,10 @@ public class Mooring implements ReplicatorLog {
   }
 
   private void setQuorumConfigFromLog() {
-    final QuorumConfigurationWithSeqNum configFromLog = log.getQuorumConfig(lastIndex, quorumId);
+    final QuorumConfigurationWithSeqNum configFromLog = log.getLastQuorumConfig(quorumId);
     lastQuorumConfig = configFromLog.quorumConfiguration;
     lastQuorumConfigIndex = configFromLog.seqNum;
   }
-
 
   private static List<LogEntry> toProtostuffMessages(List<OLogEntry> entries) {
     return Lists.transform(entries, OLogEntry::toProtostuff);

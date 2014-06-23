@@ -20,7 +20,6 @@ package c5db.log;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -64,7 +63,8 @@ public class EncodedSequentialLog<E extends SequentialEntry> implements Sequenti
         seqNum = entry.getSeqNum();
       } while (seqNum < end - 1);
     } catch (EOFException e) {
-      throw new LogEntryNotFound(e);
+      throw new LogEntryNotFound("EOF reached before finding all requested entries: seqNum range ["
+          + start + ", " + end + ")");
     }
 
     ensureAscendingWithNoGaps(readEntries);
@@ -77,21 +77,19 @@ public class EncodedSequentialLog<E extends SequentialEntry> implements Sequenti
   }
 
   @Override
-  public E getLastEntry() throws IOException, LogEntryNotFound {
+  public E getLastEntry() throws IOException {
     if (isEmpty()) {
       return null;
     }
 
     try (InputStream inputStream = persistenceNavigator.getStreamAtLastEntry()) {
       return codec.decode(inputStream);
-    } catch (EOFException e) {
-      throw new LogEntryNotFound(e);
     }
   }
 
   @Override
   public void forEach(Consumer<? super E> doForEach) throws IOException {
-    try (InputStream inputStream = Channels.newInputStream(persistence.getReader())) {
+    try (InputStream inputStream = persistenceNavigator.getStreamAtFirstEntry()) {
       //noinspection InfiniteLoopStatement
       do {
         E entry = codec.decode(inputStream);

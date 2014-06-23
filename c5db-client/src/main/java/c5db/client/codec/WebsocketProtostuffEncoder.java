@@ -51,6 +51,8 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
       lcpo.buffer.finish().stream().forEach(byteBuf::writeBytes);
       final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(byteBuf);
       objects.add(frame);
+    //  byteBuf.release();
+
     } else {
       long remaining = size;
       boolean first = true;
@@ -75,6 +77,7 @@ public class WebsocketProtostuffEncoder extends MessageToMessageEncoder<Call> {
         }
         objects.add(frame);
       }
+  //    byteBuf.release();
     }
   }
 

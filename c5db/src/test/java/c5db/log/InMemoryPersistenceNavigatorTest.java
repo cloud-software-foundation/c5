@@ -29,6 +29,7 @@ import java.util.List;
 
 import static c5db.log.LogTestUtil.seqNum;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.core.Is.is;
 
@@ -69,29 +70,60 @@ public class InMemoryPersistenceNavigatorTest {
 
   @Test
   public void cachesAddressOfLastEntry() throws Exception {
-    navigator.getStreamAtLastEntry();
-    int numberOfSkipOperationsForASecondCall = numberOfSkipOperations(() -> navigator.getStreamAtSeqNum(LAST_SEQ_NUM));
+    tidyGetStreamAtLastEntry();
+    int numberOfSkipOperationsForASecondCall = numberOfSkipOperations(() -> tidyGetStreamAtSeqNum(LAST_SEQ_NUM));
     assertThat(numberOfSkipOperationsForASecondCall, is(0));
   }
 
   @Test
   public void cachesAddressOfAPreviousEntryLookup() throws Exception {
-    navigator.getStreamAtSeqNum(20);
-    int numberOfSkipOperationsForASecondCall = numberOfSkipOperations(() -> navigator.getStreamAtSeqNum(20));
+    tidyGetStreamAtSeqNum(20);
+    int numberOfSkipOperationsForASecondCall = numberOfSkipOperations(() -> tidyGetStreamAtSeqNum(20));
     assertThat(numberOfSkipOperationsForASecondCall, is(0));
   }
 
   @Test(expected = Exception.class)
-  public void throwsAnExceptionIfAskedToTruncateToIndexZero() throws Exception {
+  public void throwsAnExceptionIfAskedToTruncateToSeqNumZero() throws Exception {
     navigator.notifyTruncation(0);
+  }
+
+  @Test
+  public void returnsAStreamPositionedAtTheFirstEntry() throws Exception {
+    try (InputStream input = navigator.getStreamAtFirstEntry()) {
+      assertThat(navigatorsCodec.decode(input).getSeqNum(), is(equalTo(1L)));
+    }
+  }
+
+  @Test
+  public void returnsAStreamPositionedAtTheLastEntry() throws Exception {
+    try (InputStream input = navigator.getStreamAtLastEntry()) {
+      assertThat(navigatorsCodec.decode(input).getSeqNum(), is(equalTo((long) LAST_SEQ_NUM)));
+    }
+  }
+
+  @Test
+  public void returnsAStreamPositionedAtASpecifiedEntry() throws Exception {
+    long entrySeqNum = 12;
+
+    try (InputStream input = navigator.getStreamAtSeqNum(entrySeqNum)) {
+      assertThat(navigatorsCodec.decode(input).getSeqNum(), is(equalTo(entrySeqNum)));
+    }
   }
 
 
   private void performVariousNavigatorOperations() throws Exception {
-    navigator.getStreamAtSeqNum(20);
-    navigator.getStreamAtSeqNum(15);
-    navigator.getStreamAtLastEntry();
+    tidyGetStreamAtSeqNum(20);
+    tidyGetStreamAtSeqNum(15);
+    tidyGetStreamAtLastEntry();
     navigator.getAddressOfEntry(6);
+  }
+
+  private void tidyGetStreamAtSeqNum(long seqNum) throws Exception {
+    navigator.getStreamAtSeqNum(seqNum).close();
+  }
+
+  private void tidyGetStreamAtLastEntry() throws Exception {
+    navigator.getStreamAtLastEntry().close();
   }
 
   private int numberOfSkipOperations(ExceptionRunnable navigationOperation) throws Exception {

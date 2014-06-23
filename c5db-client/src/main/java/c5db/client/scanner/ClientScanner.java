@@ -110,7 +110,7 @@ public class ClientScanner extends AbstractClientScanner {
 
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
     this.outStandingRequests += requestSize;
-    ch.write(ProtobufUtil.getScanCall(commandId, scanRequest));
+    ch.writeAndFlush(ProtobufUtil.getScanCall(commandId, scanRequest));
   }
 
   @Override

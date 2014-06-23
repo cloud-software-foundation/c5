@@ -110,15 +110,17 @@ public class ReplicatorElectionTest {
 
   private final ReplicatorInfoPersistence persistence = context.mock(ReplicatorInfoPersistence.class);
   private final ReplicatorLog log = context.mock(ReplicatorLog.class);
-  private final InRamSim.Info info = new InRamSim.Info(0, ELECTION_TIMEOUT_MILLIS);
+  private final InRamSim.StoppableClock clock = new InRamSim.StoppableClock(0, ELECTION_TIMEOUT_MILLIS);
 
   private ReplicatorInstance replicatorInstance;
 
   @Before
   public final void setupFibersAndChannels() throws Exception {
     context.checking(new Expectations() {{
-      oneOf(persistence).writeCurrentTermAndVotedFor(
-          with(equalTo(QUORUM_ID)), with(equalTo(CURRENT_TERM)), with(anyVotedFor()));
+      oneOf(persistence).readCurrentTerm(QUORUM_ID);
+      will(returnValue(CURRENT_TERM));
+
+      oneOf(persistence).readVotedFor(QUORUM_ID);
     }});
 
     sendRpcChannel.subscribe(rpcFiber, requestChannel::publish);
@@ -168,7 +170,7 @@ public class ReplicatorElectionTest {
 
   @Test
   public void ifAFollowerWhoTimedOutReceivesPreElectionRepliesFromAMajorityOfServersThenItWillInitiateAnElection()
-  throws Exception {
+      throws Exception {
     final QuorumConfiguration configuration = aFiveNodeConfiguration();
     withLogReflectingConfiguration(configuration);
     whenTheReplicatorIsInState(FOLLOWER);
@@ -253,14 +255,14 @@ public class ReplicatorElectionTest {
 
     receiveAnAppendMessage();
 
-    info.advanceTime(ELECTION_TIMEOUT_MILLIS - 1);
+    clock.advanceTime(clock.electionTimeout() - 1);
 
     havingReceived(
         aPreElectionPollRequestWithSameLastIndexAndTermFrom(chooseOne(otherPeers(configuration))),
         (ignoreReply) -> {
         });
 
-    info.advanceTime(2);
+    clock.advanceTime(2);
     expectReplicatorToEmitEvent(aReplicatorEvent(ELECTION_TIMEOUT));
   }
 
@@ -302,9 +304,7 @@ public class ReplicatorElectionTest {
   }
 
 
-  private void whenTheReplicatorIsInState(Replicator.State state) {
-    final long leaderId = 0;
-    final long votedFor = 0;
+  private void whenTheReplicatorIsInState(Replicator.State state) throws Exception {
     final Fiber replicatorFiber = new ThreadFiber(new RunnableExecutorImpl(batchExecutor),
         "replicatorFiber-Thread", true);
 
@@ -312,16 +312,12 @@ public class ReplicatorElectionTest {
         MY_ID,
         QUORUM_ID,
         log,
-        info,
+        clock,
         persistence,
         sendRpcChannel,
         eventChannel,
         commitNotices,
-        CURRENT_TERM,
-        state,
-        lastCommittedIndex(0),
-        leaderId,
-        votedFor);
+        state);
 
     sendRpcChannel.subscribe(rpcFiber, (request) -> {
       if (request.getRequest().to == MY_ID) {
@@ -348,7 +344,7 @@ public class ReplicatorElectionTest {
   }
 
   private void allowTimeToPass() throws Exception {
-    info.advanceTime(5);
+    clock.advanceTime(5);
   }
 
   private void receiveAnAppendMessage() throws Exception {
@@ -360,7 +356,7 @@ public class ReplicatorElectionTest {
     allowReplicatorToTimeout();
 
     expectReplicatorToEmitEvent(aReplicatorEvent(ELECTION_TIMEOUT));
-    info.stopTimeout();
+    clock.stopTimeout();
     eventMonitor.forgetHistory();
 
     allPeers((peerId) ->
@@ -417,7 +413,7 @@ public class ReplicatorElectionTest {
   }
 
   private void allowReplicatorToTimeout() {
-    info.startTimeout();
+    clock.startTimeout();
   }
 
   private void handleLoopBack(Request<RpcRequest, RpcWireReply> request) {

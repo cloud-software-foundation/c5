@@ -21,18 +21,20 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 public class C5ServerConstants {
 
-  public static final String LOG_NAME = "log";
-  public static final String WAL_DIR = "wal";
-  public static final String ARCHIVE_DIR = "old_wal";
   public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
 
   public static final String LOCALHOST = "localhost";
-  public static final int WAL_THREAD_POOL_SIZE = 1;
   public static final java.lang.String MIN_CLUSTER_SIZE = "minClusterSize";
   public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
   public static final int DEFAULT_QUORUM_SIZE = 3;
   public static final String C5_CFG_PATH = "c5.cfgPath";
+
+  public static final String WAL_ROOT_DIRECTORY_NAME = "wal";
+  public static final String WAL_LOG_FILE_SUBDIRECTORY_NAME = "logs";
+  public static final int WAL_THREAD_POOL_SIZE = 1;
+  public static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
+  public static final int WAL_CLOSE_TIMEOUT_SECONDS = 15;
 
   // We use this column qualifier in system tables to mark the leader
   public static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUALIFIER");
@@ -48,6 +50,8 @@ public class C5ServerConstants {
 
   public static final int REPLICATOR_PORT_MIN = 1024;
   public static final int REPLICATOR_PORT_RANGE = 30000;
+
+  public static final int REPLICATOR_BASE_ELECTION_TIMEOUT_MILLISECONDS = 1000;
 
   public static final int DEFAULT_REGION_SERVER_PORT_MIN = 8080;
   public static final int REGION_SERVER_PORT_RANGE = 1000;

@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
@@ -71,7 +72,7 @@ public class BasicTableCreationTest {
   private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
   private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
-  private final MemoryChannel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
+  private final MemoryChannel<ReplicatorInstanceEvent> eventMemoryChannel = new MemoryChannel<>();
   private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
   private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
   private final C5Server c5Server = context.mock(C5Server.class);
@@ -156,12 +157,16 @@ public class BasicTableCreationTest {
       oneOf(replicator).getStateChannel();
       will(returnValue(stateChannel));
 
-      oneOf(replicator).getStateChangeChannel();
-      will(returnValue(stateChangeChannel));
+      oneOf(replicator).getEventChannel();
+      will(returnValue(eventMemoryChannel));
+
+      allowing(replicator).getCommitNoticeChannel();
+
+      allowing(replicator).getId();
 
       oneOf(replicator).start();
 
-      oneOf(replicator).getQuorumId();
+      allowing(replicator).getQuorumId();
       will(returnValue("hbase:root,\\x00,1.33578e495f8173aac4be480afe41410a."));
     }});
     AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
@@ -196,12 +201,12 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventMemoryChannel));
 
         oneOf(replicator).start();
 
-        oneOf(replicator).getQuorumId();
+        allowing(replicator).getQuorumId();
         will(returnValue("hbase:meta,\\x00,1.33578e495f8173aac4be480afe41410a."));
 
       }
@@ -232,12 +237,12 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventMemoryChannel));
 
         oneOf(replicator).start();
 
-        oneOf(replicator).getQuorumId();
+        allowing(replicator).getQuorumId();
         will(returnValue("hbase:tabletName,\\x00,1.33578e495f8173aac4be480afe41410a."));
 
         allowing(replicator).logData(with(any(List.class)));

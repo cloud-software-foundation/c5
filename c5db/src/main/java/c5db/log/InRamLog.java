@@ -20,16 +20,13 @@ package c5db.log;
 import c5db.replication.QuorumConfiguration;
 import c5db.replication.generated.LogEntry;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static c5db.log.SequentialLog.LogEntryNotFound;
-import static c5db.log.SequentialLog.LogEntryNotInSequence;
 
 /**
  * ReplicatorLog hosted in memory, e.g. for unit testing ReplicatorInstance in-memory. This
@@ -47,14 +44,7 @@ public class InRamLog implements ReplicatorLog {
     validateEntries(entries);
     log.addAll(entries);
 
-    return Futures.immediateFuture(true);
-  }
-
-  @Override
-  public synchronized ListenableFuture<LogEntry> getLogEntry(long index) {
-    assert index > 0;
-
-    return Futures.immediateFuture(getEntryInternal(index));
+    return blockingFuture(true);
   }
 
   @Override
@@ -67,10 +57,10 @@ public class InRamLog implements ReplicatorLog {
         .collect(Collectors.toList());
 
     if (foundEntries.size() != (end - start)) {
-      throw new LogEntryNotFound("requested [" + start + ", " + end + "); received" + foundEntries.toString());
+      throw new RuntimeException("requested [" + start + ", " + end + "); received" + foundEntries.toString());
     }
 
-    return Futures.immediateFuture(foundEntries);
+    return blockingFuture(foundEntries);
   }
 
   @Override
@@ -108,7 +98,7 @@ public class InRamLog implements ReplicatorLog {
     int listIndex = log.lastIndexOf(firstRemovedEntry);
     log.subList(listIndex, log.size()).clear();
 
-    return Futures.immediateFuture(true);
+    return blockingFuture(true);
   }
 
   @Override
@@ -140,7 +130,7 @@ public class InRamLog implements ReplicatorLog {
       if (lastIndex == 0 || e.getIndex() == lastIndex + 1) {
         lastIndex = e.getIndex();
       } else {
-        throw new LogEntryNotInSequence("entries not in sequence: " + entries.toString());
+        throw new RuntimeException("entries not in sequence: " + entries.toString());
       }
     }
   }
@@ -155,9 +145,16 @@ public class InRamLog implements ReplicatorLog {
     Optional<LogEntry> requestedEntry = optionallyGetEntryInternal(index);
 
     if (!requestedEntry.isPresent()) {
-      throw new LogEntryNotFound("entry index " + index + " not found");
+      throw new RuntimeException("entry index " + index + " not found");
     }
 
     return requestedEntry.get();
+  }
+
+  private static <V> ListenableFuture<V> blockingFuture(V result) {
+    SettableFuture<V> future = SettableFuture.create();
+    new Thread(() -> future.set(result))
+        .start();
+    return future;
   }
 }

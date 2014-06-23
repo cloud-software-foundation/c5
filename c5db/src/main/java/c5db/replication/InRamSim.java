@@ -18,6 +18,7 @@
 package c5db.replication;
 
 import c5db.interfaces.replication.IndexCommitNotice;
+import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.log.InRamLog;
 import c5db.log.ReplicatorLog;
@@ -48,6 +49,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -65,7 +67,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class InRamSim {
   private static final Logger LOG = LoggerFactory.getLogger("InRamSim");
 
-  public static class Info implements ReplicatorInformation {
+  public static class StoppableClock implements ReplicatorClock {
     private final long electionTimeout;
     private final StopWatch stopWatch = new StopWatch();
     private boolean suspended = true; // field needed because StopWatch doesn't have a way to check its state
@@ -73,9 +75,10 @@ public class InRamSim {
     private long offset;
 
 
-    public Info(long offset, long electionTimeout) {
+    public StoppableClock(long offset, long electionTimeout) {
+      Random r = new Random();
       this.offset = offset;
-      this.electionTimeout = electionTimeout;
+      this.electionTimeout = r.nextInt((int) electionTimeout) + electionTimeout;
       stopWatch.start();
       stopWatch.suspend();
     }
@@ -159,7 +162,8 @@ public class InRamSim {
   private final Set<Long> offlinePeers = new HashSet<>();
   private final Map<Long, ReplicatorInstance> replicators = new HashMap<>();
   private final Map<Long, ReplicatorLog> replicatorLogs = new HashMap<>();
-  private final List<WireObstruction> wireObstructions = Collections.synchronizedList(new ArrayList<>());
+  private final List<WireObstruction> wireObstructions
+      = Collections.<WireObstruction>synchronizedList(new ArrayList<>());
   private final RequestChannel<RpcRequest, RpcWireReply> rpcChannel = new MemoryRequestChannel<>();
   private final Channel<IndexCommitNotice> commitNotices = new MemoryChannel<>();
   private final Fiber rpcFiber;
@@ -201,11 +205,12 @@ public class InRamSim {
           peerId,
           "foobar",
           log,
-          new Info(plusMillis, electionTimeout),
+          new StoppableClock(plusMillis, electionTimeout),
           new Persister(),
           rpcChannel,
           stateChanges,
-          commitNotices);
+          commitNotices,
+          Replicator.State.FOLLOWER);
       peerIds.add(peerId);
       replicators.put(peerId, rep);
       replicatorLogs.put(peerId, log);
@@ -231,11 +236,12 @@ public class InRamSim {
         peerId,
         "foobar",
         log,
-        oldRepl.info,
+        oldRepl.clock,
         oldRepl.persister,
         rpcChannel,
         stateChanges,
-        commitNotices);
+        commitNotices,
+        Replicator.State.FOLLOWER);
     replicators.put(peerId, repl);
     replicatorLogs.put(peerId, log);
     offlinePeers.remove(peerId);
@@ -305,24 +311,24 @@ public class InRamSim {
 
   public void stopAllTimeouts() {
     for (ReplicatorInstance repl : replicators.values()) {
-      ((Info) repl.info).stopTimeout();
+      ((StoppableClock) repl.clock).stopTimeout();
     }
   }
 
   public void startAllTimeouts() {
     for (ReplicatorInstance repl : replicators.values()) {
-      ((Info) repl.info).startTimeout();
+      ((StoppableClock) repl.clock).startTimeout();
     }
   }
 
   @SuppressWarnings("UnusedDeclaration")
   public void stopTimeout(long peerId) {
     assert replicators.containsKey(peerId);
-    ((Info) replicators.get(peerId).info).stopTimeout();
+    ((StoppableClock) replicators.get(peerId).clock).stopTimeout();
   }
 
   public void startTimeout(long peerId) {
-    ((Info) replicators.get(peerId).info).startTimeout();
+    ((StoppableClock) replicators.get(peerId).clock).startTimeout();
   }
 
   private void messageForwarder(final Request<RpcRequest, RpcWireReply> origMsg) {
@@ -363,12 +369,12 @@ public class InRamSim {
     rpcFiber.start();
 
     // bootstrap ALL the replicators, collect their futures and skip the null ones.
-    List<ListenableFuture<Long>> futures = replicators.values()
+    List<ListenableFuture<Void>> futures = replicators.values()
         .stream().map(repl -> repl.bootstrapQuorum(peerIds))
         .filter(future -> future != null)
         .collect(Collectors.toList());
 
-    for (ListenableFuture<Long> aFuture : futures) {
+    for (ListenableFuture<Void> aFuture : futures) {
       LOG.info("Waiting for bootstrap");
       aFuture.get(4, TimeUnit.SECONDS);
     }

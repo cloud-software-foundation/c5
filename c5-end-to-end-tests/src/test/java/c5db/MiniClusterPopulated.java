@@ -14,36 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package c5db;
 
-package c5db.replication;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Before;
 
-/**
- * Information used by a {@link c5db.replication.ReplicatorInstance} to configure itself; for instance,
- * tunable timing-related parameters.
- */
-public interface ReplicatorInformation {
-  public long currentTimeMillis();
+import java.io.IOException;
 
-  /**
-   * How often to check if the election needs to be rerun.
-   * <p>
-   * TODO revisit this to see if necessary or can be set to another derivative value.
-   *
-   * @return
-   */
-  public long electionCheckRate();
+public class MiniClusterPopulated extends MiniClusterBase {
 
-  /**
-   * The election timeout.
-   *
-   * @return
-   */
-  public long electionTimeout();
+  public int NUMBER_OF_ROWS = 101;
+  @Before
+  public void initTable() throws IOException {
+    for (int i =0;i != NUMBER_OF_ROWS;i++){
+      Put put = new Put(Bytes.toBytes(i));
+      put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
+      this.table.put(put);
+    }
 
-  /**
-   * How frequently we should check the append queue, and send RPCs to the clients.
-   *
-   * @return
-   */
-  public long groupCommitDelay();
+
+  }
 }

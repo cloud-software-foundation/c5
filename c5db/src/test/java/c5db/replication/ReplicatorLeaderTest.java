@@ -56,14 +56,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
 import static c5db.AsyncChannelAsserts.ChannelListener;
 import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.IndexCommitMatchers.hasCommitNoticeIndexValueAtLeast;
+import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.RpcMatchers.RequestMatcher;
 import static c5db.RpcMatchers.RequestMatcher.anAppendRequest;
 import static c5db.interfaces.replication.Replicator.State;
-import static c5db.log.LogTestUtil.seqNum;
 import static c5db.log.LogTestUtil.someData;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertFalse;
 
 
@@ -98,34 +99,33 @@ public class ReplicatorLeaderTest {
   private long lastIndex;
 
   @Before
-  public final void createLeaderAndSetupFibersAndChannels() {
+  public final void createLeaderAndSetupFibersAndChannels() throws Exception {
     sendRpcChannel.subscribe(rpcFiber, (request) -> System.out.println(request.getRequest()));
     sendRpcChannel.subscribe(rpcFiber, this::routeOutboundRequests);
     sendRpcChannel.subscribe(rpcFiber, requestLog::publish);
 
     Fiber replicatorFiber = new ThreadFiber(new RunnableExecutorImpl(batchExecutor), "replicatorFiber-Thread", true);
-    InRamSim.Info info = new InRamSim.Info(0, 1000);
-    info.startTimeout();
+    InRamSim.StoppableClock clock = new InRamSim.StoppableClock(0, 1000);
+    clock.startTimeout();
 
     log.logEntries(
         Lists.newArrayList(
             new LogEntry(CURRENT_TERM, 1, new ArrayList<>(), QuorumConfiguration.of(PEER_ID_LIST).toProtostuff())));
     lastIndex = 1;
 
+    ReplicatorInfoPersistence persister = new InRamSim.Persister();
+    persister.writeCurrentTermAndVotedFor(QUORUM_ID, CURRENT_TERM, LEADER_ID);
+
     replicatorInstance = new ReplicatorInstance(replicatorFiber,
         LEADER_ID,
         QUORUM_ID,
         log,
-        info,
+        clock,
         new InRamSim.Persister(),
         sendRpcChannel,
         new MemoryChannel<>(),
         commitNotices,
-        CURRENT_TERM,
-        State.LEADER,
-        seqNum(1),
-        LEADER_ID,
-        LEADER_ID);
+        State.LEADER);
     replicatorInstance.start();
     rpcFiber.start();
   }
@@ -331,7 +331,7 @@ public class ReplicatorLeaderTest {
 
   private class LeaderController {
     private LeaderController logSomeData() throws Exception {
-      lastIndex = replicatorInstance.logData(TEST_DATUM).get();
+      lastIndex = replicatorInstance.logData(TEST_DATUM).get().seqNum;
 
       // Wait for the leader to send this entry so that later entries don't get batched together into the
       // same append message -- this enables the AppendEntries reply to have more granularity about which
@@ -408,8 +408,8 @@ public class ReplicatorLeaderTest {
   }
 
   private void expectLeaderToCommitUpToIndex(long index) {
-    commitMonitor.waitFor(hasCommitNoticeIndexValueAtLeast(index));
-    assertFalse(commitMonitor.hasAny(hasCommitNoticeIndexValueAtLeast(index + 1)));
+    commitMonitor.waitFor(aCommitNotice().withIndex(greaterThanOrEqualTo(index)));
+    assertFalse(commitMonitor.hasAny(aCommitNotice().withIndex(greaterThan(index))));
   }
 
 }

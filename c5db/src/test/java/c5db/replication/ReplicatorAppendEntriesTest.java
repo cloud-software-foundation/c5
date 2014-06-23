@@ -28,16 +28,17 @@ import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.JUnitRuleFiberExceptions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.jetlang.channels.AsyncRequest;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.channels.MemoryRequestChannel;
-import org.jetlang.core.RunnableExecutor;
+import org.jetlang.core.BatchExecutor;
 import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
-import org.jmock.States;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.After;
@@ -52,7 +53,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
-import static c5db.IndexCommitMatchers.hasCommitNoticeIndexValueAtLeast;
+import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.RpcMatchers.ReplyMatcher.anAppendReply;
 import static c5db.interfaces.replication.Replicator.State;
 import static c5db.log.LogTestUtil.LogSequenceBuilder;
@@ -62,6 +63,8 @@ import static c5db.log.LogTestUtil.makeProtostuffEntry;
 import static c5db.log.LogTestUtil.someData;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 
@@ -81,22 +84,23 @@ public class ReplicatorAppendEntriesTest {
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
-  private final States testState = context.states("test");
   private final ReplicatorInfoPersistence persistence = context.mock(ReplicatorInfoPersistence.class);
   private final ReplicatorLog log = context.mock(ReplicatorLog.class);
 
   @Rule
   public JUnitRuleFiberExceptions fiberExceptionHandler = new JUnitRuleFiberExceptions();
+  private final BatchExecutor batchExecutor = new ExceptionHandlingBatchExecutor(fiberExceptionHandler);
 
-  private final RunnableExecutor runnableExecutor = new RunnableExecutorImpl(
-      new ExceptionHandlingBatchExecutor(fiberExceptionHandler));
-  private final Fiber rpcFiber = new ThreadFiber(runnableExecutor, null, true);
+  private final Fiber rpcFiber = new ThreadFiber(new RunnableExecutorImpl(batchExecutor), null, true);
 
   @Before
   public void setOverallTestExpectations() throws Exception {
     context.checking(new Expectations() {{
-      oneOf(persistence).writeCurrentTermAndVotedFor(QUORUM_ID, CURRENT_TERM, LEADER_ID);
-      when(testState.isNot("fully-set-up"));
+      allowing(persistence).readCurrentTerm(QUORUM_ID);
+      will(returnValue(CURRENT_TERM));
+
+      allowing(persistence).readVotedFor(QUORUM_ID);
+      will(returnValue(LEADER_ID));
 
       /* Place no constraint on the replicator's usage of these synchronous getters.
        * The replicator uses a Proxy ReplicatorLog which allows us to use jmock
@@ -115,7 +119,6 @@ public class ReplicatorAppendEntriesTest {
     replicatorInstance = makeTestInstance();
     replicatorInstance.start();
     rpcFiber.start();
-    testState.become("fully-set-up");
   }
 
   @After
@@ -284,6 +287,30 @@ public class ReplicatorAppendEntriesTest {
   }
 
   @Test
+  public void issuesASeparateCommitNoticeForEachTermInTheRangeOfCommittedEntries() throws Exception {
+    context.checking(new Expectations() {{
+      allowing(log).logEntries(with(anyList()));
+    }});
+
+    havingReceived(
+        anAppendEntriesRequest()
+            .withEntries(entries()
+                .term(101).indexes(1)
+                .term(102).indexes(2, 3)
+                .term(103).indexes(4, 5, 6))
+            .withCommitIndex(5));
+
+    assertThatReplicatorWillIssue(aCommitNotice()
+        .withTerm(equalTo(101L)).withIndexRange(equalTo(1L), equalTo(1L)));
+
+    assertThatReplicatorWillIssue(aCommitNotice()
+        .withTerm(equalTo(102L)).withIndexRange(equalTo(2L), equalTo(3L)));
+
+    assertThatReplicatorWillIssue(aCommitNotice()
+        .withTerm(equalTo(103L)).withIndexRange(equalTo(4L), equalTo(5L)));
+  }
+
+  @Test
   public void willLogANewQuorumConfigurationItReceivesAndUpdateItsCurrentConfiguration() throws Exception {
     final QuorumConfiguration configuration = aNewConfiguration();
     final List<LogEntry> receivedEntries = entries()
@@ -308,13 +335,12 @@ public class ReplicatorAppendEntriesTest {
   private final ChannelHistoryMonitor<IndexCommitNotice> commitMonitor =
       new ChannelHistoryMonitor<>(commitNotices, rpcFiber);
 
-  private ReplicatorInstance makeTestInstance() {
+  private ReplicatorInstance makeTestInstance() throws Exception {
     long thisReplicatorId = 1;
-    long lastCommittedIndex = 0;
-    ReplicatorInformation info = new InRamSim.Info(0, Long.MAX_VALUE / 2L);
+    ReplicatorClock info = new InRamSim.StoppableClock(0, Integer.MAX_VALUE / 2L);
     ReplicatorLog proxyLog = getReplicatorLogWhichInvokesMock();
 
-    return new ReplicatorInstance(new ThreadFiber(runnableExecutor, null, true),
+    return new ReplicatorInstance(new ThreadFiber(new RunnableExecutorImpl(batchExecutor), null, true),
         thisReplicatorId,
         QUORUM_ID,
         proxyLog,
@@ -323,11 +349,7 @@ public class ReplicatorAppendEntriesTest {
         new MemoryRequestChannel<>(),
         new MemoryChannel<>(),
         commitNotices,
-        CURRENT_TERM,
-        State.FOLLOWER,
-        lastCommittedIndex,
-        LEADER_ID,
-        LEADER_ID);
+        State.FOLLOWER);
   }
 
   private ReplicatorLog getReplicatorLogWhichInvokesMock() {
@@ -347,8 +369,12 @@ public class ReplicatorAppendEntriesTest {
   }
 
   private void assertThatReplicatorWillCommitUpToIndex(long index) {
-    commitMonitor.waitFor(hasCommitNoticeIndexValueAtLeast(index));
-    assertFalse(commitMonitor.hasAny(hasCommitNoticeIndexValueAtLeast(index + 1)));
+    commitMonitor.waitFor(aCommitNotice().withIndex(greaterThanOrEqualTo(index)));
+    assertFalse(commitMonitor.hasAny(aCommitNotice().withIndex(greaterThan(index))));
+  }
+
+  private void assertThatReplicatorWillIssue(Matcher<IndexCommitNotice> commitNoticeMatcher) {
+    commitMonitor.waitFor(commitNoticeMatcher);
   }
 
   private SettableFuture<RpcReply> lastReply = null;
@@ -449,5 +475,9 @@ public class ReplicatorAppendEntriesTest {
 
   private long votedForNoOne() {
     return 0;
+  }
+
+  private Matcher<List<LogEntry>> anyList() {
+    return Matchers.instanceOf(List.class);
   }
 }

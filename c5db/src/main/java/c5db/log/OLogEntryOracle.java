@@ -36,9 +36,26 @@ public interface OLogEntryOracle {
    * This method removes information from the map. It must be called when the log
    * has truncated some entries.
    *
-   * @param seqNum Index to truncate back to, inclusive.
+   * @param seqNum Log sequence number to truncate back to, inclusive.
    */
   void notifyTruncation(long seqNum);
+
+  /**
+   * Return the greatest sequence number of entries logged. If no entries have
+   * been logged, return zero. Immediately after notifyTruncation is called, the
+   * greatest sequence number will be one less than the sequence number passed to
+   * notifyTruncation.
+   *
+   * @return The greatest sequence known to the oracle, or zero if there is none.
+   */
+  long getGreatestSeqNum();
+
+  /**
+   * Get the last term logged, or zero if there is none.
+   *
+   * @return The latest election term.
+   */
+  long getLastTerm();
 
   /**
    * Get the log term for a specified sequence number, or zero if the sequence number
@@ -50,16 +67,14 @@ public interface OLogEntryOracle {
   long getTermAtSeqNum(long seqNum);
 
   /**
-   * Get the quorum configuration which was active as of a specified sequence number,
-   * together with the sequence number at which it was established. If the sequence
-   * number is less than every entry logged, return the empty quorum configuration and
-   * a seqNum of zero.
+   * Get the last quorum configuration, together with the sequence number at which it was
+   * established. If there is none, return the empty quorum configuration and a seqNum
+   * of zero.
    *
-   * @param seqNum Log sequence number
    * @return The quorum configuration active at this sequence number, and the sequence
    * number at which it became active.
    */
-  QuorumConfigurationWithSeqNum getConfigAtSeqNum(long seqNum);
+  QuorumConfigurationWithSeqNum getLastQuorumConfig();
 
 
   interface OLogEntryOracleFactory {

@@ -34,14 +34,13 @@ public class NavigableMapOLogEntryOracleTest {
 
   private final QuorumConfiguration firstConfig = QuorumConfiguration.of(Lists.newArrayList(1L));
   private final QuorumConfiguration secondConfig = firstConfig.getTransitionalConfiguration(Lists.newArrayList(2L));
-  private final QuorumConfiguration thirdConfig = secondConfig.getCompletedConfiguration();
 
   @Test
   public void returnsTheElectionTermAtAGivenSeqNum() throws Exception {
     havingLogged(
         entries()
-            .term(17).indexes(5, 6, 7)
-            .term(18).indexes(8, 9, 10));
+            .term(17).seqNums(5, 6, 7)
+            .term(18).seqNums(8, 9, 10));
 
     assertThat(oracle.getTermAtSeqNum(4), is(equalTo(0L)));
     assertThat(oracle.getTermAtSeqNum(5), is(equalTo(17L)));
@@ -52,45 +51,73 @@ public class NavigableMapOLogEntryOracleTest {
   public void handlesTruncationsAndUpdatesTermInformationAccordingly() throws Exception {
     havingLogged(
         entries()
-            .term(7).indexes(1, 2));
-    havingTruncatedToIndex(2);
+            .term(7).seqNums(1, 2));
+    havingTruncatedToSeqNum(2);
     havingLogged(
         entries()
-            .term(8).indexes(2));
+            .term(8).seqNums(2));
 
     assertThat(oracle.getTermAtSeqNum(1), is(equalTo(7L)));
     assertThat(oracle.getTermAtSeqNum(2), is(equalTo(8L)));
   }
 
   @Test
-  public void returnsTheQuorumConfigurationWhichWasActiveAtAGivenSeqNum() throws Exception {
+  public void returnsTheLastQuorumConfigurationAndItsSeqNum() throws Exception {
     havingLogged(
         entries()
             .term(999)
-            .indexes(5).configurationAndIndex(firstConfig, 6)
-            .indexes(7, 8, 9).configurationAndIndex(secondConfig, 10)
-            .configurationAndIndex(thirdConfig, 11));
+            .seqNums(5)
+            .configurationAndSeqNum(firstConfig, 6)
+            .seqNums(7, 8, 9));
+    assertThat(oracle.getLastQuorumConfig(), is(equalTo(configurationAndSeqNum(firstConfig, 6))));
 
-    assertThat(oracle.getConfigAtSeqNum(5), is(equalTo(configurationAndIndex(EMPTY, 0))));
-    assertThat(oracle.getConfigAtSeqNum(6), is(equalTo(configurationAndIndex(firstConfig, 6))));
-    assertThat(oracle.getConfigAtSeqNum(9), is(equalTo(configurationAndIndex(firstConfig, 6))));
-    assertThat(oracle.getConfigAtSeqNum(11), is(equalTo(configurationAndIndex(thirdConfig, 11))));
+    havingLogged(
+        entries()
+            .term(999)
+            .configurationAndSeqNum(secondConfig, 10));
+
+    assertThat(oracle.getLastQuorumConfig(), is(equalTo(configurationAndSeqNum(secondConfig, 10))));
   }
 
   @Test
   public void handlesTruncationsAndUpdatesQuorumConfigurationInformationAccordingly() throws Exception {
     havingLogged(
         entries()
-            .term(7).configurationAndIndex(firstConfig, 1));
-    havingTruncatedToIndex(1);
+            .term(7).configurationAndSeqNum(firstConfig, 1));
+    havingTruncatedToSeqNum(1);
+    assertThat(oracle.getLastQuorumConfig(), is(equalTo(configurationAndSeqNum(EMPTY, 0))));
+
     havingLogged(
         entries()
-            .term(8).configurationAndIndex(secondConfig, 2));
-
-    assertThat(oracle.getConfigAtSeqNum(1), is(equalTo(configurationAndIndex(EMPTY, 0))));
-    assertThat(oracle.getConfigAtSeqNum(2), is(equalTo(configurationAndIndex(secondConfig, 2))));
+            .term(8).configurationAndSeqNum(secondConfig, 2));
+    assertThat(oracle.getLastQuorumConfig(), is(equalTo(configurationAndSeqNum(secondConfig, 2))));
   }
 
+  @Test
+  public void reportsAGreatestSeqNumOfZeroWhenNothingHasBeenLogged() throws Exception {
+    assertThat(oracle.getGreatestSeqNum(), is(equalTo(0L)));
+  }
+
+  @Test
+  public void reportsTheGreatestSeqNumLogged() throws Exception {
+    havingLogged(
+        entries()
+            .term(8).seqNums(1, 2, 3));
+    assertThat(oracle.getGreatestSeqNum(), is(equalTo(3L)));
+  }
+
+  @Test
+  public void takesTruncationIntoAccountWhenReportingTheGreatestSeqNumLogged() throws Exception {
+    havingLogged(
+        entries()
+            .term(8).seqNums(1, 2, 3));
+
+    havingTruncatedToSeqNum(2);
+    assertThat(oracle.getGreatestSeqNum(), is(equalTo(1L)));
+
+    havingTruncatedToSeqNum(1);
+    assertThat(oracle.getGreatestSeqNum(), is(equalTo(0L)));
+  }
 
   private void havingLogged(LogTestUtil.LogSequenceBuilder sequenceBuilder) {
     for (LogEntry entry : sequenceBuilder.build()) {
@@ -99,12 +126,12 @@ public class NavigableMapOLogEntryOracleTest {
     }
   }
 
-  private void havingTruncatedToIndex(long index) {
-    oracle.notifyTruncation(index);
+  private void havingTruncatedToSeqNum(long seqNum) {
+    oracle.notifyTruncation(seqNum);
   }
 
-  private QuorumConfigurationWithSeqNum configurationAndIndex(QuorumConfiguration quorumConfiguration,
-                                                              long index) {
-    return new QuorumConfigurationWithSeqNum(quorumConfiguration, index);
+  private QuorumConfigurationWithSeqNum configurationAndSeqNum(QuorumConfiguration quorumConfiguration,
+                                                               long seqNum) {
+    return new QuorumConfigurationWithSeqNum(quorumConfiguration, seqNum);
   }
 }

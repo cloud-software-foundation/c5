@@ -44,11 +44,17 @@ public class InMemoryPersistenceNavigator<E extends SequentialEntry> implements 
   private final SequentialEntryCodec<E> codec;
 
   private final NavigableMap<Long, Long> index = new TreeMap<>();
+  private final long fileOffset;
   private int maxEntrySeek = 256;
 
   public InMemoryPersistenceNavigator(BytePersistence persistence, SequentialEntryCodec<E> codec) {
+    this(persistence, codec, 0);
+  }
+
+  public InMemoryPersistenceNavigator(BytePersistence persistence, SequentialEntryCodec<E> codec, long offset) {
     this.persistence = persistence;
     this.codec = codec;
+    this.fileOffset = offset;
 
     // Logic is simplified if the index NavigableMap is guaranteed to have at least one entry.
     index.put(0L, 0L);
@@ -64,6 +70,11 @@ public class InMemoryPersistenceNavigator<E extends SequentialEntry> implements 
   @Override
   public void notifyLogging(long seqNum, long byteAddress) throws IOException {
     maybeAddToIndex(seqNum, byteAddress);
+  }
+
+  @Override
+  public void addToIndex(long seqNum, long address) {
+    index.put(seqNum, address);
   }
 
   @Override
@@ -91,24 +102,33 @@ public class InMemoryPersistenceNavigator<E extends SequentialEntry> implements 
   }
 
   @Override
+  public InputStream getStreamAtFirstEntry() throws IOException {
+    PersistenceReader reader = persistence.getReader();
+    reader.position(fileOffset);
+    return Channels.newInputStream(reader);
+  }
+
+  @Override
   public InputStream getStreamAtLastEntry() throws IOException {
-    long entrySeqNum = lastSeqNum();
-    PersistenceReader reader = getReaderAtSeqNum(entrySeqNum);
-    long lastEntryAddress = reader.position();
+    long lastEntrySeqNum = lastIndexedSeqNum();
+    long lastEntryAddress = index.get(lastEntrySeqNum);
+
+    PersistenceReader reader = persistence.getReader();
+    reader.position(lastEntryAddress);
     InputStream inputStream = Channels.newInputStream(reader);
 
     try {
       //noinspection InfiniteLoopStatement
       while (true) {
         long entryStartAddress = reader.position();
-        entrySeqNum = codec.skipEntryAndReturnSeqNum(inputStream);
+        lastEntrySeqNum = codec.skipEntryAndReturnSeqNum(inputStream);
         lastEntryAddress = entryStartAddress;
       }
     } catch (EOFException ignore) {
     }
 
     reader.position(lastEntryAddress);
-    addToIndex(entrySeqNum, lastEntryAddress);
+    addToIndex(lastEntrySeqNum, lastEntryAddress);
     return inputStream;
   }
 
@@ -133,25 +153,21 @@ public class InMemoryPersistenceNavigator<E extends SequentialEntry> implements 
         }
       }
     } catch (EOFException e) {
-      throw new LogEntryNotFound(e);
+      throw new LogEntryNotFound("EOF reached before finding requested seqNum (" + seqNum + ")");
     }
   }
 
   /**
    * @return The greatest seqNum in the index, or 0 if no seqNum has ever been added to the index.
    */
-  private long lastSeqNum() {
+  private long lastIndexedSeqNum() {
     return index.lastKey();
   }
 
   private void maybeAddToIndex(long seqNum, long address) {
-    if (seqNum - lastSeqNum() >= maxEntrySeek) {
+    if (seqNum - lastIndexedSeqNum() >= maxEntrySeek) {
       index.put(seqNum, address);
     }
-  }
-
-  private void addToIndex(long seqNum, long address) {
-    index.put(seqNum, address);
   }
 
   private long nearestAddressTo(long seqNum) {
