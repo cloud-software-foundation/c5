@@ -238,7 +238,11 @@ public class OLogShim implements Syncable, HLog {
 
       // our replicator knows what quorumId/tabletId we are.
       ListenableFuture<ReplicatorReceipt> receiptFuture = replicatorInstance.logData(entryBytes);
+      if (receiptFuture == null) {
+        throw new IOException("OLogShim: attempting to append a WALEdit to a Replicator not in the leader state");
+      }
       receiptFutureQueue.add(receiptFuture);
+
     } catch (InterruptedException e) {
       throw new IOException(e);
     }
