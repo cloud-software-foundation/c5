@@ -183,7 +183,7 @@ public class OLogShim implements Syncable, HLog {
         }
       }
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
-      throw new IOException(e);
+      throw new IOException("Error encountered while waiting within OLogShim#sync", e);
     }
   }
 
