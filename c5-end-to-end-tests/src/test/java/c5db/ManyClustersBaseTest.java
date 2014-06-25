@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db;
 
 import c5db.client.FakeHTable;
@@ -21,6 +22,7 @@ import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,6 +37,7 @@ import static org.hamcrest.core.Is.is;
 public class ManyClustersBaseTest extends ManyClusterBase {
 
   @Test
+  @Ignore
   public void metaTableShouldContainUserTableEntries()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
     ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
