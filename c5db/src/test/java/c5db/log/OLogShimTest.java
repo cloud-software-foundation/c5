@@ -72,6 +72,7 @@ public class OLogShimTest {
   public void setOverallExpectationsAndCreateTestObject() {
     context.checking(new Expectations() {{
       allowing(replicator).getQuorumId();
+      will(returnValue(QUORUM_ID));
 
       allowing(replicator).getId();
       will(returnValue(1L));

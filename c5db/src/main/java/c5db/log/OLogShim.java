@@ -79,11 +79,14 @@ public class OLogShim implements Syncable, HLog {
 
   public OLogShim(Replicator replicatorInstance, Fiber fiber) {
     this.replicatorInstance = replicatorInstance;
+    String quorumId = replicatorInstance.getQuorumId();
     long serverNodeId = replicatorInstance.getId();
 
     replicatorInstance.getCommitNoticeChannel().subscribe(
         new ChannelSubscription<>(fiber, commitNoticeQueue::add,
-            (notice) -> notice.nodeId == serverNodeId));
+            (notice) ->
+                notice.nodeId == serverNodeId
+                    && notice.quorumId.equals(quorumId)));
   }
 
   //TODO fix so we don't always insert a huge amount of data
