@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * A tablet, backed by a replicator that keeps values replicated across multiple servers.
@@ -145,11 +146,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
     replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
-
-    // TODO this ThreadFiber is a workaround until issue 252 is fixed; at which point shim can use tabletFiber.
-    Fiber shimFiber = new ThreadFiber();
-    shimFiber.start();
-    OLogShim shim = new OLogShim(replicator, shimFiber);
+    OLogShim shim = new OLogShim(replicator, tabletFiber);
     try {
       region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);

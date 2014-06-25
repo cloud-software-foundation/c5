@@ -238,9 +238,13 @@ public class RegionServerService extends AbstractService implements RegionServer
       Scan scan = new Scan(Bytes.add(metaScanningKey, Bytes.toBytes(","), Bytes.toBytes(Long.MAX_VALUE)));
       scan.addFamily(HConstants.CATALOG_FAMILY);
       ResultScanner scanner = metaTable.getScanner(scan);
-      org.apache.hadoop.hbase.client.Result result = scanner.next();
-      Cell leaderCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER);
-      Cell regionInfoCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER);
+      Cell leaderCell = null;
+      Cell regionInfoCell = null;
+      while (leaderCell == null || regionInfoCell == null) {
+        org.apache.hadoop.hbase.client.Result result = scanner.next();
+        leaderCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER);
+        regionInfoCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER);
+      }
       HRegionInfo regionInfo = HRegionInfo.parseFrom(regionInfoCell.getValue());
       leader = Bytes.toLong(leaderCell.getValue());
       metaCache.put(regionInfo, leader );
