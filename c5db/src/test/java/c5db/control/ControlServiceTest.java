@@ -156,7 +156,7 @@ public class ControlServiceTest {
   }
 
   @Test(timeout = 3000)
-  public void shouldHaveEmbededClientCalledByDoMessageCallItself() throws ExecutionException, InterruptedException {
+  public void shouldHaveEmbeddedClientCalledByDoMessageCallItself() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
       will(returnFutureWithNodeInfo(nodeInfo().withPort(modulePortUnderTest)));
@@ -174,7 +174,7 @@ public class ControlServiceTest {
   }
 
   @Test(timeout = 3000)
-  public void embededClientHandlesCantFindNode() throws ExecutionException, InterruptedException {
+  public void embeddedClientHandlesCantFindNode() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
       will(returnFutureWithNodeInfo(nodeInfo().failedToLookupNode()));
@@ -190,7 +190,7 @@ public class ControlServiceTest {
   }
 
   @Test(timeout = 3000)
-  public void embeddedClientBadDNSLoopup() throws ExecutionException, InterruptedException {
+  public void embeddedClientBadDNSLookup() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
       allowing(discoveryModule).getNodeInfo(LOCAL_NODE_ID, ModuleType.ControlRpc);
       will(returnFutureWithNodeInfo(nodeInfo().withAddress("WEIRD_ADDRESS_DNS_FAIL_ME")));
