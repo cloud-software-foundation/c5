@@ -132,7 +132,7 @@ public class MiniClusterBase {
 
     final CountDownLatch latch = new CountDownLatch(1);
     Callback<TabletStateChange> onMsg = message -> {
-      if (message.state.equals(Tablet.State.Open) || message.state.equals(Tablet.State.Leader)) {
+      if (message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
