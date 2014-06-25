@@ -16,27 +16,29 @@
  */
 package c5db.client.codec.websocket;
 
-import c5db.client.generated.Response;
 import com.google.common.util.concurrent.SettableFuture;
+import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.protostuff.ByteBufferInput;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
+public class Decoder extends WebSocketClientProtocolHandler {
 
   private static final long HANDSHAKE_TIMEOUT = 4000;
   private final WebSocketClientHandshaker handShaker;
   private final SettableFuture<Boolean> handshakeFuture = SettableFuture.create();
+  CompositeByteBuf previousFrameData = null;
 
-  public WebsocketProtostuffDecoder(WebSocketClientHandshaker handShaker) {
+  public Decoder(WebSocketClientHandshaker handShaker) {
     super(handShaker);
     this.handShaker = handShaker;
   }
@@ -55,13 +57,32 @@ public class WebsocketProtostuffDecoder extends WebSocketClientProtocolHandler {
 
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
-    if (frame instanceof BinaryWebSocketFrame) {
-      final ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
-      final Response newMsg = Response.getSchema().newMessage();
-      Response.getSchema().mergeFrom(input, newMsg);
-      out.add(newMsg);
-    } else {
-      super.decode(ctx, frame, out);
+    try {
+      if (frame instanceof BinaryWebSocketFrame || frame instanceof ContinuationWebSocketFrame) {
+        handleC5Frame(frame, out);
+      } else {
+        super.decode(ctx, frame, out);
+      }
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+
+  }
+
+  private void handleC5Frame(WebSocketFrame frame, List<Object> out) {
+    if (previousFrameData == null && frame.isFinalFragment()) {
+      out.add(frame.content().retain());
+    } else {// We have a stream of frames comming in
+      if (previousFrameData == null) { // first in a series
+        previousFrameData = Unpooled.compositeBuffer();
+      }
+      previousFrameData.addComponent(frame.content().retain());
+      previousFrameData.writerIndex(previousFrameData.writerIndex() + frame.content().readableBytes());
+
+      if (frame.isFinalFragment()) { // last in a series
+        out.add(previousFrameData);
+        previousFrameData = null;
+      }
     }
   }
 

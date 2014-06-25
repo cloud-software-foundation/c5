@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.codec;
+package c5db.codec.protostuff;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,20 +30,23 @@ import java.util.List;
  * Decode a protobuf object using the "protostuff" library.
  * The replication library uses this class to decode replication messages over the wire.
  */
-public class ProtostuffDecoder<T extends Message<T>> extends MessageToMessageDecoder<ByteBuf> {
+public class Decoder<T extends Message<T>> extends MessageToMessageDecoder<ByteBuf> {
   final Schema<T> schema;
 
-  public ProtostuffDecoder(Schema<T> schema) {
+  public Decoder(Schema<T> schema) {
     this.schema = schema;
   }
 
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-    ByteBufferInput input = new ByteBufferInput(in.nioBuffer(), false);
-    T newMsg = schema.newMessage();
-
-    schema.mergeFrom(input, newMsg);
-    out.add(newMsg);
+    try {
+      ByteBufferInput input = new ByteBufferInput(in.nioBuffer(), false);
+      T newMsg = schema.newMessage();
+      schema.mergeFrom(input, newMsg);
+      out.add(newMsg);
+    } catch (Exception e){
+      e.printStackTrace();
+    }
   }
 }

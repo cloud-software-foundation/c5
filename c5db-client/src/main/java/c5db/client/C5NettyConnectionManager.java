@@ -16,7 +16,8 @@
  */
 package c5db.client;
 
-import c5db.client.codec.websocket.WebsocketProtostuffEncoder;
+import c5db.client.codec.websocket.Encoder;
+import c5db.client.codec.websocket.Initializer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -72,7 +73,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
         null,
         false,
         new DefaultHttpHeaders());
-    final C5ConnectionInitializer initializer = new C5ConnectionInitializer(handShaker);
+    final Initializer initializer = new Initializer(handShaker);
     bootstrap.channel(NioSocketChannel.class).handler(initializer);
 
     final ChannelFuture future = bootstrap.connect(host, port);
@@ -114,7 +115,7 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
 
   private boolean isHandShakeConnected(Channel channel) {
     final ChannelPipeline pipeline = channel.pipeline();
-    final WebsocketProtostuffEncoder encoder = pipeline.get(WebsocketProtostuffEncoder.class);
+    final Encoder encoder = pipeline.get(Encoder.class);
     return encoder.getHandShaker().isHandshakeComplete();
   }
 

@@ -72,5 +72,6 @@ public class TestTooBigForASingleWebSocketTest extends ManyClusterBase {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
     table.put(put);
+    table.flushCommits();
   }
 }

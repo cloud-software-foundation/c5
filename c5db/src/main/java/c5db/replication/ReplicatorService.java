@@ -17,8 +17,8 @@
 
 package c5db.replication;
 
-import c5db.codec.ProtostuffDecoder;
-import c5db.codec.ProtostuffEncoder;
+import c5db.codec.protostuff.Decoder;
+import c5db.codec.protostuff.Encoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.DiscoveryModule;
@@ -163,7 +163,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
             );
         if (logMooring.getLastIndex() == 0) {
           instance.bootstrapQuorum(peers);
-    	}
+        }
         throwableChannel.subscribe(fiber, instance::failReplicatorInstance);
         replicatorInstances.put(quorumId, instance);
         future.set(instance);
@@ -503,10 +503,10 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
                 protected void initChannel(SocketChannel ch) throws Exception {
                   ChannelPipeline p = ch.pipeline();
                   p.addLast("frameDecode", new ProtobufVarint32FrameDecoder());
-                  p.addLast("pbufDecode", new ProtostuffDecoder<>(ReplicationWireMessage.getSchema()));
+                  p.addLast("pbufDecode", new Decoder<>(ReplicationWireMessage.getSchema()));
 
                   p.addLast("frameEncode", new ProtobufVarint32LengthFieldPrepender());
-                  p.addLast("pbufEncoder", new ProtostuffEncoder<ReplicationWireMessage>());
+                  p.addLast("pbufEncoder", new Encoder<ReplicationWireMessage>());
 
                   p.addLast(new MessageHandler());
                 }

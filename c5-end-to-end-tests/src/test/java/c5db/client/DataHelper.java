@@ -94,7 +94,7 @@ class DataHelper {
   }
 
   static void putBigRowInDatabase(FakeHTable hTable, byte[] row) throws IOException {
-    Put put = new Put(row).add(cf, cq, new byte[1024 * 1024 * 64]);
+    Put put = new Put(row).add(cf, cq, new byte[1024 * 64]);
     hTable.put(put);
     hTable.flushCommits();
   }

@@ -17,12 +17,13 @@
 
 package c5db.codec.websocket;
 
-import c5db.client.generated.Call;
+import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.protostuff.ByteBufferInput;
 
 import java.util.List;
 
@@ -31,21 +32,41 @@ import java.util.List;
  * A specialized Protostuff decoder used to deserialize Protostuff from a WebSocketStream and map them to a Call
  * object.
  */
-public class WebsocketProtostuffDecoder extends WebSocketServerProtocolHandler {
+public class Decoder extends WebSocketServerProtocolHandler {
+  CompositeByteBuf previousFrameData = null;
 
-  public WebsocketProtostuffDecoder(String websocketPath) {
+  public Decoder(String websocketPath) {
     super(websocketPath);
   }
 
   @Override
   protected void decode(ChannelHandlerContext ctx, WebSocketFrame frame, List<Object> out) throws Exception {
-    if (frame instanceof BinaryWebSocketFrame) {
-      final ByteBufferInput input = new ByteBufferInput(frame.content().nioBuffer(), false);
-      final Call newMsg = Call.getSchema().newMessage();
-      Call.getSchema().mergeFrom(input, newMsg);
-      out.add(newMsg);
-    } else {
-      super.decode(ctx, frame, out);
+    try {
+      if (frame instanceof BinaryWebSocketFrame || frame instanceof ContinuationWebSocketFrame) {
+        handleC5Frame(frame, out);
+      } else {
+        super.decode(ctx, frame, out);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void handleC5Frame(WebSocketFrame frame, List<Object> out) {
+    if (previousFrameData == null && frame.isFinalFragment()) {
+      out.add(frame.content().retain());
+    } else { // We have a stream of frames comming in
+      if (previousFrameData == null) { // first in a series
+        previousFrameData = Unpooled.compositeBuffer();
+      }
+
+      previousFrameData.addComponent(frame.content().retain());
+      previousFrameData.writerIndex(previousFrameData.writerIndex() + frame.content().readableBytes());
+
+      if (frame.isFinalFragment()) { // last in a series
+        out.add(previousFrameData);
+        previousFrameData = null;
+      }
     }
   }
 }

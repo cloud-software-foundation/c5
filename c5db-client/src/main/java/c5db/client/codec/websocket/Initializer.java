@@ -14,17 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client;
+package c5db.client.codec.websocket;
 
-import c5db.client.codec.websocket.WebsocketProtostuffDecoder;
-import c5db.client.codec.websocket.WebsocketProtostuffEncoder;
+import c5db.client.C5Constants;
+import c5db.client.FutureBasedMessageHandler;
+import c5db.client.generated.Call;
+import c5db.client.generated.Response;
+import c5db.codec.protostuff.LowCopyProtobufOutputEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -33,25 +35,29 @@ import java.util.concurrent.TimeoutException;
  * A simple helper class which initializes a websocket / protocol buffers (protostuff) handler
  * for netty.
  */
-class C5ConnectionInitializer extends ChannelInitializer<SocketChannel> {
+public class Initializer extends ChannelInitializer<SocketChannel> {
 
   private final WebSocketClientHandshaker handShaker;
-  private WebsocketProtostuffDecoder decoder;
+  private c5db.client.codec.websocket.Decoder decoder;
 
-  public C5ConnectionInitializer(WebSocketClientHandshaker handShaker) {
+  public Initializer(WebSocketClientHandshaker handShaker) {
     super();
     this.handShaker = handShaker;
   }
 
   @Override
   protected void initChannel(SocketChannel ch) throws Exception {
-    decoder = new WebsocketProtostuffDecoder(handShaker);
+    decoder = new c5db.client.codec.websocket.Decoder(handShaker);
     final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast("http-client", new HttpClientCodec());
     pipeline.addLast("aggregator", new HttpObjectAggregator(C5Constants.MAX_RESPONSE_SIZE));
-    pipeline.addLast("websec-codec", new WebsocketProtostuffEncoder(handShaker));
-    pipeline.addLast("websocket-aggregator", new WebSocketFrameAggregator(C5Constants.MAX_RESPONSE_SIZE));
-    pipeline.addLast("message-codec", decoder);
+
+    pipeline.addLast("websocket-decoder", decoder);
+    pipeline.addLast("protostuff-decoder", new c5db.codec.protostuff.Decoder<>(Response.getSchema()));
+
+    pipeline.addLast("websocket-encoder", new Encoder(handShaker));
+    pipeline.addLast("protostuff-encoder", new LowCopyProtobufOutputEncoder<Call>());
+
     pipeline.addLast("message-handler", new FutureBasedMessageHandler());
   }
 

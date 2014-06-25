@@ -15,38 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.codec;
+package c5db.codec.protostuff;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.protostuff.LowCopyProtobufOutput;
 import io.protostuff.Message;
 import io.protostuff.Schema;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
-/**
- * Serialized a protostuff object - using 'protobuf' format.
- * The replication library uses this class to decode replication messages over the wire.
- */
-public class ProtostuffEncoder<T extends Message<T>> extends MessageToMessageEncoder<Message<T>> {
+public class LowCopyProtobufOutputEncoder<T extends Message<T>> extends MessageToMessageEncoder<Message<T>> {
   @Override
   protected void encode(ChannelHandlerContext ctx, Message<T> msg, List<Object> out) throws Exception {
     Schema<T> schema = msg.cachedSchema();
-
     LowCopyProtobufOutput lcpo = new LowCopyProtobufOutput();
     schema.writeTo(lcpo, (T) msg);
-
-    List<ByteBuffer> buffers = lcpo.buffer.finish();
-
-    long size = lcpo.buffer.size();
-    if (size > Integer.MAX_VALUE) {
-      throw new EncoderException("Serialized form was too large, actual size: " + size);
-    }
-
-    out.add(Unpooled.wrappedBuffer(buffers.toArray(new ByteBuffer[]{})));
+    out.add(lcpo);
   }
 }
