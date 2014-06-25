@@ -269,7 +269,7 @@ public class C5DB extends AbstractService implements C5Server {
   protected void doStop() {
     serverFiber.dispose();
     fiberPool.dispose();
-
+    executor.shutdownNow();
     notifyStopped();
   }
 

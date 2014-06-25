@@ -86,6 +86,24 @@ public class TestingUtilTest extends MiniClusterBase {
   }
 
   @Test
+  public void testMultiGet() throws IOException {
+    byte[] neverInserted = Bytes.toBytes("rowNeverInserted");
+    putRowInDB(table, row);
+    byte[][] values = valuesReadFromDB(table, new byte[][]{row, neverInserted});
+    assertArrayEquals(value, values[0]);
+    assertNull(values[1]);
+  }
+
+  @Test
+  public void testMultiExists() throws IOException, InterruptedException, TimeoutException, ExecutionException, MutationFailedException {
+    byte[] neverInserted = Bytes.toBytes("rowNeverInserted");
+    putRowInDB(table, row);
+    Boolean[] values = valuesExistsInDB(table, new byte[][]{row, neverInserted});
+    assertTrue(values[0]);
+    assertFalse(values[1]);
+  }
+
+  @Test
   public void testScan() throws IOException {
     byte[] row0 = new byte[]{0x00};
     byte[] row1 = new byte[]{0x01};
@@ -114,20 +132,60 @@ public class TestingUtilTest extends MiniClusterBase {
   }
 
   @Test
-  public void testMultiGet() throws IOException {
-    byte[] neverInserted = Bytes.toBytes("rowNeverInserted");
-    putRowInDB(table, row);
-    byte[][] values = valuesReadFromDB(table, new byte[][]{row, neverInserted});
-    assertArrayEquals(value, values[0]);
-    assertNull(values[1]);
+  public void testScanWith0Row() throws IOException {
+    byte[] row0 = new byte[]{0x00};
+    byte[] row1 = new byte[]{0x01};
+    byte[] row2 = new byte[]{0x02};
+    byte[] row3 = new byte[]{0x03};
+    byte[] row10 = new byte[]{0x0a};
+    byte[] row11 = new byte[]{0x0b};
+    byte[] row12 = new byte[]{0x0c};
+
+    putRowInDB(table, row0);
+    putRowInDB(table, row1);
+    putRowInDB(table, row2);
+    putRowInDB(table, row3);
+    putRowInDB(table, row10);
+    putRowInDB(table, row11);
+    putRowInDB(table, row12);
+
+    Scan scan = new Scan();
+    scan.setStartRow(new byte[]{0x00});
+    scan.setStopRow(row3);
+    ResultScanner resultScanner = table.getScanner(scan);
+
+    assertArrayEquals(row0, resultScanner.next().getRow());
+    assertArrayEquals(row1, resultScanner.next().getRow());
+    assertArrayEquals(row2, resultScanner.next().getRow());
+    assertEquals(resultScanner.next(), null);
   }
 
+
   @Test
-  public void testMultiExists() throws IOException, InterruptedException, TimeoutException, ExecutionException, MutationFailedException {
-    byte[] neverInserted = Bytes.toBytes("rowNeverInserted");
-    putRowInDB(table, row);
-    Boolean[] values = valuesExistsInDB(table, new byte[][]{row, neverInserted});
-    assertTrue(values[0]);
-    assertFalse(values[1]);
+  public void testScanWithNoStart() throws IOException {
+    byte[] row0 = new byte[]{0x00};
+    byte[] row1 = new byte[]{0x01};
+    byte[] row2 = new byte[]{0x02};
+    byte[] row3 = new byte[]{0x03};
+    byte[] row10 = new byte[]{0x0a};
+    byte[] row11 = new byte[]{0x0b};
+    byte[] row12 = new byte[]{0x0c};
+
+    putRowInDB(table, row0);
+    putRowInDB(table, row1);
+    putRowInDB(table, row2);
+    putRowInDB(table, row3);
+    putRowInDB(table, row10);
+    putRowInDB(table, row11);
+    putRowInDB(table, row12);
+
+    Scan scan = new Scan();
+    scan.setStopRow(row3);
+    ResultScanner resultScanner = table.getScanner(scan);
+
+    assertArrayEquals(row0, resultScanner.next().getRow());
+    assertArrayEquals(row1, resultScanner.next().getRow());
+    assertArrayEquals(row2, resultScanner.next().getRow());
+    assertEquals(resultScanner.next(), null);
   }
 }

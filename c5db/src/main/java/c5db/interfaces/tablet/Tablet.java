@@ -16,6 +16,8 @@
  */
 package c5db.interfaces.tablet;
 
+
+import c5db.client.generated.RegionSpecifier;
 import c5db.tablet.Region;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -27,6 +29,7 @@ import java.util.List;
  * A tablet object
  */
 public interface Tablet {
+
   void start();
 
   Channel<TabletStateChange> getStateChangeChannel();
@@ -46,6 +49,10 @@ public interface Tablet {
   Region getRegion();
 
   void setStateChangeChannel(Channel<TabletStateChange> stateChangeChannel);
+
+  RegionSpecifier getRegionSpecifier();
+
+  boolean rowInRange(byte[] row);
 
   enum State {
     Initialized, // Initial state, nothing done yet.
