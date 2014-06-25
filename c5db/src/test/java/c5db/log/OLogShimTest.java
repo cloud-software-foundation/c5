@@ -49,6 +49,9 @@ import java.util.UUID;
 import static c5db.FutureActions.returnFutureWithValue;
 
 public class OLogShimTest {
+  private static final String QUORUM_ID = "q";
+  private static final String ANOTHER_QUORUM_ID = "q2";
+
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
@@ -95,9 +98,20 @@ public class OLogShimTest {
 
     havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(17), index(13)));
 
-    theReplicatorHavingIssued(new IndexCommitNotice(replicator.getId(), index(13), index(13), term(18)));
+    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), index(13), index(13), term(18)));
 
     hLog.sync(); // exception
+  }
+
+  @Test(timeout = 3000)
+  public void syncIgnoresCommitNoticesPublishedForADifferentQuorum() throws Exception {
+    long index = 77;
+    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(2), index));
+
+    theReplicatorHavingIssued(new IndexCommitNotice(ANOTHER_QUORUM_ID, replicator.getId(), index, index, term(1)));
+    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), index, index, term(2))); // match
+
+    hLog.sync();
   }
 
   @Test(timeout = 3000)
@@ -107,8 +121,8 @@ public class OLogShimTest {
     havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(102), index(2)));
     havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(102), index(3)));
 
-    theReplicatorHavingIssued(new IndexCommitNotice(replicator.getId(), 1, 1, 101));
-    theReplicatorHavingIssued(new IndexCommitNotice(replicator.getId(), 2, 3, 102));
+    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), 1, 1, 101));
+    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), 2, 3, 102));
 
     hLog.sync();
   }
