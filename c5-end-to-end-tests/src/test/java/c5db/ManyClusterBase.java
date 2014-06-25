@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.client.FakeHTable;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -25,12 +26,9 @@ import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.TabletService;
-import com.google.common.util.concurrent.Service;
+import c5db.util.TabletNameHelpers;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.protostuff.ByteString;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HRegionInfo;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
@@ -46,42 +44,52 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
-import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class ManyClusterBase {
-  static int metaOnPort;
+  private static int metaOnPort;
   private static Channel<CommandRpcRequest<?>> commandChannel;
-  private static List<C5Server> servers = new ArrayList<>();
+  private static final List<C5Server> servers = new ArrayList<>();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
+  private static long metaOnNode;
+  static FakeHTable metaTable;
 
   @Rule
   public TestName name = new TestName();
-  private FakeHTable table;
-  private byte[] row;
-  private int userTabletOn;
+  protected FakeHTable table;
+  protected byte[] row;
+  private final Map<String, Integer> userTabletOn = new HashMap<>();
+
+  final byte[][] splitkeys = {};
 
   @AfterClass()
   public static void afterClass() throws ExecutionException, InterruptedException, TimeoutException {
-
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {
       for (C5Module module : server.getModules().values()) {
-        module.stopAndWait();
+        try {
+          module.stop().get(1, TimeUnit.SECONDS);
+        } catch (UncheckedExecutionException e) {
+          e.printStackTrace();
+        }
       }
-      Service.State state = server.stopAndWait();
+      server.stop().get(1, TimeUnit.SECONDS);
     }
     Log.warn("-----------------------------------------------------------------------------------------------------------");
 
@@ -91,6 +99,7 @@ public class ManyClusterBase {
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     System.setProperty(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME, String.valueOf("foo"));
+    System.setProperty(C5ServerConstants.MIN_CLUSTER_SIZE, String.valueOf(3));
     testFolder.create();
 
     int processors = Runtime.getRuntime().availableProcessors();
@@ -100,7 +109,10 @@ public class ManyClusterBase {
     final CountDownLatch latch = new CountDownLatch(1);
     for (int i = 0; i != 3; i++) {
       Path nodeBasePath = Paths.get(testFolder.getRoot().getAbsolutePath(), String.valueOf(random.nextInt()));
-      new File(nodeBasePath.toUri()).mkdirs();
+      boolean success = new File(nodeBasePath.toUri()).mkdirs();
+      if (!success) {
+        throw new IOException("Unable to create: " + nodeBasePath);
+      }
       System.setProperty(C5ServerConstants.C5_CFG_PATH, nodeBasePath.toString());
 
       System.setProperty(C5ServerConstants.WEB_SERVER_PORT_PROPERTY_NAME,
@@ -118,9 +130,18 @@ public class ManyClusterBase {
         if (tabletStateChange.state.equals(Tablet.State.Leader)) {
           if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
             metaOnPort = regionServer.port();
-            System.out.println("Found meta on:" + metaOnPort);
+            metaOnNode = server.getNodeId();
+            try {
+              metaTable = new FakeHTable("localhost",
+                  metaOnPort,
+                  ByteString.copyFromUtf8("hbase:meta"));
+            } catch (InterruptedException | TimeoutException | ExecutionException e) {
+              e.printStackTrace();
+            }
+
             commandChannel = server.getCommandChannel();
             latch.countDown();
+            fiber.dispose();
           }
         }
       });
@@ -132,12 +153,12 @@ public class ManyClusterBase {
   }
 
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException, URISyntaxException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
     final CountDownLatch latch = new CountDownLatch(1);
-    final ByteString tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
+    final String tableName = name.getMethodName();
 
     for (C5Server server : servers) {
       C5Module regionServer = server.getModule(ModuleType.RegionServer).get();
@@ -146,49 +167,26 @@ public class ManyClusterBase {
       Callback<TabletStateChange> onMsg = message -> {
         if (!message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
             && message.state.equals(Tablet.State.Leader)) {
-          userTabletOn = regionServer.port();
+          userTabletOn.put(message.tablet.getRegionInfo().getRegionNameAsString(), regionServer.port());
           latch.countDown();
         }
       };
       ((TabletService) tabletServer).getTabletStateChanges().subscribe(receiver, onMsg);
     }
 
-    for (C5Server server : servers) {
-      ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-          getCreateTabletSubCommand(tableName));
-      commandChannel.publish(new CommandRpcRequest<>(server.getNodeId(), createTableSubCommand));
-    }
+    ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
+        TestHelpers.getCreateTabletSubCommand("c5", tableName, splitkeys, servers));
+    commandChannel.publish(new CommandRpcRequest<>(metaOnNode, createTableSubCommand));
 
     // create java.util.concurrent.CountDownLatch to notify when message arrives
     latch.await();
+    TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
 
-    table = new FakeHTable(C5TestServerConstants.LOCALHOST, userTabletOn, tableName);
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST,
+        userTabletOn.values().iterator().next(),
+        TabletNameHelpers.toByteString(clientTableName));
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
-  }
-
-
-  protected int getRegionServerPort() {
-    Log.info("Getting region from: " + userTabletOn);
-    return userTabletOn;
-  }
-
-  String getCreateTabletSubCommand(ByteString tableNameBytes) {
-    TableName tableName = TableName.valueOf(tableNameBytes.toByteArray());
-    HTableDescriptor testDesc = new HTableDescriptor(tableName);
-    testDesc.addFamily(new HColumnDescriptor("cf"));
-    HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
-
-    String peerString = String.valueOf(servers.get(0).getNodeId() + ","
-        + servers.get(1).getNodeId() + ","
-        + servers.get(2).getNodeId());
-    BASE64Encoder encoder = new BASE64Encoder();
-
-    String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
-    String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
-
-    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
-
   }
 
   @After

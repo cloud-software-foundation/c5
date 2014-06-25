@@ -21,6 +21,7 @@ import c5db.MiniClusterBase;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,14 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class PopulatorTest extends MiniClusterBase {
-
-
-  private static ByteString tableName = ByteString.bytesDefaultValue("testTable");
-
-  public PopulatorTest() {
-
-  }
-
+  private static final ByteString tableName = ByteString.bytesDefaultValue("c5:testPopulator");
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
@@ -48,13 +42,11 @@ public class PopulatorTest extends MiniClusterBase {
     }
     try (FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, port, tableName)) {
       long start = System.currentTimeMillis();
-
       int numberOfBatches = 100;
       int batchSize = 10;
       if (args.length == 2) {
         numberOfBatches = Integer.parseInt(args[0]);
         batchSize = Integer.parseInt(args[1]);
-
       }
       compareToHBasePut(table,
           Bytes.toBytes("cf"),
@@ -64,8 +56,6 @@ public class PopulatorTest extends MiniClusterBase {
           batchSize);
       long end = System.currentTimeMillis();
       System.out.println("time:" + (end - start));
-
-
     }
   }
 
@@ -75,9 +65,7 @@ public class PopulatorTest extends MiniClusterBase {
                                         final byte[] value,
                                         final int numberOfBatches,
                                         final int batchSize) throws IOException {
-
     ArrayList<Put> puts = new ArrayList<>();
-
     long startTime = System.nanoTime();
     for (int j = 1; j != numberOfBatches + 1; j++) {
       for (int i = 1; i != batchSize + 1; i++) {
@@ -98,16 +86,13 @@ public class PopulatorTest extends MiniClusterBase {
         }
         table.put(put);
       }
-
       puts.clear();
     }
   }
 
+  @Ignore // TODO To slow until we turn on autobuffering
   @Test
   public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
-    PopulatorTest populator = new PopulatorTest();
-    tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-
     main(new String[]{String.valueOf(getRegionServerPort())});
   }
 }

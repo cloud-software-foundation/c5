@@ -16,26 +16,36 @@
  */
 package c5db.tablet;
 
+import c5db.C5Compare;
 import c5db.ConfigDirectory;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
+import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
+import c5db.util.TabletNameHelpers;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
+import org.apache.hadoop.hbase.regionserver.HRegion;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.jetlang.channels.Channel;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Handles the logic of starting quorums, restoring them from disk, etc.
@@ -44,13 +54,13 @@ import java.util.Map;
  */
 public class TabletRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(TabletRegistry.class);
-
   private final C5FiberFactory fiberFactory;
   private final TabletFactory tabletFactory;
-
   private final Region.Creator regionCreator;
 
-  private final Map<String, Tablet> tablets = new HashMap<>();
+  // contains tables, which contain tablets
+
+  private final NonBlockingHashMap<String, ConcurrentSkipListMap<byte[], Tablet>> tables = new NonBlockingHashMap<>();
   private final Channel<TabletStateChange> commonStateChangeChannel;
   private final ReplicationModule replicationModule;
   private final C5Server c5server;
@@ -102,12 +112,28 @@ public class TabletRegistry {
             regionCreator);
         tablet.start();
         tablet.setStateChangeChannel(commonStateChangeChannel);
-        tablets.put(quorum, tablet);
+
+
+        ConcurrentSkipListMap<byte[], Tablet> tablets;
+        // This is a new table to this server
+        String tableName = regionInfo.getTable().getNameAsString();
+        if (tables.containsKey(tableName)) {
+          tablets = tables.get(tableName);
+        } else {
+          tablets = new ConcurrentSkipListMap<>(new C5Compare());
+          TableName hbaseTableName = TabletNameHelpers.getClientTableName(regionInfo.getTable());
+          tables.put(TabletNameHelpers.toString(hbaseTableName), tablets);
+        }
+
+        tablets.put(Bytes.add(Bytes.toBytes(regionInfo.getTable().toString()),
+            Bytes.toBytes(","),
+            regionInfo.getEndKey()), tablet);
       } catch (IOException | DeserializationException e) {
         LOG.error("Unable to start quorum, due to config error: " + quorum, e);
       }
     }
   }
+
 
   public Tablet startTablet(HRegionInfo regionInfo,
                             HTableDescriptor tableDescriptor,
@@ -116,11 +142,6 @@ public class TabletRegistry {
 
     // quorum name - ?
     String quorumName = regionInfo.getRegionNameAsString();
-    if (tablets.containsKey(quorumName)) {
-      // cant start, already started:
-      LOG.warn("Trying to start tablet {} already started!", quorumName);
-      return tablets.get(quorumName);
-    }
 
     // write the stuff to disk first:
     configDirectory.writeBinaryData(quorumName, ConfigDirectory.regionInfoFile,
@@ -130,7 +151,7 @@ public class TabletRegistry {
     configDirectory.writePeersToFile(quorumName, peerList);
 
     Fiber tabletFiber = fiberFactory.create();
-    Tablet newTablet = tabletFactory.create(
+    Tablet tablet = tabletFactory.create(
         c5server,
         regionInfo,
         tableDescriptor,
@@ -140,13 +161,83 @@ public class TabletRegistry {
         tabletFiber,
         replicationModule,
         regionCreator);
-    newTablet.setStateChangeChannel(commonStateChangeChannel);
-    newTablet.start();
-    tablets.put(quorumName, newTablet);
-    return newTablet;
+    tablet.setStateChangeChannel(commonStateChangeChannel);
+    tablet.start();
+    ConcurrentSkipListMap<byte[], Tablet> tablets;
+    // This is a new table to this server
+    String tableName = TabletNameHelpers.toString(TabletNameHelpers.getClientTableName(regionInfo.getTable()));
+    byte[] rowKey;
+    if (regionInfo.getEndKey().length == 0) {
+      rowKey = new byte[0];
+    } else {
+      rowKey = regionInfo.getEndKey();
+    }
+
+    if (tables.containsKey(tableName)) {
+      tablets = tables.get(tableName);
+    } else {
+      tablets = new ConcurrentSkipListMap<>(new C5Compare());
+      tables.put(tableName, tablets);
+    }
+    Tablet replacement = tablets.put(rowKey, tablet);
+    if (replacement != null) {
+      LOG.error("We replaced a tablet inadvertently" + replacement.toString());
+    }
+
+    return tablet;
   }
 
-  Map<String, Tablet> getTablets() {
+  public Tablet getTablet(String tableName, byte[] row) throws RegionNotFoundException {
+    return this.getTablet(tableName, ByteBuffer.wrap(row));
+
+  }
+
+  public Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException {
+    Tablet tablet;
+
+    if (!tables.containsKey(tableName)) {
+      throw new RegionNotFoundException("We couldn't find table: " + tableName);
+    }
+
+    ConcurrentSkipListMap<byte[], Tablet> tablets = tables.get(tableName);
+    if (tablets.size() == 1) {
+      tablet = tablets.values().iterator().next();
+      //Properly formed single tablet table end tablet
+      if (tablet.getRegionInfo().getEndKey().length != 0) {
+        throw new RegionNotFoundException("We only have one tablet, but it has an endRow");
+      }
+    } else {
+      byte[] sep = SystemTableNames.sep;
+      // It must be the last tablet
+      if (row == null || row.array().length == 0) {
+        tablet = tablets.ceilingEntry(new byte[]{0x00}).getValue();
+      } else {
+        Map.Entry<byte[], Tablet> entry = tablets.higherEntry(row.array());
+        if (entry == null) {
+          tablet = tablets.ceilingEntry(sep).getValue();
+        } else {
+          tablet = entry.getValue();
+        }
+      }
+    }
+    assureCorrectRequest(tablet, row);
+    return tablet;
+  }
+
+  private void assureCorrectRequest(Tablet tablet, ByteBuffer row) throws RegionNotFoundException {
+    if (!HRegion.rowIsInRange(tablet.getRegionInfo(), row.array())) {
+      throw new RegionNotFoundException("We are trying to return a region which is not in range");
+    }
+  }
+
+  public Collection<Tablet> dumpTablets() {
+    ArrayList<Tablet> tablets = new ArrayList<>();
+    tables.values().forEach(tabletConcurrentSkipListMap
+        -> tabletConcurrentSkipListMap.values().stream().forEach(tablets::add));
     return tablets;
+  }
+
+  NonBlockingHashMap<String, ConcurrentSkipListMap<byte[], Tablet>> getTables() {
+    return tables;
   }
 }

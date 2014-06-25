@@ -73,8 +73,8 @@ public class RegionServerTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
-  Tablet tablet = context.mock(Tablet.class);
-  Region region = context.mock(Region.class);
+  private final Tablet tablet = context.mock(Tablet.class);
+  private final Region region = context.mock(Region.class);
 
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
@@ -87,7 +87,7 @@ public class RegionServerTest {
   private final int port = 10000 + random.nextInt(100);
 
   private RegionServerHandler regionServerHandler;
-  RegionServerService regionServerService;
+  private RegionServerService regionServerService;
 
   @Before
   public void before() throws ExecutionException, InterruptedException {
@@ -159,7 +159,7 @@ public class RegionServerTest {
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l, 10, false, 11l);
     RegionScanner regionScanner = context.mock(RegionScanner.class);
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -191,7 +191,7 @@ public class RegionServerTest {
 
     c5db.client.generated.Result result = new c5db.client.generated.Result();
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -217,7 +217,7 @@ public class RegionServerTest {
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -245,7 +245,7 @@ public class RegionServerTest {
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -274,7 +274,7 @@ public class RegionServerTest {
     SettableFuture<Boolean> mutateSuccess = SettableFuture.create();
 
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -309,7 +309,7 @@ public class RegionServerTest {
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, condition);
 
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet("testTable");
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       oneOf(tablet).getRegion();
@@ -344,7 +344,7 @@ public class RegionServerTest {
     MultiRequest multiRequest = new MultiRequest(regionActionList);
 
     context.checking(new Expectations() {{
-      exactly(4).of(tabletModule).getTablet("testTable");
+      exactly(4).of(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
       exactly(4).of(tablet).getRegion();
