@@ -35,6 +35,7 @@ import c5db.client.generated.Scan;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
@@ -88,6 +89,8 @@ public class RegionServerTest {
   private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
   private final ChannelHandlerContext ctx = context.mock(ChannelHandlerContext.class);
   private final TabletModule tabletModule = context.mock(TabletModule.class);
+  private final DiscoveryModule discoveryModule;
+
   private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(2));
   private final C5Server server = context.mock(C5Server.class);
   private final Random random = new Random();
@@ -99,6 +102,10 @@ public class RegionServerTest {
   private RegionServerHandler regionServerHandler;
   RegionServerService regionServerService;
   TableName tableName;
+
+  public RegionServerTest() {
+    discoveryModule = context.mock(DiscoveryModule.class);
+  }
 
   @Before
   public void before() throws ExecutionException, InterruptedException, UnknownHostException {
@@ -117,6 +124,11 @@ public class RegionServerTest {
     context.checking(new Expectations() {{
       oneOf(server).getModule(with(any(ModuleType.class)));
       will(returnFutureWithValue(tabletModule));
+
+      oneOf(server).getModule(with(any(ModuleType.class)));
+      will(returnFutureWithValue(discoveryModule));
+
+
     }});
 
     ListenableFuture<Service.State> future = regionServerService.start();
@@ -279,6 +291,8 @@ public class RegionServerTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
     context.checking(new Expectations() {{
+
+
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
