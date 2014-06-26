@@ -48,6 +48,7 @@ public class MetaTabletLeaderBehaviorTest {
   private ControlModule controlRpcModule;
   private TabletModule tabletModule;
 
+
   @Before
   public void before() throws IOException {
     rootTablet = context.mock(Tablet.class, "rootTablet");

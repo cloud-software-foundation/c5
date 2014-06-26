@@ -42,7 +42,6 @@ import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.client.Put;
@@ -67,14 +66,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import static c5db.FutureActions.returnFutureWithValue;
+
 public class RegionServerTest {
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private final Tablet tablet = context.mock(Tablet.class);
-  private final Region region = context.mock(Region.class);
+  Tablet tablet = context.mock(Tablet.class);
+  Region region = context.mock(Region.class);
 
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
@@ -87,7 +88,7 @@ public class RegionServerTest {
   private final int port = 10000 + random.nextInt(100);
 
   private RegionServerHandler regionServerHandler;
-  private RegionServerService regionServerService;
+  RegionServerService regionServerService;
 
   @Before
   public void before() throws ExecutionException, InterruptedException {
@@ -103,11 +104,9 @@ public class RegionServerTest {
         port,
         server);
 
-    SettableFuture<TabletModule> tabletModuleSettableFuture = SettableFuture.create();
-    tabletModuleSettableFuture.set(tabletModule);
     context.checking(new Expectations() {{
       oneOf(server).getModule(with(any(ModuleType.class)));
-      will(returnValue(tabletModuleSettableFuture));
+      will(returnFutureWithValue(tabletModule));
     }});
 
     ListenableFuture<Service.State> future = regionServerService.start();
@@ -278,7 +277,6 @@ public class RegionServerTest {
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
 
-    SettableFuture<Boolean> mutateSuccess = SettableFuture.create();
 
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
@@ -286,19 +284,12 @@ public class RegionServerTest {
 
       oneOf(tablet).getRegion();
       will(returnValue(region));
+      allowing(ctx).writeAndFlush(with(any(Response.class)));
 
       oneOf(region).batchMutate(with(any(MutationProto.class)));
-      will(returnValue(mutateSuccess));
+      will(returnFutureWithValue(true));
     }});
     regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
-
-    context.checking(new Expectations() {
-      {
-        allowing(ctx).writeAndFlush(with(any(Response.class)));
-      }
-    });
-    mutateSuccess.set(true);
-
   }
 
   @Test

@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.client.FakeHTable;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -62,7 +63,7 @@ import java.util.concurrent.TimeoutException;
 public class ManyClusterBase {
   private static int metaOnPort;
   private static Channel<CommandRpcRequest<?>> commandChannel;
-  private static final List<C5Server> servers = new ArrayList<>();
+  private static List<C5Server> servers = new ArrayList<>();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
   private static long metaOnNode;

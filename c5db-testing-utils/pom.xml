@@ -15,31 +15,20 @@
   ~  You should have received a copy of the GNU Affero General Public License
   ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>c5db</groupId>
         <artifactId>parent</artifactId>
+        <groupId>c5db</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>c5-end-to-end-tests</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>c5db-testing-utils</artifactId>
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -48,33 +37,13 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
+
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit4</artifactId>
@@ -87,17 +56,22 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-legacy</artifactId>
             <version>2.6.0</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-testing-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
+
 </project>

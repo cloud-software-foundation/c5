@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.client.FakeHTable;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.RegionServerModule;
@@ -29,6 +30,7 @@ import c5db.messages.generated.ModuleType;
 
 import c5db.regionserver.RegionServerHandler;
 import c5db.util.TabletNameHelpers;
+import com.google.common.collect.ImmutableMap;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -76,16 +78,9 @@ public class MiniClusterBase {
   }
 
   @AfterClass
-  public static void afterClass() {
-    ImmutableMap<ModuleType, C5Module> modules = null;
-    try {
-      modules = server.getModules();
-    } catch (ExecutionException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } catch (TimeoutException e) {
-      e.printStackTrace();
+  public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
+    for (C5Module module : server.getModules().values()) {
+      module.stop().get(1, TimeUnit.SECONDS);
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
@@ -164,7 +159,8 @@ public class MiniClusterBase {
     commandChannel.publish(createTableCommand);
     latch.await();
 
-    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
+        TabletNameHelpers.toByteString(clientTableName));
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
   }
