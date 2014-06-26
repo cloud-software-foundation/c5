@@ -21,6 +21,7 @@ import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.messages.generated.ModuleType;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.jetlang.channels.Channel;
 
@@ -37,7 +38,7 @@ import java.util.List;
 @ModuleTypeBinding(ModuleType.Replication)
 public interface ReplicationModule extends C5Module {
   ListenableFuture<Replicator> createReplicator(String quorumId,
-                                                List<Long> peers);
+                                                ImmutableList<Long> peers);
 
   public Channel<IndexCommitNotice> getIndexCommitNotices();
 

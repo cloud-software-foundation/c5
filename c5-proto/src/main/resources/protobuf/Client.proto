@@ -328,6 +328,7 @@ message Response {
         MUTATE = 1;
         SCAN = 2;
         MULTI = 3;
+        LOCATION = 4;
     }
     required Command command = 1;
     required int64 commandId = 2;
@@ -336,6 +337,7 @@ message Response {
     optional MutateResponse mutate = 4;
     optional ScanResponse scan = 5;
     optional MultiResponse multi = 6;
+    optional LocationResponse location = 7;
 }
 
 message Call {
@@ -351,6 +353,7 @@ message Call {
     optional MutateRequest mutate = 4;
     optional ScanRequest scan = 5;
     optional MultiRequest multi = 6;
+    optional TableName tableName = 7;
 }
 
 
@@ -399,4 +402,27 @@ message MultiRequest {
 
 message MultiResponse {
   repeated RegionActionResult regionActionResult = 1;
+}
+
+message LocationRequest {
+  required TableName table = 1;
+  required bytes row = 2;
+}
+
+message LocationResponse {
+  repeated RegionLocation regionLocation = 1;
+  required Call call = 2;
+}
+
+message RegionLocation {
+  required TableName table = 1;
+  required Location location = 2;
+  optional bytes startKey = 3;
+  optional bytes endKey = 4;
+  optional uint64 regionid = 5;
+}
+
+message Location {
+  required string hostname = 1;
+  required uint32 port = 2;
 }

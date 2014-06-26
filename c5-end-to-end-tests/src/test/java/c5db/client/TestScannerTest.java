@@ -30,14 +30,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 
 
-public class TestScannerTest extends MiniClusterPopulated {
+public class TestScannerTest extends ManyClusterPopulated {
   private static final Logger LOG = LoggerFactory.getLogger(TestScannerTest.class);
 
   int SCANNER_TRIALS = 10;
+
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     for (int j = 0; j != SCANNER_TRIALS; j++) {
@@ -45,15 +45,15 @@ public class TestScannerTest extends MiniClusterPopulated {
       int i = 0;
       Result result;
 
-      ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{}));
+      ResultScanner scanner = table.getScanner(new Scan());
       int previous_row = -1;
 
       do {
         result = scanner.next();
         if (result != null) {
-          int rowInt = Bytes.toInt(result.getRow());
-          assertThat(rowInt, is(previous_row + 1));
-          previous_row = rowInt;
+          int row = Bytes.toInt(result.getRow());
+          assertThat(row, is(previous_row + 1));
+          previous_row = row;
           i++;
         }
       } while (result != null);
@@ -61,4 +61,6 @@ public class TestScannerTest extends MiniClusterPopulated {
       assertThat(i, is(this.NUMBER_OF_ROWS));
     }
   }
+
+
 }

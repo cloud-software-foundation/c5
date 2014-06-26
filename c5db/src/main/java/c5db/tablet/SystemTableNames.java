@@ -26,7 +26,6 @@ import org.apache.hadoop.hbase.util.Bytes;
  * Helper functionality to make various value type/objects.
  */
 public class SystemTableNames {
-
   public static byte[] sep = Bytes.toBytes(",");
 
   public static HTableDescriptor rootTableDescriptor() {

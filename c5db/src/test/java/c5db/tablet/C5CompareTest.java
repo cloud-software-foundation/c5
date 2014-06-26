@@ -14,29 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client;
+package c5db.tablet;
 
-import c5db.ManyClusterBase;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
-import java.io.IOException;
+import static org.junit.Assert.*;
 
-public class ManyClusterPopulated extends ManyClusterBase {
-
-  public int NUMBER_OF_ROWS = 1024 * 100 ;
+public class C5CompareTest {
 
   @Before
-  public void initTable() throws IOException, InterruptedException {
-    table.setAutoFlush(false);
-    table.setWriteBufferSize(100000);
-    for (int i = 0; i != NUMBER_OF_ROWS; i++) {
-      Put put = new Put(Bytes.toBytes(i));
-      put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
-      this.table.put(put);
-  
-    }
-    table.flushCommits();
+  public void setUp() throws Exception {
+
+  }
+
+  @After
+  public void tearDown() throws Exception {
+
+  }
+
+  @Test
+  public void testCompare() throws Exception {
+
   }
 }

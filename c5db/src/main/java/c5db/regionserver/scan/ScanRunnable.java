@@ -19,6 +19,7 @@ package c5db.regionserver.scan;
 
 
 import c5db.client.generated.Call;
+import c5db.client.generated.LocationResponse;
 import c5db.client.generated.Response;
 import c5db.client.generated.Result;
 import c5db.client.generated.ScanResponse;
@@ -27,6 +28,7 @@ import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.core.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,22 +47,27 @@ public class ScanRunnable implements Callback<Integer> {
   private final long scannerId;
   private final Call call;
   private final ChannelHandlerContext ctx;
+
   private final RegionScanner scanner;
+  private boolean toSendClose = false;
+  long count = 0;
+  private LocationResponse nextLocation;
   private boolean close;
   private static final Logger LOG = LoggerFactory.getLogger(ScanRunnable.class);
 
   public ScanRunnable(final ChannelHandlerContext ctx,
                       final Call call,
                       final long scannerId,
-                      final Region region) throws IOException {
+                      final Region region,
+                      final LocationResponse nextLocation) throws IOException {
     super();
     assert (call.getScan() != null);
-
     this.ctx = ctx;
     this.call = call;
     this.scannerId = scannerId;
-    this.scanner = region.getScanner(call.getScan().getScan());
     this.close = false;
+    this.scanner = region.getScanner(call.getScan().getScan());
+    this.nextLocation = nextLocation;
   }
 
   @Override
@@ -70,49 +77,55 @@ public class ScanRunnable implements Callback<Integer> {
     }
 
     long numberOfMessagesLeftToSend = numberOfMessagesToSend;
+    try {
 
-    while (!this.close && numberOfMessagesLeftToSend > 0) {
-      List<Integer> cellsPerResult = new ArrayList<>();
-      List<Result> scanResults = new ArrayList<>();
-      int rowBufferedToSend = 0;
+      while (!this.close && numberOfMessagesLeftToSend > 0) {
+        List<Integer> cellsPerResult = new ArrayList<>();
+        List<Result> scanResults = new ArrayList<>();
+        int rowBufferedToSend = 0;
 
-      while (!this.close
-          && rowBufferedToSend < MAX_ROWS_TO_SEND_IN_A_SCAN_RESPONSE
-          && numberOfMessagesToSend - rowBufferedToSend > 0) {
-        Result result = null;
-        try {
-          result = getNextRow();
+        while (!this.close &&
+            rowBufferedToSend < MAX_ROWS_TO_SEND_IN_A_SCAN_RESPONSE &&
+            numberOfMessagesToSend - rowBufferedToSend > 0) {
+          Result result = getNextRow(scanner);
           rowBufferedToSend++;
-        } catch (IOException e) {
-          e.printStackTrace();
+          scanResults.add(result);
+          if (result != null) {
+            cellsPerResult.add(result.getCellList().size());
+          }
         }
-        scanResults.add(result);
-        if (result != null) {
-          cellsPerResult.add(result.getCellList().size());
+
+        if (scanResults.size() > 1 || this.nextLocation != null || toSendClose) {
+          numberOfMessagesLeftToSend = sendScannerResponse(numberOfMessagesLeftToSend,
+              cellsPerResult,
+              scanResults,
+              rowBufferedToSend,
+              !this.close);
+        } else {
+
         }
       }
-
-      numberOfMessagesLeftToSend = sendScannerResponse(numberOfMessagesLeftToSend,
-          cellsPerResult,
-          scanResults,
-          rowBufferedToSend,
-          !this.close);
+    } catch (IOException e) {
+      LOG.error("Error closing scanner:" + e.getLocalizedMessage());
+      e.printStackTrace();
     }
+
   }
 
-  private Result getNextRow() throws IOException {
+  private Result getNextRow(@NotNull RegionScanner scanner) throws IOException {
     boolean moreResults;
     List<Cell> rawCells = new ArrayList<>();
     // Get a row worth of results
-    moreResults = scanner.nextRaw(rawCells);
+    moreResults = scanner.next(rawCells);
     List<c5db.client.generated.Cell> protoCells = rawCells
         .stream()
         .map(ReverseProtobufUtil::toCell)
         .collect(Collectors.toList());
 
     if (!moreResults) {
-      this.scanner.close();
+      scanner.close();
       this.close = true;
+      this.toSendClose = true;
     }
     return new Result(protoCells, protoCells.size(), protoCells.size() > 0);
   }
@@ -123,11 +136,20 @@ public class ScanRunnable implements Callback<Integer> {
                                    int rowBufferedToSend,
                                    boolean moreResults) {
     ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, 0, scanResults);
-    Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null);
+    Response response = new Response(Response.Command.SCAN, call.getCommandId(), null, null, scanResponse, null,
+        this.nextLocation);
+
+    // only send the next location with the first response.
+    if (this.nextLocation != null){
+      this.nextLocation = null;
+    }
+
     ctx.writeAndFlush(response);
+    if (toSendClose && !moreResults){
+      toSendClose = false;
+    }
+
     numberOfMessagesLeftToSend -= rowBufferedToSend;
     return numberOfMessagesLeftToSend;
   }
 }
-
-

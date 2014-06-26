@@ -20,7 +20,6 @@ import c5db.client.FakeHTable;
 import c5db.client.ProtobufUtil;
 import c5db.client.generated.Action;
 import c5db.client.generated.ByteArrayComparable;
-import c5db.client.generated.Call;
 import c5db.client.generated.CompareType;
 import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
@@ -34,29 +33,36 @@ import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.Scan;
 import c5db.client.generated.ScanRequest;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
 import c5db.util.C5FiberFactory;
+import c5db.util.TabletNameHelpers;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.nio.NioEventLoopGroup;
+import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hamcrest.core.IsNull;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,11 +93,15 @@ public class RegionServerTest {
   private final Random random = new Random();
   private final int port = 10000 + random.nextInt(100);
 
+  @Rule
+  public TestName name = new TestName();
+
   private RegionServerHandler regionServerHandler;
   RegionServerService regionServerService;
+  TableName tableName;
 
   @Before
-  public void before() throws ExecutionException, InterruptedException {
+  public void before() throws ExecutionException, InterruptedException, UnknownHostException {
     context.checking(new Expectations() {{
       oneOf(server).getFiberFactory(with(any(Consumer.class)));
       will(returnValue(c5FiberFactory));
@@ -112,6 +122,10 @@ public class RegionServerTest {
     ListenableFuture<Service.State> future = regionServerService.start();
     future.get();
     regionServerHandler = new RegionServerHandler(regionServerService);
+    ByteBuffer namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    tableName = new TableName(namespace, qualifier);
+
   }
 
   @After
@@ -119,48 +133,54 @@ public class RegionServerTest {
     regionServerService.stop();
   }
 
+  @Ignore
   @Test(expected = RegionNotFoundException.class)
   public void shouldThrowErrorWhenInvalidRegionSpecifierSpecified() throws Exception {
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, null);
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     Get get = new Get();
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getGetCall(1, getRequest, tableName));
   }
 
   @Test(expected = IOException.class)
   public void shouldHandleGetCommandRequestWithNullArgument() throws Exception {
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, null, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getGetCall(1, null, tableName));
   }
 
 
   @Test(expected = IOException.class)
   public void shouldHandleMutateWithNullArguments() throws Exception {
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getMutateCall(1, null, tableName));
   }
 
 
   @Test(expected = IOException.class)
   public void shouldHandleMultiWithNullArgument() throws Exception {
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MULTI, 1, null, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getMultiCall(1, null, tableName));
   }
 
 
   @Test(expected = IOException.class)
   public void shouldHandleScanCommandRequestWithNullArgument() throws Exception {
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.SCAN, 1, null, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getScanCall(1, null, tableName));
   }
 
   @Test
   public void shouldBeAbleToScan() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
+
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
+
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, new Scan(), 10l, 10, false, 11l);
     RegionScanner regionScanner = context.mock(RegionScanner.class);
-
+    HRegionInfo hRegionInfo = new HRegionInfo(TabletNameHelpers.getHBaseTableName(tableName),
+        new byte[]{},
+        new byte[]{});
     context.checking(new Expectations() {{
-      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
+      oneOf(tabletModule).getTablet("testTable", ByteBuffer.wrap(new byte[0]));
       will(returnValue(tablet));
+
+      oneOf(tablet).getRegionInfo();
+      will(returnValue(hRegionInfo));
 
       oneOf(tablet).getRegion();
       will(returnValue(region));
@@ -174,24 +194,19 @@ public class RegionServerTest {
       oneOf(c5FiberFactory).create();
       will(returnValue(fiberFactory.create()));
 
-      allowing(regionScanner).nextRaw(with(any(List.class)));
+      allowing(regionScanner).next(with(any(List.class)));
       will(returnValue(false));
 
       allowing(ctx).writeAndFlush(with(any(Response.class)));
 
       allowing(regionScanner).close();
     }});
-
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.SCAN, 1, null, null, scanRequest, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getScanCall(1l, scanRequest, tableName));
   }
 
   @Test
   public void shouldBeAbleToHandleGet() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-
-
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
@@ -209,19 +224,14 @@ public class RegionServerTest {
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
 
     }});
-
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getGetCall(1, getRequest, tableName));
   }
 
   @Test
   public void shouldBeAbleToHandleExistsTrue() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
-
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
@@ -235,18 +245,13 @@ public class RegionServerTest {
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
 
     }});
-
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getGetCall(1, getRequest, tableName));
   }
 
 
   @Test
   public void shouldBeAbleToHandleExistsFalse() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-
-
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), true);
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
 
@@ -264,20 +269,15 @@ public class RegionServerTest {
 
     }});
 
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.GET, 1, getRequest, null, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getGetCall(1, getRequest, tableName));
   }
 
 
   @Test
   public void shouldBeAbleToHandleMutate() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutation, new Condition());
-
-
     context.checking(new Expectations() {{
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
@@ -289,7 +289,7 @@ public class RegionServerTest {
       oneOf(region).batchMutate(with(any(MutationProto.class)));
       will(returnFutureWithValue(true));
     }});
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getMutateCall(1, mutateRequest, tableName));
   }
 
   @Test
@@ -320,15 +320,12 @@ public class RegionServerTest {
 
     }});
 
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MUTATE, 1, null, mutateRequest, null, null));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getMutateCall(1, mutateRequest, tableName));
   }
 
   @Test
   public void shouldBeAbleToHandleMulti() throws Exception {
-    ByteBuffer regionLocation = ByteBuffer.wrap(Bytes.toBytes("testTable"));
-    RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        regionLocation);
-
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(Bytes.toBytes("fakeRow")));
     Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes("fakeRow")), false);
 
@@ -338,24 +335,20 @@ public class RegionServerTest {
     regionActionList.add(new RegionAction(regionSpecifier, true, Arrays.asList(new Action(2, null, get))));
     regionActionList.add(new RegionAction(regionSpecifier, false, Arrays.asList(new Action(3, mutation, get))));
 
-
     MultiRequest multiRequest = new MultiRequest(regionActionList);
 
     context.checking(new Expectations() {{
-      exactly(4).of(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
+      exactly(regionActionList.size()).of(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(tablet));
 
-      exactly(4).of(tablet).getRegion();
+      exactly(regionActionList.size()).of(tablet).getRegion();
       will(returnValue(region));
 
-      exactly(4).of(region).processRegionAction(with(any(RegionAction.class)));
+      exactly(regionActionList.size()).of(region).processRegionAction(with(any(RegionAction.class)));
       will(returnValue(new RegionActionResult()));
 
       oneOf(ctx).writeAndFlush(with(any(Response.class)));
-
     }});
-
-    regionServerHandler.channelRead0(ctx, new Call(Call.Command.MULTI, 1, null, null, null, multiRequest));
+    regionServerHandler.channelRead0(ctx, ProtobufUtil.getMultiCall(1, multiRequest, tableName));
   }
-
 }

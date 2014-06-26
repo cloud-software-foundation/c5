@@ -18,6 +18,7 @@ package c5db.regionserver;
 
 import c5db.AsyncChannelAsserts;
 import c5db.client.generated.Call;
+import c5db.client.generated.LocationResponse;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.Scan;
@@ -26,6 +27,7 @@ import c5db.regionserver.scan.ScanRunnable;
 import c5db.tablet.Region;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.hadoop.hbase.KeyValue;
+
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.hamcrest.Description;
@@ -85,7 +87,7 @@ public class ScanRunnableTest {
     int numberOfRows = 100;
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, scan, scannerId, numberOfRows, false, 0);
     long commandId = 1000;
-    Call call = new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
+    Call call = new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null, null);
     context.checking(new Expectations() {
       {
         oneOf(region).getScanner(with(any(Scan.class)));
@@ -94,7 +96,7 @@ public class ScanRunnableTest {
       }
     });
 
-    scanRunnable = new ScanRunnable(ctx, call, scannerId, region);
+    scanRunnable = new ScanRunnable(ctx, call, scannerId, region, new LocationResponse());
 
   }
 
@@ -108,7 +110,7 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        oneOf(regionScanner).next(with(any(List.class)));
         will(AddElementsActionReturnTrue.addElements(keyValue));
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
       }
@@ -131,7 +133,7 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        oneOf(regionScanner).next(with(any(List.class)));
         will(AddElementsActionReturnFalse.addElements(kvs.toArray()));
         oneOf(regionScanner).close();
         oneOf(ctx).writeAndFlush(with(any(Response.class)));
@@ -164,7 +166,7 @@ public class ScanRunnableTest {
 
     context.checking(new Expectations() {
       {
-        oneOf(regionScanner).nextRaw(with(any(List.class)));
+        oneOf(regionScanner).next(with(any(List.class)));
         will(AddElementsActionReturnTrue.addElements(kvs.toArray()));
 
         oneOf(ctx).writeAndFlush(with(any(Response.class)));

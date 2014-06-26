@@ -24,8 +24,10 @@ import c5db.client.generated.RegionInfo;
 import c5db.client.generated.Scan;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
+import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
@@ -40,6 +42,9 @@ import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jetlang.channels.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,9 +54,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
   private final long numberOfMetaPeers;
   private final Tablet tablet;
   private final C5Server server;
+  Channel<CommandRpcRequest<?>> commandRpcRequestChannel;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
                                   final C5Server server,
@@ -62,10 +70,11 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   public void start() throws IOException, ExecutionException, InterruptedException {
+
     Region region = tablet.getRegion();
     if (!metaExists(region)) {
       List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(tablet.getPeers());
-      createLeaderLessMetaEntryInRoot(region, pickedPeers);
+          createLeaderLessMetaEntryInRoot(region, pickedPeers);
       requestMetaCommandCreated(pickedPeers);
     } else {
       // Check to see if you can take root
@@ -96,15 +105,14 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
       TabletLeaderBehaviorHelper.sendRequest(commandRpcRequest, server);
     }
   }
-
   private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
     org.apache.hadoop.hbase.TableName hbaseDatabaseName = SystemTableNames.metaTableName();
     ByteBuffer hbaseNameSpace = ByteBuffer.wrap(hbaseDatabaseName.getNamespace());
     ByteBuffer hbaseTableName = ByteBuffer.wrap(hbaseDatabaseName.getQualifier());
     TableName tableName = new TableName(hbaseNameSpace, hbaseTableName);
 
-    byte[] initialMetaRockeyInRoot = Bytes.add(TabletNameHelpers.toBytes(tableName), SystemTableNames.sep, new byte[0]);
-    Put put = new Put(initialMetaRockeyInRoot);
+    byte[] initalMetaRowkeyInRoot = Bytes.add(TabletNameHelpers.toBytes(tableName), SystemTableNames.sep, new byte[0]);
+    Put put = new Put(initalMetaRowkeyInRoot);
 
     RegionInfo regionInfo = new RegionInfo(1,
         tableName,
@@ -118,10 +126,9 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     put.add(HConstants.CATALOG_FAMILY,
         HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
-
     boolean processed = region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
-    if (!processed) {
-      throw new IOException("Unable to mutate root and thus we can't properly run root tablet leader behavior");
+    if (!processed){
+      throw new IOException("Unable to set root");
     }
   }
 }

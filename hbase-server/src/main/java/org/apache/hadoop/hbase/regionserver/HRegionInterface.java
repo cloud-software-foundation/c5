@@ -19,6 +19,7 @@
  */
 package org.apache.hadoop.hbase.regionserver;
 
+import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -53,4 +54,5 @@ public interface HRegionInterface {
   void processRowsWithLocks(RowProcessor<?, ?> processor) throws IOException;
 
   OperationStatus[] batchMutate(Mutation[] putArray) throws IOException;
+
 }

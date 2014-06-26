@@ -92,7 +92,7 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
    * in the filesystem.
    *
    * New region name format:
-   *    &lt;tablename>,,&lt;startkey>,&lt;regionIdTimestamp>.&lt;encodedName>.
+   *    &lt;tablename>,,&lt;endKey>,&lt;regionIdTimestamp>.&lt;encodedName>.
    * where,
    *    &lt;encodedName> is a hex version of the MD5 hash of
    *    &lt;tablename>,&lt;startkey>,&lt;regionIdTimestamp>
@@ -142,7 +142,7 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
     String encodedName;
     if (hasEncodedName(regionName)) {
       // region is in new format:
-      // <tableName>,<startKey>,<regionIdTimeStamp>/encodedName/
+      // <tableName>,<endKey>,<regionIdTimeStamp>/encodedName/
       encodedName = Bytes.toString(regionName,
           regionName.length - MD5_HEX_LENGTH - 1,
           MD5_HEX_LENGTH);
@@ -289,7 +289,7 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
     this.offLine = false;
     this.regionId = regionid;
 
-    this.regionName = createRegionName(this.tableName, startKey, regionId, true);
+    this.regionName = createRegionName(this.tableName, endKey, regionId, true);
 
     this.split = split;
     this.endKey = endKey == null? HConstants.EMPTY_END_ROW: endKey.clone();
@@ -321,52 +321,52 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
   /**
    * Make a region name of passed parameters.
    * @param tableName
-   * @param startKey Can be null
+   * @param endKey Can be null
    * @param regionid Region id (Usually timestamp from when region was created).
    * @param newFormat should we create the region name in the new format
    *                  (such that it contains its encoded name?).
-   * @return Region name made of passed tableName, startKey and id
+   * @return Region name made of passed tableName, endKey and id
    */
   public static byte [] createRegionName(final TableName tableName,
-      final byte [] startKey, final long regionid, boolean newFormat) {
-    return createRegionName(tableName, startKey, Long.toString(regionid), newFormat);
+      final byte [] endKey, final long regionid, boolean newFormat) {
+    return createRegionName(tableName, endKey, Long.toString(regionid), newFormat);
   }
 
   /**
    * Make a region name of passed parameters.
    * @param tableName
-   * @param startKey Can be null
+   * @param endKey Can be null
    * @param id Region id (Usually timestamp from when region was created).
    * @param newFormat should we create the region name in the new format
    *                  (such that it contains its encoded name?).
-   * @return Region name made of passed tableName, startKey and id
+   * @return Region name made of passed tableName, endKey and id
    */
   public static byte [] createRegionName(final TableName tableName,
-      final byte [] startKey, final String id, boolean newFormat) {
-    return createRegionName(tableName, startKey, Bytes.toBytes(id), newFormat);
+      final byte [] endKey, final String id, boolean newFormat) {
+    return createRegionName(tableName, endKey, Bytes.toBytes(id), newFormat);
   }
 
   /**
    * Make a region name of passed parameters.
    * @param tableName
-   * @param startKey Can be null
+   * @param endKey Can be null
    * @param id Region id (Usually timestamp from when region was created).
    * @param newFormat should we create the region name in the new format
    *                  (such that it contains its encoded name?).
-   * @return Region name made of passed tableName, startKey and id
+   * @return Region name made of passed tableName, endKey and id
    */
   public static byte [] createRegionName(final TableName tableName,
-      final byte [] startKey, final byte [] id, boolean newFormat) {
+      final byte [] endKey, final byte [] id, boolean newFormat) {
     byte [] b = new byte [tableName.getName().length + 2 + id.length +
-       (startKey == null? 0: startKey.length) +
+       (endKey == null? 0: endKey.length) +
        (newFormat ? (MD5_HEX_LENGTH + 2) : 0)];
 
     int offset = tableName.getName().length;
     System.arraycopy(tableName.getName(), 0, b, 0, offset);
     b[offset++] = HConstants.DELIMITER;
-    if (startKey != null && startKey.length > 0) {
-      System.arraycopy(startKey, 0, b, offset, startKey.length);
-      offset += startKey.length;
+    if (endKey != null && endKey.length > 0) {
+      System.arraycopy(endKey, 0, b, offset, endKey.length);
+      offset += endKey.length;
     }
     b[offset++] = HConstants.DELIMITER;
     System.arraycopy(id, 0, b, offset, id.length);
@@ -431,18 +431,18 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
   }
 
   /**
-   * Gets the start key from the specified region name.
+   * Gets the end key from the specified region name.
    * @param regionName
-   * @return Start key.
+   * @return End key.
    */
-  public static byte[] getStartKey(final byte[] regionName) throws IOException {
+  public static byte[] getEndKey(final byte[] regionName) throws IOException {
     return parseRegionName(regionName)[1];
   }
 
   /**
    * Separate elements of a regionName.
    * @param regionName
-   * @return Array of byte[] containing tableName, startKey and id
+   * @return Array of byte[] containing tableName, endKey and id
    * @throws IOException
    */
   public static byte [][] parseRegionName(final byte [] regionName)
@@ -465,10 +465,10 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
       }
     }
     if(offset == -1) throw new IOException("Invalid regionName format");
-    byte [] startKey = HConstants.EMPTY_BYTE_ARRAY;
+    byte [] endKey = HConstants.EMPTY_BYTE_ARRAY;
     if(offset != tableName.length + 1) {
-      startKey = new byte[offset - tableName.length - 1];
-      System.arraycopy(regionName, tableName.length + 1, startKey, 0,
+      endKey = new byte[offset - tableName.length - 1];
+      System.arraycopy(regionName, tableName.length + 1, endKey, 0,
           offset - tableName.length - 1);
     }
     byte [] id = new byte[regionName.length - offset - 1];
@@ -476,7 +476,7 @@ public class HRegionInfo implements Comparable<HRegionInfo> {
         regionName.length - offset - 1);
     byte [][] elements = new byte[3][];
     elements[0] = tableName;
-    elements[1] = startKey;
+    elements[1] = endKey ;
     elements[2] = id;
     return elements;
   }

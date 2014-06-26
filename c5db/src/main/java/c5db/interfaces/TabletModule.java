@@ -31,6 +31,7 @@ import org.jetlang.channels.Channel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Manages the lifecycle of tablets - the individual chunks of tables.  Each tablet is

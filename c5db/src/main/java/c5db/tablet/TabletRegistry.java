@@ -43,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -54,6 +55,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  */
 public class TabletRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(TabletRegistry.class);
+
   private final C5FiberFactory fiberFactory;
   private final TabletFactory tabletFactory;
   private final Region.Creator regionCreator;
@@ -134,7 +136,6 @@ public class TabletRegistry {
     }
   }
 
-
   public Tablet startTablet(HRegionInfo regionInfo,
                             HTableDescriptor tableDescriptor,
                             List<Long> peerList) throws IOException {
@@ -188,46 +189,14 @@ public class TabletRegistry {
   }
 
   public Tablet getTablet(String tableName, byte[] row) throws RegionNotFoundException {
-    return this.getTablet(tableName, ByteBuffer.wrap(row));
+    return null;
 
-  }
-
-  public Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException {
-    Tablet tablet;
-
-    if (!tables.containsKey(tableName)) {
-      throw new RegionNotFoundException("We couldn't find table: " + tableName);
-    }
-
-    ConcurrentSkipListMap<byte[], Tablet> tablets = tables.get(tableName);
-    if (tablets.size() == 1) {
-      tablet = tablets.values().iterator().next();
-      //Properly formed single tablet table end tablet
-      if (tablet.getRegionInfo().getEndKey().length != 0) {
-        throw new RegionNotFoundException("We only have one tablet, but it has an endRow");
-      }
-    } else {
-      byte[] sep = SystemTableNames.sep;
-      // It must be the last tablet
-      if (row == null || row.array().length == 0) {
-        tablet = tablets.ceilingEntry(new byte[]{0x00}).getValue();
-      } else {
-        Map.Entry<byte[], Tablet> entry = tablets.higherEntry(row.array());
-        if (entry == null) {
-          tablet = tablets.ceilingEntry(sep).getValue();
-        } else {
-          tablet = entry.getValue();
-        }
-      }
-    }
-    assureCorrectRequest(tablet, row);
-    return tablet;
   }
 
   private void assureCorrectRequest(Tablet tablet, ByteBuffer row) throws RegionNotFoundException {
-    if (!HRegion.rowIsInRange(tablet.getRegionInfo(), row.array())) {
-      throw new RegionNotFoundException("We are trying to return a region which is not in range");
-    }
+   if (!HRegion.rowIsInRange(tablet.getRegionInfo(), row.array())) {
+     throw new RegionNotFoundException("We are trying to return a region which is not in range");
+   }
   }
 
   public Collection<Tablet> dumpTablets() {

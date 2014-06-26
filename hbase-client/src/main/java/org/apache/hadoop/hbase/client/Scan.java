@@ -139,7 +139,9 @@ public class Scan extends OperationWithAttributes {
   /**
    * Create a Scan operation across all rows.
    */
-  public Scan() {}
+  public Scan() {
+
+  }
 
   public Scan(byte [] startRow, Filter filter) {
     this(startRow);

@@ -17,6 +17,7 @@
 package c5db;
 
 import c5db.interfaces.C5Server;
+import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -24,11 +25,12 @@ import org.apache.hadoop.hbase.TableName;
 import sun.misc.BASE64Encoder;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TestHelpers {
-  private static HRegionInfo testRegion;
-  private static HTableDescriptor testDesc;
-  private static long peer;
+  public static HRegionInfo testRegion;
+  public static HTableDescriptor testDesc;
+  public static long peer;
 
   public static String getCreateTabletCommand(final TableName tableName, final long nodeId) {
     peer = nodeId;
@@ -41,7 +43,7 @@ public class TestHelpers {
     String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
     String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
 
-    return C5ServerConstants.LAUNCH_TABLET + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
+    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
 
   }
 

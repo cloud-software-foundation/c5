@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -42,9 +43,18 @@ import java.util.concurrent.TimeoutException;
 public class HTable extends FakeHTable implements HTableInterface {
   private static final Logger LOG = LoggerFactory.getLogger(HTable.class);
 
-  public HTable(String hostname, int port, ByteString tableName) throws InterruptedException, TimeoutException, ExecutionException {
+  /**
+   * A  HTable Client
+   *
+   * @param hostname
+   * @param port
+   * @param tableName The name of the table to connect to.
+   */
+  public HTable(String hostname, int port, String tableName)
+      throws InterruptedException, TimeoutException, ExecutionException, URISyntaxException {
     super(hostname, port, tableName);
   }
+
 
   @Override
   public Result append(Append append) throws IOException {

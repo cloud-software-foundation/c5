@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+
 public class MiniClustersBaseTest extends MiniClusterPopulated {
 
   @Test

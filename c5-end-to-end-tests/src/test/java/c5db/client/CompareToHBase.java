@@ -27,6 +27,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -42,17 +43,19 @@ public class CompareToHBase extends MiniClusterBase {
     conf = HBaseConfiguration.create();
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, ExecutionException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException, TimeoutException, ExecutionException, URISyntaxException {
     CompareToHBase testingUtil = new CompareToHBase();
     hTable = new HTable(conf, tableName.toByteArray());
     testingUtil.compareToHBaseScan();
     hTable.close();
   }
 
-  void compareToHBaseScan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  void compareToHBaseScan()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException, URISyntaxException {
     tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
 
-    FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), tableName);
+    FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), name.getMethodName());
 
     long As, Ae, Bs, Be;
     int i = 0;

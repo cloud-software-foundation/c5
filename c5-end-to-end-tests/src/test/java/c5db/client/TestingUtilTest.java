@@ -131,6 +131,7 @@ public class TestingUtilTest extends MiniClusterBase {
     assertEquals(resultScanner.next(), null);
   }
 
+
   @Test
   public void testScanWith0Row() throws IOException {
     byte[] row0 = new byte[]{0x00};

@@ -32,5 +32,6 @@ public interface MessageHandler extends ChannelHandler, ChannelInboundHandler {
 
   ListenableFuture<Response> buffer(Call request, Channel channel);
 
-  ListenableFuture<c5db.client.scanner.C5ClientScanner> callScan(Call request, Channel channel) throws InterruptedException, ExecutionException, TimeoutException;
+  ListenableFuture<c5db.client.scanner.C5ClientScanner> callScan(Call request, Channel channel)
+      throws InterruptedException, ExecutionException;
 }

@@ -18,6 +18,10 @@ package c5db.client;
 
 import c5db.client.codec.websocket.Encoder;
 import c5db.client.codec.websocket.Initializer;
+import c5db.client.generated.Location;
+import c5db.client.generated.LocationResponse;
+import c5db.client.generated.RegionLocation;
+import c5db.client.generated.TableName;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -31,8 +35,11 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import org.mortbay.log.Log;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,30 +52,23 @@ import java.util.concurrent.TimeoutException;
  * A class which manages all of the outbound connections from a client to a set of regions/tablets.
  */
 public class C5NettyConnectionManager implements C5ConnectionManager {
+  private static final Logger LOG = LoggerFactory.getLogger(C5NettyConnectionManager.class);
   private final ConcurrentHashMap<String, Channel> regionChannelMap = new ConcurrentHashMap<>();
   private final Bootstrap bootstrap = new Bootstrap();
-
   private final EventLoopGroup group = new NioEventLoopGroup();
-  private URI uri;
 
   public C5NettyConnectionManager() {
     bootstrap.group(group);
     bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-
-    try {
-      uri = new URI("ws://0.0.0.0:8080/websocket");
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-
   }
 
   String getHostPortHash(String host, int port) {
     return host + ":" + port;
   }
 
-  Channel connect(String host, int port)
-      throws InterruptedException, TimeoutException, ExecutionException {
+  Channel bootStrapConnection(String host, int port)
+      throws InterruptedException, TimeoutException, ExecutionException, URISyntaxException {
+    URI uri = new URI("ws://" + host + ":" + port + "/websocket");
     final WebSocketClientHandshaker handShaker = WebSocketClientHandshakerFactory.newHandshaker(uri,
         WebSocketVersion.V13,
         null,
@@ -76,43 +76,15 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
         new DefaultHttpHeaders());
     final Initializer initializer = new Initializer(handShaker);
     bootstrap.channel(NioSocketChannel.class).handler(initializer);
-
     final ChannelFuture future = bootstrap.connect(host, port);
     final Channel channel = future.sync().channel();
     initializer.syncOnHandshake();
-
     return channel;
   }
 
   @Override
-  public Channel getOrCreateChannel(byte tableName, byte row) {
-    // look up the leader in the local meta cache
-
+  public Channel getBestChannelFor(TableName tableName, byte[] row) {
     return null;
-  }
-
-  @Override
-  public Channel getOrCreateChannel(String host, int port)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    final String hash = getHostPortHash(host, port);
-
-    if (!regionChannelMap.containsKey(hash)) {
-      final Channel channel = connect(host, port);
-      regionChannelMap.put(hash, channel);
-      Log.warn("Channel" + channel);
-      return channel;
-    }
-
-    Channel channel = regionChannelMap.get(hash);
-
-    // Clear stale channels
-    if (!(channel.isOpen() && channel.isActive() && isHandShakeConnected(channel))) {
-      closeChannel(host, port);
-      channel.disconnect();
-      channel = getOrCreateChannel(host, port);
-    }
-
-    return channel;
   }
 
   private boolean isHandShakeConnected(Channel channel) {
@@ -121,7 +93,6 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
     return encoder.getHandShaker().isHandshakeComplete();
   }
 
-  @Override
   public void closeChannel(String host, int port) {
     final String hash = getHostPortHash(host, port);
     regionChannelMap.remove(hash);
@@ -140,5 +111,52 @@ public class C5NettyConnectionManager implements C5ConnectionManager {
       future.sync();
     }
     group.shutdownGracefully();
+  }
+
+  @Override
+  public void flush() {
+    for (Channel channel : regionChannelMap.values()) {
+      channel.flush();
+    }
+  }
+
+  @Override
+  @NotNull
+  public Channel getOrCreateChannel(LocationResponse locationResponse)
+      throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException {
+    List<RegionLocation> regionLocationList = locationResponse.getRegionLocationList();
+
+    if (regionLocationList.size() > 1) {
+      LOG.error("we only support using the first location response currently");
+    } else if (regionLocationList.size() == 0) {
+      throw new ExecutionException(new IOException("invalid location response:" + locationResponse));
+    }
+
+    Location location = regionLocationList.get(0).getLocation();
+    return getOrCreateChannel(location.getHostname(), location.getPort());
+  }
+
+  @Override
+  @NotNull
+  public Channel getOrCreateChannel(String host, int port)
+      throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException {
+    final String hash = getHostPortHash(host, port);
+
+    if (!regionChannelMap.containsKey(hash)) {
+      final Channel channel = bootStrapConnection(host, port);
+      regionChannelMap.put(hash, channel);
+      return channel;
+    }
+
+    Channel channel = regionChannelMap.get(hash);
+
+    // Clear stale channels
+    if (!(channel.isOpen() && channel.isActive() && isHandShakeConnected(channel))) {
+      closeChannel(host, port);
+      channel.disconnect();
+      channel = getOrCreateChannel(host, port);
+    }
+
+    return channel;
   }
 }

@@ -22,6 +22,8 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
+import org.hamcrest.core.IsAnything;
+import org.hamcrest.core.IsNull;
 import org.jetlang.channels.Request;
 import org.jmock.Expectations;
 import org.jmock.States;
@@ -32,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.ByteBuffer;
 
 import static c5db.FutureActions.returnFutureWithValue;
@@ -76,8 +79,18 @@ public class MetaTabletLeaderBehaviorTest {
       oneOf(c5Server).getNodeId();
       will(returnValue(1l));
 
-      oneOf(controlRpcModule).doMessage(with(any(Request.class)));
+      oneOf(controlRpcModule).doMessage(with(any(Request.class)));//TODO make sure the message is correct
       then(state.is("done"));
+
+      // Prepare to get the root region
+      oneOf(c5Server).getModule(ModuleType.Tablet);
+      will(returnFutureWithValue(tabletModule));
+
+      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
+      will(returnValue(rootTablet));
+
+      oneOf(rootTablet).getLeader();
+      will(returnValue(1l));
     }});
     MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(c5Server);
     metaTabletLeaderBehavior.start();

@@ -37,6 +37,7 @@ import c5db.replication.rpc.RpcRequest;
 import c5db.replication.rpc.RpcWireReply;
 import c5db.replication.rpc.RpcWireRequest;
 import c5db.util.FiberOnly;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -120,7 +121,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
   @Override
   public ListenableFuture<Replicator> createReplicator(final String quorumId,
-                                                       final List<Long> peers) {
+                                                       final ImmutableList<Long> peers) {
     final SettableFuture<Replicator> future = SettableFuture.create();
     fiber.execute(new Runnable() {
       @Override
@@ -133,8 +134,8 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
         // We need to make sure that it's not coming from another single mode daemon.
         if (!peers.contains(server.getNodeId()) && !server.isSingleNodeMode()) {
-          LOG.error("Creating replicator for {}, peer list did not contain myself", quorumId, peers);
-          peers.add(server.getNodeId());
+          LOG.error("Not starting replicator peer list did not contain myself", quorumId, peers);
+          return;
         }
         LOG.info("Creating replicator instance for {} peers {}", quorumId, peers);
 

@@ -17,6 +17,7 @@
 package c5db.client;
 
 import c5db.MiniClusterBase;
+import c5db.util.TabletNameHelpers;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;

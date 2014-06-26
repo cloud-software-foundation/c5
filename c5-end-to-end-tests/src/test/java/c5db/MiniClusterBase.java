@@ -28,10 +28,12 @@ import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 
-import c5db.regionserver.RegionServerHandler;
+import c5db.tablet.TabletService;
 import c5db.util.TabletNameHelpers;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.ByteString;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
@@ -49,6 +51,7 @@ import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -69,9 +72,9 @@ public class MiniClusterBase {
   static FakeHTable metaTable;
   @Rule
   public TestName name = new TestName();
-  protected FakeHTable table;
+  public static FakeHTable table;
   protected byte[] row;
-  public final byte[][] splitkeys = new byte[][]{};
+  byte[][] splitkeys = {Bytes.toBytes(10), Bytes.toBytes(100), Bytes.toBytes(1000), Bytes.toBytes(10000)};
 
   protected static int getRegionServerPort() throws ExecutionException, InterruptedException {
     return server.getModule(ModuleType.RegionServer).get().port();
@@ -79,8 +82,14 @@ public class MiniClusterBase {
 
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module : server.getModules().values()) {
-      module.stop().get(1, TimeUnit.SECONDS);
+    ImmutableMap<ModuleType, C5Module> modules = null;
+
+    modules = server.getModules();
+
+    if (modules != null) {
+      for (C5Module module : modules.values()) {
+        module.stopAndWait();
+      }
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
@@ -94,63 +103,48 @@ public class MiniClusterBase {
     System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
     server = Main.startC5Server(new String[]{});
-    metaOnNode = server.getNodeId();
-    TabletModule tabletServer = (TabletModule) server.getModule(ModuleType.Tablet).get();
-    RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
+    ListenableFuture<C5Module> tabletServerFuture = server.getModule(ModuleType.Tablet);
+    TabletModule tabletServer = (TabletModule) tabletServerFuture.get(1, TimeUnit.SECONDS);
     stateChanges = tabletServer.getTabletStateChanges();
 
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
     // create java.util.concurrent.CountDownLatch to notify when message arrives
-    final CountDownLatch latch = new CountDownLatch(1);
-    int processors = Runtime.getRuntime().availableProcessors();
-    PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
-    Fiber fiber = fiberPool.create();
-    fiber.start();
-    tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
-      if (tabletStateChange.state.equals(Tablet.State.Leader)) {
-        if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServer.port();
-          metaOnNode = server.getNodeId();
-          try {
-            metaTable = new FakeHTable("localhost", metaOnPort, ByteString.copyFromUtf8("hbase:meta"));
-          } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            e.printStackTrace();
-          }
+    final CountDownLatch latch = new CountDownLatch(2);
 
-          latch.countDown();
-          fiber.dispose();
-        }
+    Callback<TabletStateChange> onMsg = message -> {
+      if (!message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
+          && message.state.equals(Tablet.State.Leader)) {
+        latch.countDown();
       }
-    });
-
-    latch.await();
-    receiver.dispose();
+    };
+    ((TabletService) tabletServer).getTabletStateChanges().subscribe(receiver, onMsg);
   }
 
   @After
   public void after() throws InterruptedException, IOException {
     table.close();
+    metaTable.close();
   }
 
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException {
+  public void before()
+      throws InterruptedException, ExecutionException, TimeoutException, IOException, URISyntaxException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
-    final CountDownLatch latch = new CountDownLatch(1);
+    final CountDownLatch latch = new CountDownLatch(splitkeys.length + 1);
     Callback<TabletStateChange> onMsg = message -> {
-      if (message.state.equals(Tablet.State.Leader)) {
+      if (!message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
+          && message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
     stateChanges.subscribe(receiver, onMsg);
-
     TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
-    org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
+    org.apache.hadoop.hbase.TableName tableName  = TabletNameHelpers.getHBaseTableName(clientTableName);
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
-
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));
     CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
@@ -159,9 +153,9 @@ public class MiniClusterBase {
     commandChannel.publish(createTableCommand);
     latch.await();
 
-    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
-        TabletNameHelpers.toByteString(clientTableName));
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), clientTableName);
     row = Bytes.toBytes(name.getMethodName());
+    table.put(new Put(row));
     receiver.dispose();
   }
 }

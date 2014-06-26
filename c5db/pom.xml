@@ -170,5 +170,11 @@
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>annotations</artifactId>
+            <version>12.0</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

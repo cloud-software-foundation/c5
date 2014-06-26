@@ -79,7 +79,6 @@ public class ControlService extends AbstractService implements ControlModule {
     this.acceptConnectionGroup = acceptConnectionGroup;
     this.ioWorkerGroup = ioWorkerGroup;
     this.modulePort = modulePort;
-
     controlClient = new SimpleControlClient(ioWorkerGroup);
   }
 
@@ -145,7 +144,6 @@ public class ControlService extends AbstractService implements ControlModule {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CommandRpcRequest<? extends Message> msg) throws Exception {
-      System.out.println("Server read off: " + msg);
       // this should match our local node id!
       if (msg.receipientNodeId != server.getNodeId()) {
         sendErrorReply(ctx.channel(), new Exception("Bad nodeId!"));

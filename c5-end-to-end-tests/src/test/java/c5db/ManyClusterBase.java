@@ -17,7 +17,6 @@
 package c5db;
 
 import c5db.client.FakeHTable;
-import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -28,6 +27,9 @@ import c5db.messages.generated.ModuleType;
 import c5db.tablet.TabletService;
 import c5db.util.TabletNameHelpers;
 import io.protostuff.ByteString;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
@@ -43,6 +45,7 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
+import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,16 +69,16 @@ public class ManyClusterBase {
   private static List<C5Server> servers = new ArrayList<>();
   @ClassRule
   public static TemporaryFolder testFolder = new TemporaryFolder();
-  private static long metaOnNode;
+  static long metaOnNode;
   static FakeHTable metaTable;
 
   @Rule
   public TestName name = new TestName();
   protected FakeHTable table;
   protected byte[] row;
-  private final Map<String, Integer> userTabletOn = new HashMap<>();
+  private Map<String, Integer> userTabletOn = new HashMap<>();
 
-  final byte[][] splitkeys = {};
+  byte[][] splitkeys = {Bytes.toBytes(10), Bytes.toBytes(100), Bytes.toBytes(1000), Bytes.toBytes(10000)};
 
   @AfterClass()
   public static void afterClass() throws ExecutionException, InterruptedException, TimeoutException {
@@ -95,7 +98,7 @@ public class ManyClusterBase {
   public static void beforeClass() throws Exception {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     System.setProperty(C5ServerConstants.CLUSTER_NAME_PROPERTY_NAME, String.valueOf("foo"));
-    System.setProperty(C5ServerConstants.MIN_CLUSTER_SIZE, String.valueOf(3));
+    System.setProperty(C5ServerConstants.MIN_CLUSTER_SIZE, String.valueOf(5));
     testFolder.create();
 
     int processors = Runtime.getRuntime().availableProcessors();
@@ -105,7 +108,7 @@ public class ManyClusterBase {
     final CountDownLatch latch = new CountDownLatch(1);
     int webServerPort = 31337 + random.nextInt(1000);
     int controlServerPort = 20000 + random.nextInt(1000);
-    for (int i = 0; i != 3; i++) {
+    for (int i = 0; i != 5; i++) {
       Path nodeBasePath = Paths.get(testFolder.getRoot().getAbsolutePath(), String.valueOf(random.nextInt()));
       boolean success = new File(nodeBasePath.toUri()).mkdirs();
       if (!success) {
@@ -130,10 +133,8 @@ public class ManyClusterBase {
             metaOnPort = regionServer.port();
             metaOnNode = server.getNodeId();
             try {
-              metaTable = new FakeHTable("localhost",
-                  metaOnPort,
-                  ByteString.copyFromUtf8("hbase:meta"));
-            } catch (InterruptedException | TimeoutException | ExecutionException e) {
+              metaTable = new FakeHTable("localhost", metaOnPort, "hbase:meta");
+            } catch (URISyntaxException | InterruptedException | TimeoutException | ExecutionException e) {
               e.printStackTrace();
             }
 
@@ -156,7 +157,9 @@ public class ManyClusterBase {
     receiver.start();
 
     final CountDownLatch latch = new CountDownLatch(1);
-    final String tableName = name.getMethodName();
+
+    c5db.client.generated.TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
+    org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
 
     for (C5Server server : servers) {
       C5Module regionServer = server.getModule(ModuleType.RegionServer).get();
@@ -173,18 +176,39 @@ public class ManyClusterBase {
     }
 
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        TestHelpers.getCreateTabletSubCommand("c5", tableName, splitkeys, servers));
+        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, servers));
     commandChannel.publish(new CommandRpcRequest<>(metaOnNode, createTableSubCommand));
 
     // create java.util.concurrent.CountDownLatch to notify when message arrives
     latch.await();
-    TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
 
-    table = new FakeHTable(C5TestServerConstants.LOCALHOST,
-        userTabletOn.values().iterator().next(),
-        TabletNameHelpers.toByteString(clientTableName));
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(), clientTableName);
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
+  }
+
+
+  protected int getRegionServerPort() {
+    Log.info("Getting region from: " + userTabletOn);
+    return userTabletOn.values().iterator().next();
+  }
+
+  String getCreateTabletSubCommand(ByteString tableNameBytes) {
+    org.apache.hadoop.hbase.TableName tableName = org.apache.hadoop.hbase.TableName.valueOf(tableNameBytes.toByteArray());
+    HTableDescriptor testDesc = new HTableDescriptor(tableName);
+    testDesc.addFamily(new HColumnDescriptor("cf"));
+    HRegionInfo testRegion = new HRegionInfo(tableName, new byte[]{0}, new byte[]{}, false, 1);
+
+    String peerString = String.valueOf(servers.get(0).getNodeId() + ","
+        + servers.get(1).getNodeId() + ","
+        + servers.get(2).getNodeId());
+    BASE64Encoder encoder = new BASE64Encoder();
+
+    String hTableDesc = encoder.encodeBuffer(testDesc.toByteArray());
+    String hRegionInfo = encoder.encodeBuffer(testRegion.toByteArray());
+
+    return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
+
   }
 
   @After

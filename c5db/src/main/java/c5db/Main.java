@@ -128,7 +128,6 @@ public class Main {
       StartModule startModuleMessage = new StartModule(moduleType, port, "");
       instance.getCommandChannel().publish(new CommandRpcRequest<>(nodeId, startModuleMessage));
     }
-
     return instance;
   }
 

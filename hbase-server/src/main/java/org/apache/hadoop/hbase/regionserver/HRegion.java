@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.primitives.UnsignedBytes;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -208,6 +210,17 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
 
   protected long completeSequenceId = -1L;
 
+
+
+
+
+
+  public class C5RegionScanner extends HRegion.RegionScannerImpl {
+    public C5RegionScanner(Scan scan, List<KeyValueScanner> additionalScanners, HRegion region) throws IOException {
+      super(scan, additionalScanners, region);
+    }
+  }
+
   /**
    * Operation enum is used in {@link HRegion#startRegionOperation} to provide operation context for
    * startRegionOperation to possibly invoke different checks before any region operations. Not all
@@ -261,6 +274,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
   private final HRegionFileSystem fs;
   protected final Configuration conf;
   private final Configuration baseConf;
+
   private final KeyValue.KVComparator comparator;
   private final int rowLockWaitDuration;
   static final int DEFAULT_ROWLOCK_WAIT_DURATION = 30000;
@@ -1620,7 +1634,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
 
     // Record latest flush time
     this.lastFlushTime = EnvironmentEdgeManager.currentTimeMillis();
-    
+
     // Update the last flushed sequence id for region
     if (this.rsServices != null) {
       completeSequenceId = flushSeqId;
@@ -1718,7 +1732,8 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
    * @throws IOException read exceptions
    */
   public RegionScanner getScanner(Scan scan) throws IOException {
-   return getScanner(scan, null);
+    RegionScanner scanner = getScanner(scan, null);
+    return scanner;
   }
 
   void prepareScanner(Scan scan) throws IOException {
@@ -3134,7 +3149,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
   //////////////////////////////////////////////////////////////////////////////
 
   /** Make sure this is a valid row for the HRegion */
-  void checkRow(final byte [] row, String op) throws IOException {
+  public void checkRow(final byte [] row, String op) throws IOException {
     if (!rowIsInRange(getRegionInfo(), row)) {
       throw new WrongRegionException("Requested row out of range for " +
           op + " on HRegion " + this + ", startKey='" +
@@ -3369,7 +3384,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
   /**
    * RegionScannerImpl is used to combine scanners from multiple Stores (aka column families).
    */
-  class RegionScannerImpl implements RegionScanner {
+  public class RegionScannerImpl implements RegionScanner {
     // Package local for testability
     KeyValueHeap storeHeap = null;
     /** Heap of key-values that are not essential for the provided filters and are thus read
@@ -3395,7 +3410,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
       return region.getRegionInfo();
     }
 
-    RegionScannerImpl(Scan scan, List<KeyValueScanner> additionalScanners, HRegion region)
+    public RegionScannerImpl(Scan scan, List<KeyValueScanner> additionalScanners, HRegion region)
         throws IOException {
 
       this.region = region;
@@ -3449,6 +3464,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
           joinedScanners.add(scanner);
         }
       }
+
       this.storeHeap = new KeyValueHeap(scanners, comparator);
       if (!joinedScanners.isEmpty()) {
         this.joinedHeap = new KeyValueHeap(joinedScanners, comparator);
@@ -4222,11 +4238,26 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
    * @return true if the row is within the range specified by the HRegionInfo
    */
   public static boolean rowIsInRange(HRegionInfo info, final byte [] row) {
-    return ((info.getStartKey().length == 0) ||
-        (Bytes.compareTo(info.getStartKey(), row) <= 0)) &&
-        ((info.getEndKey().length == 0) ||
-            (Bytes.compareTo(info.getEndKey(), row) > 0));
+    boolean withinStartKey = false;
+    boolean withinEndKey = false;
+    // No start key
+    if (info.getStartKey() == null || info.getStartKey().length == 0){
+      withinStartKey = true;
+    } else if (Bytes.compareTo(info.getStartKey(), row) <= 0) {
+      withinStartKey = true;
+    }
+
+    if (info.getEndKey() == null || info.getEndKey().length == 0){
+      withinEndKey = true;
+    } else if (Bytes.compareTo(info.getEndKey(), row) > 0) {
+      withinEndKey = true;
+    }
+    if ((row == null || row.length == 0)) {
+      withinEndKey = true;
+    }
+    return withinStartKey && withinEndKey;
   }
+
 
   /**
    * Merge two HRegions.  The regions must be adjacent and must not overlap.
@@ -4674,7 +4705,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
 
             Store store = stores.get(family.getKey());
             List<Cell> kvs = new ArrayList<Cell>(family.getValue().size());
-  
+
             Collections.sort(family.getValue(), store.getComparator());
             // Get previous values for all columns in this family
             Get get = new Get(row);
@@ -4683,7 +4714,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
               get.addColumn(family.getKey(), kv.getQualifier());
             }
             List<Cell> results = get(get, false);
-  
+
             // Iterate the input columns and update existing values if they were
             // found, otherwise add new column initialized to the append value
 
@@ -4729,7 +4760,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
               System.arraycopy(kv.getBuffer(), kv.getQualifierOffset(),
                   newKV.getBuffer(), newKV.getQualifierOffset(),
                   kv.getQualifierLength());
-  
+
               newKV.setMvccVersion(w.getWriteNumber());
               kvs.add(newKV);
 
@@ -4858,7 +4889,7 @@ public class HRegion implements HeapSize, HRegionInterface { // , Writable{
             }
             get.setTimeRange(tr.getMin(), tr.getMax());
             List<Cell> results = get(get, false);
-  
+
             // Iterate the input columns and update existing values if they were
             // found, otherwise add new column initialized to the increment amount
             int idx = 0;

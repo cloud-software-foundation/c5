@@ -30,7 +30,6 @@ import c5db.client.scanner.C5ClientScanner;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -39,7 +38,6 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.hamcrest.Matcher;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -49,6 +47,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,7 +78,7 @@ public class C5FakeHTableTest {
   private final ChannelPipeline channelPipeline = context.mock(ChannelPipeline.class);
   private final C5ConnectionManager c5ConnectionManager = context.mock(C5ConnectionManager.class);
   private final Channel channel = context.mock(Channel.class);
-  private final byte[] row = Bytes.toBytes("row");
+  private byte[] row = Bytes.toBytes("row");
   private final byte[] cf = Bytes.toBytes("cf");
   private final byte[] cq = Bytes.toBytes("cq");
   private final byte[] value = Bytes.toBytes("value");
@@ -87,7 +86,7 @@ public class C5FakeHTableTest {
   private FakeHTable hTable;
 
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException, IOException, URISyntaxException {
     context.checking(new Expectations() {
       {
         oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
@@ -99,11 +98,13 @@ public class C5FakeHTableTest {
         oneOf(channelPipeline).get(with(any(Class.class)));
         will(returnValue(messageHandler));
 
+        allowing(channel).flush();
+
       }
     });
 
     singleNodeTableInterface = new ExplicitNodeCaller("fake", 0, c5ConnectionManager);
-    hTable = new FakeHTable(singleNodeTableInterface, ByteString.copyFromUtf8("Does Not Exist"));
+    hTable = new FakeHTable(singleNodeTableInterface, "Does Not Exist");
   }
 
   @After
@@ -122,7 +123,7 @@ public class C5FakeHTableTest {
   public void putShouldErrorOnInvalidResponse() throws IOException, InterruptedException, ExecutionException, TimeoutException, MutationFailedException {
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(new Response()));
       }
     });
@@ -133,11 +134,11 @@ public class C5FakeHTableTest {
   @Test(expected = IOException.class)
   public void putShouldThrowErrorIfMutationFailed()
       throws InterruptedException, ExecutionException, TimeoutException, MutationFailedException, IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, false), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, false), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -147,11 +148,11 @@ public class C5FakeHTableTest {
   @Test
   public void putCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -169,7 +170,7 @@ public class C5FakeHTableTest {
         SettableFuture<Response> response = SettableFuture.create();
         context.checking(new Expectations() {
           {
-            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
@@ -195,7 +196,7 @@ public class C5FakeHTableTest {
       SettableFuture<Response> response = SettableFuture.create();
       context.checking(new Expectations() {
         {
-          allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+          allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
           will(returnValue(response));
         }
       });
@@ -222,7 +223,7 @@ public class C5FakeHTableTest {
         SettableFuture<Response> response = SettableFuture.create();
         context.checking(new Expectations() {
           {
-            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
@@ -236,7 +237,7 @@ public class C5FakeHTableTest {
 
       // Remove one entry from the top
       futures.remove();
-      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
       futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
 
       flushFuture.get(2, TimeUnit.SECONDS);
@@ -258,7 +259,7 @@ public class C5FakeHTableTest {
         SettableFuture<Response> response = SettableFuture.create();
         context.checking(new Expectations() {
           {
-            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
@@ -271,7 +272,7 @@ public class C5FakeHTableTest {
         return null;
       });
 
-      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
       futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
       flushFuture.get();
 
@@ -296,14 +297,14 @@ public class C5FakeHTableTest {
 
         context.checking(new Expectations() {
           {
-            oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
         hTable.put(new Put(row));
         futures.add(response);
       }
-      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+      Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
       futures.parallelStream().forEach(responseSettableFuture -> responseSettableFuture.set(response));
     } finally {
       hTable.setAutoFlush(true);
@@ -314,11 +315,11 @@ public class C5FakeHTableTest {
   @Test
   public void putsCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -329,11 +330,11 @@ public class C5FakeHTableTest {
   @Test
   public void deleteCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -343,11 +344,11 @@ public class C5FakeHTableTest {
   @Test
   public void deletesCanSucceed()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -419,8 +420,14 @@ public class C5FakeHTableTest {
     scanner.close();
   }
 
+  @Test(expected = IOException.class)
+  public void multiMutateFailsWithoutAnyUpdates() throws IOException, InterruptedException {
+    RowMutations rm = new RowMutations(Bytes.toBytes("row"));
+    hTable.mutateRow(rm);
+  }
+
   @Test
-  public void canMutateRow() throws IOException {
+  public void canMultiMutateWithRowMutations() throws IOException {
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
@@ -428,17 +435,19 @@ public class C5FakeHTableTest {
       }
     });
 
-    RowMutations rm = new RowMutations(Bytes.toBytes("row"));
+    RowMutations rm = new RowMutations(row);
+    rm.add( new Put(row));
     hTable.mutateRow(rm);
   }
 
+
   @Test
   public void canCheckAndPut() throws IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -447,11 +456,11 @@ public class C5FakeHTableTest {
 
   @Test
   public void canCheckAndDelete() throws IOException {
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
 
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -472,7 +481,7 @@ public class C5FakeHTableTest {
         SettableFuture<Response> response = SettableFuture.create();
         context.checking(new Expectations() {
           {
-            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
@@ -509,7 +518,7 @@ public class C5FakeHTableTest {
         SettableFuture<Response> response = SettableFuture.create();
         context.checking(new Expectations() {
           {
-            allowing(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+            allowing(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
             will(returnValue(response));
           }
         });
@@ -548,7 +557,7 @@ public class C5FakeHTableTest {
     regionActionResults.add(new RegionActionResult(resultOrExceptions, null));
 
     Response response = new Response(Response.Command.MULTI, 1l, null, null, null,
-        new MultiResponse(regionActionResults));
+        new MultiResponse(regionActionResults), null);
 
     context.checking(new Expectations() {
       {
@@ -561,7 +570,7 @@ public class C5FakeHTableTest {
     rows.add(new Get(row));
     Object[] results = new Object[2];
     hTable.batch(rows, results);
-    assertThat(results.length , is(equalTo(2)));
+    assertThat(results.length, is(equalTo(2)));
     RegionActionResult roe = (RegionActionResult) results[0];
     RegionActionResult in = new RegionActionResult(resultOrExceptions, null);
     assertThat(roe.toString(), is(in.toString()));
@@ -577,7 +586,7 @@ public class C5FakeHTableTest {
     regionActionResults.add(new RegionActionResult(resultOrExceptions, null));
 
     Response response = new Response(Response.Command.MULTI, 1l, null, null, null,
-        new MultiResponse(regionActionResults));
+        new MultiResponse(regionActionResults), null);
 
     context.checking(new Expectations() {
       {
@@ -590,7 +599,7 @@ public class C5FakeHTableTest {
     rows.add(new Get(row));
     Object[] results = new Object[0];
     hTable.batch(rows, results);
-    assertThat(results.length , is(equalTo(2)));
+    assertThat(results.length, is(equalTo(2)));
     RegionActionResult roe = (RegionActionResult) results[0];
     RegionActionResult in = new RegionActionResult(resultOrExceptions, null);
     assertThat(roe.toString(), is(in.toString()));

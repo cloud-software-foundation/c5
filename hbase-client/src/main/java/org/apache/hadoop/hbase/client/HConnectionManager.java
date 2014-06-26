@@ -962,7 +962,7 @@ public class HConnectionManager {
     @Override
     public HRegionLocation locateRegion(final byte[] regionName) throws IOException {
       return locateRegion(HRegionInfo.getTable(regionName),
-          HRegionInfo.getStartKey(regionName), false, true);
+          HRegionInfo.getEndKey(regionName), false, true);
     }
 
     @Override

@@ -17,17 +17,34 @@
 
 package c5db.regionserver;
 
+import c5db.C5ServerConstants;
+import c5db.client.ExplicitNodeCaller;
+import c5db.client.FakeHTable;
+import c5db.client.ProtobufUtil;
+import c5db.client.generated.Location;
+import c5db.client.generated.RegionLocation;
 import c5db.client.generated.RegionSpecifier;
-
+import c5db.client.generated.Result;
+import c5db.client.generated.ScanRequest;
+import c5db.client.generated.TableName;
+import c5db.client.scanner.C5ClientScanner;
 import c5db.codec.websocket.Initializer;
+import c5db.control.SimpleControlClient;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
+import c5db.interfaces.discovery.NodeInfoReply;
 import c5db.interfaces.tablet.Tablet;
+import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
+import c5db.tablet.SystemTableNames;
+import c5db.tablet.TabletRegistry;
 import c5db.util.C5FiberFactory;
+import c5db.util.C5Futures;
+import c5db.util.TabletNameHelpers;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -39,6 +56,13 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.util.MultiException;
 import org.jetbrains.annotations.NotNull;
@@ -46,11 +70,21 @@ import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -69,11 +103,14 @@ public class RegionServerService extends AbstractService implements RegionServer
   private TabletModule tabletModule;
   private Channel listenChannel;
   public final AtomicLong scannerCounter;
+  private final Location location;
+  private DiscoveryModule discoveryModule;
 
+  private ConcurrentSkipListMap<HRegionInfo, Long> metaCache = new ConcurrentSkipListMap<>(new MetaCacheComparable());
   public RegionServerService(EventLoopGroup acceptGroup,
                              EventLoopGroup workerGroup,
                              int port,
-                             C5Server server) {
+                             C5Server server) throws UnknownHostException {
     this.acceptGroup = acceptGroup;
     this.workerGroup = workerGroup;
     this.port = port;
@@ -81,7 +118,8 @@ public class RegionServerService extends AbstractService implements RegionServer
     C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
 //    bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-    scannerCounter = new AtomicLong(0);
+    this.scannerCounter = new AtomicLong(0);
+    this.location = new Location(InetAddress.getLocalHost().getHostName(), port);
   }
 
   @Override
@@ -93,6 +131,13 @@ public class RegionServerService extends AbstractService implements RegionServer
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Tablet);
       allowWebsocketHandlers(f);
 
+      ListenableFuture<C5Module> discoveryFuture = server.getModule(ModuleType.Discovery);
+      try {
+        this.discoveryModule = (DiscoveryModule) discoveryFuture.get();
+      } catch (InterruptedException | ExecutionException e) {
+        notifyFailed(e);
+      }
+
     });
   }
 
@@ -102,7 +147,6 @@ public class RegionServerService extends AbstractService implements RegionServer
       public void onSuccess(@NotNull final C5Module result) {
         tabletModule = (TabletModule) result;
         bootstrap.group(acceptGroup, workerGroup)
-            .option(ChannelOption.SO_REUSEADDR, true)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .channel(NioServerSocketChannel.class)
             .childHandler(new Initializer(RegionServerService.this));
@@ -156,24 +200,8 @@ public class RegionServerService extends AbstractService implements RegionServer
   }
 
   @Override
-  public String acceptCommand(String commandString) {
+  public String acceptCommand(final String commandString) {
     return null;
-  }
-
-  public Region getOnlineRegion(RegionSpecifier regionSpecifier) throws RegionNotFoundException {
-    ByteBuffer regionSpecifierBuffer = regionSpecifier.getValue();
-    if (regionSpecifierBuffer == null) {
-      throw new RegionNotFoundException("No region specifier specified in the request");
-    }
-
-    String stringifiedRegion = Bytes.toString(regionSpecifierBuffer.array());
-    LOG.debug("get online region:" + stringifiedRegion);
-
-    Tablet tablet = tabletModule.getTablet(stringifiedRegion, ByteBuffer.wrap(new byte[]{0x00}));
-    if (tablet == null) {
-      throw new RegionNotFoundException("Unable to find specified tablet:" + stringifiedRegion);
-    }
-    return tablet.getRegion();
   }
 
   public String toString() {
@@ -196,6 +224,79 @@ public class RegionServerService extends AbstractService implements RegionServer
     return scanManager;
   }
 
+  public long leaderResultFromMeta(TableName tableName, ByteBuffer row)
+      throws InterruptedException, ExecutionException, TimeoutException, IOException, RegionNotFoundException, URISyntaxException, DeserializationException {
+
+    org.apache.hadoop.hbase.TableName hbaseTableName = TabletNameHelpers.getHBaseTableName(tableName);
+    byte[] metaScanningKey = Bytes.add(TabletNameHelpers.toBytes(tableName), Bytes.toBytes(","), row.array());
+    HRegionInfo fakeHRegionInfo = new HRegionInfo(hbaseTableName, metaScanningKey, metaScanningKey);
+    long leader;
+    if (!metaCache.containsKey(fakeHRegionInfo)){
+      Location metaLocation = getMetaLocation(tableName, row);
+      TableName metaTableName = TabletNameHelpers.getClientTableName(SystemTableNames.metaTableName());
+      FakeHTable metaTable = new FakeHTable(metaLocation.getHostname(), metaLocation.getPort(), metaTableName);
+      Scan scan = new Scan(Bytes.add(metaScanningKey, Bytes.toBytes(","), Bytes.toBytes(Long.MAX_VALUE)));
+      scan.addFamily(HConstants.CATALOG_FAMILY);
+      ResultScanner scanner = metaTable.getScanner(scan);
+      org.apache.hadoop.hbase.client.Result result = scanner.next();
+      Cell leaderCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER);
+      Cell regionInfoCell = result.getColumnLatestCell(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER);
+      HRegionInfo regionInfo = HRegionInfo.parseFrom(regionInfoCell.getValue());
+      leader = Bytes.toLong(leaderCell.getValue());
+      metaCache.put(regionInfo, leader );
+    } else {
+      leader = metaCache.get(fakeHRegionInfo);
+    }
+    return leader;
+  }
+
+  private Location getMetaLocation(TableName tableName, ByteBuffer row)
+      throws RegionNotFoundException, IOException, ExecutionException, InterruptedException {
+    NodeInfoReply nodeInfo = null;
+
+    while (nodeInfo == null || !nodeInfo.found || nodeInfo.addresses == null || nodeInfo.addresses.size() == 0) {
+      Tablet tablet = this.getLocallyLeaderedTablet(TabletNameHelpers.getClientTableName("hbase", "root"), row);
+      Scan scan = new Scan();
+      scan.addColumn(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER);
+      RegionScanner scanner = tablet.getRegion().getScanner(ProtobufUtil.toScan(scan));
+      ArrayList<Cell> results = new ArrayList<>();
+      scanner.next(results);
+      long leader = Bytes.toLong(results.iterator().next().getValue());
+      nodeInfo = discoveryModule.getNodeInfo(leader, ModuleType.RegionServer).get();
+    }
+    return new Location(nodeInfo.addresses.get(0), nodeInfo.port);
+  }
+
+  public Tablet getLocallyLeaderedTablet(TableName tableName, ByteBuffer row) throws RegionNotFoundException {
+    return tabletModule.getTablet(TabletNameHelpers.toString(tableName), row);
+  }
+
+  public Region getRegion(RegionSpecifier regionSpecifier) throws RegionNotFoundException {
+    return this.tabletModule.getTablet(regionSpecifier).getRegion();
+  }
+
+  public RegionLocation getNextLocalTabletLocation(Tablet tablet) throws RegionNotFoundException {
+    if (tablet.getRegionInfo().getEndKey() == null || tablet.getRegionInfo().getEndKey().length == 0){
+      return null;
+    }
+    HRegionInfo hregionInfo = tablet.getRegionInfo();
+    org.apache.hadoop.hbase.TableName hbaseTableName = hregionInfo.getTable();
+    TableName clientTableName = TabletNameHelpers.getClientTableName(hbaseTableName);
+    Tablet newTablet = getLocallyLeaderedTablet(clientTableName, ByteBuffer.wrap(hregionInfo.getEndKey()));
+
+    hregionInfo = newTablet.getRegionInfo();
+
+    return new RegionLocation(TabletNameHelpers.getClientTableName(hregionInfo.getTable()),
+        location,
+        ByteBuffer.wrap(hregionInfo.getStartKey()),
+        ByteBuffer.wrap(hregionInfo.getEndKey()),
+        hregionInfo.getRegionId());
+  }
+
+  public C5Server getServer() {
+    return server;
+  }
+
   public class ScannerManager {
     private final ConcurrentHashMap<Long, org.jetlang.channels.Channel<Integer>> scannerMap = new ConcurrentHashMap<>();
 
@@ -207,4 +308,34 @@ public class RegionServerService extends AbstractService implements RegionServer
       scannerMap.put(scannerId, channel);
     }
   }
+
+  public class MetaCacheComparable implements Comparator<HRegionInfo> {
+
+    @Override
+    public int compare(HRegionInfo o1, HRegionInfo o2) {
+      boolean withinStart = false;
+      boolean withinEnd = false;
+
+
+      byte[] o1SR = o1.getStartKey();
+      byte[] o1ER = o1.getEndKey();
+      if (Arrays.equals(o1SR, o1ER)) {
+        byte[] o2SR = o2.getStartKey();
+        byte[] o2ER = o2.getEndKey();
+        if (o2SR.length == 0 || Bytes.compareTo(o2SR, o1SR) <= 0) {
+          withinStart = true;
+        }
+
+        if (o2ER.length == 0 || Bytes.compareTo(o2ER, o1SR) > 0) {
+          withinEnd = true;
+        }
+
+
+        return withinStart && withinEnd ? 0 : 1;
+      } else {
+        return o1.compareTo(o2);
+      }
+    }
+  }
 }
+

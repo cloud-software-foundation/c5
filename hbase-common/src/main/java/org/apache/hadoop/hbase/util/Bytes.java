@@ -1016,8 +1016,8 @@ public class Bytes {
    * @return 0 if equal, < 0 if left is less than right, etc.
    */
   public static int compareTo(final byte [] left, final byte [] right) {
-    return LexicographicalComparerHolder.BEST_COMPARER.
-      compareTo(left, 0, left.length, right, 0, right.length);
+  	return LexicographicalComparerHolder.BEST_COMPARER.
+          compareTo(left, 0, left.length, right, 0, right.length);
   }
 
   /**

@@ -48,7 +48,7 @@ public class TabletLeaderBehaviorHelper {
     return leaderNodeId[0];
   }
 
-  static void sendRequest(CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest, C5Server server)
+  public static void sendRequest(CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest, C5Server server)
       throws ExecutionException, InterruptedException {
 
     Request<CommandRpcRequest<?>, CommandReply> request = new Request<CommandRpcRequest<?>, CommandReply>() {

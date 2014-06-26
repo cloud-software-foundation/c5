@@ -17,7 +17,10 @@
 package c5db.client;
 
 import c5db.client.generated.Call;
+import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.Response;
+import c5db.client.generated.ResultOrException;
+import c5db.client.generated.TableName;
 import c5db.client.scanner.C5ClientScanner;
 import c5db.client.scanner.C5QueueBasedClientScanner;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -28,13 +31,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
+import org.mortbay.util.MultiException;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -44,6 +47,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Response> implements MessageHandler {
   private final ConcurrentHashMap<Long, SettableFuture<Response>> futures = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Long, SettableFuture<Long>> scannerFutures = new ConcurrentHashMap<>();
+
   private final AtomicLong inFlightCalls = new AtomicLong(0);
 
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -51,11 +55,19 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
 
   private final ClientScannerManager clientScannerManager = new ClientScannerManager(poolFiberFactory.create());
 
+  public FutureBasedMessageHandler() {
+    super();
+  }
+
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
     switch (msg.getCommand()) {
       case MULTI:
-        futures.get(msg.getCommandId()).set(msg);
+        if (hasMultiErrors(msg)) {
+          futures.get(msg.getCommandId()).setException(getMultiErrors(msg));
+        } else {
+          futures.get(msg.getCommandId()).set(msg);
+        }
         break;
       case MUTATE:
         futures.get(msg.getCommandId()).set(msg);
@@ -63,24 +75,40 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
       case SCAN:
         final long scannerId = msg.getScan().getScannerId();
         C5ClientScanner clientScanner;
-
         if (clientScannerManager.hasScanner(scannerId)) {
           clientScanner = clientScannerManager.get(scannerId).get();
         } else {
-          clientScanner = clientScannerManager.createAndGet(ctx.channel(), scannerId, msg.getCommandId());
+          clientScanner = clientScannerManager.createAndGet(ctx.channel(), msg);
           scannerFutures.get(msg.getCommandId()).set(scannerId);
         }
-
-        clientScanner.add(msg.getScan());
-
-        if (!msg.getScan().getMoreResults()) {
-          clientScanner.close();
-        }
+        clientScanner.add(msg);
         break;
       default:
         futures.get(msg.getCommandId()).set(msg);
         break;
     }
+  }
+
+
+  private Throwable getMultiErrors(Response msg) {
+    MultiException exception = new MultiException();
+    msg.getMulti().getRegionActionResultList().stream().forEach(regionActionResult -> regionActionResult.getResultOrExceptionList().stream().forEach(e -> {
+      if (e.getException() != null) {
+        exception.add(new IOException(e.getException().messageFullName()));
+      }
+    }));
+    return exception;
+  }
+
+  private boolean hasMultiErrors(Response msg) {
+    for (RegionActionResult regionActionResult : msg.getMulti().getRegionActionResultList()) {
+      for (ResultOrException resultOrException : regionActionResult.getResultOrExceptionList()) {
+        if (resultOrException.getException() != null) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override
@@ -107,35 +135,28 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
 
   @Override
   public ListenableFuture<C5ClientScanner> callScan(final Call request, final Channel channel)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, ExecutionException {
 
     SettableFuture<Long> settableFuture = SettableFuture.create();
     scannerFutures.put(request.getCommandId(), settableFuture);
     channel.writeAndFlush(request);
-    Long scannerId = settableFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
+    Long scannerId = settableFuture.get();
+    clientScannerManager.setTableForScannerId(request.getTableName(), scannerId);
     return clientScannerManager.get(scannerId);
   }
 
-  class ClientScannerManager {
-
+  public class ClientScannerManager {
     private final Fiber fiber;
+    private final ConcurrentHashMap<Long, SettableFuture<C5ClientScanner>> scannerMap = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Long, TableName> tableMap = new ConcurrentHashMap<>();
 
     ClientScannerManager(Fiber fiber) {
       this.fiber = fiber;
     }
 
-    private final ConcurrentHashMap<Long, SettableFuture<C5ClientScanner>> scannerMap = new ConcurrentHashMap<>();
-
-    public C5ClientScanner createAndGet(Channel channel, long scannerId, long commandId) throws IOException {
-      if (hasScanner(scannerId)) {
-        throw new IOException("Scanner already created");
-      }
-
-      final C5ClientScanner scanner = new C5QueueBasedClientScanner(channel, fiber, scannerId, commandId);
-      SettableFuture<C5ClientScanner> clientScannerSettableFuture = SettableFuture.create();
-      clientScannerSettableFuture.set(scanner);
-      scannerMap.put(scannerId, clientScannerSettableFuture);
-      return scanner;
+    public void setTableForScannerId(TableName tableName, long scannerId) {
+      tableMap.put(scannerId, tableName);
     }
 
     public ListenableFuture<C5ClientScanner> get(long scannerId) {
@@ -145,5 +166,22 @@ public class FutureBasedMessageHandler extends SimpleChannelInboundHandler<Respo
     public boolean hasScanner(long scannerId) {
       return scannerMap.containsKey(scannerId);
     }
+
+    public C5ClientScanner createAndGet(Channel initialChannel, Response msg) throws InterruptedException, ExecutionException, TimeoutException {
+      long scannerId = msg.getScan().getScannerId();
+      long commandId = msg.getCommandId();
+
+      C5ClientScanner scanner = new C5QueueBasedClientScanner(initialChannel,
+          fiber,
+          tableMap.get(scannerId),
+          scannerId,
+          commandId);
+      SettableFuture<C5ClientScanner> clientScannerSettableFuture = SettableFuture.create();
+      clientScannerSettableFuture.set(scanner);
+      scannerMap.put(scannerId, clientScannerSettableFuture);
+      return scanner;
+    }
+
+
   }
 }

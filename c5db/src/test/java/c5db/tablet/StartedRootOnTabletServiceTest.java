@@ -26,6 +26,7 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.replication.SingleNodeFakeReplicator;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -71,7 +72,7 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
         oneOf(discoveryModule).getState();
         will(returnFutureWithValue(ImmutableMap.copyOf(discoveryMap)));
 
-        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
+        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(ImmutableList.class)));
         will(returnFutureWithValue(replicator));
 
         allowing(configDirectory).writeBinaryData(with(any(String.class)), with(any(String.class)), with(any(byte[].class)));

@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package c5db;
+
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,5 +49,7 @@ public class ManyClustersBaseTest extends ManyClusterBase {
       assertThat(result, ScanMatchers.isWellFormedUserTable(name));
     } while (true);
     assertThat(counter, is(this.splitkeys.length + 2));
+
+
   }
 }

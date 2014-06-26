@@ -30,8 +30,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 public class PopulatorTest extends MiniClusterBase {
-  private static final ByteString tableName = ByteString.bytesDefaultValue("c5:testPopulator");
-
   public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
     int port;
@@ -40,13 +38,15 @@ public class PopulatorTest extends MiniClusterBase {
     } else {
       port = Integer.parseInt(args[0]);
     }
-    try (FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, port, tableName)) {
+
       long start = System.currentTimeMillis();
+
       int numberOfBatches = 1024;
       int batchSize = 100;
       if (args.length == 2) {
         numberOfBatches = Integer.parseInt(args[0]);
         batchSize = Integer.parseInt(args[1]);
+
       }
       table.setAutoFlush(false);
       table.setWriteBufferSize(numberOfBatches * batchSize);
@@ -59,7 +59,6 @@ public class PopulatorTest extends MiniClusterBase {
       table.flushCommits();
       long end = System.currentTimeMillis();
       System.out.println("time:" + (end - start));
-    }
   }
 
   private static void compareToHBasePut(final FakeHTable table,
@@ -68,34 +67,25 @@ public class PopulatorTest extends MiniClusterBase {
                                         final byte[] value,
                                         final int numberOfBatches,
                                         final int batchSize) throws IOException {
+
     ArrayList<Put> puts = new ArrayList<>();
-    long startTime = System.nanoTime();
+    table.setAutoFlush(false);
+    table.setWriteBufferSize(numberOfBatches * batchSize);
     for (int j = 1; j != numberOfBatches + 1; j++) {
       for (int i = 1; i != batchSize + 1; i++) {
         puts.add(new Put(Bytes.vintToBytes(i * j)).add(cf, cq, value));
       }
 
-      int i = 0;
       for (Put put : puts) {
-        i++;
-        if (i % 1024 == 0) {
-          long timeDiff = (System.nanoTime()) - startTime;
-          System.out.print("#(" + timeDiff + ")");
-          System.out.flush();
-          startTime = System.nanoTime();
-        }
-        if (i % (1024 * 12) == 0) {
-          System.out.println("");
-        }
         table.put(put);
       }
       puts.clear();
     }
   }
 
-  @Ignore // TODO To slow until we turn on autobuffering
   @Test
   public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
+    PopulatorTest populator = new PopulatorTest();
     main(new String[]{String.valueOf(getRegionServerPort())});
   }
 }

@@ -29,13 +29,11 @@ import c5db.client.generated.RegionActionResult;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
-import c5db.client.scanner.C5ClientScanner;
+import c5db.client.generated.TableName;
 import c5db.client.scanner.ClientScanner;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -44,13 +42,13 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +59,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 
 /**
@@ -70,11 +67,10 @@ import java.util.function.Consumer;
 public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
+  private final TableName tableName;
   private long bufferSize = 100;
-  private byte[] regionName;
-  private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
-  private byte[] tableName;
+
   private final AtomicLong outstandingMutations = new AtomicLong(0);
   private final ExecutorService executor = Executors.newSingleThreadExecutor();
   private final List<Throwable> throwablesToThrow = new ArrayList<>();
@@ -86,30 +82,46 @@ public class FakeHTable implements AutoCloseable {
    *
    * @param tableName The name of the table to connect to.
    */
-  public FakeHTable(String hostname, int port, ByteString tableName)
-      throws InterruptedException, TimeoutException, ExecutionException {
-    c5AsyncDatabase = new ExplicitNodeCaller(hostname, port);
-
-    this.tableName = tableName.toByteArray();
-    regionName = tableName.toByteArray();
-    regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
+  public FakeHTable(String hostname, int port, String tableName)
+      throws InterruptedException, TimeoutException, ExecutionException, URISyntaxException {
+    this(new ExplicitNodeCaller(hostname, port), tableName);
   }
 
-  FakeHTable(TableInterface c5AsyncDatabase, ByteString tableName) {
+  public FakeHTable(String hostname, int port, TableName tableName)
+      throws InterruptedException, TimeoutException, ExecutionException, URISyntaxException {
+    this(new ExplicitNodeCaller(hostname, port), tableName);
+  }
+
+
+  FakeHTable(TableInterface c5AsyncDatabase, String tableName) {
     this.c5AsyncDatabase = c5AsyncDatabase;
-    this.tableName = tableName.toByteArray();
-    regionName = tableName.toByteArray();
-    regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(regionName));
+    ByteBuffer namespace;
+    ByteBuffer qualifier;
+    int colonLocation = tableName.indexOf(':');
+    if (colonLocation < 0) {
+      namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+      qualifier = ByteBuffer.wrap(Bytes.toBytes(tableName));
+    } else {
+      namespace = ByteBuffer.wrap(Bytes.toBytes(tableName.substring(0, colonLocation)));
+      qualifier = ByteBuffer.wrap(Bytes.toBytes(tableName.substring(colonLocation + 1, tableName.length())));
+    }
+    this.tableName = new TableName(namespace, qualifier);
   }
+
+  FakeHTable(TableInterface c5AsyncDatabase, TableName tableName) {
+    this.c5AsyncDatabase = c5AsyncDatabase;
+    this.tableName = tableName;
+  }
+
 
   public static Comparator toComparator(ByteArrayComparable comparator) {
     return new Comparator(comparator.getClass().getName(), comparator.getValue());
   }
 
   public Result get(final Get get) throws IOException {
-    GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, false);
+    GetRequest getRequest = RequestConverter.buildGetRequest(get, false);
     try {
-      return ProtobufUtil.toResult(c5AsyncDatabase.get(getRequest).get().getGet().getResult());
+      return ProtobufUtil.toResult(c5AsyncDatabase.get(tableName, getRequest).get().getGet().getResult());
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -125,9 +137,9 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public boolean exists(final Get get) throws IOException {
-    GetRequest getRequest = RequestConverter.buildGetRequest(regionName, get, true);
+    GetRequest getRequest = RequestConverter.buildGetRequest(get, true);
     try {
-      return c5AsyncDatabase.get(getRequest).get().getGet().getResult().getExists();
+      return c5AsyncDatabase.get(tableName, getRequest).get().getGet().getResult().getExists();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
@@ -140,6 +152,7 @@ public class FakeHTable implements AutoCloseable {
       throw new IOException("StopRow needs to be greater than StartRow");
     }
 
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier,
         ProtobufUtil.toScan(scan),
         0L,
@@ -147,10 +160,8 @@ public class FakeHTable implements AutoCloseable {
         false,
         0L);
     try {
-      ListenableFuture<C5ClientScanner> scanResultFuture = c5AsyncDatabase.scan(scanRequest);
-      C5ClientScanner c5ClientScanner = scanResultFuture.get(C5Constants.CREATE_SCANNER_TIMEOUT, TimeUnit.MILLISECONDS);
-      return new ClientScanner(c5ClientScanner);
-    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      return new ClientScanner(c5AsyncDatabase, tableName, scanRequest);
+    } catch (ExecutionException | InterruptedException e) {
       throw new IOException(e);
     }
   }
@@ -232,9 +243,10 @@ public class FakeHTable implements AutoCloseable {
   }
 
   private void syncPut(Put put) throws IOException {
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(MutationProto.MutationType.PUT, put);
     try {
+      ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(tableName, mutateRequest);
       Response result = mutationFuture.get();
       if (result == null || result.getMutate() == null || !result.getMutate().getProcessed()) {
         throw new IOException("Mutation not processed");
@@ -245,12 +257,17 @@ public class FakeHTable implements AutoCloseable {
   }
 
   private void bufferPut(Put put) throws IOException {
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(MutationProto.MutationType.PUT, put);
     while (outstandingMutations.get() >= bufferSize) {
       waitForRunningPutsToComplete();
       checkBufferedThrowables();
     }
-    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+    ListenableFuture<Response> mutationFuture;
+    try {
+      mutationFuture = c5AsyncDatabase.mutate(tableName, mutateRequest);
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
     outstandingMutations.incrementAndGet();
     Futures.addCallback(mutationFuture, new FutureCallback<Response>() {
       @Override
@@ -271,7 +288,7 @@ public class FakeHTable implements AutoCloseable {
 
     }, executor);
   }
-  
+
   private void clearBufferIfSet() {
     if (clearBufferOnFail) {
       LOG.error("Had a failure clearing buffer");
@@ -287,11 +304,11 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void delete(Delete delete) throws IOException {
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
-        MutationProto.MutationType.DELETE,
+
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(MutationProto.MutationType.DELETE,
         delete);
     try {
-      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(tableName, mutateRequest).get().getMutate().getProcessed()) {
         throw new IOException("Not processed");
       }
     } catch (InterruptedException | ExecutionException e) {
@@ -306,10 +323,11 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void mutateRow(RowMutations rm) throws IOException {
-    RegionAction regionAction = RequestConverter.buildRegionAction(regionName, rm);
+
+    RegionAction regionAction = RequestConverter.buildRegionAction(rm);
     List<RegionAction> regionActions = Arrays.asList(regionAction);
     try {
-      c5AsyncDatabase.multiRequest(new MultiRequest(regionActions)).get();
+      c5AsyncDatabase.multiRequest(tableName, new MultiRequest(regionActions)).get();
     } catch (InterruptedException | ExecutionException e) {
       throw new IOException(e);
     }
@@ -322,12 +340,11 @@ public class FakeHTable implements AutoCloseable {
         ByteBuffer.wrap(qualifier),
         CompareType.EQUAL,
         toComparator(new ByteArrayComparable(ByteBuffer.wrap(value))));
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
-        MutationProto.MutationType.PUT,
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(MutationProto.MutationType.PUT,
         put,
         condition);
     try {
-      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(tableName, mutateRequest).get().getMutate().getProcessed()) {
         return false;
       }
     } catch (InterruptedException | ExecutionException e) {
@@ -343,12 +360,11 @@ public class FakeHTable implements AutoCloseable {
         ByteBuffer.wrap(qualifier),
         CompareType.EQUAL,
         toComparator(new ByteArrayComparable(ByteBuffer.wrap(value))));
-    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName,
-        MutationProto.MutationType.DELETE,
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(MutationProto.MutationType.DELETE,
         delete,
         condition);
     try {
-      if (!c5AsyncDatabase.mutate(mutateRequest).get().getMutate().getProcessed()) {
+      if (!c5AsyncDatabase.mutate(tableName, mutateRequest).get().getMutate().getProcessed()) {
         return false;
       }
     } catch (InterruptedException | ExecutionException e) {
@@ -382,22 +398,26 @@ public class FakeHTable implements AutoCloseable {
 
 
   public byte[] getTableName() {
-    return this.tableName;
+    return Bytes.add(tableName.getNamespace().array(),
+        Bytes.toBytes(":"),
+        tableName.getQualifier().array());
+
   }
 
 
-  public void batch(final List<? extends Row> actions, final Object[] results) throws  IOException {
+  public void batch(final List<? extends Row> actions, final Object[] results) throws IOException {
 
     try {
-      RegionAction regionAction = RequestConverter.buildRegionAction(regionName, actions);
+
+      RegionAction regionAction = RequestConverter.buildRegionAction(actions);
       List<RegionAction> regionActions = Arrays.asList(regionAction);
-      Response response = c5AsyncDatabase.multiRequest(new MultiRequest(regionActions)).get();
+      Response response = c5AsyncDatabase.multiRequest(tableName, new MultiRequest(regionActions)).get();
       List<RegionActionResult> actionResultList = response.getMulti().getRegionActionResultList();
-      if (actionResultList.size() > results.length){
+      if (actionResultList.size() > results.length) {
         throw new IOException("The results array passed in is not large enough to store all of our results");
       }
       int counter = 0;
-      for (RegionActionResult actionResult: actionResultList){
+      for (RegionActionResult actionResult : actionResultList) {
         results[counter++] = actionResult;
       }
 
@@ -405,4 +425,5 @@ public class FakeHTable implements AutoCloseable {
       throw new IOException(e);
     }
   }
+
 }

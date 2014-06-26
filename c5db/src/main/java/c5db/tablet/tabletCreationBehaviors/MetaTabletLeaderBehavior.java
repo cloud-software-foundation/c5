@@ -17,10 +17,13 @@
 package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
+import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
@@ -43,9 +46,8 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
     Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
     String metaLeader = C5ServerConstants.SET_META_LEADER + ":" + server.getNodeId();
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, metaLeader);
-
-    long leader = rootTablet.getLeader();
-    CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
+    CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest
+        = new CommandRpcRequest<>(rootTablet.getLeader(), moduleSubCommand);
     TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, server);
   }
 }

@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.primitives.UnsignedBytes;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
@@ -1536,7 +1537,7 @@ public class KeyValue implements Cell, HeapSize, Cloneable {
      */
     @Override
     public int compareRows(byte [] left, int loffset, int llength,
-        byte [] right, int roffset, int rlength) {
+                           byte [] right, int roffset, int rlength) {
       int leftDelimiter = getDelimiter(left, loffset, llength,
           HConstants.DELIMITER);
       int rightDelimiter = getDelimiter(right, roffset, rlength,
@@ -1565,7 +1566,7 @@ public class KeyValue implements Cell, HeapSize, Cloneable {
           rightDelimiter, rlength - (rightDelimiter - roffset),
           HConstants.DELIMITER);
       // Now compare middlesection of row.
-      result = super.compareRows(left, leftDelimiter,
+      result = compareTo(left, leftDelimiter,
           leftFarDelimiter - leftDelimiter, right, rightDelimiter,
           rightFarDelimiter - rightDelimiter);
       if (result != 0) {
@@ -1578,6 +1579,29 @@ public class KeyValue implements Cell, HeapSize, Cloneable {
           right, rightFarDelimiter, rlength - (rightFarDelimiter - roffset));
       return result;
     }
+
+    public static int compareTo(byte[] left, int lOffset, int lLength,
+                                byte[] right, int rOffset , int rLength) {
+      if (lLength == 0){
+        if (rLength == 0){
+          return 0;
+        }
+        return 1;
+      } else if (rLength == 0){
+        return -1;
+      }
+
+      int minLength = Math.min(lLength, rLength);
+      for (int i = 0; i < minLength; i++) {
+        int result = UnsignedBytes.compare(left[i + lOffset], right[i + rOffset]);
+        if (result != 0) {
+          return result;
+        }
+      }
+      return left.length - right.length;
+    }
+
+
 
     /**
      * Don't do any fancy Block Index splitting tricks.
@@ -1603,6 +1627,7 @@ public class KeyValue implements Cell, HeapSize, Cloneable {
       return new MetaComparator();
     }
 
+
     /**
      * Override the row key comparison to parse and compare the meta row key parts.
      */
@@ -1616,7 +1641,7 @@ public class KeyValue implements Cell, HeapSize, Cloneable {
       int rlength = r.getRowLength();
       return compareRows(left, loffset, llength, right, roffset, rlength);
     }
-  }
+ }
 
   /**
    * Compare KeyValues.  When we compare KeyValues, we only compare the Key

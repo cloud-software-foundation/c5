@@ -16,20 +16,27 @@
  */
 package c5db.client;
 
+import c5db.client.generated.LocationRequest;
+import c5db.client.generated.LocationResponse;
+import c5db.client.generated.RegionLocation;
+import c5db.client.generated.TableName;
 import io.netty.channel.Channel;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by posix4e on 5/15/14.
- */
 public interface C5ConnectionManager {
-  Channel getOrCreateChannel(byte tableName, byte row);
 
-  Channel getOrCreateChannel(String host, int port) throws InterruptedException, ExecutionException, TimeoutException;
-
-  void closeChannel(String host, int port);
-
+  @NotNull
+  Channel getOrCreateChannel(String host, int port)
+      throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException;
+  Channel getBestChannelFor(TableName tableName, byte[] row);
   void close() throws InterruptedException;
+  void flush();
+
+  Channel getOrCreateChannel(LocationResponse location)
+      throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException;
 }

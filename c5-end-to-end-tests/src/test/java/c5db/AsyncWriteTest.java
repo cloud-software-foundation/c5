@@ -22,6 +22,7 @@ import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.Response;
+import c5db.client.generated.TableName;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -30,6 +31,7 @@ import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.junit.Test;
 
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +48,7 @@ public class AsyncWriteTest extends MiniClusterBase {
   CountDownLatch countDownLatch = new CountDownLatch(TO_SEND);
 
   @Test
-  public void testPopulator() throws ExecutionException, InterruptedException, TimeoutException {
+  public void testPopulator() throws ExecutionException, InterruptedException, TimeoutException, URISyntaxException {
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         ByteBuffer.wrap(Bytes.toBytes("c5:testPopulator")));
     ByteBuffer cq = ByteBuffer.wrap(Bytes.toBytes("cq"));
@@ -73,7 +75,11 @@ public class AsyncWriteTest extends MiniClusterBase {
                          ByteBuffer cf,
                          List<MutationProto.ColumnValue.QualifierValue> qualifierValue,
                          ExplicitNodeCaller singleNodeTable,
-                         int row) throws ExecutionException, InterruptedException {
+                         int row) throws ExecutionException, InterruptedException, TimeoutException {
+    ByteBuffer space = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    TableName tableName = new TableName(space, qualifier);
+
     MutationProto mutationProto = new MutationProto(ByteBuffer.wrap(Bytes.toBytes(row)),
         MutationProto.MutationType.PUT,
         Arrays.asList(new MutationProto.ColumnValue(cf, qualifierValue)),
@@ -83,7 +89,7 @@ public class AsyncWriteTest extends MiniClusterBase {
         null,
         1);
     MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutationProto, new Condition());
-    ListenableFuture<Response> future = singleNodeTable.bufferMutate(mutateRequest);
+    ListenableFuture<Response> future = singleNodeTable.mutate(tableName, mutateRequest);
     Futures.addCallback(future, new FutureCallback<Response>() {
       @Override
       public void onSuccess(Response result) {
@@ -98,7 +104,8 @@ public class AsyncWriteTest extends MiniClusterBase {
 
   }
 
-  public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
+  public static void main(String[] args)
+      throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException {
     AsyncWriteTest asyncWriteTest = new AsyncWriteTest();
     asyncWriteTest.testPopulator();
   }

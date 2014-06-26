@@ -482,9 +482,6 @@ public final class TableName implements Comparable<TableName> {
    * @return The comparator.
    */
   public KVComparator getRowComparator() {
-     if(TableName.META_TABLE_NAME.equals(this)) {
-      return KeyValue.META_COMPARATOR;
-    }
-    return KeyValue.COMPARATOR;
+     return KeyValue.COMPARATOR;
   }
 }

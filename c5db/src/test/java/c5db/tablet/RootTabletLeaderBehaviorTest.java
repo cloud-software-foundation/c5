@@ -36,6 +36,7 @@ import c5db.regionserver.AddElementsActionReturnTrue;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.jetlang.channels.MemoryChannel;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
@@ -108,7 +109,7 @@ public class RootTabletLeaderBehaviorTest {
 
     List<String> addresses = new ArrayList<>();
     addresses.add("127.0.0.1");
-
+    MemoryChannel commandMemoryChannel = new MemoryChannel();
     context.checking(new Expectations() {{
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
@@ -124,8 +125,10 @@ public class RootTabletLeaderBehaviorTest {
       oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
       will(returnValue(true));
 
-      oneOf(c5Server).getModule(ModuleType.ControlRpc);
-      will(returnFutureWithValue(controlModule));
+      // Post put we send a command over the command commandRpcRequestChannel
+      exactly(2).of(c5Server).getCommandChannel();
+
+      will(returnValue(commandMemoryChannel));
 
       oneOf(c5Server).getNodeId();
       will(returnValue(1l));
@@ -182,7 +185,11 @@ public class RootTabletLeaderBehaviorTest {
 
     }});
     commandListener = waitForReply(memoryChannel);
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server, 1);
+
+
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
+        c5Server,
+        1);
 
     rootTabletLeaderBehavior.start();
     assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
@@ -193,6 +200,9 @@ public class RootTabletLeaderBehaviorTest {
 
     RegionScanner regionScanner = context.mock(RegionScanner.class);
     context.checking(new Expectations() {{
+      oneOf(c5Server).getModule(ModuleType.ControlRpc);
+      will(returnFutureWithValue(controlModule));
+
       oneOf(hRegionTablet).getRegion();
       will(returnValue(region));
 
@@ -208,10 +218,13 @@ public class RootTabletLeaderBehaviorTest {
 
       never(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
       will(returnValue(true));
+
+
     }});
 
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
         c5Server, C5ServerConstants.DEFAULT_QUORUM_SIZE);
     rootTabletLeaderBehavior.start();
+    Thread.sleep(1000);
   }
 }

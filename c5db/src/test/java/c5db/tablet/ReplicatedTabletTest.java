@@ -43,7 +43,6 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -69,7 +68,7 @@ public class ReplicatedTabletTest {
   final C5Server server = context.mock(C5Server.class);
 
   // Value objects for the test.
-  final List<Long> peerList = ImmutableList.of(1L, 2L, 3L);
+  final ImmutableList<Long> peerList = ImmutableList.of(1L, 2L, 3L);
   final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("tablename"));
   final String regionName = regionInfo.getRegionNameAsString();
   final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("tablename"));
@@ -131,7 +130,7 @@ public class ReplicatedTabletTest {
         will(returnValue(region));
         then(state.is("opened"));
         stateChannel = new MemoryChannel<>();
-        replicatorStateChangeChannel = new MemoryChannel<ReplicatorInstanceEvent>();
+        replicatorStateChangeChannel = new MemoryChannel<>();
       }
     });
 

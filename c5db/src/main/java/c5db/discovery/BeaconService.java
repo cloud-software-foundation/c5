@@ -221,14 +221,7 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   @Override
   public ListenableFuture<ImmutableMap<Long, NodeInfo>> getState() {
     final SettableFuture<ImmutableMap<Long, NodeInfo>> future = SettableFuture.create();
-
-    fiber.execute(new Runnable() {
-      @Override
-      public void run() {
-        future.set(getCopyOfState());
-      }
-    });
-
+    fiber.execute(() -> future.set(getCopyOfState()));
     return future;
   }
 

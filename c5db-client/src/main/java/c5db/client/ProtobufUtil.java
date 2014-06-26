@@ -47,6 +47,7 @@ import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.NameBytesPair;
 import c5db.client.generated.ScanRequest;
+import c5db.client.generated.TableName;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -288,7 +289,6 @@ public class ProtobufUtil {
       }
     }
 
-
     ByteBuffer startRow = ByteBuffer.wrap(scan.getStartRow());
     ByteBuffer stopRow = ByteBuffer.wrap(scan.getStopRow());
     c5db.client.generated.Filter filter = ProtobufUtil.toFilter(scan.getFilter());
@@ -328,24 +328,20 @@ public class ProtobufUtil {
         false);
   }
 
-  @NotNull
-  public static Call getGetCall(long commandId, GetRequest get) {
-    return new Call(Call.Command.GET, commandId, get, null, null, null);
+  public static Call getGetCall(long commandId, GetRequest get, TableName tableName) {
+    return new Call(Call.Command.GET, commandId, get, null, null, null, tableName);
   }
 
-  @NotNull
-  public static Call getMutateCall(long commandId, MutateRequest mutateRequest) {
-    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null);
+  public static Call getMutateCall(long commandId, MutateRequest mutateRequest, TableName tableName) {
+    return new Call(Call.Command.MUTATE, commandId, null, mutateRequest, null, null, tableName);
   }
 
-  @NotNull
-  public static Call getScanCall(long commandId, ScanRequest scanRequest) {
-    return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null);
+  public static Call getScanCall(long commandId, ScanRequest scanRequest, TableName tableName ) {
+    return new Call(Call.Command.SCAN, commandId, null, null, scanRequest, null, tableName);
   }
 
-  @NotNull
-  public static Call getMultiCall(long commandId, MultiRequest multiRequest) {
-    return new Call(Call.Command.MULTI, commandId, null, null, null, multiRequest);
+  public static Call getMultiCall(long commandId, MultiRequest multiRequest, TableName tableName) {
+    return new Call(Call.Command.MULTI, commandId, null, null, null, multiRequest, tableName);
   }
 
   /**

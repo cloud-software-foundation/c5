@@ -27,6 +27,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 public class Initializer extends ChannelInitializer<SocketChannel> {
 
   private final WebSocketClientHandshaker handShaker;
+
   private c5db.client.codec.websocket.Decoder decoder;
 
   public Initializer(WebSocketClientHandshaker handShaker) {
@@ -49,6 +52,7 @@ public class Initializer extends ChannelInitializer<SocketChannel> {
   protected void initChannel(SocketChannel ch) throws Exception {
     decoder = new c5db.client.codec.websocket.Decoder(handShaker);
     final ChannelPipeline pipeline = ch.pipeline();
+
     pipeline.addLast("http-client", new HttpClientCodec());
     pipeline.addLast("aggregator", new HttpObjectAggregator(C5Constants.MAX_RESPONSE_SIZE));
 

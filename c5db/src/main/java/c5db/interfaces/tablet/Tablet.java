@@ -16,13 +16,15 @@
  */
 package c5db.interfaces.tablet;
 
-
 import c5db.client.generated.RegionSpecifier;
 import c5db.tablet.Region;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
+import org.jetlang.fibers.Fiber;
 
+import java.nio.file.Path;
 import java.util.List;
 
 /**

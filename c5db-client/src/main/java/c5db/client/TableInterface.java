@@ -42,7 +42,9 @@ import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MutateRequest;
 import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
+import c5db.client.generated.TableName;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -51,14 +53,18 @@ import java.util.concurrent.TimeoutException;
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
  */
-interface TableInterface extends AutoCloseable {
-  ListenableFuture<Response> get(GetRequest get);
+public interface TableInterface extends AutoCloseable {
+  ListenableFuture<Response> get(TableName tableName, GetRequest get)
+      throws InterruptedException, ExecutionException;
 
-  ListenableFuture<c5db.client.scanner.C5ClientScanner> scan(ScanRequest scanRequest) throws ExecutionException, InterruptedException, TimeoutException;
+  ListenableFuture<c5db.client.scanner.C5ClientScanner> scan(TableName tableName, ScanRequest scanRequest)
+      throws InterruptedException, ExecutionException;
 
-  ListenableFuture<Response> mutate(MutateRequest mutateRequest);
+  ListenableFuture<Response> mutate(TableName tableName, MutateRequest mutateRequest)
+      throws InterruptedException, ExecutionException;
 
-  ListenableFuture<Response> multiRequest(MultiRequest multiRequest);
+  ListenableFuture<Response> multiRequest(TableName tableName, MultiRequest multiRequest)
+      throws InterruptedException, ExecutionException;
 
   void close() throws IOException;
 }

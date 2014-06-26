@@ -43,19 +43,18 @@ import c5db.client.generated.MutateRequest;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionAction;
 import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.TableName;
 import org.apache.hadoop.hbase.DoNotRetryIOException;
-import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowMutations;
-import org.apache.hadoop.hbase.protobuf.generated.ClientProtos;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,57 +70,41 @@ public final class RequestConverter {
   /**
    * Create a protocol buffer GetRequest for a client Get.
    *
-   * @param regionName    the name of the region to get
    * @param get           the client Get
    * @param existenceOnly indicate if check row existence only
    * @return a protocol buffer GetRequest
    */
-  public static GetRequest buildGetRequest(final byte[] regionName,
-                                           final Get get,
+  public static GetRequest buildGetRequest(final Get get,
                                            final boolean existenceOnly) throws IOException {
-    final RegionSpecifier region = buildRegionSpecifier(regionName);
-    return new GetRequest(region, ProtobufUtil.toGet(get, existenceOnly));
-  }
-
-  /**
-   * Convert a byte array to a protocol buffer RegionSpecifier.
-   *
-   * @param value the region specifier byte array value
-   * @return a protocol buffer RegionSpecifier
-   */
-  public static RegionSpecifier buildRegionSpecifier(final byte[] value) {
-    return new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, ByteBuffer.wrap(value));
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
+    return new GetRequest(regionSpecifier, ProtobufUtil.toGet(get, existenceOnly));
   }
 
   /**
    * Create a protocol buffer MutateRequest for a put.
    *
-   * @param regionName The region name to request from
-   * @param mutation   The mutation to process
-   * @param type       The type of mutation to process
+   * @param mutation The mutation to process
+   * @param type     The type of mutation to process
    * @return a mutate request
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName,
-                                                 final MutationProto.MutationType type,
+  public static MutateRequest buildMutateRequest(final MutationProto.MutationType type,
                                                  final Mutation mutation) {
-    final RegionSpecifier region = buildRegionSpecifier(regionName);
+    final RegionSpecifier region = new RegionSpecifier();
     return new MutateRequest(region, ProtobufUtil.toMutation(type, mutation), new Condition());
   }
 
   /**
    * Create a protocol buffer MutateRequest for a put.
    *
-   * @param regionName The region name to request from
-   * @param mutation   The mutation to process
-   * @param type       The type of mutation to process
-   * @param condition  The optional condition or null
+   * @param mutation  The mutation to process
+   * @param type      The type of mutation to process
+   * @param condition The optional condition or null
    * @return a mutate request
    */
-  public static MutateRequest buildMutateRequest(final byte[] regionName,
-                                                 final MutationProto.MutationType type,
+  public static MutateRequest buildMutateRequest(final MutationProto.MutationType type,
                                                  final Mutation mutation,
                                                  final Condition condition) {
-    final RegionSpecifier region = buildRegionSpecifier(regionName);
+    final RegionSpecifier region = new RegionSpecifier();
     return new MutateRequest(region,
         ProtobufUtil.toMutation(type, mutation),
         condition);
@@ -131,14 +114,12 @@ public final class RequestConverter {
    * Create a protocol buffer MultiRequest for row mutations.
    * Does not propagate Action absolute position.
    *
-   * @param regionName   The region name the actions apply to.
    * @param rowMutations The row mutations to apply to the region
    * @return a data-laden RegionAction
    */
-  public static RegionAction buildRegionAction(final byte[] regionName,
-                                               final RowMutations rowMutations)
+  public static RegionAction buildRegionAction(final RowMutations rowMutations)
       throws IOException {
-    final RegionSpecifier region = buildRegionSpecifier(regionName);
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
     final List<Action> actions = new ArrayList<>();
     int index = 0;
     for (Mutation mutation : rowMutations.getMutations()) {
@@ -156,25 +137,23 @@ public final class RequestConverter {
       actions.add(action);
 
     }
-    return new RegionAction(region, true, actions);
+    return new RegionAction(regionSpecifier, true, actions);
   }
 
   /**
    * Create a protocol buffer multi request for a list of actions.
    * Propagates Actions original index.
    *
-   * @param regionName
    * @param actionsIn
    * @return a multi request
    * @throws IOException
    */
-  public static <R> RegionAction buildRegionAction(final byte[] regionName,
-                                                   final List<? extends Row> actionsIn)
+  public static <R> RegionAction buildRegionAction(final List<? extends Row> actionsIn)
       throws IOException {
-
+    final RegionSpecifier region = new RegionSpecifier();
     List<Action> actions = new ArrayList<>();
     int index = 0;
-    for (Row row: actionsIn) {
+    for (Row row : actionsIn) {
       Action action;
       if (row instanceof Get) {
         Get g = (Get) row;
@@ -190,7 +169,25 @@ public final class RequestConverter {
       }
       actions.add(action);
 
+
     }
-    return new RegionAction(RequestConverter.buildRegionSpecifier(regionName), true, actions);
+    return new RegionAction(region, true, actions);
+  }
+
+  public static byte[] buildRegionName(TableName tableName, byte[] row) {
+
+    byte[] fullTableName = Bytes.add(tableName.getNamespace().array(),
+        Bytes.toBytes(":"),
+        tableName.getQualifier().array());
+
+    return Bytes.add(fullTableName, Bytes.toBytes(","), row);
+  }
+
+  public static byte[] buildScannerRegionName(TableName tableName, Scan scan) {
+    if (scan.getStartRow() == null || scan.getStartRow().length == 0) {
+      return buildRegionName(tableName, new byte[]{0x00});
+    } else {
+      return buildRegionName(tableName, scan.getStartRow());
+    }
   }
 }

@@ -18,6 +18,7 @@
 package c5db.client;
 
 
+import c5db.client.generated.Action;
 import c5db.client.generated.Call;
 import c5db.client.generated.Cell;
 import c5db.client.generated.CellType;
@@ -25,6 +26,7 @@ import c5db.client.generated.Condition;
 import c5db.client.generated.Get;
 import c5db.client.generated.GetRequest;
 import c5db.client.generated.GetResponse;
+import c5db.client.generated.LocationResponse;
 import c5db.client.generated.MultiRequest;
 import c5db.client.generated.MultiResponse;
 import c5db.client.generated.MutateRequest;
@@ -38,6 +40,7 @@ import c5db.client.generated.Result;
 import c5db.client.generated.Scan;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.ScanResponse;
+import c5db.client.generated.TableName;
 import c5db.client.scanner.C5ClientScanner;
 import c5db.client.scanner.C5QueueBasedClientScanner;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -45,6 +48,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
@@ -55,8 +59,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,8 +90,12 @@ public class C5DatabaseTest {
 
   private ExplicitNodeCaller singleNodeTableInterface;
 
+  @Rule
+  public TestName name = new TestName();
+
+
   @Before
-  public void before() throws InterruptedException, ExecutionException, TimeoutException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException, URISyntaxException {
     context.checking(new Expectations() {
       {
         oneOf(c5ConnectionManager).getOrCreateChannel(with(any(String.class)), with(any(int.class)));
@@ -96,6 +106,8 @@ public class C5DatabaseTest {
 
         oneOf(channelPipeline).get(with(any(Class.class)));
         will(returnValue(messageHandler));
+
+        allowing(channel).flush();
 
       }
     });
@@ -117,12 +129,15 @@ public class C5DatabaseTest {
   }
 
   @Test
-  public void mutateMe() {
+  public void mutateMe() throws InterruptedException, ExecutionException, TimeoutException {
+    ByteBuffer namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    TableName tableName = new TableName(namespace, qualifier);
 
-    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null);
+    Response response = new Response(Response.Command.MUTATE, 1l, null, new MutateResponse(null, true), null, null, null);
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
@@ -130,20 +145,22 @@ public class C5DatabaseTest {
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         ByteBuffer.wrap(new byte[]{0x00}));
 
-    MutateRequest mutateRequest = new MutateRequest(regionSpecifier, new MutationProto(), null);
-    singleNodeTableInterface.mutate(mutateRequest);
+
+    MutationProto mutationProto = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(new byte[]{0x00}));
+    MutateRequest mutateRequest = new MutateRequest(regionSpecifier, mutationProto, null);
+    singleNodeTableInterface.mutate(tableName, mutateRequest);
 
 
     Condition condition = new Condition();
-    mutateRequest = new MutateRequest(regionSpecifier, new MutationProto(), condition);
+    mutateRequest = new MutateRequest(regionSpecifier, mutationProto, condition);
     context.checking(new Expectations() {
       {
-        oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
+        oneOf(messageHandler).buffer(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
 
-    singleNodeTableInterface.mutate(mutateRequest);
+    singleNodeTableInterface.mutate(tableName, mutateRequest);
 
 
   }
@@ -151,8 +168,11 @@ public class C5DatabaseTest {
   @Test
   public void getMe()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ByteBuffer namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    TableName tableName = new TableName(namespace, qualifier);
 
-    Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null);
+    Response response = new Response(Response.Command.GET, 1l, new GetResponse(null), null, null, null, null);
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
@@ -163,16 +183,18 @@ public class C5DatabaseTest {
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
         ByteBuffer.wrap(new byte[]{0x00}));
 
-    Get get = new Get();
+    Get get = ProtobufUtil.toGet(new org.apache.hadoop.hbase.client.Get(new byte[]{0x00}), false);
     GetRequest getRequest = new GetRequest(regionSpecifier, get);
-    singleNodeTableInterface.get(getRequest);
-
-
+    singleNodeTableInterface.get(tableName, getRequest);
   }
 
 
   @Test
   public void scanMe() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    ByteBuffer namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    TableName tableName = new TableName(namespace, qualifier);
+
     SettableFuture<C5ClientScanner> scanFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
@@ -191,7 +213,7 @@ public class C5DatabaseTest {
     long nextCallSeq = 101;
 
     ScanRequest scanRequest = new ScanRequest(regionSpecifier, scan, scannerId, numberOfRows, closeScanner, nextCallSeq);
-    ListenableFuture<C5ClientScanner> f = singleNodeTableInterface.scan(scanRequest);
+    ListenableFuture<C5ClientScanner> f = singleNodeTableInterface.scan(tableName, scanRequest);
 
     List<Integer> cellsPerResult = new ArrayList<>();
 
@@ -207,7 +229,9 @@ public class C5DatabaseTest {
       results.add(new Result(Arrays.asList(new Cell(row, cf, cq, 0l, CellType.PUT, value)), 1, true));
     }
 
+    LocationResponse locationResponse = new LocationResponse();
     ScanResponse scanResponse = new ScanResponse(cellsPerResult, scannerId, moreResults, ttl, results);
+
 
     Fiber fiber = new ThreadFiber();
     ChannelFuture channelFuture = context.mock(ChannelFuture.class);
@@ -217,11 +241,11 @@ public class C5DatabaseTest {
         will(returnValue((channelFuture)));
       }
     });
-    C5ClientScanner clientScanner = new C5QueueBasedClientScanner(channel, fiber, scannerId, 0l);
+    C5ClientScanner clientScanner = new C5QueueBasedClientScanner(channel, fiber, tableName, scannerId, 0l);
 
     scanFuture.set(clientScanner);
     C5ClientScanner clientClientScanner = f.get();
-    clientClientScanner.add(scanResponse);
+    clientClientScanner.add(C5QueueBasedClientScanner.getResponse(1l, scanResponse, locationResponse));
 
     results.stream().forEach(result -> {
       try {
@@ -236,21 +260,28 @@ public class C5DatabaseTest {
   }
 
   @Test
-  public void multiMe() {
-    List<RegionAction> regionActions = new ArrayList<>();
+  public void multiMe() throws InterruptedException, ExecutionException, TimeoutException {
+    ByteBuffer namespace = ByteBuffer.wrap(Bytes.toBytes("c5"));
+    ByteBuffer qualifier = ByteBuffer.wrap(Bytes.toBytes(name.getMethodName()));
+    TableName tableName = new TableName(namespace, qualifier);
+
+    RegionSpecifier regionSpecifier = new RegionSpecifier();
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, new Put(new byte[]{0x00}));
+    Action action = new Action(0, mutation, null);
+    List<RegionAction> regionActions = Arrays.asList(new RegionAction(regionSpecifier, true, Arrays.asList(action)));
     MultiRequest multiRequest = new MultiRequest(regionActions);
 
     List<RegionActionResult> results = new ArrayList<>();
     MultiResponse multiResponse = new MultiResponse(results);
 
-    Response response = new Response(Response.Command.MULTI, 1l, null, null, null, multiResponse);
+    Response response = new Response(Response.Command.MULTI, 1l, null, null, null, multiResponse, null);
     context.checking(new Expectations() {
       {
         oneOf(messageHandler).call(with(any(Call.class)), with(any((Channel.class))));
         will(returnFutureWithValue(response));
       }
     });
-    singleNodeTableInterface.multiRequest(multiRequest);
+    singleNodeTableInterface.multiRequest(tableName, multiRequest);
 
   }
 

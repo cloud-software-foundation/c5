@@ -16,10 +16,16 @@
  */
 package c5db.client.scanner;
 
+import c5db.client.C5ConnectionManager;
+import c5db.client.generated.LocationResponse;
+import c5db.client.generated.Response;
 import c5db.client.generated.Result;
 import c5db.client.generated.ScanResponse;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public interface C5ClientScanner {
   Result next() throws InterruptedException;
@@ -28,5 +34,7 @@ public interface C5ClientScanner {
 
   void close() throws InterruptedException;
 
-  void add(ScanResponse response) throws InterruptedException;
+  void add(Response response) throws InterruptedException, TimeoutException, ExecutionException;
+
+  java.util.Queue<LocationResponse> getNextLocations();
 }
