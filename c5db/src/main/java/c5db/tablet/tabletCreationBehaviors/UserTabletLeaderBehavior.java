@@ -62,7 +62,7 @@ public class UserTabletLeaderBehavior {
 
     RegionScanner scanner = rootRegion.getScanner(ProtobufUtil.toScan(new Scan()));
     ArrayList<Cell> results = new ArrayList<>();
-    scanner.nextRaw(results);
+    scanner.next(results);
 
     long leader = TabletLeaderBehaviorHelper.getLeaderFromResults(results);
     String commandString = generateCommandString(leader, this.tablet.getRegionInfo());

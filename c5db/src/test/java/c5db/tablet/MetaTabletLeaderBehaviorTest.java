@@ -67,15 +67,6 @@ public class MetaTabletLeaderBehaviorTest {
       oneOf(c5Server).getModule(ModuleType.ControlRpc);
       will(returnFutureWithValue(controlRpcModule));
 
-      oneOf(c5Server).getModule(ModuleType.Tablet);
-      will(returnFutureWithValue(tabletModule));
-
-      oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
-      will(returnValue(rootTablet));
-
-      oneOf(rootTablet).getLeader();
-      will(returnValue(1l));
-
       oneOf(c5Server).getNodeId();
       will(returnValue(1l));
 
