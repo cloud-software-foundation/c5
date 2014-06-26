@@ -18,6 +18,7 @@
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
+import c5db.client.generated.RegionSpecifier;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
@@ -26,8 +27,10 @@ import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
 import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
+import c5db.tablet.tabletCreationBehaviors.UserTabletLeaderBehavior;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -35,10 +38,12 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -51,6 +56,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private long leader;
 
   private Channel<TabletStateChange> stateChangeChannel = new MemoryChannel<>();
+
 
   void setTabletState(State tabletState) {
     this.tabletState = tabletState;
@@ -66,7 +72,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   // Config type info:
   private final HRegionInfo regionInfo;
   private final HTableDescriptor tableDescriptor;
-  private final List<Long> peers;
+  private final ImmutableList<Long> peers;
   private final Configuration conf;
   private final Path basePath;
 
@@ -84,19 +90,25 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     this.stateChangeChannel = stateChangeChannel;
   }
 
-  public ReplicatedTablet(final C5Server server,
-                          final HRegionInfo regionInfo,
-                          final HTableDescriptor tableDescriptor,
-                          final List<Long> peers,
-                          final Path basePath,
-                          final Configuration conf,
-                          final Fiber tabletFiber,
-                          final ReplicationModule replicationModule,
-                          final Region.Creator regionCreator) {
+  @Override
+  public RegionSpecifier getRegionSpecifier() {
+    ByteBuffer value = ByteBuffer.wrap(regionInfo.getEncodedNameAsBytes());
+    return new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME, value);
+  }
+
+  public ReplicatedTablet(C5Server server,
+                          HRegionInfo regionInfo,
+                          HTableDescriptor tableDescriptor,
+                          List<Long> peers,
+                          Path basePath,
+                          Configuration conf,
+                          Fiber tabletFiber,
+                          ReplicationModule replicationModule,
+                          Region.Creator regionCreator) {
     this.server = server;
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
-    this.peers = peers;
+    this.peers = ImmutableList.copyOf(peers);
     this.conf = conf;
     this.basePath = basePath;
 
@@ -133,7 +145,11 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
     replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
-    OLogShim shim = new OLogShim(replicator);
+
+    // TODO this ThreadFiber is a workaround until issue 252 is fixed; at which point shim can use tabletFiber.
+    Fiber shimFiber = new ThreadFiber();
+    shimFiber.start();
+    OLogShim shim = new OLogShim(replicator, shimFiber);
     try {
       region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
@@ -185,11 +201,14 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
           } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
             // Have the meta leader update the root region with it being marked as the leader
-            MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(this, server);
+
+            //TODO SEND TO ROOT
+            MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(server);
             metaTabletLeaderBehavior.start();
 
           } else {
-            // update the meta table with my leader status
+            UserTabletLeaderBehavior userTabletLeaderBeauvoir = new UserTabletLeaderBehavior(server, this);
+            userTabletLeaderBeauvoir.start();
           }
         } catch (Exception e) {
           LOG.error("Error setting tablet state to leader", e);
@@ -254,5 +273,10 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   @Override
   public Region getRegion() {
     return region;
+  }
+
+  @Override
+  public boolean rowInRange(byte[] row) {
+    return region.rowInRange(row);
   }
 }

@@ -20,7 +20,6 @@ package c5db;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class C5ServerConstants {
-
   public static final String LOG_NAME = "log";
   public static final String WAL_DIR = "wal";
   public static final String ARCHIVE_DIR = "old_wal";
@@ -33,6 +32,7 @@ public class C5ServerConstants {
   public static final int MINIMUM_DEFAULT_QUORUM_SIZE = 3;
   public static final int DEFAULT_QUORUM_SIZE = 3;
   public static final String C5_CFG_PATH = "c5.cfgPath";
+  public static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
 
   // We use this column qualifier in system tables to mark the leader
   public static final byte[] LEADER_QUALIFIER = Bytes.toBytes("LEADER_QUALIFIER");
@@ -40,7 +40,9 @@ public class C5ServerConstants {
   // Commands we pass to the command server
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
+  public static final String LAUNCH_TABLET = "Launch Tablet";
   public static final String SET_META_LEADER = "Set me as Meta Leader";
+  public static final String SET_USER_LEADER = "Set me as User Leader";
 
   public static final int DISCOVERY_PORT = 54333;
   public static final int DEFAULT_WEB_SERVER_PORT = 31337;
@@ -57,8 +59,5 @@ public class C5ServerConstants {
   public static final String REGION_SERVER_PORT_PROPERTY_NAME = "regionServerPort";
   public static final String CONTROL_SERVER_PORT_PROPERTY_NAME = "controlServerPort";
 
-  public static final byte[] META_ROW = {1, 2, 3, 4, 5};
-  public static final byte[] META_START_KEY = {0x00};
-  public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
   public static final int MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG = 100000;
 }

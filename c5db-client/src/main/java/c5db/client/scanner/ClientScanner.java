@@ -72,7 +72,6 @@ public class ClientScanner extends AbstractClientScanner {
 
   @Override
   public Result next() throws IOException {
-
     if (this.isClosed && this.scanResults.isEmpty()) {
       return null;
     }
@@ -110,7 +109,7 @@ public class ClientScanner extends AbstractClientScanner {
 
     final ScanRequest scanRequest = new ScanRequest(regionSpecifier, null, scannerId, requestSize, false, 0);
     this.outStandingRequests += requestSize;
-    ch.write(ProtobufUtil.getScanCall(commandId, scanRequest));
+    ch.writeAndFlush(ProtobufUtil.getScanCall(commandId, scanRequest));
   }
 
   @Override
@@ -140,6 +139,5 @@ public class ClientScanner extends AbstractClientScanner {
     if (!this.isClosed && !response.getMoreResults()) {
       this.close();
     }
-
   }
 }

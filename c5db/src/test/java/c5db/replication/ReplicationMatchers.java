@@ -18,11 +18,13 @@
 package c5db.replication;
 
 import c5db.RpcMatchers;
-import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
+import c5db.replication.generated.LogEntry;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
@@ -51,6 +53,24 @@ class ReplicationMatchers {
     };
   }
 
+  static Matcher<ReplicatorInstanceEvent> aQuorumChangeCommittedEvent(QuorumConfiguration configuration,
+                                                                      Matcher<Long> fromMatcher) {
+    return new TypeSafeMatcher<ReplicatorInstanceEvent>() {
+      @Override
+      protected boolean matchesSafely(ReplicatorInstanceEvent item) {
+        return item.eventType == ReplicatorInstanceEvent.EventType.QUORUM_CONFIGURATION_COMMITTED
+            && fromMatcher.matches(item.instance.getId())
+            && item.configuration.equals(configuration);
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("a ReplicatorInstanceEvent indicating quorum configuration ").appendValue(configuration)
+            .appendText(" was committed from replicator with ID ").appendDescriptionOf(fromMatcher);
+      }
+    };
+  }
+
   static Matcher<ReplicatorInstanceEvent> aReplicatorEvent(ReplicatorInstanceEvent.EventType type) {
     return new TypeSafeMatcher<ReplicatorInstanceEvent>() {
       @Override
@@ -61,43 +81,6 @@ class ReplicationMatchers {
       @Override
       public void describeTo(Description description) {
         description.appendText("a ReplicatorInstanceEvent of type ").appendValue(type);
-      }
-    };
-  }
-
-  static Matcher<IndexCommitNotice> aQuorumChangeCommitNotice(QuorumConfiguration quorumConfig, long from) {
-    return new TypeSafeMatcher<IndexCommitNotice>() {
-      @Override
-      protected boolean matchesSafely(IndexCommitNotice item) {
-        return item.quorumConfig != null
-            && item.quorumConfig.equals(quorumConfig)
-            && item.replicatorInstance.getId() == from;
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("a commit notice for quorum configuration ")
-            .appendValue(quorumConfig)
-            .appendText(" from peer ").appendValue(from);
-
-      }
-    };
-  }
-
-  static Matcher<IndexCommitNotice> aNoticeMatchingPeerAndCommitIndex(long peerId, long index) {
-    return new TypeSafeMatcher<IndexCommitNotice>() {
-      @Override
-      protected boolean matchesSafely(IndexCommitNotice item) {
-        return item.committedIndex >= index &&
-            item.replicatorInstance.getId() == peerId;
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("a commit notice with index at least ")
-            .appendValue(index)
-            .appendText(" for peer ")
-            .appendValue(peerId);
       }
     };
   }
@@ -253,6 +236,31 @@ class ReplicationMatchers {
         if (matchException != null) {
           description.appendValue(matchException.toString());
         }
+      }
+    };
+  }
+
+  static Matcher<List<LogEntry>> aListOfEntriesWithConsecutiveSeqNums(long start, long end) {
+    return new TypeSafeMatcher<List<LogEntry>>() {
+      @Override
+      protected boolean matchesSafely(List<LogEntry> entries) {
+        if (entries.size() != (end - start)) {
+          return false;
+        }
+        long expectedIndex = start;
+        for (LogEntry entry : entries) {
+          if (entry.getIndex() != expectedIndex) {
+            return false;
+          }
+          expectedIndex++;
+        }
+        return true;
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("a list of LogEntry with consecutive indexes from ")
+            .appendValue(start).appendText(" inclusive to ").appendValue(end).appendText(" exclusive");
       }
     };
   }

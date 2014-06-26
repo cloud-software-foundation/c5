@@ -17,15 +17,20 @@
 
 package c5db.interfaces;
 
+import c5db.client.generated.RegionSpecifier;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
+import com.google.common.collect.ImmutableList;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.Channel;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Manages the lifecycle of tablets - the individual chunks of tables.  Each tablet is
@@ -39,13 +44,16 @@ import java.util.concurrent.ExecutionException;
 @DependsOn(ReplicationModule.class)
 @ModuleTypeBinding(ModuleType.Tablet)
 public interface TabletModule extends C5Module {
-
-  public Tablet getTablet(String tabletName) throws RegionNotFoundException;
-
-  // TODO this interface is not strong enough. Need HRegionInfo etc.
-  public void startTablet(List<Long> peers, String tabletName);
-
   public Channel<TabletStateChange> getTabletStateChanges();
 
-  public Collection<Tablet> getTablets() throws ExecutionException, InterruptedException;
+  @NotNull
+  Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException;
+
+  Tablet getTablet(RegionSpecifier regionSpecifier) throws RegionNotFoundException;
+
+  Collection<Tablet> getTablets();
+
+  void startTabletHere(HTableDescriptor hTableDescriptor,
+                       HRegionInfo hRegionInfo,
+                       ImmutableList<Long> peers) throws IOException;
 }
