@@ -95,17 +95,6 @@ public class FakeHTable extends c5db.client.FakeHTable implements HTableInterfac
   }
 
   @Override
-  public long getWriteBufferSize() {
-    LOG.error("Unspported");
-    return 0;
-  }
-
-  @Override
-  public void setWriteBufferSize(long writeBufferSize) throws IOException {
-    LOG.error("Unspported");
-  }
-
-  @Override
   public TableName getName() {
     return null;
   }

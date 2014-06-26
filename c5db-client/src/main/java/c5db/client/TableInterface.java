@@ -44,6 +44,8 @@ import c5db.client.generated.Response;
 import c5db.client.generated.ScanRequest;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.IOException;
+
 /**
  * A shared interface so that a user can interchange HTable and C5Table.
  */
@@ -55,4 +57,6 @@ interface TableInterface extends AutoCloseable {
   ListenableFuture<Response> mutate(MutateRequest mutateRequest);
 
   ListenableFuture<Response> multiRequest(MultiRequest multiRequest);
+
+  void close() throws IOException;
 }

@@ -27,7 +27,6 @@ import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.TabletService;
 import c5db.util.TabletNameHelpers;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -83,11 +82,7 @@ public class ManyClusterBase {
     Log.warn("-----------------------------------------------------------------------------------------------------------");
     for (C5Server server : servers) {
       for (C5Module module : server.getModules().values()) {
-        try {
-          module.stop().get(1, TimeUnit.SECONDS);
-        } catch (UncheckedExecutionException e) {
-          e.printStackTrace();
-        }
+        module.stop().get(1, TimeUnit.SECONDS);
       }
       server.stop().get(1, TimeUnit.SECONDS);
     }
@@ -191,7 +186,7 @@ public class ManyClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     userTabletOn.clear();
     table.close();
   }

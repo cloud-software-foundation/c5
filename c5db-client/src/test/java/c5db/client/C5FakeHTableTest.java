@@ -97,7 +97,7 @@ public class C5FakeHTableTest {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
 
     context.checking(new Expectations() {
       {

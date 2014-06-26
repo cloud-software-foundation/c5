@@ -42,6 +42,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 
 /**
@@ -64,16 +66,16 @@ import java.util.concurrent.atomic.AtomicLong;
 public class FakeHTable implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(FakeHTable.class);
-  public static final int NUMBER_OF_SIMUL_MUTATIONS = 10000;
+  private long bufferSize = 100;
   private final ClientScannerManager clientScannerManager = ClientScannerManager.INSTANCE;
   private byte[] regionName;
   private RegionSpecifier regionSpecifier;
   private TableInterface c5AsyncDatabase;
-  public byte[] tableName;
-  AtomicLong outstandingMutations = new AtomicLong(0);
-  ExecutorService executor = Executors.newSingleThreadExecutor();
-  List<Throwable> throwablesToThrow = new ArrayList<>();
-  private boolean autoFlush = false;
+  private byte[] tableName;
+  private final AtomicLong outstandingMutations = new AtomicLong(0);
+  private final ExecutorService executor = Executors.newSingleThreadExecutor();
+  private final List<Throwable> throwablesToThrow = new ArrayList<>();
+  private boolean autoFlush = true;
   private boolean clearBufferOnFail = false;
 
   /**
@@ -188,6 +190,11 @@ public class FakeHTable implements AutoCloseable {
     } catch (InterruptedException e) {
       throw new IOException(e);
     }
+    if (throwablesToThrow.size() > 0){
+      IOException exception = new IOException("We built up some exceptions while buffering writes");
+      throwablesToThrow.forEach(exception::addSuppressed);
+      throwablesToThrow.clear();
+    }
   }
 
   public void setAutoFlush(boolean autoFlush) {
@@ -209,15 +216,36 @@ public class FakeHTable implements AutoCloseable {
   }
 
   public void put(Put put) throws IOException {
+    if (this.autoFlush) {
+      syncPut(put);
+    } else {
+      bufferPut(put);
+    }
+  }
+
+  private void syncPut(Put put) throws IOException {
     MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
-    while (this.autoFlush && outstandingMutations.get() > NUMBER_OF_SIMUL_MUTATIONS) {
+    ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
+    try {
+      Response result = mutationFuture.get();
+      if (!result.getMutate().getProcessed()) {
+        throw new IOException("Mutation not processed");
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      throw new IOException(e);
+    }
+  }
+
+  private void bufferPut(Put put) throws IOException {
+    MutateRequest mutateRequest = RequestConverter.buildMutateRequest(regionName, MutationProto.MutationType.PUT, put);
+    while (outstandingMutations.get() > bufferSize) {
       flushCommits();
     }
     ListenableFuture<Response> mutationFuture = c5AsyncDatabase.mutate(mutateRequest);
     outstandingMutations.incrementAndGet();
     Futures.addCallback(mutationFuture, new FutureCallback<Response>() {
       @Override
-      public void onSuccess(Response result) {
+      public void onSuccess(@NotNull Response result) {
         outstandingMutations.decrementAndGet();
         if (!result.getMutate().getProcessed()) {
           executor.shutdownNow();
@@ -226,7 +254,7 @@ public class FakeHTable implements AutoCloseable {
       }
 
       @Override
-      public void onFailure(Throwable t) {
+      public void onFailure(@NotNull Throwable t) {
         executor.shutdownNow();
         throwablesToThrow.add(t);
       }
@@ -312,22 +340,27 @@ public class FakeHTable implements AutoCloseable {
 
 
   @Override
-  public void close() {
-    try {
-      flushCommits();
-    } catch (IOException e) {
-      LOG.error(e.getMessage());
-    }
+  public void close() throws IOException {
+    flushCommits();
     if (throwablesToThrow.size() > 0) {
-      LOG.error("Unable to close properly, we have exceptions");
-      throwablesToThrow.parallelStream().forEach(throwable -> LOG.error(throwable.getMessage()));
+      IOException exception = new IOException();
+      this.throwablesToThrow.stream().forEach(exception::addSuppressed);
+      throw exception;
     }
-    try {
-      c5AsyncDatabase.close();
-    } catch (Exception e) {
-      LOG.error("Error closing:" + e);
-    }
+
+    c5AsyncDatabase.close();
   }
+
+
+  public long getWriteBufferSize() {
+    return bufferSize;
+  }
+
+  public void setWriteBufferSize(long writeBufferSize) throws IOException {
+    flushCommits();
+    this.bufferSize = writeBufferSize;
+  }
+
 
   public byte[] getTableName() {
     return this.tableName;

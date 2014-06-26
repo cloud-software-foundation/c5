@@ -28,7 +28,6 @@ import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.util.TabletNameHelpers;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -46,6 +45,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.mortbay.log.Log;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -77,11 +77,7 @@ public class MiniClusterBase {
   @AfterClass
   public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
     for (C5Module module : server.getModules().values()) {
-      try {
-        module.stop().get(1, TimeUnit.SECONDS);
-      } catch (UncheckedExecutionException e) {
-        e.printStackTrace();
-      }
+      module.stop().get(1, TimeUnit.SECONDS);
     }
     server.stop().get(1, TimeUnit.SECONDS);
     Log.warn("-----------------------------------------------------------------------------------------------------------");
@@ -131,7 +127,7 @@ public class MiniClusterBase {
   }
 
   @After
-  public void after() throws InterruptedException {
+  public void after() throws InterruptedException, IOException {
     table.close();
   }
 
@@ -153,7 +149,7 @@ public class MiniClusterBase {
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
 
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server) ));
+        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));
     CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
         createTableSubCommand);
 
