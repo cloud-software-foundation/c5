@@ -25,12 +25,13 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.replication.ReplicatorReceipt;
+import c5db.replication.SingleNodeFakeReplicator;
 import com.google.common.collect.ImmutableMap;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jmock.Expectations;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,10 +51,10 @@ import static org.hamcrest.core.Is.is;
 
 public class StartedRootOnTabletServiceTest extends TabletServiceTest {
 
-  Replicator replicator = context.mock(Replicator.class);
   Channel<Replicator.State> stateChannel = new MemoryChannel<>();
-  Channel<Tablet.State> stateChangeChannel = new MemoryChannel<>();
   Fiber fiber = poolFiberFactory.create();
+
+  Replicator replicator = new SingleNodeFakeReplicator(fiber, -777L, "hbase:root,,1.9e44d7942d3598d55c758b7b83373c71.");
 
   @Before
   public void startRoot() throws Throwable {
@@ -73,28 +74,11 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnFutureWithValue(replicator));
 
-        oneOf(replicator).getStateChannel();
-        will(returnValue(stateChannel));
-
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
-
         allowing(configDirectory).writeBinaryData(with(any(String.class)), with(any(String.class)), with(any(byte[].class)));
         allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
 
         oneOf(c5FiberFactory).create();
         will(returnValue(fiber));
-
-        oneOf(replicator).start();
-
-        oneOf(replicator).getQuorumId();
-        will(returnValue("hbase:root,,1.9e44d7942d3598d55c758b7b83373c71."));
-
-        oneOf(replicator).getId();
-        oneOf(replicator).getCommitNoticeChannel();
-
-        allowing(replicator).logData(with(any(List.class)));
-        will(returnFutureWithValue(new ReplicatorReceipt(102l, 2l)));
 
         allowing(c5Server).getModule(ModuleType.ControlRpc);
         will(returnFutureWithValue(controlModule));
@@ -109,6 +93,11 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
 
     stateChannel.publish(Replicator.State.LEADER);
     assertEventually(tabletStateListener, hasMessageWithState(Tablet.State.Leader));
+  }
+
+  @After
+  public void disposeOfFiber() {
+    fiber.dispose();
   }
 
   @Test
