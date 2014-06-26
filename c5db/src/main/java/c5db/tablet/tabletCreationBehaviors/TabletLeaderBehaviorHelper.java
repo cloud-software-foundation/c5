@@ -34,6 +34,8 @@ import org.jetlang.channels.Session;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TabletLeaderBehaviorHelper {
 
@@ -49,7 +51,7 @@ public class TabletLeaderBehaviorHelper {
   }
 
   public static void sendRequest(CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest, C5Server server)
-      throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException, TimeoutException {
 
     Request<CommandRpcRequest<?>, CommandReply> request = new Request<CommandRpcRequest<?>, CommandReply>() {
       @Override
@@ -68,8 +70,7 @@ public class TabletLeaderBehaviorHelper {
       }
     };
     ListenableFuture<C5Module> f = server.getModule(ModuleType.ControlRpc);
-    ControlModule controlService;
-    controlService = (ControlModule) f.get();
+    ControlModule controlService = (ControlModule) f.get(1, TimeUnit.SECONDS);
     controlService.doMessage(request);
   }
 }

@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class UserTabletLeaderBehavior {
   private static final Logger LOG = LoggerFactory.getLogger(UserTabletLeaderBehavior.class);
@@ -55,7 +56,12 @@ public class UserTabletLeaderBehavior {
     return C5ServerConstants.SET_USER_LEADER + ":" + nodeId + "," + hRegionInfoStr;
   }
 
-  public void start() throws ExecutionException, InterruptedException, RegionNotFoundException, IOException {
+  public void start()
+      throws ExecutionException,
+      InterruptedException,
+      RegionNotFoundException,
+      IOException,
+      TimeoutException {
     TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
     Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
     Region rootRegion = rootTablet.getRegion();

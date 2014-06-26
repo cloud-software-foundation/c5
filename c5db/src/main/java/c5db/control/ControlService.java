@@ -41,6 +41,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.protostuff.Message;
 import org.jetlang.channels.AsyncRequest;
 import org.jetlang.channels.Request;
@@ -179,7 +181,7 @@ public class ControlService extends AbstractService implements ControlModule {
   private void startHttpRpc() {
     try {
       ServerBootstrap serverBootstrap = new ServerBootstrap();
-      ServerBootstrap serverBootstrap1 = serverBootstrap.group(acceptConnectionGroup, ioWorkerGroup)
+      serverBootstrap.group(acceptConnectionGroup, ioWorkerGroup)
           .channel(NioServerSocketChannel.class)
           .option(ChannelOption.SO_REUSEADDR, true)
           .option(ChannelOption.SO_BACKLOG, 100)
@@ -188,8 +190,7 @@ public class ControlService extends AbstractService implements ControlModule {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
               ChannelPipeline pipeline = ch.pipeline();
-
-//              pipeline.addLast("logger", new LoggingHandler(LogLevel.DEBUG));
+              pipeline.addLast("logger", new LoggingHandler(LogLevel.INFO));
               pipeline.addLast("http-server", new HttpServerCodec());
               pipeline.addLast("aggregator", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
 

@@ -33,6 +33,7 @@ import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.Channel;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
@@ -188,9 +189,54 @@ public class TabletRegistry {
     return tablet;
   }
 
-  public Tablet getTablet(String tableName, byte[] row) throws RegionNotFoundException {
-    return null;
+  public Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException {
+    Tablet tablet;
+    if (!tables.containsKey(tableName)) {
+      StringBuilder msg = new StringBuilder();
+      msg.append("We couldn't find table: ");
+      msg.append(tableName);
+      throw new RegionNotFoundException(msg.toString());
+    }
 
+    ConcurrentSkipListMap<byte[], Tablet> tablets = tables.get(tableName);
+    try {
+      if (tablets.size() == 1) {
+        tablet = tablets.values().iterator().next();
+        //Properly formed single tablet table end tablet
+        if (tablet.getRegionInfo().getEndKey().length != 0) {
+          throw new RegionNotFoundException("We only have one tablet, but it has an endRow");
+        }
+      } else {
+        byte[] sep = SystemTableNames.sep;
+        // It must be the last tablet
+        if (row == null || row.array().length == 0) {
+          tablet = tablets.ceilingEntry(new byte[]{0x00}).getValue();
+        } else {
+          Map.Entry<byte[], Tablet> entry = tablets.higherEntry(row.array());
+          if (entry == null) {
+            tablet = tablets.ceilingEntry(sep).getValue();
+          } else {
+            tablet = entry.getValue();
+          }
+        }
+      }
+    } catch (Exception e) {
+      StringBuilder msg = new StringBuilder();
+      msg.append("We couldn't find table: ");
+      msg.append(tableName);
+      msg.append(" with row:");
+      msg.append(Bytes.toString(row.array()));
+      msg.append("\nbecause of :");
+      msg.append(e);
+      throw new RegionNotFoundException(msg.toString());
+    }
+    try {
+      assureCorrectRequest(tablet, row);
+    } catch (RegionNotFoundException e) {
+      tablets.keySet().stream().forEach((bytes -> System.out.println(Bytes.toString(bytes))));
+      tablets.toString();
+    }
+    return tablet;
   }
 
   private void assureCorrectRequest(Tablet tablet, ByteBuffer row) throws RegionNotFoundException {

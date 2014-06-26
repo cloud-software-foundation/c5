@@ -20,25 +20,20 @@ import c5db.client.FakeHTable;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.RegionServerModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
-
-import c5db.tablet.TabletService;
 import c5db.util.TabletNameHelpers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.jetlang.fibers.ThreadFiber;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -55,7 +50,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -114,12 +108,13 @@ public class MiniClusterBase {
     final CountDownLatch latch = new CountDownLatch(2);
 
     Callback<TabletStateChange> onMsg = message -> {
-      if (!message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
+      if (message.tablet.getTableDescriptor().getTableName().getNameAsString().startsWith("hbase:")
           && message.state.equals(Tablet.State.Leader)) {
         latch.countDown();
       }
     };
-    ((TabletService) tabletServer).getTabletStateChanges().subscribe(receiver, onMsg);
+    (tabletServer).getTabletStateChanges().subscribe(receiver, onMsg);
+    latch.await();
   }
 
   @After
@@ -143,7 +138,7 @@ public class MiniClusterBase {
     };
     stateChanges.subscribe(receiver, onMsg);
     TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
-    org.apache.hadoop.hbase.TableName tableName  = TabletNameHelpers.getHBaseTableName(clientTableName);
+    org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));

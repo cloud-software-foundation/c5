@@ -56,7 +56,6 @@ public class PoolFiberFactoryWithExecutor implements C5FiberFactory {
   @Override
   public Fiber create() {
     // TODO this is a workaround until issue 252 is fixed.
-    return new ThreadFiber(new RunnableExecutorImpl(batchExecutor), null, false);
-    // return fiberFactory.create(batchExecutor);
+    return fiberFactory.create(batchExecutor);
   }
 }

@@ -140,9 +140,13 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     assert tabletState == State.CreatingReplicator;
 
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
-    replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
+    ThreadFiber t1 = new ThreadFiber();
+    t1.start();
+    replicatorStateChannel.subscribe(t1, this::tabletStateCallback);
     Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
-    replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
+    ThreadFiber t2 = new ThreadFiber();
+    t2.start();
+    replicatorStateChangeChannel.subscribe(t2, this::tabletStateChangeCallback);
     replicator.start();
     ThreadFiber threadFiber = new ThreadFiber();
     threadFiber.start();

@@ -17,13 +17,10 @@
 package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
-import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.ControlModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
-import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
@@ -32,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
   private static final Logger LOG = LoggerFactory.getLogger(MetaTabletLeaderBehavior.class);
@@ -41,7 +39,9 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
     this.server = server;
   }
 
-  public void start() throws ExecutionException, InterruptedException, RegionNotFoundException {
+  public void start()
+      throws ExecutionException, InterruptedException, RegionNotFoundException, TimeoutException {
+
     TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
     Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
     String metaLeader = C5ServerConstants.SET_META_LEADER + ":" + server.getNodeId();

@@ -341,17 +341,6 @@ public class ReplicatorInstance implements Replicator {
   }
 
   /**
-   * We take the quorum ID and hash it and then mod it by the # of nodes, take that as the index to
-   * duck-duck-go the leader.
-   * @param peerIds All of the peers who could become the leader
-   */
-  public long duckDuckGooseLeaderPicker(Collection<Long> peerIds){
-    Long leader = peerIds.toArray(new Long[peerIds.size()])[Math.abs(this.quorumId.hashCode()) % peerIds.size()];
-    logger.warn("duckDuck" + leader);
-    return leader;
-  }
-
-  /**
    * Call this method on each replicator in a new quorum in order to establish the quorum
    * configuration and elect a leader.
    * <p>

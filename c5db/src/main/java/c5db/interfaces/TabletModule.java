@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
  * must be bound to the write-ahead-log.  Finally the local tablet files must be located,
  * verified and loaded.
  */
-@DependsOn(ReplicationModule.class)
+@DependsOn({ReplicationModule.class, ControlModule.class})
 @ModuleTypeBinding(ModuleType.Tablet)
 public interface TabletModule extends C5Module {
   public Channel<TabletStateChange> getTabletStateChanges();

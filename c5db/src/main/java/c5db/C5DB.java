@@ -169,7 +169,7 @@ public class C5DB extends AbstractService implements C5Server {
   public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException, TimeoutException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
     serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
-    return future.get();
+    return future.get(1, TimeUnit.SECONDS);
   }
 
   @Override
@@ -242,10 +242,10 @@ public class C5DB extends AbstractService implements C5Server {
     try {
       serverFiber = new ThreadFiber(new RunnableExecutorImpl(), "C5-Server", false);
       int processors = Runtime.getRuntime().availableProcessors();
-      executor = Executors.newFixedThreadPool(processors);
+      executor = Executors.newWorkStealingPool(10);
       fiberPool = new PoolFiberFactory(executor);
-      bossGroup = new NioEventLoopGroup(processors);
-      workerGroup = new NioEventLoopGroup(processors);
+      bossGroup = new NioEventLoopGroup(1);
+      workerGroup = new NioEventLoopGroup(1);
 
       commandChannel.subscribe(serverFiber, message -> {
         try {

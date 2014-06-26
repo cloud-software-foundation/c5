@@ -243,7 +243,7 @@ public class TabletService extends AbstractService implements TabletModule {
   @org.jetbrains.annotations.NotNull
   @Override
   public Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException {
-    return tabletRegistry.getTablet(tableName, row.array());
+    return tabletRegistry.getTablet(tableName, row);
   }
 
   @Override
@@ -399,7 +399,7 @@ public class TabletService extends AbstractService implements TabletModule {
                                               final HTableDescriptor hTableDescriptor,
                                               final HRegionInfo hRegionInfo,
                                               final int maximumNumberOfCohorts)
-      throws ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException, TimeoutException {
     int numberOfCohorts = peers.size() < 3 ? peers.size() : maximumNumberOfCohorts;
     ArrayList<Long> shuffledPeers = new ArrayList<>(peers);
     Collections.shuffle(shuffledPeers);

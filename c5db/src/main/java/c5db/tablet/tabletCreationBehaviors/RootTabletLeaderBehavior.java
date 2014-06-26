@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
@@ -64,9 +65,9 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     this.tablet = tablet;
   }
 
-  public void start() throws IOException, ExecutionException, InterruptedException {
+  public void start() throws IOException, ExecutionException, InterruptedException, TimeoutException {
 
-    while (tablet.getLeader() == 0){
+    while (tablet.getLeader() == 0 || tablet.getRegion() == null){
       LOG.info("Sleeping for a second waiting to become the leader");
       Thread.sleep(1000);
     }
@@ -75,7 +76,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     if (!metaExists(region)) {
       List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(tablet.getPeers());
           createLeaderLessMetaEntryInRoot(region, pickedPeers);
-      requestMetaCommandCreated(pickedPeers);
+       requestMetaCommandCreated(pickedPeers);
     } else {
       // Check to see if you can take root
     }
@@ -95,7 +96,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   @FiberOnly
-  private void requestMetaCommandCreated(List<Long> peers) throws ExecutionException, InterruptedException {
+  private void requestMetaCommandCreated(List<Long> peers) throws ExecutionException, InterruptedException, TimeoutException {
     String pickedPeersString = StringUtils.join(peers, ',');
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         C5ServerConstants.START_META + ":" + pickedPeersString);
