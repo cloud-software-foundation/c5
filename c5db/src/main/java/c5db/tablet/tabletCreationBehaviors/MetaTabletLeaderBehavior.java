@@ -37,7 +37,7 @@ public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
   private static final Logger LOG = LoggerFactory.getLogger(MetaTabletLeaderBehavior.class);
   private final C5Server server;
 
-  public MetaTabletLeaderBehavior(final C5Server server) {
+  public MetaTabletLeaderBehavior(C5Server server) {
     this.server = server;
   }
 

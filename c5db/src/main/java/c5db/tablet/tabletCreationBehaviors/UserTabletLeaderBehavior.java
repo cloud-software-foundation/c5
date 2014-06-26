@@ -44,7 +44,7 @@ public class UserTabletLeaderBehavior {
   private final C5Server server;
   private final Tablet tablet;
 
-  public UserTabletLeaderBehavior(C5Server server, Tablet tablet) {
+  public UserTabletLeaderBehavior(Tablet tablet, C5Server server) {
     this.server = server;
     this.tablet = tablet;
   }

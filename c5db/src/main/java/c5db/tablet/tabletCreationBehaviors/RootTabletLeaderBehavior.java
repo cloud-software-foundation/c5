@@ -24,10 +24,8 @@ import c5db.client.generated.RegionInfo;
 import c5db.client.generated.Scan;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
-import c5db.interfaces.ControlModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
-import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
@@ -42,7 +40,6 @@ import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.jetlang.channels.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,17 +56,20 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private final long numberOfMetaPeers;
   private final Tablet tablet;
   private final C5Server server;
-  Channel<CommandRpcRequest<?>> commandRpcRequestChannel;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
-                                  final C5Server server,
-                                  final long numberOfMetaPeers) {
-    this.numberOfMetaPeers = numberOfMetaPeers;
+                                  final C5Server server) {
+    this.numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
     this.server = server;
     this.tablet = tablet;
   }
 
   public void start() throws IOException, ExecutionException, InterruptedException {
+
+    while (tablet.getLeader() == 0){
+      LOG.info("Sleeping for a second waiting to become the leader");
+      Thread.sleep(1000);
+    }
 
     Region region = tablet.getRegion();
     if (!metaExists(region)) {

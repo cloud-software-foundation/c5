@@ -17,7 +17,6 @@
 
 package c5db.tablet;
 
-import c5db.C5ServerConstants;
 import c5db.client.generated.RegionSpecifier;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
@@ -46,7 +45,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * A tablet, backed by a replicator that keeps values replicated across multiple servers.
@@ -146,7 +144,9 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
     replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
-    OLogShim shim = new OLogShim(replicator, tabletFiber);
+    ThreadFiber threadFiber = new ThreadFiber();
+    threadFiber.start();
+    OLogShim shim = new OLogShim(replicator, threadFiber);
     try {
       region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
@@ -154,8 +154,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
       setTabletState(State.Failed);
       LOG.error("Settings tablet state to failed, we got an IOError opening the region:" + e.toString());
     }
-
-
   }
 
   private void tabletStateChangeCallback(ReplicatorInstanceEvent replicatorInstanceEvent) {
@@ -189,22 +187,14 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
         this.setTabletState(State.Leader);
         try {
           if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:root,")) {
-
-            long numberOfMetaPeers = server.isSingleNodeMode() ? 1 : C5ServerConstants.DEFAULT_QUORUM_SIZE;
-            RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this,
-                server,
-                numberOfMetaPeers);
+            RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(this, server);
             rootTabletLeaderBehavior.start();
-
           } else if (this.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta,")) {
             // Have the meta leader update the root region with it being marked as the leader
-
-            //TODO SEND TO ROOT
             MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(server);
             metaTabletLeaderBehavior.start();
-
           } else {
-            UserTabletLeaderBehavior userTabletLeaderBeauvoir = new UserTabletLeaderBehavior(server, this);
+            UserTabletLeaderBehavior userTabletLeaderBeauvoir = new UserTabletLeaderBehavior(this, server);
             userTabletLeaderBeauvoir.start();
           }
         } catch (Exception e) {

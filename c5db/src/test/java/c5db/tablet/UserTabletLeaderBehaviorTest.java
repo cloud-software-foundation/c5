@@ -84,7 +84,7 @@ public class UserTabletLeaderBehaviorTest {
       will(returnValue(userRegionInfo));
     }});
 
-    UserTabletLeaderBehavior userTabletLeaderBehavior = new UserTabletLeaderBehavior(c5Server, tablet);
+    UserTabletLeaderBehavior userTabletLeaderBehavior = new UserTabletLeaderBehavior(tablet, c5Server);
     userTabletLeaderBehavior.start();
     synchronizer.waitUntil(searching.is("done"));
   }

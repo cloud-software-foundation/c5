@@ -145,8 +145,7 @@ public class RootTabletLeaderBehaviorTest {
     });
 
     commandListener = waitForReply(memoryChannel);
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-        c5Server, 1);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
     rootTabletLeaderBehavior.start();
     assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
   }
@@ -190,9 +189,7 @@ public class RootTabletLeaderBehaviorTest {
     }});
     commandListener = waitForReply(memoryChannel);
 
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-        c5Server,
-        1);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
 
     rootTabletLeaderBehavior.start();
     assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
@@ -217,8 +214,7 @@ public class RootTabletLeaderBehaviorTest {
       never(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
     }});
 
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-        c5Server, C5ServerConstants.DEFAULT_QUORUM_SIZE);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server);
     rootTabletLeaderBehavior.start();
 
   }
