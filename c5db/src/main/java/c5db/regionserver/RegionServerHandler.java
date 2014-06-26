@@ -56,7 +56,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
   private final RegionServerService regionServerService;
   private final ScannerManager scanManager = ScannerManager.INSTANCE;
-  AtomicLong scannerCounter = new AtomicLong(0);
   public RegionServerHandler(RegionServerService myService) {
     this.regionServerService = myService;
   }
@@ -155,8 +154,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       throw new IOException("Poorly specified c5db.regionserver.scan. There is no actual get data in the RPC");
     }
 
-    final long scannerId;
-    scannerId = getScannerId(scanIn);
+    final long scannerId = getScannerId(scanIn);
     final Integer numberOfRowsToSend = scanIn.getNumberOfRows();
     Channel<Integer> channel = scanManager.getChannel(scannerId);
     // New Scanner
@@ -179,7 +177,7 @@ public class RegionServerHandler extends SimpleChannelInboundHandler<Call> {
       scannerId = scanIn.getScannerId();
     } else {
       // Make a scanner with an Id not 0
-      scannerId = this.scannerCounter.incrementAndGet();
+      scannerId = this.regionServerService.scannerCounter.incrementAndGet();
     }
     return scannerId;
   }

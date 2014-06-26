@@ -57,6 +57,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
@@ -74,6 +75,8 @@ public class RegionServerService extends AbstractService implements RegionServer
   private final ServerBootstrap bootstrap = new ServerBootstrap();
   private TabletModule tabletModule;
   private Channel listenChannel;
+  public final AtomicLong scannerCounter;
+
 
   public RegionServerService(EventLoopGroup acceptGroup,
                              EventLoopGroup workerGroup,
@@ -86,6 +89,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
     bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+    scannerCounter = new AtomicLong(0);
   }
 
   @Override
