@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
 import static c5db.CollectionMatchers.isIn;
 import static c5db.FutureMatchers.resultsIn;
+import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.RpcMatchers.ReplyMatcher.aPreElectionReply;
 import static c5db.RpcMatchers.ReplyMatcher.anAppendReply;
 import static c5db.RpcMatchers.RequestMatcher;
@@ -64,8 +65,7 @@ import static c5db.RpcMatchers.RequestMatcher.anAppendRequest;
 import static c5db.RpcMatchers.containsQuorumConfiguration;
 import static c5db.interfaces.replication.Replicator.State.FOLLOWER;
 import static c5db.interfaces.replication.ReplicatorInstanceEvent.EventType.ELECTION_TIMEOUT;
-import static c5db.replication.ReplicationMatchers.aNoticeMatchingPeerAndCommitIndex;
-import static c5db.replication.ReplicationMatchers.aQuorumChangeCommitNotice;
+import static c5db.replication.ReplicationMatchers.aQuorumChangeCommittedEvent;
 import static c5db.replication.ReplicationMatchers.aReplicatorEvent;
 import static c5db.replication.ReplicationMatchers.hasCommittedEntriesUpTo;
 import static c5db.replication.ReplicationMatchers.leaderElectedEvent;
@@ -281,27 +281,30 @@ public class InRamTest {
     leader().changeQuorum(secondPeerSet);
     sim.createAndStartReplicators(secondPeerSet);
 
+    waitForALeaderWithId(isIn(secondPeerSet));
+    leader().log(someData());
+
     peers(secondPeerSet).forEach((peer) ->
         assertThat(peer,
             willCommitConfiguration(
                 QuorumConfiguration.of(secondPeerSet))));
-
-    waitForALeaderWithId(isIn(secondPeerSet));
   }
 
   @Test
-  public void theFutureReturnedByAQuorumChangeRequestWillReturnTheLogIndexOfTheTransitionalConfigurationEntry()
+  public void theFutureReturnedByAQuorumChangeRequestWillReturnTheReceiptOfTheTransitionalConfigurationEntry()
       throws Exception {
     final Set<Long> newPeerIds = smallerPeerSetWithOneInCommonWithInitialSet();
     final long lastIndexBeforeQuorumChange = 4;
 
     havingElectedALeaderAtOrAfter(term(1));
+    final long electionTerm = currentTerm();
 
     sim.createAndStartReplicators(newPeerIds);
     leader().logDataUpToIndex(lastIndexBeforeQuorumChange);
 
     assertThat(leader().changeQuorum(newPeerIds),
-        resultsIn(equalTo(lastIndexBeforeQuorumChange + 1)));
+        resultsIn(equalTo(
+            new ReplicatorReceipt(electionTerm, lastIndexBeforeQuorumChange + 1))));
   }
 
   @Test
@@ -415,6 +418,8 @@ public class InRamTest {
     });
 
     waitForALeaderWithId(isIn(newPeerIds));
+    leader().log(someData());
+
     peers(newPeerIds).forEach((peer) ->
         assertThat(peer, willCommitConfiguration(finalConfig)));
 
@@ -477,7 +482,7 @@ public class InRamTest {
     sim.startTimeout(leaderId);
   }
 
-  private void havingElectedALeaderAtOrAfter(long minimumTerm) throws Exception {
+  private void havingElectedALeaderAtOrAfter(long minimumTerm) {
     waitForALeader(minimumTerm);
   }
 
@@ -527,7 +532,7 @@ public class InRamTest {
     }
 
     public LeaderController log(List<ByteBuffer> buffers) throws Exception {
-      lastIndexLogged = currentLeaderInstance().logData(buffers).get();
+      lastIndexLogged = currentLeaderInstance().logData(buffers).get().seqNum;
       return this;
     }
 
@@ -569,7 +574,7 @@ public class InRamTest {
       return instance.getQuorumConfiguration();
     }
 
-    public ListenableFuture<Long> changeQuorum(Collection<Long> newPeerIds) throws Exception {
+    public ListenableFuture<ReplicatorReceipt> changeQuorum(Collection<Long> newPeerIds) throws Exception {
       return instance.changeQuorum(newPeerIds);
     }
 
@@ -593,12 +598,12 @@ public class InRamTest {
     }
 
     public PeerController waitForCommit(long commitIndex) {
-      commitMonitor.waitFor(aNoticeMatchingPeerAndCommitIndex(id, commitIndex));
+      commitMonitor.waitFor(aCommitNotice().withIndex(greaterThanOrEqualTo(commitIndex)).issuedFromPeer(id));
       return this;
     }
 
     public PeerController waitForQuorumCommit(QuorumConfiguration quorumConfiguration) {
-      commitMonitor.waitFor(aQuorumChangeCommitNotice(quorumConfiguration, id));
+      eventMonitor.waitFor(aQuorumChangeCommittedEvent(quorumConfiguration, equalTo(id)));
       return this;
     }
 
@@ -613,7 +618,7 @@ public class InRamTest {
     }
 
     public boolean hasCommittedEntriesUpTo(long index) {
-      return commitMonitor.hasAny(aNoticeMatchingPeerAndCommitIndex(id, index));
+      return commitMonitor.hasAny(aCommitNotice().withIndex(greaterThanOrEqualTo(index)).issuedFromPeer(id));
     }
 
     public boolean hasWonAnElection(Matcher<Long> termMatcher) {
@@ -715,9 +720,9 @@ public class InRamTest {
   }
 
   private void updateLastCommit(IndexCommitNotice notice) {
-    long peerId = notice.replicatorInstance.getId();
-    if (notice.committedIndex > lastCommit.getOrDefault(peerId, 0L)) {
-      lastCommit.put(peerId, notice.committedIndex);
+    long peerId = notice.nodeId;
+    if (notice.lastIndex > lastCommit.getOrDefault(peerId, 0L)) {
+      lastCommit.put(peerId, notice.lastIndex);
     }
   }
 

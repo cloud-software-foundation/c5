@@ -35,6 +35,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
+import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   // Finals
   private final Fiber tabletFiber;
+  private final Fiber shimFiber = new ThreadFiber();
   private final ReplicationModule replicationModule;
   private final Region.Creator regionCreator;
 
@@ -111,6 +113,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   public void start() {
     this.tabletFiber.start();
     this.tabletFiber.execute(this::createReplicator);
+    shimFiber.start();
   }
 
   @FiberOnly
@@ -130,10 +133,12 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
     Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
-    Channel<ReplicatorInstanceEvent> replicatorStateChangeChannel = replicator.getStateChangeChannel();
-    replicatorStateChangeChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
+    Channel<ReplicatorInstanceEvent> eventChannel = replicator.getEventChannel();
+    eventChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
-    OLogShim shim = new OLogShim(replicator);
+
+    // TODO this ThreadFiber is a workaround until issue 252 is fixed; at which point shim can use tabletFiber.
+    OLogShim shim = new OLogShim(replicator, shimFiber);
     try {
       region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
@@ -229,6 +234,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   public void dispose() {
     this.tabletFiber.dispose();
+    shimFiber.dispose();
   }
 
   @Override

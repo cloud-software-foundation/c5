@@ -189,7 +189,7 @@ public class HRegionBridge implements Region {
     try {
       theRegion.put(ReverseProtobufUtil.toPut(mutation));
     } catch (IOException e) {
-      LOG.error(e.getLocalizedMessage());
+      LOG.error("error in HRegionBridge#simplePut", e);
       return false;
     }
     return true;
@@ -219,7 +219,7 @@ public class HRegionBridge implements Region {
     try {
       theRegion.delete(ReverseProtobufUtil.toDelete(mutation));
     } catch (IOException e) {
-      LOG.error(e.getLocalizedMessage());
+      LOG.error("error in HRegionBridge#simpleDelete", e);
       return false;
     }
     return true;
