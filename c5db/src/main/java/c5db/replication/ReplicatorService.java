@@ -466,7 +466,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
     fiber.execute(() -> {
       // TODO this is a shitty way to do this, more refactoring is necessary.
-      LOG.warn("ReplicatorService now waiting for module dependency on Log & BeaconService");
+      LOG.warn("ReplicatorService now waiting for module dependency on Log & Discovery");
 
       ListenableFuture<C5Module> logListen = server.getModule(ModuleType.Log);
       try {
@@ -541,7 +541,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
         @Override
         public void onFailure(Throwable t) {
-          LOG.error("ReplicatorService unable to retrieve BeaconService!", t);
+          LOG.error("ReplicatorService unable to retrieve Discovery module!", t);
           notifyFailed(t);
         }
       }, fiber);
