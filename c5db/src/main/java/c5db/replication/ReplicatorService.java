@@ -368,6 +368,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
     NodeInfoRequest nodeInfoRequest = new NodeInfoRequest(to, ModuleType.Replication);
     AsyncRequest.withOneReply(fiber, discoveryModule.getNodeInfo(), nodeInfoRequest, new Callback<NodeInfoReply>() {
+      @SuppressWarnings("RedundantCast")
       @FiberOnly
       @Override
       public void onMessage(NodeInfoReply nodeInfoReply) {
@@ -477,6 +478,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
       ListenableFuture<C5Module> f = server.getModule(ModuleType.Discovery);
       Futures.addCallback(f, new FutureCallback<C5Module>() {
+        @SuppressWarnings({"RedundantCast", "Convert2MethodRef"})
         @Override
         public void onSuccess(C5Module result) {
           discoveryModule = (DiscoveryModule) result;
