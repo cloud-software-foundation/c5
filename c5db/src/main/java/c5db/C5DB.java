@@ -397,7 +397,7 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case Replication: {
-        C5Module module = new ReplicatorService(bossGroup, workerGroup, modulePort, this);
+        C5Module module = new ReplicatorService(bossGroup, workerGroup, modulePort, this::getModule, this);
         startServiceModule(module);
         break;
       }
