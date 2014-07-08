@@ -44,6 +44,8 @@ public class C5ServerConstants {
   public static final String CREATE_TABLE = "Create Table";
   public static final String SET_META_LEADER = "Set me as Meta Leader";
 
+  public static final String LOOPBACK_ADDRESS = "127.0.0.1";
+  public static final String BROADCAST_ADDRESS = "255.255.255.255";
   public static final int DISCOVERY_PORT = 54333;
   public static final int DEFAULT_WEB_SERVER_PORT = 31337;
   public static final int CONTROL_RPC_PROPERTY_PORT = 9099;
