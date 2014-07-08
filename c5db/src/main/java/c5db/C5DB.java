@@ -225,6 +225,10 @@ public class C5DB extends AbstractService implements C5Server {
         new ExceptionHandlingBatchExecutor(throwableConsumer));
   }
 
+  private Fiber getFiber(Consumer<Throwable> throwableConsumer) {
+    return getFiberFactory(throwableConsumer).create();
+  }
+
   @Override
   public ListenableFuture<Void> getShutdownFuture() {
     return shutdownFuture;
@@ -397,7 +401,8 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case Replication: {
-        C5Module module = new ReplicatorService(bossGroup, workerGroup, modulePort, this::getModule, this);
+        C5Module module = new ReplicatorService(bossGroup, workerGroup, nodeId, modulePort, this::getModule,
+            this::getFiber, configDirectory);
         startServiceModule(module);
         break;
       }
