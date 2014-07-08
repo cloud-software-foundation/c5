@@ -31,7 +31,6 @@ public interface ConfigDirectory {
   String peerIdsFile = "peerIds";
   String regionInfoFile = "region-info";
   String htableDescriptorFile = "htable-descriptor";
-  String persisterFile = "replication-data";
 
   /**
    * Get the contents of the node id config file
