@@ -114,7 +114,7 @@ public class StandaloneReplicatorTest {
   }
 
   @Test(timeout = 9000)
-  public void establishesASystemForGenericReplicationOfDataAcrossNodes() throws Exception {
+  public void establishesASingleNodeReplicationServerAndLogsASingleEntryToASingleQuorumReplicator() throws Exception {
     ReplicationServer replicationServer = new ReplicationServer(1, REPLICATOR_PORT_MIN, DISCOVERY_PORT, this::newExceptionHandlingFiber);
     replicationServer.startAndWait();
 
@@ -139,6 +139,14 @@ public class StandaloneReplicatorTest {
     Fiber newFiber = fiberFactory.create(new ExceptionHandlingBatchExecutor(throwableHandler));
     fibers.add(newFiber);
     return newFiber;
+  }
+
+  /**
+   * Runs a ReplicatorServer and handles startup and disposal for the purpose of making
+   * tests more readable
+   */
+  private class ReplicationServerTestFixture {
+
   }
 
   /**
@@ -236,9 +244,9 @@ public class StandaloneReplicatorTest {
       moduleServer = new SimpleModuleServer(serverFiber);
       serverFiber.start();
 
-      // TODO BeaconService will start this Fiber on its own, but it probably should be started by us
       discoveryFiber = fiberFactory.getFiber(jUnitFiberExceptionHandler);
       discoveryModule = new BeaconService(nodeId, discoveryPort, discoveryFiber, workerGroup, ImmutableMap.of(), moduleServer);
+      discoveryFiber.start();
 
       // TODO ReplicatorService provides no way to dispose of its own fiber; it should
       replicationModule = new ReplicatorService(bossGroup, workerGroup, nodeId, replicatorPort, moduleServer, fiberFactory, configDirectory);
@@ -296,7 +304,7 @@ public class StandaloneReplicatorTest {
 
     public void dispose() {
       serverFiber.dispose();
-
+      discoveryFiber.dispose();
     }
   }
 
