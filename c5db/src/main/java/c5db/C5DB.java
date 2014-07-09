@@ -94,6 +94,7 @@ public class C5DB extends AbstractService implements C5Server {
   private final int minQuorumSize;
 
   private Fiber serverFiber;
+  private Fiber beaconServiceFiber;
   private PoolFiberFactory fiberPool;
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
@@ -245,6 +246,10 @@ public class C5DB extends AbstractService implements C5Server {
       bossGroup = new NioEventLoopGroup(processors / 3);
       workerGroup = new NioEventLoopGroup(processors / 3);
 
+      beaconServiceFiber = getFiber((t) -> {
+        LOG.error("Error from beaconServiceFiber:", t);
+      });
+
       commandChannel.subscribe(serverFiber, message -> {
         try {
           processCommandMessage(message);
@@ -258,6 +263,7 @@ public class C5DB extends AbstractService implements C5Server {
       serviceRegisteredChannel.subscribe(serverFiber, this::onModuleStateChange);
 
       serverFiber.start();
+      beaconServiceFiber.start();
 
       notifyStarted();
     } catch (Exception e) {
@@ -268,6 +274,7 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   protected void doStop() {
     serverFiber.dispose();
+    beaconServiceFiber.dispose();
     fiberPool.dispose();
 
     notifyStopped();
@@ -406,7 +413,7 @@ public class C5DB extends AbstractService implements C5Server {
 
     switch (moduleType) {
       case Discovery: {
-        C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup,
+        C5Module module = new BeaconService(this.nodeId, modulePort, beaconServiceFiber, workerGroup,
             ImmutableMap.copyOf(availableModulePorts), this);
         startServiceModule(module);
         break;

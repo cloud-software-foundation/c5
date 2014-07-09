@@ -77,6 +77,10 @@ public class OLogShim implements Syncable, HLog {
   // Keep track of the most recent IndexCommitNotice that was withdrawn from the commitNoticeQueue.
   private IndexCommitNotice lastCommitNotice;
 
+  /**
+   * The caller of this constructor must take responsibility for starting and disposing of
+   * the Replicator, and starting and disposing of the fiber.
+   */
   public OLogShim(Replicator replicatorInstance, Fiber fiber) {
     this.replicatorInstance = replicatorInstance;
     String quorumId = replicatorInstance.getQuorumId();
