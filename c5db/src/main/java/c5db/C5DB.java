@@ -172,13 +172,6 @@ public class C5DB extends AbstractService implements C5Server {
     return future.get(1, TimeUnit.SECONDS);
   }
 
-  @Override
-  public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2() {
-    final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
-    serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
-    return future;
-  }
-
   private final RequestChannel<CommandRpcRequest<?>, CommandReply> commandRequests = new MemoryRequestChannel<>();
 
   @Override
@@ -401,7 +394,7 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case Replication: {
-        C5Module module = new ReplicatorService(bossGroup, workerGroup, nodeId, modulePort, this::getModule,
+        C5Module module = new ReplicatorService(bossGroup, workerGroup, nodeId, modulePort, this,
             this::getFiber, configDirectory);
         startServiceModule(module);
         break;

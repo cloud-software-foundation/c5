@@ -20,18 +20,13 @@ package c5db.interfaces;
 import c5db.ConfigDirectory;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.server.ConfigKeyUpdated;
-import c5db.interfaces.server.ModuleStateChange;
 import c5db.messages.generated.CommandReply;
-import c5db.messages.generated.ModuleType;
 import c5db.util.C5FiberFactory;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -44,7 +39,7 @@ import java.util.function.Consumer;
  * Note that multiple {@link c5db.interfaces.C5Server} may be in a single JVM, so avoiding
  * static method calls is of paramount importance.
  */
-public interface C5Server extends Service {
+public interface C5Server extends ModuleServer, Service {
   /**
    * Every server has a persistent id that is independent of it's (in some cases temporary)
    * network or host identification.  Normally this would be persisted in a configuration
@@ -55,27 +50,6 @@ public interface C5Server extends Service {
    * @return THE node id for this server.
    */
   public long getNodeId();
-
-  // TODO this could be generified if we used an interface instead of ModuleType
-
-  /**
-   * This is primary mechanism via which modules with compile time binding via interfaces
-   * that live in {@link c5db.interfaces} may obtain instances of their dependencies.
-   * <p/>
-   * This method returns a future, which implies that the module may not be started yet.
-   * The future will be signalled when the module is started, and callers may just add a
-   * callback and wait.
-   * <p/>
-   * In the future when automatic service startup order is working, this method might just
-   * return the type without a future, or may not require much/any waiting.
-   * <p/>
-   * Right now modules are specified via an enum, in the future perhaps we should
-   * use a Java interface type?
-   *
-   * @param moduleType the specific module type you wish to retrieve
-   * @return a future that will be set when the module is running
-   */
-  public ListenableFuture<C5Module> getModule(ModuleType moduleType);
 
   /**
    * A jetlang channel to submit command objects to the 'system'.
@@ -102,12 +76,6 @@ public interface C5Server extends Service {
    * @return The jetlang request channel to submit requests
    */
   public RequestChannel<CommandRpcRequest<?>, CommandReply> getCommandRequests();
-
-  public Channel<ModuleStateChange> getModuleStateChangeChannel();
-
-  public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException, TimeoutException;
-
-  public ListenableFuture<ImmutableMap<ModuleType, C5Module>> getModules2();
 
   public ConfigDirectory getConfigDirectory();
 
