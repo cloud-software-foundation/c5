@@ -43,7 +43,7 @@ public class NioFileConfigDirectory implements ConfigDirectory {
   private final Path nodeIdPath;
   private final Path clusterNamePath;
 
-  public NioFileConfigDirectory(Path baseConfigPath) throws Exception {
+  public NioFileConfigDirectory(Path baseConfigPath) throws IOException {
     this.baseConfigPath = baseConfigPath;
     this.nodeIdPath = baseConfigPath.resolve(nodeIdFile);
     this.clusterNamePath = baseConfigPath.resolve(clusterNameFile);
@@ -55,11 +55,11 @@ public class NioFileConfigDirectory implements ConfigDirectory {
    * Verifies that the 'config directory' is actually usable.  If it doesn't exist, create it.  If it exists,
    * ensure that it's writable.  Ensure that primary configuration files aren't directories.
    *
-   * @throws Exception
+   * @throws IOException
    */
-  private void init() throws Exception {
+  private void init() throws IOException {
     if (Files.exists(getBaseConfigPath()) && !Files.isDirectory(getBaseConfigPath())) {
-      throw new Exception("Base config path exists and is not a directory " + getBaseConfigPath());
+      throw new IOException("Base config path exists and is not a directory " + getBaseConfigPath());
     }
 
     if (!Files.exists(getBaseConfigPath())) {
@@ -68,15 +68,15 @@ public class NioFileConfigDirectory implements ConfigDirectory {
 
 
     if (Files.exists(nodeIdPath) && !Files.isRegularFile(nodeIdPath)) {
-      throw new Exception("NodeId file is not a regular directory!");
+      throw new IOException("NodeId file is not a regular directory!");
     }
 
     if (Files.exists(clusterNamePath) && !Files.isRegularFile(clusterNamePath)) {
-      throw new Exception("Cluster name is not a regular directory!");
+      throw new IOException("Cluster name is not a regular directory!");
     }
 
     if (!Files.isWritable(getBaseConfigPath())) {
-      throw new Exception("Can't write to the base configuration path!");
+      throw new IOException("Can't write to the base configuration path!");
     }
   }
 
