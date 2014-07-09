@@ -19,6 +19,7 @@ package c5db.replication;
 
 import c5db.C5CommonTestUtil;
 import c5db.ConfigDirectory;
+import c5db.IndexCommitMatcher;
 import c5db.NioFileConfigDirectory;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
@@ -26,7 +27,9 @@ import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.LogModule;
 import c5db.interfaces.ModuleServer;
 import c5db.interfaces.ReplicationModule;
+import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.log.LogService;
 import c5db.log.LogTestUtil;
 import c5db.messages.generated.ModuleType;
@@ -36,6 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.Service;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.jetlang.channels.Channel;
@@ -45,7 +49,6 @@ import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -59,12 +62,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
 import static c5db.C5ServerConstants.DISCOVERY_PORT;
 import static c5db.C5ServerConstants.REPLICATOR_PORT_MIN;
+import static c5db.interfaces.replication.ReplicatorInstanceEvent.EventType.LEADER_ELECTED;
 import static c5db.replication.ReplicatorService.FiberFactory;
 
 public class GeneralReplicatorTest {
-  @Rule
   public JUnitRuleFiberExceptions jUnitFiberExceptionHandler = new JUnitRuleFiberExceptions();
 
   private static final int NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
@@ -75,12 +79,14 @@ public class GeneralReplicatorTest {
 
   private final PoolFiberFactory fiberFactory = new PoolFiberFactory(executorService);
   private final Set<Fiber> fibers = new HashSet<>();
+  private final Fiber testFiber = newTestFiber(jUnitFiberExceptionHandler);
 
   private ConfigDirectory configDirectory;
 
   @Before
   public void setupConfigDirectory() throws Exception {
     configDirectory = new NioFileConfigDirectory(new C5CommonTestUtil().getDataTestDir("general-replicator-test"));
+    testFiber.start();
   }
 
   @After
@@ -103,7 +109,18 @@ public class GeneralReplicatorTest {
 
     Replicator replicator = replicationServer.createReplicator("quorumId", Lists.newArrayList(1L)).get();
 
+    ChannelHistoryMonitor<ReplicatorInstanceEvent> eventMonitor = new ChannelHistoryMonitor<>(replicator.getEventChannel(), testFiber);
+    ChannelHistoryMonitor<IndexCommitNotice> commitMonitor = new ChannelHistoryMonitor<>(replicator.getCommitNoticeChannel(), testFiber);
+
+    replicator.start();
+
+    eventMonitor.waitFor(ReplicationMatchers.aReplicatorEvent(LEADER_ELECTED));
+
     replicator.logData(Lists.newArrayList(LogTestUtil.someData())).get();
+
+    commitMonitor.waitFor(IndexCommitMatcher.aCommitNotice());
+
+    replicationServer.close();
   }
 
   private Fiber newTestFiber(Consumer<Throwable> throwableHandler) {
@@ -118,6 +135,7 @@ public class GeneralReplicatorTest {
     private final Channel<ImmutableMap<ModuleType, Integer>> modulePortsChannel = new MemoryChannel<>();
 
     public void addAndStartModule(C5Module module) throws InterruptedException, ExecutionException {
+      module.addListener(new SimpleModuleListener(module), testFiber);
       module.start().get();
 
       modules.put(module.getModuleType(), module);
@@ -176,4 +194,32 @@ public class GeneralReplicatorTest {
     }
   }
 
+  private class SimpleModuleListener implements Service.Listener {
+    private final C5Module module;
+
+    private SimpleModuleListener(C5Module module) {
+      this.module = module;
+    }
+
+    @Override
+    public void starting() {
+    }
+
+    @Override
+    public void running() {
+    }
+
+    @Override
+    public void stopping(Service.State from) {
+    }
+
+    @Override
+    public void terminated(Service.State from) {
+    }
+
+    @Override
+    public void failed(Service.State from, Throwable failure) {
+      throw new AssertionError("Failure in module " + module + ": " + failure);
+    }
+  }
 }
