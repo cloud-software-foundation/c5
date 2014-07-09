@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.Subscriber;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
@@ -131,9 +132,9 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   private void replicatorCreated(Replicator replicator) {
     assert tabletState == State.CreatingReplicator;
 
-    Channel<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
+    Subscriber<Replicator.State> replicatorStateChannel = replicator.getStateChannel();
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
-    Channel<ReplicatorInstanceEvent> replicatorEventChannel = replicator.getEventChannel();
+    Subscriber<ReplicatorInstanceEvent> replicatorEventChannel = replicator.getEventChannel();
     replicatorEventChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
     replicator.start();
 
@@ -205,11 +206,11 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   private void publishEvent(State newState) {
-    getStateChangeChannel().publish(new TabletStateChange(this, newState, null));
+    stateChangeChannel.publish(new TabletStateChange(this, newState, null));
   }
 
   private void publishEvent(Throwable t) {
-    getStateChangeChannel().publish(new TabletStateChange(this, State.Failed, t));
+    stateChangeChannel.publish(new TabletStateChange(this, State.Failed, t));
   }
 
   private void handleFail(Throwable t) {
@@ -218,7 +219,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   }
 
   @Override
-  public Channel<TabletStateChange> getStateChangeChannel() {
+  public Subscriber<TabletStateChange> getStateChangeChannel() {
     return this.stateChangeChannel;
   }
 

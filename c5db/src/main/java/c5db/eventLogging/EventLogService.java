@@ -33,6 +33,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.Subscriber;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,7 @@ public class EventLogService extends AbstractService implements EventLogModule {
   }
 
   @Override
-  public Channel<EventLogEntry> eventLogChannel() {
+  public Subscriber<EventLogEntry> eventLogChannel() {
     return eventLogChannel;
   }
 
