@@ -52,6 +52,7 @@ import org.jetlang.channels.MemoryChannel;
 import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
+import org.jetlang.channels.Subscriber;
 import org.jetlang.core.Disposable;
 import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
@@ -87,6 +88,8 @@ public class C5DB extends AbstractService implements C5Server {
   private final ConfigDirectory configDirectory;
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
+  private final Channel<ModuleStateChange> serviceRegisteredChannel = new MemoryChannel<>();
+  private final Channel<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
   private final int minQuorumSize;
 
@@ -96,6 +99,7 @@ public class C5DB extends AbstractService implements C5Server {
   private EventLoopGroup workerGroup;
 
   private final Map<ModuleType, C5Module> allModules = new HashMap<>();
+  private final Map<ModuleType, Integer> availableModulePorts = new HashMap<>();
   private ExecutorService executor;
 
   public C5DB(Long nodeId) throws Exception {
@@ -129,7 +133,6 @@ public class C5DB extends AbstractService implements C5Server {
     } else {
       this.minQuorumSize = C5ServerConstants.MINIMUM_DEFAULT_QUORUM_SIZE;
     }
-
   }
 
   @Override
@@ -146,7 +149,7 @@ public class C5DB extends AbstractService implements C5Server {
       if (!allModules.containsKey(moduleType)) {
         // listen to the registration stream:
         final Disposable[] d = new Disposable[]{null};
-        d[0] = getModuleStateChangeChannel().subscribe(serverFiber, message -> {
+        d[0] = serviceRegisteredChannel.subscribe(serverFiber, message -> {
           if (message.state != State.RUNNING) {
             return;
           }
@@ -166,6 +169,11 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
+  public Subscriber<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel() {
+    return availableModulePortsChannel;
+  }
+
+  @Override
   public ImmutableMap<ModuleType, C5Module> getModules() throws ExecutionException, InterruptedException, TimeoutException {
     final SettableFuture<ImmutableMap<ModuleType, C5Module>> future = SettableFuture.create();
     serverFiber.execute(() -> future.set(ImmutableMap.copyOf(allModules)));
@@ -182,13 +190,6 @@ public class C5DB extends AbstractService implements C5Server {
   @Override
   public Channel<CommandRpcRequest<?>> getCommandChannel() {
     return commandChannel;
-  }
-
-  private final Channel<ModuleStateChange> serviceRegisteredChannel = new MemoryChannel<>();
-
-  @Override
-  public Channel<ModuleStateChange> getModuleStateChangeChannel() {
-    return serviceRegisteredChannel;
   }
 
   @Override
@@ -254,6 +255,8 @@ public class C5DB extends AbstractService implements C5Server {
 
       commandRequests.subscribe(serverFiber, this::processCommandRequest);
 
+      serviceRegisteredChannel.subscribe(serverFiber, this::onModuleStateChange);
+
       serverFiber.start();
 
       notifyStarted();
@@ -268,6 +271,25 @@ public class C5DB extends AbstractService implements C5Server {
     fiberPool.dispose();
 
     notifyStopped();
+  }
+
+  @FiberOnly
+  private void onModuleStateChange(ModuleStateChange message) {
+    if (message.state == State.RUNNING) {
+      LOG.debug("BeaconService adding running module {} on port {}",
+          message.module.getModuleType(),
+          message.module.port());
+      availableModulePorts.put(message.module.getModuleType(), message.module.port());
+    } else if (message.state == State.STOPPING || message.state == State.FAILED || message.state == State.TERMINATED) {
+      LOG.debug("BeaconService removed module {} on port {} with state {}",
+          message.module.getModuleType(),
+          message.module.port(),
+          message.state);
+      availableModulePorts.remove(message.module.getModuleType());
+    } else {
+      LOG.debug("BeaconService got unknown state module change {}", message);
+    }
+    availableModulePortsChannel.publish(ImmutableMap.copyOf(availableModulePorts));
   }
 
   private ConfigDirectory createConfigDirectory(Long nodeId) throws Exception {
@@ -384,12 +406,8 @@ public class C5DB extends AbstractService implements C5Server {
 
     switch (moduleType) {
       case Discovery: {
-        Map<ModuleType, Integer> l = new HashMap<>();
-        for (ModuleType name : allModules.keySet()) {
-          l.put(name, allModules.get(name).port());
-        }
-
-        C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup, l, this);
+        C5Module module = new BeaconService(this.nodeId, modulePort, fiberPool.create(), workerGroup,
+            ImmutableMap.copyOf(availableModulePorts), this);
         startServiceModule(module);
         break;
       }
@@ -500,7 +518,7 @@ public class C5DB extends AbstractService implements C5Server {
 
     private void publishEvent(State state) {
       ModuleStateChange p = new ModuleStateChange(module, state);
-      getModuleStateChangeChannel().publish(p);
+      serviceRegisteredChannel.publish(p);
     }
   }
 }
