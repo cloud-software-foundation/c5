@@ -231,7 +231,7 @@ public class OLogShim implements Syncable, HLog {
     return linkBuffer.finish();
   }
 
-  private Channel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
+  private Channel<ReplicatorInstanceEvent> eventChannel = new MemoryChannel<>();
   private Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
 
 //    private ReplicatorInstance getReplicator(HRegionInfo info) {
@@ -254,7 +254,7 @@ public class OLogShim implements Syncable, HLog {
 //                new Info(plusMillis),
 //                new Persister(),
 //                rpcChannel,
-//                stateChangeChannel,
+//                eventChannel,
 //                commitNoticeChannel);
 //        replicators.put(peerId, replicator);
 //        return replicator;

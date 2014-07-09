@@ -71,7 +71,7 @@ public class BasicTableCreationTest {
   private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
   private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
-  private final MemoryChannel<ReplicatorInstanceEvent> stateChangeChannel = new MemoryChannel<>();
+  private final MemoryChannel<ReplicatorInstanceEvent> eventChannel = new MemoryChannel<>();
   private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
   private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
   private final C5Server c5Server = context.mock(C5Server.class);
@@ -156,8 +156,8 @@ public class BasicTableCreationTest {
       oneOf(replicator).getStateChannel();
       will(returnValue(stateChannel));
 
-      oneOf(replicator).getStateChangeChannel();
-      will(returnValue(stateChangeChannel));
+      oneOf(replicator).getEventChannel();
+      will(returnValue(eventChannel));
 
       oneOf(replicator).start();
 
@@ -196,8 +196,8 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventChannel));
 
         oneOf(replicator).start();
 
@@ -232,8 +232,8 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventChannel));
 
         oneOf(replicator).start();
 

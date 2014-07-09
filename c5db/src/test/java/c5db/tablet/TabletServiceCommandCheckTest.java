@@ -187,7 +187,7 @@ public class TabletServiceCommandCheckTest {
     ListenableFuture<Service.State> future = tabletService.start();
     future.get();
     Channel channel = new MemoryChannel();
-    Channel stateChangeChannel = new MemoryChannel();
+    Channel eventChannel = new MemoryChannel();
     context.checking(new Expectations() {
       {
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
@@ -196,8 +196,8 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(channel));
 
-        oneOf(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        oneOf(replicator).getEventChannel();
+        will(returnValue(eventChannel));
 
         oneOf(replicator).start();
         oneOf(replicator).getQuorumId();
@@ -234,8 +234,8 @@ public class TabletServiceCommandCheckTest {
         allowing(replicator).getStateChannel();
         will(returnValue(channel));
 
-        allowing(replicator).getStateChangeChannel();
-        will(returnValue(stateChangeChannel));
+        allowing(replicator).getEventChannel();
+        will(returnValue(eventChannel));
 
         allowing(replicator).start();
         oneOf(replicator).getQuorumId();
@@ -299,7 +299,7 @@ public class TabletServiceCommandCheckTest {
     SettableFuture<Replicator> replicationFuture = SettableFuture.create();
 
     Channel channel = new MemoryChannel();
-    Channel stateChangeChannel = new MemoryChannel();
+    Channel eventChannel = new MemoryChannel();
 
     context.checking(new Expectations() {{
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
@@ -308,8 +308,8 @@ public class TabletServiceCommandCheckTest {
       allowing(replicator).getStateChannel();
       will(returnValue(channel));
 
-      allowing(replicator).getStateChangeChannel();
-      will(returnValue(stateChangeChannel));
+      allowing(replicator).getEventChannel();
+      will(returnValue(eventChannel));
 
       allowing(replicator).start();
       oneOf(replicator).getQuorumId();
