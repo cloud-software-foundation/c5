@@ -418,9 +418,8 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case Log: {
-        C5Module module = new LogService(this);
+        C5Module module = new LogService(configDirectory);
         startServiceModule(module);
-
         break;
       }
       case Tablet: {
