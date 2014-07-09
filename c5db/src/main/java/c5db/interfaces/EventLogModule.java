@@ -19,7 +19,7 @@ package c5db.interfaces;
 
 import c5db.eventLogging.generated.EventLogEntry;
 import c5db.messages.generated.ModuleType;
-import org.jetlang.channels.Channel;
+import org.jetlang.channels.Subscriber;
 
 /**
  * The Event log module provides a system-wide service for publishing high value events.
@@ -29,5 +29,5 @@ import org.jetlang.channels.Channel;
 @ModuleTypeBinding(ModuleType.EventLog)
 public interface EventLogModule extends C5Module {
 
-  Channel<EventLogEntry> eventLogChannel();
+  Subscriber<EventLogEntry> eventLogChannel();
 }

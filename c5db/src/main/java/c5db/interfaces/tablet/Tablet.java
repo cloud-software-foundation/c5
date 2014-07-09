@@ -20,6 +20,7 @@ import c5db.tablet.Region;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
+import org.jetlang.channels.Subscriber;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ import java.util.List;
 public interface Tablet {
   void start();
 
-  Channel<TabletStateChange> getStateChangeChannel();
+  Subscriber<TabletStateChange> getStateChangeChannel();
 
   boolean isOpen();
 
