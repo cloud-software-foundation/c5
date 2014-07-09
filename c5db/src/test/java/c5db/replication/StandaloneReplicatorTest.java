@@ -78,7 +78,7 @@ import static c5db.interfaces.replication.ReplicatorInstanceEvent.EventType.LEAD
 import static c5db.replication.ReplicatorService.FiberFactory;
 import static org.hamcrest.Matchers.equalTo;
 
-public class GeneralReplicatorTest {
+public class StandaloneReplicatorTest {
   @Rule
   public JUnitRuleFiberExceptions jUnitFiberExceptionHandler = new JUnitRuleFiberExceptions();
 
