@@ -19,7 +19,6 @@ package c5db.replication;
 
 import c5db.C5CommonTestUtil;
 import c5db.ConfigDirectory;
-import c5db.IndexCommitMatcher;
 import c5db.NioFileConfigDirectory;
 import c5db.discovery.BeaconService;
 import c5db.interfaces.C5Module;
@@ -31,7 +30,6 @@ import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.log.LogService;
-import c5db.log.LogTestUtil;
 import c5db.messages.generated.ModuleType;
 import c5db.util.C5Futures;
 import c5db.util.ExceptionHandlingBatchExecutor;
@@ -74,7 +72,10 @@ import java.util.function.Consumer;
 import static c5db.AsyncChannelAsserts.ChannelHistoryMonitor;
 import static c5db.C5ServerConstants.DISCOVERY_PORT;
 import static c5db.C5ServerConstants.REPLICATOR_PORT_MIN;
+import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.interfaces.replication.ReplicatorInstanceEvent.EventType.LEADER_ELECTED;
+import static c5db.log.LogTestUtil.someData;
+import static c5db.replication.ReplicationMatchers.aReplicatorEvent;
 import static c5db.replication.ReplicatorService.FiberFactory;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -114,26 +115,19 @@ public class StandaloneReplicatorTest {
   }
 
   @Test(timeout = 9000)
-  public void establishesASingleNodeReplicationServerAndLogsASingleEntryToASingleQuorumReplicator() throws Exception {
-    ReplicationServer replicationServer = new ReplicationServer(1, REPLICATOR_PORT_MIN, DISCOVERY_PORT, this::newExceptionHandlingFiber);
-    replicationServer.startAndWait();
+  public void logsToASingleQuorumReplicator() throws Exception {
+    long nodeId = 1;
+    List<Long> peerIds = Lists.newArrayList(1L);
 
-    Replicator replicator = replicationServer.createReplicator("quorumId", Lists.newArrayList(1L)).get();
+    try (SingleQuorumReplicationServer serverFixture
+             = new SingleQuorumReplicationServer(nodeId, peerIds, this::newExceptionHandlingFiber)) {
 
-    ChannelHistoryMonitor<ReplicatorInstanceEvent> eventMonitor = new ChannelHistoryMonitor<>(replicator.getEventChannel(), mainTestFiber);
-    ChannelHistoryMonitor<IndexCommitNotice> commitMonitor = new ChannelHistoryMonitor<>(replicator.getCommitNoticeChannel(), mainTestFiber);
-
-    replicator.start();
-
-    eventMonitor.waitFor(ReplicationMatchers.aReplicatorEvent(LEADER_ELECTED));
-
-    replicator.logData(Lists.newArrayList(LogTestUtil.someData())).get();
-
-    commitMonitor.waitFor(IndexCommitMatcher.aCommitNotice().withIndex(equalTo(1L)));
-
-    replicationServer.stopAndWait();
-    replicationServer.dispose();
+      serverFixture.eventMonitor.waitFor(aReplicatorEvent(LEADER_ELECTED));
+      serverFixture.replicator.logData(Lists.newArrayList(someData())).get();
+      serverFixture.commitMonitor.waitFor(aCommitNotice().withIndex(equalTo(1L)));
+    }
   }
+
 
   private Fiber newExceptionHandlingFiber(Consumer<Throwable> throwableHandler) {
     Fiber newFiber = fiberFactory.create(new ExceptionHandlingBatchExecutor(throwableHandler));
@@ -145,8 +139,31 @@ public class StandaloneReplicatorTest {
    * Runs a ReplicatorServer and handles startup and disposal for the purpose of making
    * tests more readable
    */
-  private class ReplicationServerTestFixture {
+  private class SingleQuorumReplicationServer implements AutoCloseable {
+    private static final String QUORUM_ID = "quorumId";
 
+    public final ReplicationServer server;
+    public final Replicator replicator;
+    public final ChannelHistoryMonitor<ReplicatorInstanceEvent> eventMonitor;
+    public final ChannelHistoryMonitor<IndexCommitNotice> commitMonitor;
+
+    public SingleQuorumReplicationServer(long nodeId, Collection<Long> peerIds, FiberFactory fiberFactory)
+        throws Exception {
+      server = new ReplicationServer(nodeId, REPLICATOR_PORT_MIN, DISCOVERY_PORT, fiberFactory);
+      server.startAndWait();
+
+      replicator = server.createReplicator(QUORUM_ID, peerIds).get();
+      replicator.start();
+
+      eventMonitor = new ChannelHistoryMonitor<>(replicator.getEventChannel(), mainTestFiber);
+      commitMonitor = new ChannelHistoryMonitor<>(replicator.getCommitNoticeChannel(), mainTestFiber);
+    }
+
+    @Override
+    public void close() {
+      server.stopAndWait();
+      server.dispose();
+    }
   }
 
   /**
