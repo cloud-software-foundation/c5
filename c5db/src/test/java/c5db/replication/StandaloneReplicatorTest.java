@@ -107,11 +107,9 @@ public class StandaloneReplicatorTest {
     executorService.shutdownNow();
     fibers.forEach(Fiber::dispose);
 
+    // Initiate shut down but don't wait for termination, for the sake of test speed.
     bossGroup.shutdownGracefully();
     workerGroup.shutdownGracefully();
-
-    bossGroup.terminationFuture().get();
-    workerGroup.terminationFuture().get();
   }
 
   @Test(timeout = 9000)
