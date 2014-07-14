@@ -20,7 +20,6 @@ package c5db.log;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.replication.ReplicatorReceipt;
-import c5db.tablet.SystemTableNames;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
@@ -59,8 +58,8 @@ public class OLogShimTest {
   }};
 
   private final Replicator replicator = context.mock(Replicator.class);
-  private final HTableDescriptor descriptor = SystemTableNames.rootTableDescriptor();
-  private final HRegionInfo info = SystemTableNames.rootRegionInfo();
+  private final HTableDescriptor descriptor = new HTableDescriptor();
+  private final HRegionInfo info = new HRegionInfo();
   private final TableName tableName = descriptor.getTableName();
 
   private final Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();

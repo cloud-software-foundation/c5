@@ -34,7 +34,6 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
-import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.ChannelSubscription;
 import org.jetlang.fibers.Fiber;
@@ -46,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,13 +53,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static c5db.C5ServerConstants.WAL_SYNC_TIMEOUT_SECONDS;
-
 /**
  * A distributed WriteAheadLog using c5's replication algorithm
  */
 public class OLogShim implements Syncable, HLog {
+  public static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
+
   private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
+  private static final int MAX_COMMITS_OUTSTANDING = 10000000;
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final Replicator replicatorInstance;
 
@@ -72,7 +73,7 @@ public class OLogShim implements Syncable, HLog {
 
   // When the OLogShim's Replicator issues a commit notice, keep track of it in this queue.
   // Then, when performing sync, make use of these notices.
-  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new BlockingArrayQueue<>();
+  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new ArrayBlockingQueue<IndexCommitNotice>(MAX_COMMITS_OUTSTANDING);
 
   // Keep track of the most recent IndexCommitNotice that was withdrawn from the commitNoticeQueue.
   private IndexCommitNotice lastCommitNotice;
