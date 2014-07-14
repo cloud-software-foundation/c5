@@ -15,30 +15,27 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-api</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-collectionschema</artifactId>
-            <version>${protostuff.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-json</artifactId>
-            <version>${protostuff.version}</version>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-util</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-            <version>${protostuff.version}</version>
+            <groupId>c5db</groupId>
+            <artifactId>c5-proto</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-util</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <classifier>tests</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -68,53 +65,5 @@
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetlang</groupId>
-            <artifactId>jetlang</artifactId>
-            <version>${jetlang.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5-proto</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.2</version>
-        </dependency>
-
     </dependencies>
 </project>
