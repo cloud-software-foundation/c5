@@ -58,7 +58,9 @@ public class OLogShimTest {
   }};
 
   private final Replicator replicator = context.mock(Replicator.class);
+  @SuppressWarnings("deprecation")
   private final HTableDescriptor descriptor = new HTableDescriptor();
+  @SuppressWarnings("deprecation")
   private final HRegionInfo info = new HRegionInfo();
   private final TableName tableName = descriptor.getTableName();
 

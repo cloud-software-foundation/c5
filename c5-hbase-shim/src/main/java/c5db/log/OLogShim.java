@@ -73,7 +73,7 @@ public class OLogShim implements Syncable, HLog {
 
   // When the OLogShim's Replicator issues a commit notice, keep track of it in this queue.
   // Then, when performing sync, make use of these notices.
-  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new ArrayBlockingQueue<IndexCommitNotice>(MAX_COMMITS_OUTSTANDING);
+  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new ArrayBlockingQueue<>(MAX_COMMITS_OUTSTANDING);
 
   // Keep track of the most recent IndexCommitNotice that was withdrawn from the commitNoticeQueue.
   private IndexCommitNotice lastCommitNotice;
