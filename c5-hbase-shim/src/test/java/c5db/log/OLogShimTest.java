@@ -19,7 +19,7 @@ package c5db.log;
 
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
-import c5db.replication.ReplicatorReceipt;
+import c5db.interfaces.replication.ReplicatorReceipt;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
