@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.util;
+package c5db.log;
 
 import c5db.generated.OLogHeader;
 import c5db.log.EntryEncodingUtil;

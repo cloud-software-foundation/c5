@@ -17,11 +17,10 @@
 
 package c5db.replication;
 
-import c5db.C5ServerConstants;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
-import c5db.log.ReplicatorLog;
+import c5db.interfaces.ReplicatorLog;
 import c5db.replication.generated.AppendEntries;
 import c5db.replication.generated.AppendEntriesReply;
 import c5db.replication.generated.LogEntry;
@@ -34,7 +33,6 @@ import c5db.replication.rpc.RpcRequest;
 import c5db.replication.rpc.RpcWireReply;
 import c5db.replication.rpc.RpcWireRequest;
 import c5db.util.C5Futures;
-import c5db.util.FiberOnly;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
@@ -73,10 +71,11 @@ import java.util.concurrent.TimeUnit;
  * RAFT algorithm (see <a href="http://raftconsensus.github.io/">http://raftconsensus.github.io/</a>.
  * <p>
  * A ReplicatorInstance handles the consensus and replication for a single quorum, and communicates
- * with the log package via {@link c5db.log.ReplicatorLog}.
+ * with the log package via {@link c5db.interfaces.ReplicatorLog}.
  */
 public class ReplicatorInstance implements Replicator {
 
+  private static final int MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG = 100000;
   private final Channel<State> stateMemoryChannel = new MemoryChannel<>();
   private final RequestChannel<RpcWireRequest, RpcReply> incomingChannel = new MemoryRequestChannel<>();
   private final RequestChannel<RpcRequest, RpcWireReply> sendRpcChannel;
@@ -98,7 +97,7 @@ public class ReplicatorInstance implements Replicator {
    */
 
   private final BlockingQueue<InternalReplicationRequest> logRequests =
-      new ArrayBlockingQueue<>(C5ServerConstants.MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG);
+      new ArrayBlockingQueue<>(MAXIMUM_SIMULTANEOUS_LOG_ENTRIES_PER_LOG);
 
   // this is the next index from our log we need to send to each peer, kept track of on a per-peer basis.
   private final Map<Long, Long> peersNextIndex = new HashMap<>();

@@ -20,7 +20,7 @@ package c5db.replication;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
-import c5db.log.ReplicatorLog;
+import c5db.interfaces.ReplicatorLog;
 import c5db.replication.generated.AppendEntries;
 import c5db.replication.generated.PreElectionPoll;
 import c5db.replication.generated.PreElectionReply;

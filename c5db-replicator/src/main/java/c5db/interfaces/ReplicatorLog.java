@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.log;
+package c5db.interfaces;
 
 import c5db.replication.QuorumConfiguration;
 import c5db.replication.generated.LogEntry;

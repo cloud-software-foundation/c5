@@ -20,6 +20,7 @@ package c5db.log;
 import c5db.C5ServerConstants;
 import c5db.ConfigDirectory;
 import c5db.interfaces.LogModule;
+import c5db.interfaces.ReplicatorLog;
 import c5db.messages.generated.ModuleType;
 import c5db.util.KeySerializingExecutor;
 import c5db.util.WrappingKeySerializingExecutor;

@@ -18,6 +18,7 @@
 package c5db.log;
 
 import c5db.C5CommonTestUtil;
+import c5db.interfaces.ReplicatorLog;
 import c5db.replication.QuorumConfiguration;
 import c5db.util.CheckedConsumer;
 import c5db.util.WrappingKeySerializingExecutor;

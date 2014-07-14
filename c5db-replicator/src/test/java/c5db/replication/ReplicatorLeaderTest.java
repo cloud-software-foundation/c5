@@ -19,7 +19,7 @@ package c5db.replication;
 
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.log.InRamLog;
-import c5db.log.ReplicatorLog;
+import c5db.interfaces.ReplicatorLog;
 import c5db.replication.generated.AppendEntriesReply;
 import c5db.replication.generated.LogEntry;
 import c5db.replication.rpc.RpcRequest;
@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -60,7 +61,7 @@ import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.RpcMatchers.RequestMatcher;
 import static c5db.RpcMatchers.RequestMatcher.anAppendRequest;
 import static c5db.interfaces.replication.Replicator.State;
-import static c5db.log.LogTestUtil.someData;
+
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -68,7 +69,16 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertFalse;
 
 
+
 public class ReplicatorLeaderTest {
+  private static final Random deterministicDataSequence = new Random(112233);
+
+  public static ByteBuffer someData() {
+    byte[] bytes = new byte[10];
+    deterministicDataSequence.nextBytes(bytes);
+    return ByteBuffer.wrap(bytes);
+  }
+
   private static final long LEADER_ID = 1;
   private static final long CURRENT_TERM = 4;
   private static final String QUORUM_ID = "quorumId";

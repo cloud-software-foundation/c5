@@ -17,7 +17,7 @@
 
 package c5db.interfaces;
 
-import c5db.log.ReplicatorLog;
+import c5db.interfaces.ReplicatorLog;
 import c5db.messages.generated.ModuleType;
 
 import java.io.IOException;

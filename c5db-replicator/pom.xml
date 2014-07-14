@@ -10,68 +10,10 @@
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>c5db</artifactId>
+    <artifactId>c5db-replicator</artifactId>
     <version>0.1-SNAPSHOT</version>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.protostuff</groupId>
-                <artifactId>protostuff-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.theoryinpractise</groupId>
-                <artifactId>clojure-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
     <dependencies>
-        <dependency>
-            <groupId>com.github.spullara.mustache.java</groupId>
-            <artifactId>compiler</artifactId>
-            <version>0.8.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>9.1.4.v20140401</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>9.1.4.v20140401</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>9.1.4.v20140401</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-server</artifactId>
-            <version>9.1.4.v20140401</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-rewrite</artifactId>
-            <version>9.1.4.v20140401</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.clojure</groupId>
-            <artifactId>clojure</artifactId>
-            <version>${clojure.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-api</artifactId>
@@ -97,11 +39,6 @@
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-core</artifactId>
             <version>${protostuff.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>hbase-server</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -153,6 +90,13 @@
             <groupId>com.codahale.metrics</groupId>
             <artifactId>metrics-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>c5db</groupId>
+            <artifactId>c5db-util</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5-proto</artifactId>
@@ -160,35 +104,17 @@
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
-            <artifactId>c5db-client</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-protostuff-codec</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
             <artifactId>c5db-util</artifactId>
             <version>0.1-SNAPSHOT</version>
             <classifier>tests</classifier>
         </dependency>
+
         <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-replicator</artifactId>
-            <version>0.1-SNAPSHOT</version>
+
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.2</version>
         </dependency>
-        <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>c5db-replicator</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <classifier>tests</classifier>
-        </dependency>
+
     </dependencies>
 </project>

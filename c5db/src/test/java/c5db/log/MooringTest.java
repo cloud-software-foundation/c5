@@ -17,6 +17,7 @@
 
 package c5db.log;
 
+import c5db.interfaces.ReplicatorLog;
 import c5db.replication.QuorumConfiguration;
 import c5db.replication.generated.LogEntry;
 import com.google.common.collect.Lists;
