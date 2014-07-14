@@ -41,7 +41,7 @@ import static c5db.log.EntryEncodingUtil.decodeAndCheckCrc;
 import static c5db.log.EntryEncodingUtil.encodeWithLengthAndCrc;
 import static c5db.log.LogMatchers.equalToHeader;
 import static c5db.log.LogPersistenceService.BytePersistence;
-import static c5db.log.LogTestUtil.term;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;

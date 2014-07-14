@@ -51,13 +51,13 @@ import static c5db.log.LogPersistenceService.PersistenceNavigator;
 import static c5db.log.LogPersistenceService.PersistenceNavigatorFactory;
 import static c5db.log.LogTestUtil.makeEntry;
 import static c5db.log.LogTestUtil.makeSingleEntryList;
-import static c5db.log.LogTestUtil.seqNum;
 import static c5db.log.LogTestUtil.someConsecutiveEntries;
-import static c5db.log.LogTestUtil.someData;
-import static c5db.log.LogTestUtil.term;
 import static c5db.log.OLog.QuorumNotOpen;
 import static c5db.log.OLogEntryOracle.OLogEntryOracleFactory;
 import static c5db.log.OLogEntryOracle.QuorumConfigurationWithSeqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.seqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.someData;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 

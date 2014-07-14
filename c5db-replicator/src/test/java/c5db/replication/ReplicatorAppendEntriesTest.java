@@ -17,9 +17,9 @@
 
 package c5db.replication;
 
+import c5db.interfaces.ReplicatorLog;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.log.InRamLog;
-import c5db.interfaces.ReplicatorLog;
 import c5db.replication.generated.AppendEntries;
 import c5db.replication.generated.LogEntry;
 import c5db.replication.rpc.RpcReply;
@@ -57,12 +57,12 @@ import static c5db.FutureMatchers.resultsIn;
 import static c5db.IndexCommitMatcher.aCommitNotice;
 import static c5db.RpcMatchers.ReplyMatcher.anAppendReply;
 import static c5db.interfaces.replication.Replicator.State;
-import static c5db.log.LogTestUtil.LogSequenceBuilder;
-import static c5db.log.LogTestUtil.aSeqNum;
-import static c5db.log.LogTestUtil.entries;
-import static c5db.log.LogTestUtil.makeProtostuffEntry;
-import static c5db.log.LogTestUtil.someData;
+import static c5db.log.ReplicatorLogGenericTestUtil.aSeqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.someData;
 import static c5db.replication.ReplicationMatchers.aListOfEntriesWithConsecutiveSeqNums;
+import static c5db.replication.ReplicatorTestUtil.LogSequenceBuilder;
+import static c5db.replication.ReplicatorTestUtil.entries;
+import static c5db.replication.ReplicatorTestUtil.makeProtostuffEntry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -510,7 +510,7 @@ public class ReplicatorAppendEntriesTest {
 
   private final ReplicatorLog internalLog = new InRamLog();
 
-  private void havingLogged(LogSequenceBuilder sequenceBuilder) throws Exception {
+  private void havingLogged(ReplicatorTestUtil.LogSequenceBuilder sequenceBuilder) throws Exception {
     List<LogEntry> entries = sequenceBuilder.build();
     internalLog.logEntries(entries).get();
   }

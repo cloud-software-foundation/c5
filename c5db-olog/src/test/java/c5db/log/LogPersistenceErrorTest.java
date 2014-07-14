@@ -23,8 +23,8 @@ import java.util.List;
 
 import static c5db.log.EntryEncodingUtil.CrcError;
 import static c5db.log.LogTestUtil.makeSingleEntryList;
-import static c5db.log.LogTestUtil.seqNum;
-import static c5db.log.LogTestUtil.term;
+import static c5db.log.ReplicatorLogGenericTestUtil.seqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
 
 public class LogPersistenceErrorTest {
   private final ByteArrayPersistence persistence = new ByteArrayPersistence();

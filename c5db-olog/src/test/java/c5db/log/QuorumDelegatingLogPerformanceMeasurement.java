@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
-import static c5db.log.LogTestUtil.term;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
 import static com.google.common.math.IntMath.pow;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 

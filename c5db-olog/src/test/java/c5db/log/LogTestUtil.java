@@ -27,24 +27,26 @@ import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static c5db.log.ReplicatorLogGenericTestUtil.aSeqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.anElectionTerm;
+import static c5db.log.ReplicatorLogGenericTestUtil.someData;
 
 /**
  * Helper methods to create and manipulate OLogEntry instances.
  */
 public class LogTestUtil {
-  private static final Random deterministicDataSequence = new Random(112233);
 
   public static List<OLogEntry> emptyEntryList() {
     return new ArrayList<>();
   }
 
-  public static OLogEntry makeEntry(long seqNum, long term, String stringData) {
-    return makeEntry(seqNum, term, ByteBuffer.wrap(stringData.getBytes(CharsetUtil.UTF_8)));
-  }
-
   public static OLogEntry makeEntry(long seqNum, long term, ByteBuffer data) {
     return new OLogEntry(seqNum, term, new OLogRawDataContent(Lists.newArrayList(data)));
+  }
+
+  public static OLogEntry makeEntry(long seqNum, long term, String stringData) {
+    return makeEntry(seqNum, term, ByteBuffer.wrap(stringData.getBytes(CharsetUtil.UTF_8)));
   }
 
   public static List<OLogEntry> makeSingleEntryList(long seqNum, long term, String stringData) {
@@ -53,32 +55,6 @@ public class LogTestUtil {
 
   public static List<OLogEntry> makeSingleEntryList(long seqNum, long term, ByteBuffer data) {
     return Lists.newArrayList(makeEntry(seqNum, term, data));
-  }
-
-  public static LogEntry makeProtostuffEntry(long index, long term, String stringData) {
-    return makeEntry(index, term, stringData).toProtostuff();
-  }
-
-  public static LogEntry makeProtostuffEntry(long index, long term, ByteBuffer data) {
-    return makeEntry(index, term, data).toProtostuff();
-  }
-
-  public static LogEntry makeConfigurationEntry(long index, long term, QuorumConfiguration configuration) {
-    return new LogEntry(term, index, new ArrayList<>(), configuration.toProtostuff());
-  }
-
-  public static long seqNum(long seqNum) {
-    return seqNum;
-  }
-
-  public static long term(long term) {
-    return term;
-  }
-
-  public static ByteBuffer someData() {
-    byte[] bytes = new byte[10];
-    deterministicDataSequence.nextBytes(bytes);
-    return ByteBuffer.wrap(bytes);
   }
 
   /**
@@ -93,54 +69,46 @@ public class LogTestUtil {
     return entries;
   }
 
-  public static long anElectionTerm() {
-    return Math.abs(deterministicDataSequence.nextLong());
-  }
-
-  public static long aSeqNum() {
-    return Math.abs(deterministicDataSequence.nextLong());
-  }
-
   public static OLogEntry anOLogEntry() {
     return makeEntry(aSeqNum(), anElectionTerm(), someData());
   }
 
-  public static LogSequenceBuilder entries() {
-    return new LogSequenceBuilder();
+  public static OLogSequenceBuilder entries() {
+    return new OLogSequenceBuilder();
   }
 
-  public static class LogSequenceBuilder {
-    private final List<LogEntry> logSequence = new ArrayList<>();
+  public static class OLogSequenceBuilder {
+    private final List<OLogEntry> logSequence = new ArrayList<>();
     private long term = 1;
 
-    public LogSequenceBuilder term(long term) {
+    public OLogSequenceBuilder term(long term) {
       this.term = term;
       return this;
     }
 
-    public LogSequenceBuilder indexes(long... indexes) {
+    public OLogSequenceBuilder indexes(long... indexes) {
       for (long index : indexes) {
-        logSequence.add(makeProtostuffEntry(index, term, someData()));
+        logSequence.add(makeEntry(index, term, someData()));
       }
       return this;
     }
 
-    public LogSequenceBuilder configurationAndIndex(QuorumConfiguration configuration, long index) {
-      logSequence.add(new LogEntry(term, index, new ArrayList<>(), configuration.toProtostuff()));
+    public OLogSequenceBuilder configurationAndIndex(QuorumConfiguration configuration, long index) {
+      logSequence.add(new OLogEntry(index, term, new OLogProtostuffContent<>(configuration.toProtostuff())));
       return this;
     }
 
     // Alternate name for code clarity in certain places
-    public LogSequenceBuilder seqNums(long... seqNums) {
+    public OLogSequenceBuilder seqNums(long... seqNums) {
       return indexes(seqNums);
     }
 
     // Alternate name for code clarity in certain places
-    public LogSequenceBuilder configurationAndSeqNum(QuorumConfiguration configuration, long seqNum) {
+    public OLogSequenceBuilder configurationAndSeqNum(QuorumConfiguration configuration, long seqNum) {
       return configurationAndIndex(configuration, seqNum);
     }
 
-    public List<LogEntry> build() {
+    public List<OLogEntry> build() {
       return logSequence;
     }
   }

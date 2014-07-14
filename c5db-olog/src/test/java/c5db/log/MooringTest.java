@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static c5db.FutureActions.returnFutureWithValue;
-import static c5db.log.LogTestUtil.makeConfigurationEntry;
-import static c5db.log.LogTestUtil.makeProtostuffEntry;
 import static c5db.log.OLogEntryOracle.QuorumConfigurationWithSeqNum;
+import static c5db.replication.ReplicatorTestUtil.makeConfigurationEntry;
+import static c5db.replication.ReplicatorTestUtil.makeProtostuffEntry;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

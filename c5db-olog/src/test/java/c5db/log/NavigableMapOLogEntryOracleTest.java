@@ -18,13 +18,14 @@
 package c5db.log;
 
 import c5db.replication.QuorumConfiguration;
+import c5db.replication.ReplicatorTestUtil;
 import c5db.replication.generated.LogEntry;
 import com.google.common.collect.Lists;
 import org.junit.Test;
 
-import static c5db.log.LogTestUtil.entries;
 import static c5db.log.OLogEntryOracle.QuorumConfigurationWithSeqNum;
 import static c5db.replication.QuorumConfiguration.EMPTY;
+import static c5db.replication.ReplicatorTestUtil.entries;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -119,7 +120,7 @@ public class NavigableMapOLogEntryOracleTest {
     assertThat(oracle.getGreatestSeqNum(), is(equalTo(0L)));
   }
 
-  private void havingLogged(LogTestUtil.LogSequenceBuilder sequenceBuilder) {
+  private void havingLogged(ReplicatorTestUtil.LogSequenceBuilder sequenceBuilder) {
     for (LogEntry entry : sequenceBuilder.build()) {
       OLogEntry oLogEntry = OLogEntry.fromProtostuff(entry);
       oracle.notifyLogging(oLogEntry);

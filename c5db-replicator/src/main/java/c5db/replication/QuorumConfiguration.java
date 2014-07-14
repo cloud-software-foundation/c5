@@ -51,7 +51,7 @@ public final class QuorumConfiguration {
     return new QuorumConfiguration(peerCollection);
   }
 
-  public static QuorumConfiguration fromProtostuff(QuorumConfigurationMessage message) {
+  public static QuorumConfiguration fromProtostuff(c5db.replication.generated.QuorumConfigurationMessage message) {
     if (message.getTransitional()) {
       return new QuorumConfiguration(message.getPrevPeersList(), message.getNextPeersList());
     } else {

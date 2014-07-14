@@ -30,11 +30,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import static c5db.log.LogTestUtil.aSeqNum;
-import static c5db.log.LogTestUtil.anElectionTerm;
 import static c5db.log.LogTestUtil.makeEntry;
-import static c5db.log.LogTestUtil.seqNum;
-import static c5db.log.LogTestUtil.term;
+import static c5db.log.ReplicatorLogGenericTestUtil.aSeqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.anElectionTerm;
+import static c5db.log.ReplicatorLogGenericTestUtil.seqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

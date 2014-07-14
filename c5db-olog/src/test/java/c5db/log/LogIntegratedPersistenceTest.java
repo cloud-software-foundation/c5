@@ -31,12 +31,12 @@ import java.util.concurrent.Executors;
 
 import static c5db.FutureMatchers.resultsIn;
 import static c5db.log.LogMatchers.aListOfEntriesWithConsecutiveSeqNums;
-import static c5db.log.LogTestUtil.entries;
+import static c5db.log.ReplicatorLogGenericTestUtil.seqNum;
+import static c5db.log.ReplicatorLogGenericTestUtil.someData;
+import static c5db.log.ReplicatorLogGenericTestUtil.term;
+import static c5db.replication.ReplicatorTestUtil.entries;
 import static c5db.log.LogTestUtil.makeSingleEntryList;
-import static c5db.log.LogTestUtil.seqNum;
 import static c5db.log.LogTestUtil.someConsecutiveEntries;
-import static c5db.log.LogTestUtil.someData;
-import static c5db.log.LogTestUtil.term;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
