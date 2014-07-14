@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2013  Ohm Data
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package c5db.log;
+
+option java_package = "c5db.generated";
+option java_outer_classname = "Log";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "replication_messages.proto";
+
+
+message RegionWalEntry {
+    optional string regionInfo = 1;
+    optional bytes key = 2;
+    optional bytes family = 3;
+    optional bytes column = 4;
+    optional bytes value = 5;
+    optional uint64 ts = 6;
+}
+
+message QuorumMapping {
+    // The ID to use elsewhere in the file.
+    optional int32 quorumTag = 1;
+    // The actual string that was provided to us.
+    optional string quorumId = 2;
+}
+
+message OLogHeader {
+    optional int64 baseTerm = 1;
+    optional int64 baseSeqNum = 2;
+    optional c5db.replication.QuorumConfigurationMessage baseConfiguration = 3;
+}
+
+enum OLogContentType {
+    DATA = 1;
+    QUORUM_CONFIGURATION = 2;
+}
+
+message OLogEntryHeader {
+    optional int64 seqNum = 1; // same as the "index" in the terminology of the replication algorithm
+    optional int64 term = 2; // election term
+    optional int32 contentLength = 3; // length of content (raw bytes) after the CRC of this header
+    optional OLogContentType type = 4; // type of content
+}
+
