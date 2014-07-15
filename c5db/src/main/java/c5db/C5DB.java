@@ -32,6 +32,7 @@ import c5db.messages.generated.ModuleType;
 import c5db.messages.generated.StartModule;
 import c5db.messages.generated.StopModule;
 import c5db.regionserver.RegionServerService;
+import c5db.replication.ConfigDirectoryQuorumFileReaderWriter;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
 import c5db.util.C5FiberFactory;
@@ -77,7 +78,7 @@ import java.util.function.Consumer;
 /**
  * Holds information about all other modules, can start/stop other modules, etc.
  * Knows the 'root' information about this server as well, such as NodeId, etc.
- * <p/>
+ * <p>
  * To shut down the 'server' module is to shut down the server.
  */
 public class C5DB extends AbstractService implements C5Server {
@@ -420,7 +421,7 @@ public class C5DB extends AbstractService implements C5Server {
       }
       case Replication: {
         C5Module module = new ReplicatorService(bossGroup, workerGroup, nodeId, modulePort, this,
-            this::getFiber, configDirectory);
+            this::getFiber, new ConfigDirectoryQuorumFileReaderWriter(configDirectory));
         startServiceModule(module);
         break;
       }
