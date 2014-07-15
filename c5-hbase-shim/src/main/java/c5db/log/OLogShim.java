@@ -57,10 +57,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * A distributed WriteAheadLog using c5's replication algorithm
  */
 public class OLogShim implements Syncable, HLog {
-  public static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
-
   private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
-  private static final int MAX_COMMITS_OUTSTANDING = 10000000;
+
+  private static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
+  private static final int MAX_COMMITS_OUTSTANDING = 1000;
+
   private final AtomicLong logSeqNum = new AtomicLong(0);
   private final Replicator replicatorInstance;
 
