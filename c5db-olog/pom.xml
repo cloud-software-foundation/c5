@@ -43,11 +43,6 @@
             <version>${guava.version}</version>
         </dependency>
         <dependency>
-            <groupId>c5db</groupId>
-            <artifactId>hbase-server</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
