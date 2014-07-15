@@ -47,6 +47,6 @@ class DefaultSystemTimeReplicatorClock implements ReplicatorClock {
 
   @Override
   public long leaderLogRequestsProcessingInterval() {
-    return ReplicatorConstants.REPLICATOR_DEFAULT_LEADER_LOG_INTERVAL;
+    return ReplicatorConstants.REPLICATOR_DEFAULT_LEADER_LOG_INTERVAL_MILLISECONDS;
   }
 }
