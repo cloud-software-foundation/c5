@@ -133,8 +133,6 @@ public class C5DB extends AbstractService implements C5Server {
     } else {
       this.minQuorumSize = C5ServerConstants.MINIMUM_DEFAULT_QUORUM_SIZE;
     }
-
-    serviceRegisteredChannel.subscribe(serverFiber, this::onModuleStateChange);
   }
 
   @Override
@@ -256,6 +254,8 @@ public class C5DB extends AbstractService implements C5Server {
       });
 
       commandRequests.subscribe(serverFiber, this::processCommandRequest);
+
+      serviceRegisteredChannel.subscribe(serverFiber, this::onModuleStateChange);
 
       serverFiber.start();
 
