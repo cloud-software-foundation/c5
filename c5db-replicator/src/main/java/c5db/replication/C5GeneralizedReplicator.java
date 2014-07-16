@@ -63,9 +63,15 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
   }
 
   @Override
-  public ListenableFuture<Long> replicate(List<ByteBuffer> data) throws InterruptedException {
+  public ListenableFuture<Long> replicate(List<ByteBuffer> data) throws InterruptedException,
+      InvalidReplicatorStateException {
+
     final ReceiptWithCompletionFuture receiptWithCompletionFuture =
         new ReceiptWithCompletionFuture(replicator.logData(data));
+
+    if (receiptWithCompletionFuture.receiptFuture == null) {
+      throw new InvalidReplicatorStateException("Replicator is not in the leader state");
+    }
 
     // Add to the queue on the fiber for concurrency safety
     fiber.execute(
