@@ -18,9 +18,9 @@
 package c5db.log;
 
 import c5db.generated.RegionWalEntry;
-import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
-import c5db.interfaces.replication.ReplicatorReceipt;
+import c5db.replication.C5GeneralizedReplicator;
+import c5db.replication.GeneralizedReplicator;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.LinkBuffer;
@@ -34,8 +34,6 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
-import org.jetbrains.annotations.NotNull;
-import org.jetlang.channels.ChannelSubscription;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +46,6 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,39 +57,23 @@ public class OLogShim implements Syncable, HLog {
   private static final Logger LOG = LoggerFactory.getLogger(OLogShim.class);
 
   private static final int WAL_SYNC_TIMEOUT_SECONDS = 10;
-  private static final int MAX_COMMITS_OUTSTANDING = 1000;
+  private static final int MAX_APPENDS_OUTSTANDING = 1000;
 
   private final AtomicLong logSeqNum = new AtomicLong(0);
-  private final Replicator replicatorInstance;
+  private final GeneralizedReplicator replicator;
 
-  // When logging, place all receipts in this queue. Then, when performing sync, reconcile all
-  // queued receipts with received commit notices. To prevent this queue and the commit notice
-  // queue from growing without bound, the client of this class must sync regularly. That's
-  // something the client would need to do anyway in order to determine whether its writes are
-  // succeeding.
-  private final BlockingQueue<ListenableFuture<ReplicatorReceipt>> receiptFutureQueue = new LinkedBlockingQueue<>();
-
-  // When the OLogShim's Replicator issues a commit notice, keep track of it in this queue.
-  // Then, when performing sync, make use of these notices.
-  private final BlockingQueue<IndexCommitNotice> commitNoticeQueue = new ArrayBlockingQueue<>(MAX_COMMITS_OUTSTANDING);
-
-  // Keep track of the most recent IndexCommitNotice that was withdrawn from the commitNoticeQueue.
-  private IndexCommitNotice lastCommitNotice;
+  // When logging, place all received futures in this queue. Then, when performing sync, wait
+  // for all those saved futures. To prevent this queue from growing without bound, the client
+  // of this class must sync regularly. That's something the client would need to do anyway in
+  // order to determine whether its writes are succeeding.
+  private final BlockingQueue<ListenableFuture<Long>> appendFutures = new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
 
   /**
    * The caller of this constructor must take responsibility for starting and disposing of
    * the Replicator, and starting and disposing of the fiber.
    */
   public OLogShim(Replicator replicatorInstance, Fiber fiber) {
-    this.replicatorInstance = replicatorInstance;
-    String quorumId = replicatorInstance.getQuorumId();
-    long serverNodeId = replicatorInstance.getId();
-
-    replicatorInstance.getCommitNoticeChannel().subscribe(
-        new ChannelSubscription<>(fiber, commitNoticeQueue::add,
-            (notice) ->
-                notice.nodeId == serverNodeId
-                    && notice.quorumId.equals(quorumId)));
+    this.replicator = new C5GeneralizedReplicator(replicatorInstance, fiber);
   }
 
   //TODO fix so we don't always insert a huge amount of data
@@ -180,16 +161,12 @@ public class OLogShim implements Syncable, HLog {
   public void sync() throws IOException {
     // TODO how should this handle a case where some writes succeed and others fail?
     // TODO currently it throws an exception, but that can lead to the appearance that a successful write failed
-    List<ListenableFuture<ReplicatorReceipt>> receiptList = new ArrayList<>();
-    receiptFutureQueue.drainTo(receiptList);
+    List<ListenableFuture<Long>> appendFutureList = new ArrayList<>();
+    appendFutures.drainTo(appendFutureList);
 
     try {
-      for (ListenableFuture<ReplicatorReceipt> receiptFuture : receiptList) {
-        ReplicatorReceipt receipt = receiptFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        IndexCommitNotice commitNotice = waitForCommitNotice(receipt.seqNum);
-        if (commitNotice.term != receipt.term) {
-          throw new IOException("OLogShim#sync: term returned by logData differs from term of IndexCommitNotice");
-        }
+      for (ListenableFuture<Long> appendFuture : appendFutureList) {
+        appendFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
       }
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException("Error encountered while waiting within OLogShim#sync", e);
@@ -203,7 +180,7 @@ public class OLogShim implements Syncable, HLog {
 
   @Override
   // TODO this is a problematic call because the replication algorithm is in charge of the log-ids. We must
-  // TODO  depreciate this call, and bubble the consequences throughout the system.
+  // TODO  deprecate this call, and bubble the consequences throughout the system.
   public void setSequenceNumber(long newValue) {
     for (long id = this.logSeqNum.get(); id < newValue &&
         !this.logSeqNum.compareAndSet(id, newValue); id = this.logSeqNum.get()) {
@@ -246,13 +223,10 @@ public class OLogShim implements Syncable, HLog {
       List<ByteBuffer> entryBytes = serializeWalEdit(info.getRegionNameAsString(), edit);
 
       // our replicator knows what quorumId/tabletId we are.
-      ListenableFuture<ReplicatorReceipt> receiptFuture = replicatorInstance.logData(entryBytes);
-      if (receiptFuture == null) {
-        throw new IOException("OLogShim: attempting to append a WALEdit to a Replicator not in the leader state");
-      }
-      receiptFutureQueue.add(receiptFuture);
+      ListenableFuture<Long> appendFuture = replicator.replicate(entryBytes);
+      appendFutures.add(appendFuture);
 
-    } catch (InterruptedException e) {
+    } catch (GeneralizedReplicator.InvalidReplicatorStateException | InterruptedException e) {
       throw new IOException(e);
     }
     return 0;
@@ -301,30 +275,5 @@ public class OLogShim implements Syncable, HLog {
 
     buffers.addAll(lengthBuf.finish());
     buffers.addAll(entryBuffer.finish());
-  }
-
-  private IndexCommitNotice waitForCommitNotice(long index) throws IOException, InterruptedException, TimeoutException {
-    while (true) {
-      if (lastCommitNotice == null || lastCommitNotice.lastIndex < index) {
-        lastCommitNotice = pollWithTimeoutException(commitNoticeQueue, WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-      } else if (index < lastCommitNotice.firstIndex) {
-        LOG.error("weird, requested to wait for a notice with index {} but that's prior to the latest commit notice {}",
-            index, lastCommitNotice);
-        throw new IOException("waitForCommitNotice");
-
-      } else {
-        return lastCommitNotice;
-      }
-    }
-  }
-
-  private <T> T pollWithTimeoutException(BlockingQueue<T> queue, long timeout, @NotNull TimeUnit unit)
-      throws InterruptedException, TimeoutException {
-    T result = queue.poll(timeout, unit);
-    if (result == null) {
-      throw new TimeoutException("pollWithTimeoutException");
-    }
-    return result;
   }
 }
