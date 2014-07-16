@@ -41,5 +41,18 @@ public interface GeneralizedReplicator {
    * both succeed, and if one "happens-before" the other, then the earlier request will
    * have a lower sequence number than the second.
    */
-  ListenableFuture<Long> replicate(List<ByteBuffer> data) throws InterruptedException;
+  ListenableFuture<Long> replicate(List<ByteBuffer> data)
+      throws InterruptedException, InvalidReplicatorStateException;
+
+  /**
+   * An exception thrown when attempting to replicate but the GeneralizedReplicator is not
+   * accepting replication requests -- perhaps because the replicator must be in a certain
+   * state to accept requests (e.g. leader in Raft or proposer in Paxos), and that state
+   * might not be known until the time the request is submitted.
+   */
+  public class InvalidReplicatorStateException extends Exception {
+    public InvalidReplicatorStateException(String message) {
+      super(message);
+    }
+  }
 }
