@@ -149,8 +149,8 @@ public class StandaloneReplicatorTest {
         add(replicator.replicate(someData()));
       }};
 
-      assertThat(allAsList(replicateFutures), resultsInAListOfLongs(hasSize(3)));
-      assertThat(allAsList(replicateFutures), resultsInAListOfLongs(isStrictlyIncreasing()));
+      assertThat(allAsList(replicateFutures), resultsInAListOfLongsThat(hasSize(3)));
+      assertThat(allAsList(replicateFutures), resultsInAListOfLongsThat(isStrictlyIncreasing()));
     }
   }
 
@@ -165,7 +165,7 @@ public class StandaloneReplicatorTest {
     return Lists.newArrayList(ReplicatorLogGenericTestUtil.someData());
   }
 
-  private static Matcher<? super ListenableFuture<List<Long>>> resultsInAListOfLongs(
+  private static Matcher<? super ListenableFuture<List<Long>>> resultsInAListOfLongsThat(
       Matcher<? super List<Long>> longsMatcher) {
     return resultsIn(longsMatcher);
   }
