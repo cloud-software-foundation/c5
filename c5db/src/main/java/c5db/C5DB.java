@@ -426,7 +426,7 @@ public class C5DB extends AbstractService implements C5Server {
         break;
       }
       case Log: {
-        C5Module module = new LogService(configDirectory.getBaseConfigPath());
+        C5Module module = new LogService(configDirectory.getBaseConfigPath(), this::getFiber);
         startServiceModule(module);
         break;
       }
