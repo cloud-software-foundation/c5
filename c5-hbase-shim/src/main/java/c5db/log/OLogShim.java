@@ -18,9 +18,9 @@
 package c5db.log;
 
 import c5db.generated.RegionWalEntry;
+import c5db.interfaces.replication.GeneralizedReplicator;
 import c5db.interfaces.replication.Replicator;
 import c5db.replication.C5GeneralizedReplicator;
-import c5db.replication.GeneralizedReplicator;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.LinkBuffer;
