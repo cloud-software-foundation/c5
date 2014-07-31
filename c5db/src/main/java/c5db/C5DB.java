@@ -171,6 +171,14 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
+  public ListenableFuture<ImmutableMap<ModuleType, Integer>> getAvailableModulePorts() {
+    final SettableFuture<ImmutableMap<ModuleType, Integer>> future = SettableFuture.create();
+    serverFiber.execute(() ->
+        future.set(ImmutableMap.copyOf(availableModulePorts)));
+    return future;
+  }
+
+  @Override
   public Subscriber<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel() {
     return availableModulePortsChannel;
   }
