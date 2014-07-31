@@ -422,8 +422,7 @@ public class C5DB extends AbstractService implements C5Server {
 
     switch (moduleType) {
       case Discovery: {
-        C5Module module = new BeaconService(this.nodeId, modulePort, beaconServiceFiber, workerGroup,
-            ImmutableMap.copyOf(availableModulePorts), this);
+        C5Module module = new BeaconService(this.nodeId, modulePort, workerGroup, this, this::getFiber);
         startServiceModule(module);
         break;
       }
