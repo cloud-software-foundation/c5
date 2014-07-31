@@ -21,6 +21,7 @@ import c5db.ReplicatorConstants;
 import c5db.interfaces.replication.GeneralizedReplicator;
 import c5db.interfaces.replication.IndexCommitNotice;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.replication.ReplicatorReceipt;
 import c5db.util.C5Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -42,8 +43,11 @@ import java.util.concurrent.ExecutionException;
  * interface.
  */
 public class C5GeneralizedReplicator implements GeneralizedReplicator {
+  private final long nodeId;
   private final Replicator replicator;
   private final Fiber fiber;
+
+  private SettableFuture<Void> availableFuture;
 
   /**
    * Queue of receipts for pending log requests and their futures; access this queue only
@@ -57,10 +61,12 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
    * user takes responsibility for their disposal.
    */
   public C5GeneralizedReplicator(Replicator replicator, Fiber fiber) {
+    this.nodeId = replicator.getId();
     this.replicator = replicator;
     this.fiber = fiber;
 
     setupCommitNoticeSubscription();
+    setupEventNoticeSubscription();
   }
 
   @Override
@@ -81,6 +87,22 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
     return receiptWithCompletionFuture.completionFuture;
   }
 
+  @Override
+  public ListenableFuture<Void> isAvailableFuture() {
+    SettableFuture<Void> returnedFuture = SettableFuture.create();
+
+    fiber.execute(() -> {
+      if (this.availableFuture == null) {
+        this.availableFuture = returnedFuture;
+      } else {
+        // "Forward" the result of the existing availableFuture to the newly created one.
+        C5Futures.addCallback(this.availableFuture, returnedFuture::set, returnedFuture::setException, fiber);
+      }
+    });
+
+    return returnedFuture;
+  }
+
   private void setupCommitNoticeSubscription() {
     final String quorumId = replicator.getQuorumId();
     final long serverNodeId = replicator.getId();
@@ -90,6 +112,10 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
             (notice) ->
                 notice.nodeId == serverNodeId
                     && notice.quorumId.equals(quorumId)));
+  }
+
+  private void setupEventNoticeSubscription() {
+    replicator.getEventChannel().subscribe(fiber, this::handleEventNotice);
   }
 
   /**
@@ -125,6 +151,19 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
       }
 
       receiptQueue.poll();
+    }
+  }
+
+  @FiberOnly
+  private void handleEventNotice(ReplicatorInstanceEvent eventNotice) {
+    if (availableFuture != null
+        && eventNotice.instance == replicator
+        && eventNotice.eventType == ReplicatorInstanceEvent.EventType.LEADER_ELECTED
+        && eventNotice.newLeader == nodeId) {
+
+      // Notify past callers of isAvailableFuture
+      availableFuture.set(null);
+      availableFuture = null;
     }
   }
 
