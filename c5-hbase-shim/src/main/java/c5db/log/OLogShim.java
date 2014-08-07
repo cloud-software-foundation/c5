@@ -19,6 +19,7 @@ package c5db.log;
 
 import c5db.generated.RegionWalEntry;
 import c5db.interfaces.replication.GeneralizedReplicator;
+import c5db.interfaces.replication.ReplicateSubmissionInfo;
 import c5db.interfaces.replication.Replicator;
 import c5db.replication.C5GeneralizedReplicator;
 import com.google.common.primitives.Ints;
@@ -66,7 +67,8 @@ public class OLogShim implements Syncable, HLog {
   // for all those saved futures. To prevent this queue from growing without bound, the client
   // of this class must sync regularly. That's something the client would need to do anyway in
   // order to determine whether its writes are succeeding.
-  private final BlockingQueue<ListenableFuture<Long>> appendFutures = new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
+  private final BlockingQueue<ListenableFuture<ReplicateSubmissionInfo>> appendFutures =
+      new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
 
   /**
    * The caller of this constructor must take responsibility for starting and disposing of
@@ -161,12 +163,14 @@ public class OLogShim implements Syncable, HLog {
   public void sync() throws IOException {
     // TODO how should this handle a case where some writes succeed and others fail?
     // TODO currently it throws an exception, but that can lead to the appearance that a successful write failed
-    List<ListenableFuture<Long>> appendFutureList = new ArrayList<>();
+    List<ListenableFuture<ReplicateSubmissionInfo>> appendFutureList = new ArrayList<>();
     appendFutures.drainTo(appendFutureList);
 
     try {
-      for (ListenableFuture<Long> appendFuture : appendFutureList) {
-        appendFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+      for (ListenableFuture<ReplicateSubmissionInfo> appendFuture : appendFutureList) {
+        appendFuture
+            .get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .completedFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
       }
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException("Error encountered while waiting within OLogShim#sync", e);
@@ -223,7 +227,7 @@ public class OLogShim implements Syncable, HLog {
       List<ByteBuffer> entryBytes = serializeWalEdit(info.getRegionNameAsString(), edit);
 
       // our replicator knows what quorumId/tabletId we are.
-      ListenableFuture<Long> appendFuture = replicator.replicate(entryBytes);
+      ListenableFuture<ReplicateSubmissionInfo> appendFuture = replicator.replicate(entryBytes);
       appendFutures.add(appendFuture);
 
     } catch (GeneralizedReplicator.InvalidReplicatorStateException | InterruptedException e) {
