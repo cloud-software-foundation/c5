@@ -17,9 +17,9 @@
 
 package c5db.log;
 
-import c5db.interfaces.replication.IndexCommitNotice;
-import c5db.interfaces.replication.Replicator;
-import c5db.interfaces.replication.ReplicatorReceipt;
+import c5db.interfaces.replication.GeneralizedReplicator;
+import c5db.interfaces.replication.ReplicateSubmissionInfo;
+import com.google.common.util.concurrent.Futures;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
@@ -28,8 +28,6 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.jetlang.channels.Channel;
-import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
@@ -49,22 +47,19 @@ import java.util.UUID;
 import static c5db.FutureActions.returnFutureWithValue;
 
 public class OLogShimTest {
-  private static final String QUORUM_ID = "q";
-  private static final String ANOTHER_QUORUM_ID = "q2";
 
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
 
-  private final Replicator replicator = context.mock(Replicator.class);
+  private final GeneralizedReplicator replicator = context.mock(GeneralizedReplicator.class);
   @SuppressWarnings("deprecation")
   private final HTableDescriptor descriptor = new HTableDescriptor();
   @SuppressWarnings("deprecation")
   private final HRegionInfo info = new HRegionInfo();
   private final TableName tableName = descriptor.getTableName();
 
-  private final Channel<IndexCommitNotice> commitNoticeChannel = new MemoryChannel<>();
   private final Fiber oLogShimFiber = new ThreadFiber();
 
   private HLog hLog;
@@ -72,18 +67,12 @@ public class OLogShimTest {
   @Before
   public void setOverallExpectationsAndCreateTestObject() {
     context.checking(new Expectations() {{
-      allowing(replicator).getQuorumId();
-      will(returnValue(QUORUM_ID));
-
-      allowing(replicator).getId();
-      will(returnValue(1L));
-
-      allowing(replicator).getCommitNoticeChannel();
-      will(returnValue(commitNoticeChannel));
+      allowing(replicator).isAvailableFuture();
+      will(returnFutureWithValue(null));
     }});
 
     oLogShimFiber.start();
-    hLog = new OLogShim(replicator, oLogShimFiber);
+    hLog = new OLogShim(replicator);
   }
 
   @After
@@ -94,61 +83,47 @@ public class OLogShimTest {
   @Test
   public void logsOneReplicationDatumPerSubmittedWALEdit() throws Exception {
     context.checking(new Expectations() {{
-      oneOf(replicator).logData(with(anyData()));
+      oneOf(replicator).replicate(with(anyData()));
     }});
 
     hLog.appendNoSync(info, tableName, aWalEditWithMultipleKeyValues(), aClusterIdList(), currentTime(), descriptor);
   }
 
   @Test(expected = IOException.class, timeout = 3000)
-  public void syncThrowsAnExceptionIfACommitNoticeIsPublishedWhoseTermDisagreesWithTheTermOfALoggedEntry()
+  public void syncThrowsAnExceptionIfTheReplicatorIsUnableToReplicateTheData()
       throws Exception {
 
-    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(17), index(13)));
-
-    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), index(13), index(13), term(18)));
+    havingAppendedAndReceivedResponse(hLog, aFailureResponseWithSeqNum(1));
 
     hLog.sync(); // exception
   }
 
   @Test(timeout = 3000)
-  public void syncIgnoresCommitNoticesPublishedForADifferentQuorum() throws Exception {
-    long index = 77;
-    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(2), index));
-
-    theReplicatorHavingIssued(new IndexCommitNotice(ANOTHER_QUORUM_ID, replicator.getId(), index, index, term(1)));
-    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), index, index, term(2))); // match
-
-    hLog.sync();
-  }
-
-  @Test(timeout = 3000)
   public void syncCanWaitForSeveralPrecedingLogAppends() throws Exception {
 
-    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(101), index(1)));
-    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(102), index(2)));
-    havingAppendedAndReceivedReceipt(hLog, new ReplicatorReceipt(term(102), index(3)));
-
-    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), 1, 1, 101));
-    theReplicatorHavingIssued(new IndexCommitNotice(QUORUM_ID, replicator.getId(), 2, 3, 102));
+    havingAppendedAndReceivedResponse(hLog, aSuccessResponseWithSeqNum(1));
+    havingAppendedAndReceivedResponse(hLog, aSuccessResponseWithSeqNum(2));
+    havingAppendedAndReceivedResponse(hLog, aSuccessResponseWithSeqNum(3));
 
     hLog.sync();
   }
 
 
-  private void havingAppendedAndReceivedReceipt(HLog hLog, ReplicatorReceipt receipt) throws Exception {
+  private void havingAppendedAndReceivedResponse(HLog hLog, ReplicateSubmissionInfo submissionInfo) throws Exception {
     context.checking(new Expectations() {{
-      allowing(replicator).logData(with(anyData()));
-      will(returnFutureWithValue(
-          receipt));
+      allowing(replicator).replicate(with(anyData()));
+      will(returnFutureWithValue(submissionInfo));
     }});
 
     hLog.appendNoSync(info, tableName, aWalEditWithMultipleKeyValues(), aClusterIdList(), currentTime(), descriptor);
   }
 
-  private void theReplicatorHavingIssued(IndexCommitNotice notice) {
-    oLogShimFiber.execute(() ->
-        commitNoticeChannel.publish(notice));
+  private ReplicateSubmissionInfo aSuccessResponseWithSeqNum(long seqNum) {
+    return new ReplicateSubmissionInfo(seqNum, Futures.immediateFuture(null));
+  }
+
+  private ReplicateSubmissionInfo aFailureResponseWithSeqNum(long seqNum) {
+    return new ReplicateSubmissionInfo(seqNum, Futures.immediateFailedFuture(new IOException()));
   }
 
   private WALEdit aWalEditWithMultipleKeyValues() {
@@ -174,13 +149,5 @@ public class OLogShimTest {
 
   private Matcher<List<ByteBuffer>> anyData() {
     return Matchers.instanceOf(List.class);
-  }
-
-  private long term(long term) {
-    return term;
-  }
-
-  private long index(long index) {
-    return index;
   }
 }
