@@ -127,6 +127,9 @@ public class BasicTableCreationTest {
             with(any(String.class)),
             with.is(anything()));
         allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
+
+        allowing(replicator).getEventChannel();
+        will(returnValue(eventChannel));
       }
     });
 
@@ -155,9 +158,6 @@ public class BasicTableCreationTest {
 
       oneOf(replicator).getStateChannel();
       will(returnValue(stateChannel));
-
-      oneOf(replicator).getEventChannel();
-      will(returnValue(eventChannel));
 
       allowing(replicator).getCommitNoticeChannel();
 
@@ -200,9 +200,6 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).getEventChannel();
-        will(returnValue(eventChannel));
-
         oneOf(replicator).start();
 
         allowing(replicator).getQuorumId();
@@ -235,9 +232,6 @@ public class BasicTableCreationTest {
 
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
-
-        oneOf(replicator).getEventChannel();
-        will(returnValue(eventChannel));
 
         oneOf(replicator).start();
 
