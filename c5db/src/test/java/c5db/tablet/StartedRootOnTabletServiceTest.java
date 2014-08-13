@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 
@@ -26,7 +27,6 @@ import c5db.interfaces.replication.ReplicatorReceipt;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-
 import com.google.common.collect.ImmutableMap;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -85,8 +85,6 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
 
         oneOf(c5FiberFactory).create();
         will(returnValue(fiber));
-
-        oneOf(replicator).start();
 
         oneOf(replicator).getQuorumId();
         will(returnValue("hbase:root,,1.9e44d7942d3598d55c758b7b83373c71."));
