@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
@@ -203,7 +204,6 @@ public class TabletServiceCommandCheckTest {
 
         allowing(replicator).getId();
 
-        oneOf(replicator).start();
         allowing(replicator).getQuorumId();
         will(returnValue("1"));
 
@@ -241,7 +241,6 @@ public class TabletServiceCommandCheckTest {
         allowing(replicator).getEventChannel();
         will(returnValue(eventChannel));
 
-        allowing(replicator).start();
         allowing(replicator).getQuorumId();
         will(returnValue("1"));
 
@@ -319,7 +318,6 @@ public class TabletServiceCommandCheckTest {
 
       allowing(replicator).getId();
 
-      allowing(replicator).start();
       allowing(replicator).getQuorumId();
       will(returnValue("1"));
 
