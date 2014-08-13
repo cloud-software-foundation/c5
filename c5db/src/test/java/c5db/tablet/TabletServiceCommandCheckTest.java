@@ -194,7 +194,7 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(channel));
 
-        oneOf(replicator).getEventChannel();
+        allowing(replicator).getEventChannel();
         will(returnValue(eventChannel));
 
         allowing(replicator).getCommitNoticeChannel();
