@@ -88,7 +88,7 @@ public class C5DB extends AbstractService implements C5Server {
 
   private final Channel<CommandRpcRequest<?>> commandChannel = new MemoryChannel<>();
   private final Channel<ModuleStateChange> serviceRegisteredChannel = new MemoryChannel<>();
-  private final Channel<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel = new MemoryChannel<>();
+  private final Channel<ImmutableMap<ModuleType, Integer>> moduleChangeChannel = new MemoryChannel<>();
   private final SettableFuture<Void> shutdownFuture = SettableFuture.create();
   private final int minQuorumSize;
 
@@ -99,7 +99,7 @@ public class C5DB extends AbstractService implements C5Server {
   private EventLoopGroup workerGroup;
 
   private final Map<ModuleType, C5Module> allModules = new HashMap<>();
-  private final Map<ModuleType, Integer> availableModulePorts = new HashMap<>();
+  private final Map<ModuleType, Integer> onlineModuleToPortMap = new HashMap<>();
   private ExecutorService executor;
 
   public C5DB(Long nodeId) throws Exception {
@@ -169,16 +169,16 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public ListenableFuture<ImmutableMap<ModuleType, Integer>> getAvailableModulePorts() {
+  public ListenableFuture<ImmutableMap<ModuleType, Integer>> getOnlineModules() {
     final SettableFuture<ImmutableMap<ModuleType, Integer>> future = SettableFuture.create();
     serverFiber.execute(() ->
-        future.set(ImmutableMap.copyOf(availableModulePorts)));
+        future.set(ImmutableMap.copyOf(onlineModuleToPortMap)));
     return future;
   }
 
   @Override
-  public Subscriber<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel() {
-    return availableModulePortsChannel;
+  public Subscriber<ImmutableMap<ModuleType, Integer>> moduleChangeChannel() {
+    return moduleChangeChannel;
   }
 
   @Override
@@ -289,17 +289,17 @@ public class C5DB extends AbstractService implements C5Server {
       LOG.debug("BeaconService adding running module {} on port {}",
           message.module.getModuleType(),
           message.module.port());
-      availableModulePorts.put(message.module.getModuleType(), message.module.port());
+      onlineModuleToPortMap.put(message.module.getModuleType(), message.module.port());
     } else if (message.state == State.STOPPING || message.state == State.FAILED || message.state == State.TERMINATED) {
       LOG.debug("BeaconService removed module {} on port {} with state {}",
           message.module.getModuleType(),
           message.module.port(),
           message.state);
-      availableModulePorts.remove(message.module.getModuleType());
+      onlineModuleToPortMap.remove(message.module.getModuleType());
     } else {
       LOG.debug("BeaconService got unknown state module change {}", message);
     }
-    availableModulePortsChannel.publish(ImmutableMap.copyOf(availableModulePorts));
+    moduleChangeChannel.publish(ImmutableMap.copyOf(onlineModuleToPortMap));
   }
 
   private ConfigDirectory createConfigDirectory(Long nodeId) throws Exception {

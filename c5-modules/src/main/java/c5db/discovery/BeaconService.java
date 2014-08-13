@@ -186,8 +186,8 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   private List<String> localIPs;
   private Fiber fiber;
 
-  // This field is updated when modules' availability changes
-  private ImmutableMap<ModuleType, Integer> modulePorts;
+  // This field is updated when modules' availability changes. It must only be accessed from the fiber.
+  private ImmutableMap<ModuleType, Integer> onlineModuleToPortMap;
 
   private class BeaconMessageHandler extends SimpleChannelInboundHandler<Availability> {
     @Override
@@ -251,11 +251,11 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
     }
     LOG.trace("Sending beacon broadcast message to {}", broadcastAddress);
 
-    List<ModuleDescriptor> msgModules = new ArrayList<>(modulePorts.size());
-    for (ModuleType moduleType : modulePorts.keySet()) {
+    List<ModuleDescriptor> msgModules = new ArrayList<>(onlineModuleToPortMap.size());
+    for (ModuleType moduleType : onlineModuleToPortMap.keySet()) {
       msgModules.add(
           new ModuleDescriptor(moduleType,
-              modulePorts.get(moduleType))
+              onlineModuleToPortMap.get(moduleType))
       );
     }
 
@@ -338,13 +338,13 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
       // Schedule fiber tasks and subscriptions.
       incomingMessages.subscribe(fiber, this::processWireMessage);
       nodeInfoRequests.subscribe(fiber, this::handleNodeInfoRequest);
-      moduleInformationProvider.availableModulePortsChannel().subscribe(fiber, this::updateCurrentModulePorts);
+      moduleInformationProvider.moduleChangeChannel().subscribe(fiber, this::updateCurrentModulePorts);
 
       fiber.scheduleAtFixedRate(this::sendBeacon, 2, 10, TimeUnit.SECONDS);
 
-      C5Futures.addCallback(moduleInformationProvider.getAvailableModulePorts(),
-          (ImmutableMap<ModuleType, Integer> availablePorts) -> {
-            updateCurrentModulePorts(availablePorts);
+      C5Futures.addCallback(moduleInformationProvider.getOnlineModules(),
+          (ImmutableMap<ModuleType, Integer> onlineModuleToPortMap) -> {
+            updateCurrentModulePorts(onlineModuleToPortMap);
             notifyStarted();
           },
           this::notifyFailed,
@@ -360,8 +360,8 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   }
 
   @FiberOnly
-  private void updateCurrentModulePorts(ImmutableMap<ModuleType, Integer> modulePorts) {
-    this.modulePorts = modulePorts;
+  private void updateCurrentModulePorts(ImmutableMap<ModuleType, Integer> onlineModuleToPortMap) {
+    this.onlineModuleToPortMap = onlineModuleToPortMap;
   }
 
   private List<String> getLocalIPs() throws SocketException {
