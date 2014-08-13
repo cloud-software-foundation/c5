@@ -30,20 +30,20 @@ import org.jetlang.channels.RequestChannel;
 /**
  * A C5Server stands in for global resources that modules might need.  It provides global
  * services, configuration, notification buses and more.
- * <p/>
+ * <p>
  * Right now this interface is a little too kitchen-sinky, and it should probably have
  * individual responsibilities broken off to make dependencies a bit more clear.
- * <p/>
+ * <p>
  * Note that multiple {@link c5db.interfaces.C5Server} may be in a single JVM, so avoiding
  * static method calls is of paramount importance.
  */
-public interface C5Server extends ModuleServer, Service {
+public interface C5Server extends ModuleInformationProvider, Service {
   /**
    * Every server has a persistent id that is independent of it's (in some cases temporary)
    * network or host identification.  Normally this would be persisted in a configuration
    * file, and generated randomly (64 bits is enough for everyone, right?).  There may be
    * provisions to allow administrators to assign node ids.
-   * <p/>
+   * <p>
    *
    * @return THE node id for this server.
    */
@@ -54,13 +54,13 @@ public interface C5Server extends ModuleServer, Service {
    * A command is the extensible (and not entirely specified/thought out) mechanism by which
    * entities (code, RPCs, people via command line interfaces, etc) can start/stop/adjust
    * modules or other configuration settings, or anything else at a cross-service level.
-   * <p/>
+   * <p>
    * The intent is to centralize and standardize all configuration, startup, and other details
    * on how we manage services, servers and whatnot.  Every single operation should be accessible
    * via command messages, and those command messages should be able to be conveyed via RPC.
    * This allows administration-via tooling, and avoids the need to have something like
    * password-less ssh set up (which not all wish to do).
-   * <p/>
+   * <p>
    *
    * @return The jetlang channel to submit command messages
    */
@@ -69,7 +69,7 @@ public interface C5Server extends ModuleServer, Service {
   /**
    * Similar to {@link #getCommandChannel()} except providing a feedback message with information
    * on the status and success of commands.
-   * <p/>
+   * <p>
    *
    * @return The jetlang request channel to submit requests
    */

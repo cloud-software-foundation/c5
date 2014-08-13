@@ -22,7 +22,7 @@ import c5db.codec.UdpProtostuffEncoder;
 import c5db.discovery.generated.Availability;
 import c5db.discovery.generated.ModuleDescriptor;
 import c5db.interfaces.DiscoveryModule;
-import c5db.interfaces.ModuleServer;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.discovery.NewNodeVisible;
 import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.discovery.NodeInfoReply;
@@ -177,7 +177,7 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   private final Map<Long, NodeInfo> peerNodeInfoMap = new HashMap<>();
   private final org.jetlang.channels.Channel<Availability> incomingMessages = new MemoryChannel<>();
   private final org.jetlang.channels.Channel<NewNodeVisible> newNodeVisibleChannel = new MemoryChannel<>();
-  private final ModuleServer moduleServer;
+  private final ModuleInformationProvider moduleInformationProvider;
   private final FiberSupplier fiberSupplier;
 
   // These should be final, but they are initialized in doStart().
@@ -202,22 +202,22 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   }
 
   /**
-   * @param nodeId         the id of this node.
-   * @param discoveryPort  the port to send discovery beacon messages on, and to listen to
-   *                       for messages from others
-   * @param eventLoopGroup An EventLoopGroup that's not shut down.
-   * @param moduleServer   A module server, used to receive module availability updates
+   * @param nodeId                    the id of this node.
+   * @param discoveryPort             the port to send discovery beacon messages on, and to listen to
+   *                                  for messages from others
+   * @param eventLoopGroup            An EventLoopGroup that's not shut down.
+   * @param moduleInformationProvider Used to receive module availability updates
    */
   public BeaconService(long nodeId,
                        int discoveryPort,
                        EventLoopGroup eventLoopGroup,
-                       ModuleServer moduleServer,
+                       ModuleInformationProvider moduleInformationProvider,
                        FiberSupplier fiberSupplier
   ) {
     this.nodeId = nodeId;
     this.discoveryPort = discoveryPort;
     this.eventLoopGroup = eventLoopGroup;
-    this.moduleServer = moduleServer;
+    this.moduleInformationProvider = moduleInformationProvider;
     this.fiberSupplier = fiberSupplier;
     this.broadcastAddress = new InetSocketAddress(BROADCAST_ADDRESS, discoveryPort);
   }
@@ -338,11 +338,11 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
       // Schedule fiber tasks and subscriptions.
       incomingMessages.subscribe(fiber, this::processWireMessage);
       nodeInfoRequests.subscribe(fiber, this::handleNodeInfoRequest);
-      moduleServer.availableModulePortsChannel().subscribe(fiber, this::updateCurrentModulePorts);
+      moduleInformationProvider.availableModulePortsChannel().subscribe(fiber, this::updateCurrentModulePorts);
 
       fiber.scheduleAtFixedRate(this::sendBeacon, 2, 10, TimeUnit.SECONDS);
 
-      C5Futures.addCallback(moduleServer.getAvailableModulePorts(),
+      C5Futures.addCallback(moduleInformationProvider.getAvailableModulePorts(),
           (ImmutableMap<ModuleType, Integer> availablePorts) -> {
             updateCurrentModulePorts(availablePorts);
             notifyStarted();
