@@ -32,14 +32,14 @@ import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.util.C5FiberFactory;
+import c5db.util.ExceptionHandlingBatchExecutor;
+import c5db.util.FiberSupplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.ByteString;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -76,7 +75,6 @@ public class BasicTableCreationTest {
   private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
   private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
   private final C5Server c5Server = context.mock(C5Server.class);
-  private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
   private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
   private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
   private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
@@ -85,15 +83,15 @@ public class BasicTableCreationTest {
   private SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
   private TabletService tabletService;
 
+  private final FiberSupplier fiberSupplier = (throwableConsumer) ->
+      poolFiberFactory.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
+
   @Before
   public void before() throws Throwable {
     context.checking(new Expectations() {
       {
-        oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
-        will(returnValue(c5FiberFactory));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(poolFiberFactory.create()));
+        allowing(c5Server).getFiberSupplier();
+        will(returnValue(fiberSupplier));
       }
     });
     tabletService = new TabletService(c5Server);
@@ -147,12 +145,8 @@ public class BasicTableCreationTest {
     nodeStates.put(1l, new NodeInfo(new Availability()));
     nodeNotificationsCallback.set(ImmutableMap.copyOf(nodeStates));
 
-    Fiber fiber = poolFiberFactory.create();
     context.checking(new Expectations() {{
       // Emulate a very large quorum
-
-      oneOf(c5FiberFactory).create();
-      will(returnValue(fiber));
 
       oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
       will(returnValue(replicatorSettableFuture));
@@ -186,13 +180,9 @@ public class BasicTableCreationTest {
   @Test
   public void shouldCreateMetaEntryAppropriatelyOnTableCreation() throws Throwable {
 
-    final Fiber startMetaFiber1 = poolFiberFactory.create();
     replicatorSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startMetaFiber1));
-
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(replicatorSettableFuture));
 
@@ -215,14 +205,10 @@ public class BasicTableCreationTest {
     assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
 
     tabletService.getTablet("hbase:meta");
-    final Fiber startUserTableFiber1 = poolFiberFactory.create();
 
     SettableFuture<Long> longSettableFuture = SettableFuture.create();
     context.checking(new Expectations() {
       {
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startUserTableFiber1));
 
         oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
         will(returnValue(replicatorSettableFuture));

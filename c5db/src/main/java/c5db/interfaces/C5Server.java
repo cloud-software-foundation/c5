@@ -21,13 +21,11 @@ import c5db.ConfigDirectory;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.server.ConfigKeyUpdated;
 import c5db.messages.generated.CommandReply;
-import c5db.util.C5FiberFactory;
+import c5db.util.FiberSupplier;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.RequestChannel;
-
-import java.util.function.Consumer;
 
 /**
  * A C5Server stands in for global resources that modules might need.  It provides global
@@ -82,13 +80,10 @@ public interface C5Server extends ModuleServer, Service {
   public boolean isSingleNodeMode();
 
   /**
-   * Return a C5FiberFactory using the passed exception handler, which will be run on the fiber
-   * that throws an uncaught exception.
-   *
-   * @param throwableHandler Exception handler for pool fibers to use.
-   * @return C5FiberFactory instance.
+   * Return a FiberSupplier with which the caller may create a Fiber using the server's
+   * resources (for example, a shared fiber pool).
    */
-  public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableHandler);
+  FiberSupplier getFiberSupplier();
 
   ListenableFuture<Void> getShutdownFuture();
 

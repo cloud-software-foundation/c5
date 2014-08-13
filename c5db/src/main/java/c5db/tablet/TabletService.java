@@ -30,11 +30,11 @@ import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.RegionNotFoundException;
 import c5db.tablet.hregionbridge.HRegionBridge;
 import c5db.tablet.hregionbridge.HRegionServicesBridge;
-import c5db.regionserver.RegionNotFoundException;
-import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
+import c5db.util.FiberSupplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -51,7 +51,6 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
-
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
@@ -80,7 +79,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
   private static final byte[] HTABLE_DESCRIPTOR_QUALIFIER = Bytes.toBytes("HTABLE_QUAL");
 
-  private final C5FiberFactory fiberFactory;
+  private final FiberSupplier fiberSupplier;
   private final Fiber fiber;
   private final C5Server server;
   // TODO bring this into this class, and not have an external class.
@@ -94,8 +93,8 @@ public class TabletService extends AbstractService implements TabletModule {
   private Disposable newNodeWatcher = null;
 
   public TabletService(C5Server server) {
-    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
-    this.fiber = fiberFactory.create();
+    this.fiberSupplier = server.getFiberSupplier();
+    this.fiber = fiberSupplier.getFiber(this::notifyFailed);
     this.server = server;
     this.conf = HBaseConfiguration.create();
 
@@ -152,7 +151,6 @@ public class TabletService extends AbstractService implements TabletModule {
             tabletRegistry = new TabletRegistry(server,
                 server.getConfigDirectory(),
                 conf,
-                fiberFactory,
                 getTabletStateChanges(),
                 replicationModule,
                 ReplicatedTablet::new,

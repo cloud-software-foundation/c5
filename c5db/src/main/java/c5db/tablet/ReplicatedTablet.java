@@ -94,7 +94,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
                           final List<Long> peers,
                           final Path basePath,
                           final Configuration conf,
-                          final Fiber tabletFiber,
                           final ReplicationModule replicationModule,
                           final Region.Creator regionCreator) {
     this.server = server;
@@ -104,7 +103,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     this.conf = conf;
     this.basePath = basePath;
 
-    this.tabletFiber = tabletFiber;
+    this.tabletFiber = server.getFiberSupplier().getFiber(this::handleFail);
     this.replicationModule = replicationModule;
     this.regionCreator = regionCreator;
 
@@ -215,6 +214,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   private void handleFail(Throwable t) {
     tabletFiber.dispose();
+    shimFiber.dispose();
     setTabletStateFailed(t);
   }
 

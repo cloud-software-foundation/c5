@@ -14,16 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
-import c5db.AsyncChannelAsserts;
 import c5db.ConfigDirectory;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
-import c5db.util.C5FiberFactory;
-import c5db.util.JUnitRuleFiberExceptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
@@ -31,7 +29,6 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.jetlang.channels.Channel;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
@@ -40,9 +37,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Executors;
-
-import static c5db.util.PoolFiberFactoryWithExecutor.factoryWithExceptionHandler;
 
 /**
  *
@@ -51,10 +45,6 @@ public class TabletRegistryTest {
   private static final Channel<TabletStateChange> DO_NOT_CARE_STATE_CHANGE_CHANNEL = null;
   @Rule
   public JUnitRuleMockery context = new JUnitRuleMockery();
-  @Rule
-  public JUnitRuleFiberExceptions fiberExceptionRule = new JUnitRuleFiberExceptions();
-  private final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(1));
-  private final C5FiberFactory c5FiberFactory = factoryWithExceptionHandler(poolFiberFactory, fiberExceptionRule);
 
   private final C5Server c5server = context.mock(C5Server.class);
   private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
@@ -94,7 +84,6 @@ public class TabletRegistryTest {
           with(peerList),
           with.is(anything()), /* base path */
           with.is(anything()), /* legacy conf */
-          with.is(anything()), /* tablet fiber */
           with(same(replicationModule)),
           with(same(regionCreator)));
       will(returnValue(rootTablet));
@@ -107,7 +96,6 @@ public class TabletRegistryTest {
         c5server,
         configDirectory,
         legacyConf,
-        c5FiberFactory,
         DO_NOT_CARE_STATE_CHANGE_CHANNEL,
         replicationModule, tabletFactory,
         regionCreator);
@@ -133,8 +121,6 @@ public class TabletRegistryTest {
     }});
     tabletRegistry.startOnDiskRegions();
   }
-
-  AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
 
   @Test
   public void shouldStartTabletWhenRequestedTo() throws Throwable {
