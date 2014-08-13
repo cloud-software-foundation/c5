@@ -36,7 +36,7 @@ import org.jetlang.channels.RequestChannel;
  * Note that multiple {@link c5db.interfaces.C5Server} may be in a single JVM, so avoiding
  * static method calls is of paramount importance.
  */
-public interface C5Server extends ModuleServer, Service {
+public interface C5Server extends ModuleInformationProvider, Service {
   /**
    * Every server has a persistent id that is independent of it's (in some cases temporary)
    * network or host identification.  Normally this would be persisted in a configuration
