@@ -10,7 +10,7 @@
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>c5-modules</artifactId>
+    <artifactId>c5-api</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <build>
