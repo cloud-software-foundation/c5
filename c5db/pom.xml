@@ -153,7 +153,7 @@
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
-            <artifactId>c5-modules</artifactId>
+            <artifactId>c5-api</artifactId>
           <version>${project.version}</version>
         </dependency>
         <dependency>
