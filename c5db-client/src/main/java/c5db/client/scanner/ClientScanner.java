@@ -42,18 +42,20 @@ import c5db.client.RequestConverter;
 import c5db.client.generated.RegionSpecifier;
 import c5db.client.generated.ScanRequest;
 import c5db.client.generated.ScanResponse;
-import c5db.client.queue.WickedQueue;
 import io.netty.channel.Channel;
 import org.apache.hadoop.hbase.client.AbstractClientScanner;
 import org.apache.hadoop.hbase.client.Result;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class ClientScanner extends AbstractClientScanner {
+  private static final int QUEUE_SIZE = 100000;
   private final Channel ch;
   private final long scannerId;
-  private final WickedQueue<c5db.client.generated.Result> scanResults = new WickedQueue<>();
+  private final ArrayBlockingQueue<c5db.client.generated.Result> scanResults
+      = new ArrayBlockingQueue<>(QUEUE_SIZE);
   private final long commandId;
   private boolean isClosed = false;
 
