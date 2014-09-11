@@ -18,6 +18,7 @@
 package c5db.log;
 
 import c5db.generated.OLogHeader;
+import c5db.interfaces.log.SequentialEntryCodec;
 import c5db.replication.generated.QuorumConfigurationMessage;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -38,7 +39,7 @@ import static c5db.log.LogPersistenceService.PersistenceReader;
 
 public class CatOLog {
   // TODO replace formatting constants with command line parameters
-  private static final int HEX_ADDRESS_DIGITS = 4;
+  private static final int HEX_ADDRESS_DIGITS = 8;
   private static final int LONG_DIGITS = 8;
   private static final int INT_DIGITS = 8;
 

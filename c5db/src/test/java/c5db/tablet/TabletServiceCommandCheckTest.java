@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import c5db.AsyncChannelAsserts;
@@ -31,9 +32,8 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.util.C5FiberFactory;
 import c5db.util.ExceptionHandlingBatchExecutor;
-import c5db.util.PoolFiberFactoryWithExecutor;
+import c5db.util.FiberSupplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.listenTo;
@@ -81,7 +80,7 @@ public class TabletServiceCommandCheckTest {
   private final SettableFuture<Replicator> replicationFuture = SettableFuture.create();
   private final SettableFuture<DiscoveryModule> discoveryServiceFuture = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicationServiceFuture = SettableFuture.create();
-  private final C5FiberFactory fiberFactory = getFiberFactory(this::notifyFailed);
+  private final FiberSupplier fiberSupplier = getFiberSupplier();
   private C5Server c5Server;
   private TabletService tabletService;
   private DiscoveryModule discoveryModule;
@@ -91,12 +90,11 @@ public class TabletServiceCommandCheckTest {
   private Replicator replicator;
   private PoolFiberFactory fiberPool;
 
-  final void notifyFailed(Throwable cause) {
-  }
-
-  C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
+  private FiberSupplier getFiberSupplier() {
     fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-    return new PoolFiberFactoryWithExecutor(fiberPool, new ExceptionHandlingBatchExecutor(throwableConsumer));
+    return
+        (throwableConsumer) ->
+            fiberPool.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
   }
 
   @After
@@ -127,8 +125,8 @@ public class TabletServiceCommandCheckTest {
       allowing(config).configuredQuorums();
       will(returnValue(Arrays.asList("testTable,\\x00,1.064e3eb1da827b1dc753e03a797dba37.")));
 
-      oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
-      will(returnValue(fiberFactory));
+      allowing(c5Server).getFiberSupplier();
+      will(returnValue(fiberSupplier));
 
     }});
 
@@ -196,14 +194,13 @@ public class TabletServiceCommandCheckTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(channel));
 
-        oneOf(replicator).getEventChannel();
+        allowing(replicator).getEventChannel();
         will(returnValue(eventChannel));
 
         allowing(replicator).getCommitNoticeChannel();
 
         allowing(replicator).getId();
 
-        oneOf(replicator).start();
         allowing(replicator).getQuorumId();
         will(returnValue("1"));
 
@@ -241,7 +238,6 @@ public class TabletServiceCommandCheckTest {
         allowing(replicator).getEventChannel();
         will(returnValue(eventChannel));
 
-        allowing(replicator).start();
         allowing(replicator).getQuorumId();
         will(returnValue("1"));
 
@@ -319,7 +315,6 @@ public class TabletServiceCommandCheckTest {
 
       allowing(replicator).getId();
 
-      allowing(replicator).start();
       allowing(replicator).getQuorumId();
       will(returnValue("1"));
 

@@ -17,8 +17,10 @@
 
 package c5db.log;
 
+import c5db.generated.OLogContentType;
 import c5db.generated.OLogEntryHeader;
 import c5db.interfaces.log.SequentialEntry;
+import c5db.interfaces.log.SequentialEntryCodec;
 import c5db.replication.generated.LogEntry;
 import c5db.replication.generated.QuorumConfigurationMessage;
 import com.google.common.collect.Iterables;
@@ -66,6 +68,10 @@ public final class OLogEntry extends SequentialEntry {
 
   public OLogContent getContent() {
     return content;
+  }
+
+  public OLogContentType getContentType() {
+    return content.getType();
   }
 
   public LogEntry toProtostuff() {
@@ -154,6 +160,12 @@ public final class OLogEntry extends SequentialEntry {
       final OLogEntryHeader header = decodeAndCheckCrc(inputStream, SCHEMA);
       skipContent(inputStream, header.getContentLength());
       return header.getSeqNum();
+    }
+
+    public OLogEntryHeader skipEntryAndReturnHeader(InputStream inputStream) throws IOException {
+      final OLogEntryHeader header = decodeAndCheckCrc(inputStream, SCHEMA);
+      skipContent(inputStream, header.getContentLength());
+      return header;
     }
 
     private void skipContent(InputStream inputStream, int contentLength) throws IOException {

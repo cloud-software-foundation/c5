@@ -15,13 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.util;
+package c5db.interfaces.replication;
 
-import org.jetlang.fibers.Fiber;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * Interface describing a service that creates fibers.
+ * A value type for information returned when requesting to replicate data.
  */
-public interface C5FiberFactory {
-  public Fiber create();
+public final class ReplicateSubmissionInfo {
+  public final long sequenceNumber;
+  public final ListenableFuture<Void> completedFuture;
+
+  public ReplicateSubmissionInfo(long sequenceNumber, ListenableFuture<Void> completedFuture) {
+    this.sequenceNumber = sequenceNumber;
+    this.completedFuture = completedFuture;
+  }
+
+  @Override
+  public String toString() {
+    return "ReplicateSubmissionInfo{" +
+        "sequenceNumber=" + sequenceNumber +
+        ", completedFuture=" + completedFuture +
+        '}';
+  }
 }

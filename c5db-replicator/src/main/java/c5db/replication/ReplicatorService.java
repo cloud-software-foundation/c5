@@ -17,12 +17,13 @@
 
 package c5db.replication;
 
+import c5db.ReplicatorConstants;
 import c5db.codec.ProtostuffDecoder;
 import c5db.codec.ProtostuffEncoder;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.LogModule;
-import c5db.interfaces.ModuleServer;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.discovery.NodeInfoReply;
 import c5db.interfaces.discovery.NodeInfoRequest;
@@ -79,6 +80,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -134,7 +136,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
   }
 
   private final int port;
-  private final ModuleServer moduleServer;
+  private final ModuleInformationProvider moduleInformationProvider;
   private final FiberSupplier fiberSupplier;
   private final long nodeId;
 
@@ -164,7 +166,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
   // Initialized in the module start, by the time any messages or fiber executions trigger, these should be not-null
   private DiscoveryModule discoveryModule = null;
-  private LogModule<?> logModule = null;
+  private LogModule logModule = null;
   private Channel listenChannel;
   private Fiber fiber;
 
@@ -179,14 +181,14 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
                            EventLoopGroup workerGroup,
                            long nodeId,
                            int port,
-                           ModuleServer moduleServer,
+                           ModuleInformationProvider moduleInformationProvider,
                            FiberSupplier fiberSupplier,
                            QuorumFileReaderWriter quorumFileReaderWriter) {
     this.bossGroup = bossGroup;
     this.workerGroup = workerGroup;
     this.nodeId = nodeId;
     this.port = port;
-    this.moduleServer = moduleServer;
+    this.moduleInformationProvider = moduleInformationProvider;
     this.fiberSupplier = fiberSupplier;
 
     this.allChannels = new DefaultChannelGroup(workerGroup.next());
@@ -262,7 +264,13 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
           true
       );
 
-      channel.writeAndFlush(b);
+      channel.writeAndFlush(b).addListener(
+          future -> {
+            if (!future.isSuccess()) {
+              LOG.warn("node {} error sending reply {} to node {} in response to request {}: {}",
+                  nodeId, reply, wireRequest.from, wireRequest, future.cause());
+            }
+          });
     });
   }
 
@@ -302,6 +310,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
     }
 
     NodeInfoRequest nodeInfoRequest = new NodeInfoRequest(to, ModuleType.Replication);
+    LOG.debug("node {} sending node info request {} ", nodeId, nodeInfoRequest);
     AsyncRequest.withOneReply(fiber, discoveryModule.getNodeInfo(), nodeInfoRequest, new Callback<NodeInfoReply>() {
       @SuppressWarnings("RedundantCast")
       @FiberOnly
@@ -314,6 +323,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
           return;
         }
 
+        LOG.debug("node {} got node info for node {} reply {} ", nodeId, to, nodeInfoReply);
         // what if existing outgoing connection attempt?
         Channel channel = connections.get(to);
         if (channel != null && channel.isOpen()) {
@@ -345,7 +355,10 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
               }
             });
       }
-    });
+    },
+        // If the NodeInfoRequest times out:
+        ReplicatorConstants.REPLICATOR_NODE_INFO_REQUEST_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS,
+        () -> LOG.warn("node info request timeout {} ", nodeInfoRequest));
   }
 
   private void sendMessageAsync(final Request<RpcRequest, RpcWireReply> message, final Channel channel) {
@@ -366,7 +379,12 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
           false
       );
 
-      channel.writeAndFlush(wireMessage);
+      channel.writeAndFlush(wireMessage).addListener(
+          future -> {
+            if (!future.isSuccess()) {
+              LOG.warn("Error sending from node {} request {}: {}", nodeId, request, future.cause());
+            }
+          });
     });
   }
 
@@ -428,9 +446,11 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
           serverBootstrap.bind(port).addListener((ChannelFutureListener)
               future -> {
                 if (future.isSuccess()) {
+                  LOG.info("successfully bound node {} port {} ", nodeId, port);
                   listenChannel = future.channel();
                 } else {
                   LOG.error("Unable to bind! ", future.cause());
+                  failModule(future.cause());
                 }
               });
 
@@ -451,7 +471,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
         },
         (Throwable t) -> {
           LOG.error("ReplicatorService unable to retrieve modules!", t);
-          notifyFailed(t);
+          failModule(t);
         }, fiber);
   }
 
@@ -476,6 +496,8 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
       final AtomicInteger countDown = new AtomicInteger(1);
       GenericFutureListener<? extends Future<? super Void>> listener = future -> {
         if (countDown.decrementAndGet() == 0) {
+          fiber.dispose();
+          fiber = null;
           notifyStopped();
         }
 
@@ -488,8 +510,6 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
       allChannels.close().addListener(listener);
       replicatorInstances.values().forEach(ReplicatorInstance::dispose);
       replicatorInstances.clear();
-      fiber.dispose();
-      fiber = null;
     });
   }
 
@@ -509,8 +529,8 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
     SettableFuture<Void> doneFuture = SettableFuture.create();
 
     List<ListenableFuture<C5Module>> moduleFutures = new ArrayList<>();
-    moduleFutures.add(moduleServer.getModule(ModuleType.Log));
-    moduleFutures.add(moduleServer.getModule(ModuleType.Discovery));
+    moduleFutures.add(moduleInformationProvider.getModule(ModuleType.Log));
+    moduleFutures.add(moduleInformationProvider.getModule(ModuleType.Discovery));
 
     ListenableFuture<List<C5Module>> compositeModulesFuture = Futures.allAsList(moduleFutures);
 
@@ -523,7 +543,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
 
           doneFuture.set(null);
         },
-        this::notifyFailed, fiber);
+        this::failModule, fiber);
 
     return doneFuture;
   }
@@ -561,6 +581,7 @@ public class ReplicatorService extends AbstractService implements ReplicationMod
     }
     throwableChannel.subscribe(fiber, instance::failReplicatorInstance);
     replicatorInstances.put(quorumId, instance);
+    instance.start();
     return instance;
   }
 }

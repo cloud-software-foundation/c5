@@ -24,6 +24,7 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.log.OLogShim;
+import c5db.replication.C5GeneralizedReplicator;
 import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import c5db.util.C5Futures;
@@ -93,7 +94,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
                           final List<Long> peers,
                           final Path basePath,
                           final Configuration conf,
-                          final Fiber tabletFiber,
                           final ReplicationModule replicationModule,
                           final Region.Creator regionCreator) {
     this.server = server;
@@ -103,7 +103,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     this.conf = conf;
     this.basePath = basePath;
 
-    this.tabletFiber = tabletFiber;
+    this.tabletFiber = server.getFiberSupplier().getFiber(this::handleFail);
     this.replicationModule = replicationModule;
     this.regionCreator = regionCreator;
 
@@ -136,10 +136,9 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
     Subscriber<ReplicatorInstanceEvent> replicatorEventChannel = replicator.getEventChannel();
     replicatorEventChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
-    replicator.start();
 
     // TODO this ThreadFiber is a workaround until issue 252 is fixed; at which point shim can use tabletFiber.
-    OLogShim shim = new OLogShim(replicator, shimFiber);
+    OLogShim shim = new OLogShim(new C5GeneralizedReplicator(replicator, shimFiber));
     try {
       region = regionCreator.getHRegion(basePath, regionInfo, tableDescriptor, shim, conf);
       setTabletState(State.Open);
@@ -215,6 +214,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   private void handleFail(Throwable t) {
     tabletFiber.dispose();
+    shimFiber.dispose();
     setTabletStateFailed(t);
   }
 

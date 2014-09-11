@@ -22,14 +22,17 @@ import c5db.codec.UdpProtostuffEncoder;
 import c5db.discovery.generated.Availability;
 import c5db.discovery.generated.ModuleDescriptor;
 import c5db.interfaces.DiscoveryModule;
-import c5db.interfaces.ModuleServer;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.discovery.NewNodeVisible;
 import c5db.interfaces.discovery.NodeInfo;
 import c5db.interfaces.discovery.NodeInfoReply;
 import c5db.interfaces.discovery.NodeInfoRequest;
 import c5db.messages.generated.ModuleType;
+import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
+import c5db.util.FiberSupplier;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -89,6 +92,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BeaconService extends AbstractService implements DiscoveryModule {
   private static final Logger LOG = LoggerFactory.getLogger(BeaconService.class);
+  private static final InetAddress BROADCAST_ADDRESS = InetAddresses.forString("255.255.255.255");
 
   @Override
   public ModuleType getModuleType() {
@@ -173,16 +177,17 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   private final Map<Long, NodeInfo> peerNodeInfoMap = new HashMap<>();
   private final org.jetlang.channels.Channel<Availability> incomingMessages = new MemoryChannel<>();
   private final org.jetlang.channels.Channel<NewNodeVisible> newNodeVisibleChannel = new MemoryChannel<>();
-  private final Fiber fiber;
-  public static final String BROADCAST_ADDRESS = "255.255.255.255";
+  private final ModuleInformationProvider moduleInformationProvider;
+  private final FiberSupplier fiberSupplier;
 
   // These should be final, but they are initialized in doStart().
   private Channel broadcastChannel = null;
   private Bootstrap bootstrap = null;
   private List<String> localIPs;
+  private Fiber fiber;
 
-  // This field is updated when modules' availability changes
-  private ImmutableMap<ModuleType, Integer> modulePorts;
+  // This field is updated when modules' availability changes. It must only be accessed from the fiber.
+  private ImmutableMap<ModuleType, Integer> onlineModuleToPortMap;
 
   private class BeaconMessageHandler extends SimpleChannelInboundHandler<Availability> {
     @Override
@@ -197,29 +202,24 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
   }
 
   /**
-   * @param nodeId         the id of this node.
-   * @param discoveryPort  the port to send discovery beacon messages on, and to listen to
-   *                       for messages from others
-   * @param fiber          A started fiber; the caller is responsible for its disposal
-   * @param eventLoopGroup An EventLoopGroup that's not shut down.
-   * @param initialModulePorts    An initial lookup of ports by module type; can be empty
-   * @param moduleServer   A module server, used to receive module availability updates
+   * @param nodeId                    the id of this node.
+   * @param discoveryPort             the port to send discovery beacon messages on, and to listen to
+   *                                  for messages from others
+   * @param eventLoopGroup            An EventLoopGroup that's not shut down.
+   * @param moduleInformationProvider Used to receive module availability updates
    */
   public BeaconService(long nodeId,
                        int discoveryPort,
-                       final Fiber fiber,
                        EventLoopGroup eventLoopGroup,
-                       ImmutableMap<ModuleType, Integer> initialModulePorts,
-                       ModuleServer moduleServer
+                       ModuleInformationProvider moduleInformationProvider,
+                       FiberSupplier fiberSupplier
   ) {
-    this.discoveryPort = discoveryPort;
     this.nodeId = nodeId;
-    this.fiber = fiber;
+    this.discoveryPort = discoveryPort;
     this.eventLoopGroup = eventLoopGroup;
-    this.modulePorts = initialModulePorts;
+    this.moduleInformationProvider = moduleInformationProvider;
+    this.fiberSupplier = fiberSupplier;
     this.broadcastAddress = new InetSocketAddress(BROADCAST_ADDRESS, discoveryPort);
-
-    moduleServer.availableModulePortsChannel().subscribe(fiber, this::updateCurrentModulePorts);
   }
 
   @Override
@@ -251,18 +251,24 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
     }
     LOG.trace("Sending beacon broadcast message to {}", broadcastAddress);
 
-    List<ModuleDescriptor> msgModules = new ArrayList<>(modulePorts.size());
-    for (ModuleType moduleType : modulePorts.keySet()) {
+    List<ModuleDescriptor> msgModules = new ArrayList<>(onlineModuleToPortMap.size());
+    for (ModuleType moduleType : onlineModuleToPortMap.keySet()) {
       msgModules.add(
           new ModuleDescriptor(moduleType,
-              modulePorts.get(moduleType))
+              onlineModuleToPortMap.get(moduleType))
       );
     }
 
     Availability beaconMessage = new Availability(nodeId, 0, localIPs, msgModules);
 
-    broadcastChannel.writeAndFlush(new
-        UdpProtostuffEncoder.UdpProtostuffMessage<>(broadcastAddress, beaconMessage));
+    broadcastChannel.writeAndFlush(new UdpProtostuffEncoder.UdpProtostuffMessage<>(broadcastAddress, beaconMessage))
+        .addListener(
+            future -> {
+              if (!future.isSuccess()) {
+                LOG.warn("node {} error sending message {} to broadcast address {}",
+                    nodeId, beaconMessage, broadcastAddress);
+              }
+            });
 
     // Fix issue #76, feed back the beacon Message to our own database:
     processWireMessage(beaconMessage);
@@ -311,7 +317,12 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
       // Wait, this is why we are in a new executor...
       //noinspection RedundantCast
       bootstrap.bind(discoveryPort).addListener((ChannelFutureListener) future -> {
-        broadcastChannel = future.channel();
+        if (future.isSuccess()) {
+          broadcastChannel = future.channel();
+        } else {
+          LOG.error("Unable to bind! ", future.cause());
+          notifyFailed(future.cause());
+        }
       });
 
       try {
@@ -321,25 +332,36 @@ public class BeaconService extends AbstractService implements DiscoveryModule {
         notifyFailed(e);
       }
 
+      fiber = fiberSupplier.getFiber(this::notifyFailed);
+      fiber.start();
+
       // Schedule fiber tasks and subscriptions.
       incomingMessages.subscribe(fiber, this::processWireMessage);
       nodeInfoRequests.subscribe(fiber, this::handleNodeInfoRequest);
+      moduleInformationProvider.moduleChangeChannel().subscribe(fiber, this::updateCurrentModulePorts);
 
       fiber.scheduleAtFixedRate(this::sendBeacon, 2, 10, TimeUnit.SECONDS);
 
-      notifyStarted();
-
+      C5Futures.addCallback(moduleInformationProvider.getOnlineModules(),
+          (ImmutableMap<ModuleType, Integer> onlineModuleToPortMap) -> {
+            updateCurrentModulePorts(onlineModuleToPortMap);
+            notifyStarted();
+          },
+          this::notifyFailed,
+          fiber);
     });
   }
 
   @Override
   protected void doStop() {
+    fiber.dispose();
+    fiber = null;
     eventLoopGroup.next().execute(this::notifyStopped);
   }
 
   @FiberOnly
-  private void updateCurrentModulePorts(ImmutableMap<ModuleType, Integer> modulePorts) {
-    this.modulePorts = modulePorts;
+  private void updateCurrentModulePorts(ImmutableMap<ModuleType, Integer> onlineModuleToPortMap) {
+    this.onlineModuleToPortMap = onlineModuleToPortMap;
   }
 
   private List<String> getLocalIPs() throws SocketException {

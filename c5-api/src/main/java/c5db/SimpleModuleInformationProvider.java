@@ -18,7 +18,7 @@
 package c5db;
 
 import c5db.interfaces.C5Module;
-import c5db.interfaces.ModuleServer;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.messages.generated.ModuleType;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableMap;
@@ -34,18 +34,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
- * A basic C5Server; coordinates the interaction of the local modules
+ * A basic ModuleInformationProvider that enables one to register and start C5Modules,
+ * after which their life cycle is tracked using a SimpleC5ModuleListener.
  */
-public class SimpleC5ModuleServer implements ModuleServer {
+public class SimpleModuleInformationProvider implements ModuleInformationProvider {
   private final Fiber fiber;
+  private final Consumer<Throwable> failureHandler;
   private final Map<ModuleType, C5Module> modules = new HashMap<>();
-  private final Map<ModuleType, Integer> modulePorts = new HashMap<>();
-  private final Channel<ImmutableMap<ModuleType, Integer>> modulePortsChannel = new MemoryChannel<>();
+  private final Map<ModuleType, Integer> onlineModuleToPortMap = new HashMap<>();
+  private final Channel<ImmutableMap<ModuleType, Integer>> moduleChangeChannel = new MemoryChannel<>();
 
-  public SimpleC5ModuleServer(Fiber fiber) {
+  public SimpleModuleInformationProvider(Fiber fiber, Consumer<Throwable> failureHandler) {
     this.fiber = fiber;
+    this.failureHandler = failureHandler;
   }
 
   public ListenableFuture<Service.State> startModule(C5Module module) {
@@ -56,7 +60,8 @@ public class SimpleC5ModuleServer implements ModuleServer {
           addRunningModule(module);
           startedFuture.set(null);
         },
-        () -> removeModule(module));
+        () -> removeModule(module),
+        failureHandler);
 
     module.addListener(stateChangeListener, fiber);
     modules.put(module.getModuleType(), module);
@@ -73,8 +78,15 @@ public class SimpleC5ModuleServer implements ModuleServer {
   }
 
   @Override
-  public Subscriber<ImmutableMap<ModuleType, Integer>> availableModulePortsChannel() {
-    return modulePortsChannel;
+  public ListenableFuture<ImmutableMap<ModuleType, Integer>> getOnlineModules() {
+    final SettableFuture<ImmutableMap<ModuleType, Integer>> future = SettableFuture.create();
+    fiber.execute(() -> future.set(ImmutableMap.copyOf(onlineModuleToPortMap)));
+    return future;
+  }
+
+  @Override
+  public Subscriber<ImmutableMap<ModuleType, Integer>> moduleChangeChannel() {
+    return moduleChangeChannel;
   }
 
   @Override
@@ -87,7 +99,7 @@ public class SimpleC5ModuleServer implements ModuleServer {
   private void addRunningModule(C5Module module) {
     ModuleType type = module.getModuleType();
     if (modules.containsKey(type) && modules.get(type).equals(module)) {
-      modulePorts.put(type, module.port());
+      onlineModuleToPortMap.put(type, module.port());
       publishCurrentActivePorts();
     }
   }
@@ -97,13 +109,13 @@ public class SimpleC5ModuleServer implements ModuleServer {
     ModuleType type = module.getModuleType();
     if (modules.containsKey(type) && modules.get(type).equals(module)) {
       modules.remove(type);
-      modulePorts.remove(type);
+      onlineModuleToPortMap.remove(type);
       publishCurrentActivePorts();
     }
   }
 
   @FiberOnly
   private void publishCurrentActivePorts() {
-    modulePortsChannel.publish(ImmutableMap.copyOf(modulePorts));
+    moduleChangeChannel.publish(ImmutableMap.copyOf(onlineModuleToPortMap));
   }
 }

@@ -28,7 +28,6 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
-import c5db.util.C5FiberFactory;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -79,8 +78,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
-    C5FiberFactory fiberFactory = server.getFiberFactory(this::notifyFailed);
-    this.fiber = fiberFactory.create();
+    this.fiber = server.getFiberSupplier().getFiber(this::notifyFailed);
     bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
   }
 
@@ -100,17 +98,17 @@ public class RegionServerService extends AbstractService implements RegionServer
               .childOption(ChannelOption.TCP_NODELAY, true)
               .channel(NioServerSocketChannel.class)
               .childHandler(new ChannelInitializer<SocketChannel>() {
-                              @Override
-                              protected void initChannel(SocketChannel ch) throws Exception {
-                                ChannelPipeline p = ch.pipeline();
-                                p.addLast("http-server-codec", new HttpServerCodec());
-                                p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                                p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
-                                p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
-                                p.addLast("encoder", new WebsocketProtostuffEncoder());
-                                p.addLast("handler", new RegionServerHandler(RegionServerService.this));
-                              }
-                            }
+                @Override
+                protected void initChannel(SocketChannel ch) throws Exception {
+                  ChannelPipeline p = ch.pipeline();
+                  p.addLast("http-server-codec", new HttpServerCodec());
+                  p.addLast("http-agg", new HttpObjectAggregator(C5ServerConstants.MAX_CALL_SIZE));
+                  p.addLast("websocket-agg", new WebSocketFrameAggregator(C5ServerConstants.MAX_CALL_SIZE));
+                  p.addLast("decoder", new WebsocketProtostuffDecoder("/websocket"));
+                  p.addLast("encoder", new WebsocketProtostuffEncoder());
+                  p.addLast("handler", new RegionServerHandler(RegionServerService.this));
+                }
+              }
               );
 
           bootstrap.bind(port).addListener(new ChannelFutureListener() {

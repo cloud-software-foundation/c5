@@ -21,11 +21,14 @@ import c5db.C5CommonTestUtil;
 import c5db.interfaces.LogModule;
 import c5db.interfaces.log.Reader;
 import c5db.interfaces.log.SequentialEntry;
+import c5db.interfaces.replication.QuorumConfiguration;
+import c5db.interfaces.replication.ReplicatorEntry;
 import c5db.interfaces.replication.ReplicatorLog;
 import c5db.replication.generated.LogEntry;
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberSupplier;
 import c5db.util.JUnitRuleFiberExceptions;
+import com.google.common.collect.Sets;
 import org.jetlang.core.BatchExecutor;
 import org.jetlang.core.RunnableExecutor;
 import org.jetlang.core.RunnableExecutorImpl;
@@ -51,7 +54,7 @@ public class OLogReaderTest {
   private static final String QUORUM_ID = "q";
   private final Path baseTestPath = new C5CommonTestUtil().getDataTestDir("o-log-reader-test");
   private final FiberSupplier fiberSupplier = makeFiberSupplier();
-  private final LogModule<OLogEntry> logModule = new LogService(baseTestPath, fiberSupplier);
+  private final LogModule logModule = new LogService(baseTestPath, fiberSupplier);
 
   // initialized after module starts
   private ReplicatorLog log;
@@ -73,10 +76,23 @@ public class OLogReaderTest {
 
     havingLogged(entries);
 
-    Reader<OLogEntry> reader = logModule.getLogReader(QUORUM_ID);
+    Reader<OLogEntry> reader = logModule.getLogReader(QUORUM_ID, new OLogEntry.Codec());
 
     try (SequentialEntryIterator<OLogEntry> iterator = iteratorOfFirstLogInReader(reader)) {
       assertThat(iterator, isIteratorContainingInOrder(oLogEntries(entries)));
+    }
+  }
+
+  @Test(timeout = 3000)
+  public void iteratesOverLoggedEntriesWithAnIteratorThatSkipsQuorumConfigurationEntries() throws Exception {
+    List<LogEntry> entries = someEntriesInterspersedWithConfigurationEntries();
+
+    havingLogged(entries);
+
+    Reader<ReplicatorEntry> reader = logModule.getLogReader(QUORUM_ID, new OLogToReplicatorEntryCodec());
+
+    try (SequentialEntryIterator<ReplicatorEntry> iterator = iteratorOfFirstLogInReader(reader)) {
+      assertThat(iterator, isIteratorContainingInOrder(justDataEntries(entries)));
     }
   }
 
@@ -96,11 +112,32 @@ public class OLogReaderTest {
         .collect(Collectors.toList());
   }
 
+  private List<ReplicatorEntry> justDataEntries(List<LogEntry> entries) {
+    return entries.stream()
+        .filter((logEntry) -> logEntry.getQuorumConfiguration() == null)
+        .map((logEntry) -> new ReplicatorEntry(logEntry.getIndex(), logEntry.getDataList()))
+        .collect(Collectors.toList());
+  }
+
   private List<LogEntry> someConsecutiveLogEntries() {
     return entries()
         .term(7)
         .indexes(1, 2, 3, 4, 5, 6)
         .build();
+  }
+
+  private List<LogEntry> someEntriesInterspersedWithConfigurationEntries() {
+    return entries()
+        .term(777)
+        .configurationAndSeqNum(someConfiguration(), 1)
+        .seqNums(2, 3)
+        .configurationAndSeqNum(someConfiguration(), 4)
+        .seqNums(5)
+        .build();
+  }
+
+  private QuorumConfiguration someConfiguration() {
+    return QuorumConfiguration.of(Sets.newHashSet(1L, 2L, 3L));
   }
 
   private FiberSupplier makeFiberSupplier() {

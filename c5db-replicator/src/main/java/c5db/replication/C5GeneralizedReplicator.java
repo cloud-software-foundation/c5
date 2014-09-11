@@ -20,9 +20,12 @@ package c5db.replication;
 import c5db.ReplicatorConstants;
 import c5db.interfaces.replication.GeneralizedReplicator;
 import c5db.interfaces.replication.IndexCommitNotice;
+import c5db.interfaces.replication.ReplicateSubmissionInfo;
 import c5db.interfaces.replication.Replicator;
+import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.replication.ReplicatorReceipt;
 import c5db.util.C5Futures;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.jetbrains.annotations.Nullable;
@@ -42,8 +45,11 @@ import java.util.concurrent.ExecutionException;
  * interface.
  */
 public class C5GeneralizedReplicator implements GeneralizedReplicator {
+  private final long nodeId;
   private final Replicator replicator;
   private final Fiber fiber;
+
+  private SettableFuture<Void> availableFuture;
 
   /**
    * Queue of receipts for pending log requests and their futures; access this queue only
@@ -57,14 +63,16 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
    * user takes responsibility for their disposal.
    */
   public C5GeneralizedReplicator(Replicator replicator, Fiber fiber) {
+    this.nodeId = replicator.getId();
     this.replicator = replicator;
     this.fiber = fiber;
 
     setupCommitNoticeSubscription();
+    setupEventNoticeSubscription();
   }
 
   @Override
-  public ListenableFuture<Long> replicate(List<ByteBuffer> data) throws InterruptedException,
+  public ListenableFuture<ReplicateSubmissionInfo> replicate(List<ByteBuffer> data) throws InterruptedException,
       InvalidReplicatorStateException {
 
     final ReceiptWithCompletionFuture receiptWithCompletionFuture =
@@ -78,7 +86,25 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
     fiber.execute(
         () -> receiptQueue.add(receiptWithCompletionFuture));
 
-    return receiptWithCompletionFuture.completionFuture;
+    return Futures.transform(receiptWithCompletionFuture.receiptFuture,
+        (ReplicatorReceipt receipt) ->
+            new ReplicateSubmissionInfo(receipt.seqNum, receiptWithCompletionFuture.completionFuture));
+  }
+
+  @Override
+  public ListenableFuture<Void> isAvailableFuture() {
+    SettableFuture<Void> returnedFuture = SettableFuture.create();
+
+    fiber.execute(() -> {
+      if (this.availableFuture == null) {
+        this.availableFuture = returnedFuture;
+      } else {
+        // "Forward" the result of the existing availableFuture to the newly created one.
+        C5Futures.addCallback(this.availableFuture, returnedFuture::set, returnedFuture::setException, fiber);
+      }
+    });
+
+    return returnedFuture;
   }
 
   private void setupCommitNoticeSubscription() {
@@ -92,6 +118,10 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
                     && notice.quorumId.equals(quorumId)));
   }
 
+  private void setupEventNoticeSubscription() {
+    replicator.getEventChannel().subscribe(fiber, this::handleEventNotice);
+  }
+
   /**
    * The core of the logic is in this method. When we receive an IndexCommitNotice, we need
    * to find out which, if any, of the pending replicate requests are affected by it. We do
@@ -103,7 +133,7 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
   private void handleCommitNotice(IndexCommitNotice notice) {
     while (!receiptQueue.isEmpty() && receiptQueue.peek().receiptFuture.isDone()) {
       ReceiptWithCompletionFuture receiptWithCompletionFuture = receiptQueue.peek();
-      SettableFuture<Long> completionFuture = receiptWithCompletionFuture.completionFuture;
+      SettableFuture<Void> completionFuture = receiptWithCompletionFuture.completionFuture;
 
       ReplicatorReceipt receipt = getReceiptOrSetException(receiptWithCompletionFuture);
 
@@ -119,12 +149,25 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
           completionFuture.setException(new IOException("commit notice's term differs from that of receipt"));
 
         } else {
-          // receipt.seqNum is within the range of the commit notice, and the terms match.
-          completionFuture.set(receipt.seqNum);
+          // receipt.seqNum is within the range of the commit notice, and the terms match: replication is complete
+          completionFuture.set(null);
         }
       }
 
       receiptQueue.poll();
+    }
+  }
+
+  @FiberOnly
+  private void handleEventNotice(ReplicatorInstanceEvent eventNotice) {
+    if (availableFuture != null
+        && eventNotice.instance == replicator
+        && eventNotice.eventType == ReplicatorInstanceEvent.EventType.LEADER_ELECTED
+        && eventNotice.newLeader == nodeId) {
+
+      // Notify past callers of isAvailableFuture
+      availableFuture.set(null);
+      availableFuture = null;
     }
   }
 
@@ -164,7 +207,7 @@ public class C5GeneralizedReplicator implements GeneralizedReplicator {
    */
   private static class ReceiptWithCompletionFuture {
     public final ListenableFuture<ReplicatorReceipt> receiptFuture;
-    public final SettableFuture<Long> completionFuture = SettableFuture.create();
+    public final SettableFuture<Void> completionFuture = SettableFuture.create();
 
     private ReceiptWithCompletionFuture(ListenableFuture<ReplicatorReceipt> receiptFuture) {
       this.receiptFuture = receiptFuture;

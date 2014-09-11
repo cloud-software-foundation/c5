@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db;
+package c5db.interfaces;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import c5db.interfaces.log.Reader;
+import c5db.interfaces.replication.GeneralizedReplicator;
+import c5db.interfaces.replication.ReplicatorEntry;
+import com.google.common.util.concurrent.ListenableFuture;
 
-public class LogConstants {
-  public static final Path LOG_ROOT_DIRECTORY_RELATIVE_PATH = Paths.get("logs");
-  public static final Path LOG_FILE_SUBDIRECTORY_RELATIVE_PATH = Paths.get("files");
-  public static final int LOG_THREAD_POOL_SIZE = 1;
-  public static final int LOG_CLOSE_TIMEOUT_SECONDS = 15;
-  public static final int LOG_NAVIGATOR_DEFAULT_MAX_ENTRY_SEEK = 256;
-  public static final boolean LOG_USE_FILE_CHANNEL_FORCE = true;
+import java.util.Collection;
+
+public interface GeneralizedReplicationService {
+
+  ListenableFuture<GeneralizedReplicator> createReplicator(String quorumId, Collection<Long> peerIds);
+
+  public Reader<ReplicatorEntry> getLogReader(String quorumId);
 }
