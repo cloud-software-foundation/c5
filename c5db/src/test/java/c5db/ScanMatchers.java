@@ -42,7 +42,7 @@ public class ScanMatchers {
           e.printStackTrace();
           return false;
         }
-        return regioninfo.getRegionNameAsString().startsWith(testName.getMethodName());
+        return regioninfo.getRegionNameAsString().startsWith("c5:" + testName.getMethodName());
       }
 
       @Override

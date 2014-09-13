@@ -28,7 +28,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.wal.HLog;
 
 import java.io.IOException;
@@ -56,9 +55,11 @@ public interface Region {
 
   Result get(Get get) throws IOException;
 
-  RegionScanner getScanner(Scan scan) throws IOException;
+  org.apache.hadoop.hbase.regionserver.RegionScanner getScanner(Scan scan) throws IOException;
 
   RegionActionResult processRegionAction(RegionAction regionAction);
+
+  boolean rowInRange(byte[] row);
 
   /**
    * Constructor arguments basically.
