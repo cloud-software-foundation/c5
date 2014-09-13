@@ -71,5 +71,4 @@ public class TestCheckAndTest extends MiniClusterBase {
     assertTrue(checkAndDeleteRowAndValueIntoDatabase(table, row, value));
     assertThat(valueReadFromDB(table, row), not(equalTo(value)));
   }
-
 }

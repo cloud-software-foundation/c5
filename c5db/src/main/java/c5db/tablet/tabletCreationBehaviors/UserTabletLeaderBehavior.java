@@ -17,6 +17,7 @@
 package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
+import c5db.client.ProtobufUtil;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -24,27 +25,48 @@ import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
+import c5db.tablet.Region;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Encoder;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class MetaTabletLeaderBehavior implements TabletLeaderBehavior {
-  private static final Logger LOG = LoggerFactory.getLogger(MetaTabletLeaderBehavior.class);
+public class UserTabletLeaderBehavior {
+  private static final Logger LOG = LoggerFactory.getLogger(UserTabletLeaderBehavior.class);
   private final C5Server server;
+  private final Tablet tablet;
 
-  public MetaTabletLeaderBehavior(final C5Server server) {
+  public UserTabletLeaderBehavior(C5Server server, Tablet tablet) {
     this.server = server;
+    this.tablet = tablet;
   }
 
-  public void start() throws ExecutionException, InterruptedException, RegionNotFoundException {
+  private static String generateCommandString(long nodeId, HRegionInfo hRegionInfo) {
+    BASE64Encoder encoder = new BASE64Encoder();
+    String hRegionInfoStr = encoder.encodeBuffer(hRegionInfo.toByteArray());
+    return C5ServerConstants.SET_USER_LEADER + ":" + nodeId + "," + hRegionInfoStr;
+  }
+
+  public void start() throws ExecutionException, InterruptedException, RegionNotFoundException, IOException {
     TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
     Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
-    String metaLeader = C5ServerConstants.SET_META_LEADER + ":" + server.getNodeId();
-    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, metaLeader);
+    Region rootRegion = rootTablet.getRegion();
 
-    long leader = rootTablet.getLeader();
+    RegionScanner scanner = rootRegion.getScanner(ProtobufUtil.toScan(new Scan()));
+    ArrayList<Cell> results = new ArrayList<>();
+    scanner.nextRaw(results);
+
+    long leader = TabletLeaderBehaviorHelper.getLeaderFromResults(results);
+    String commandString = generateCommandString(leader, this.tablet.getRegionInfo());
+    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, commandString);
     CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
     TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, server);
   }

@@ -16,246 +16,70 @@
  */
 package c5db.tablet;
 
-import c5db.AsyncChannelAsserts;
-import c5db.C5ServerConstants;
-import c5db.ConfigDirectory;
+import c5db.C5Compare;
 import c5db.TestHelpers;
-import c5db.discovery.generated.Availability;
-import c5db.interfaces.C5Server;
-import c5db.interfaces.DiscoveryModule;
-import c5db.interfaces.ReplicationModule;
-import c5db.interfaces.discovery.NewNodeVisible;
-import c5db.interfaces.discovery.NodeInfo;
-import c5db.interfaces.replication.Replicator;
-import c5db.interfaces.replication.ReplicatorInstanceEvent;
+import c5db.client.generated.Condition;
+import c5db.client.generated.MutationProto;
+import c5db.client.generated.TableName;
 import c5db.interfaces.tablet.Tablet;
-import c5db.interfaces.tablet.TabletStateChange;
-import c5db.messages.generated.ModuleType;
-import c5db.util.C5FiberFactory;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.SettableFuture;
-import io.protostuff.ByteString;
-import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
+import c5db.util.TabletNameHelpers;
+import org.apache.hadoop.hbase.HRegionInfo;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.jetlang.channels.Request;
 import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.After;
-import org.junit.Before;
+import org.jmock.States;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentSkipListMap;
 
-import static c5db.AsyncChannelAsserts.assertEventually;
-import static c5db.AsyncChannelAsserts.listenTo;
-import static c5db.TabletMatchers.hasMessageWithState;
-
-public class BasicTableCreationTest {
+public class BasicTableCreationTest extends TabletServiceTest {
 
   @Rule
-  public final JUnitRuleMockery context = new JUnitRuleMockery() {{
-    setThreadingPolicy(new Synchroniser());
-  }};
+  public TestName name = new TestName();
 
-  private final int QUORUM_SIZE = 1;
-  private final SettableFuture<DiscoveryModule> discoveryModuleFuture = SettableFuture.create();
-  private final SettableFuture<ImmutableMap<Long, NodeInfo>> nodeNotificationsCallback = SettableFuture.create();
-  private final SettableFuture<ReplicationModule> replicatorModuleFuture = SettableFuture.create();
-  private final MemoryChannel<ReplicatorInstanceEvent> eventChannel = new MemoryChannel<>();
-  private final MemoryChannel<Replicator.State> stateChannel = new MemoryChannel<>();
-  private final MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
-  private final C5Server c5Server = context.mock(C5Server.class);
-  private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
-  private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
-  private final ReplicationModule replicationModule = context.mock(ReplicationModule.class);
-  private final ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
-  private final Replicator replicator = context.mock(Replicator.class);
-  private final PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newSingleThreadExecutor());
-  private SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
-  private TabletService tabletService;
-
-  @Before
-  public void before() throws Throwable {
-    context.checking(new Expectations() {
-      {
-        oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
-        will(returnValue(c5FiberFactory));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(poolFiberFactory.create()));
-      }
-    });
-    tabletService = new TabletService(c5Server);
-    SettableFuture<Replicator> replicatorSettableFuture = SettableFuture.create();
-    replicatorSettableFuture.set(replicator);
-
-    context.checking(new Expectations() {
-      {
-
-        oneOf(c5Server).getModule(ModuleType.Discovery);
-        will(returnValue(discoveryModuleFuture));
-
-        oneOf(c5Server).getModule(ModuleType.Replication);
-        will(returnValue(replicatorModuleFuture));
-
-        allowing(c5Server).getConfigDirectory();
-        will(returnValue(configDirectory));
-        // Emulate a very large quorum
-        allowing(c5Server).isSingleNodeMode();
-        will(returnValue(false));
-
-        allowing(c5Server).getMinQuorumSize();
-        will(returnValue(QUORUM_SIZE));
-
-        oneOf(discoveryModule).getNewNodeNotifications();
-        will(returnValue(nodeNotifications));
-
-        allowing(configDirectory).getBaseConfigPath();
-        will(returnValue(Paths.get("/tmp")));
-
-        allowing(configDirectory).writeBinaryData(with(any(String.class)),
-            with(any(String.class)),
-            with.is(anything()));
-        allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
-      }
-    });
-
-    ListenableFuture<Service.State> future = tabletService.start();
-
-    discoveryModuleFuture.set(discoveryModule);
-
-    context.checking(new Expectations() {{
-      oneOf(discoveryModule).getState();
-      will(returnValue(nodeNotificationsCallback));
-    }});
-
-    Map<Long, NodeInfo> nodeStates = new HashMap<>();
-    nodeStates.put(1l, new NodeInfo(new Availability()));
-    nodeNotificationsCallback.set(ImmutableMap.copyOf(nodeStates));
-
-    Fiber fiber = poolFiberFactory.create();
-    context.checking(new Expectations() {{
-      // Emulate a very large quorum
-
-      oneOf(c5FiberFactory).create();
-      will(returnValue(fiber));
-
-      oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-      will(returnValue(replicatorSettableFuture));
-
-      oneOf(replicator).getStateChannel();
-      will(returnValue(stateChannel));
-
-      oneOf(replicator).getEventChannel();
-      will(returnValue(eventChannel));
-
-      allowing(replicator).getCommitNoticeChannel();
-
-      allowing(replicator).getId();
-
-      oneOf(replicator).start();
-
-      allowing(replicator).getQuorumId();
-      will(returnValue("hbase:root,\\x00,1.33578e495f8173aac4be480afe41410a."));
-    }});
-    AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
-        = listenTo(tabletService.getTabletStateChanges());
-
-    replicatorModuleFuture.set(replicationModule);
-    future.get();
-    assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
-
-  }
-
-  @After
-  public void tearDown() throws ExecutionException, InterruptedException {
-    tabletService.stop().get();
-    poolFiberFactory.dispose();
-  }
-
+  private final Tablet tablet = context.mock(Tablet.class);
+  private final Region region = context.mock(Region.class);
 
   @Test
-  public void shouldCreateMetaEntryAppropriatelyOnTableCreation() throws Throwable {
+  public void shouldBeAbleToStartServer() throws Throwable {
+    final States searching = context.states("running");
 
-    final Fiber startMetaFiber1 = poolFiberFactory.create();
-    replicatorSettableFuture = SettableFuture.create();
+    TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
+    org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
+
+    HRegionInfo hRegionInfo = new HRegionInfo(tableName, new byte[]{}, new byte[]{});
     context.checking(new Expectations() {
       {
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startMetaFiber1));
+        allowing(c5Server).getNodeId();
+        will(returnValue(1l));
 
-        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicatorSettableFuture));
+        oneOf(controlModule).doMessage(with(any(Request.class)));
+        then(searching.is("done")); //TODO make sure the message is correct
 
-        oneOf(replicator).getStateChannel();
-        will(returnValue(stateChannel));
+        allowing(tablet).getRegionInfo();
+        will(returnValue(hRegionInfo));
 
-        oneOf(replicator).getEventChannel();
-        will(returnValue(eventChannel));
+        oneOf(tablet).getLeader();
+        will(returnValue(1l));
 
-        oneOf(replicator).start();
+        oneOf(tablet).getRegion();
+        will(returnValue(region));
 
-        allowing(replicator).getQuorumId();
-        will(returnValue("hbase:meta,\\x00,1.33578e495f8173aac4be480afe41410a."));
-
+        oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
+        will(returnValue(true));
       }
     });
-
-    tabletService.acceptCommand(C5ServerConstants.START_META + ":1");
-    replicatorSettableFuture.set(replicator);
-
-    AsyncChannelAsserts.ChannelListener<TabletStateChange> tabletStateChangeListener
-        = listenTo(tabletService.getTabletStateChanges());
-
-    replicatorModuleFuture.set(replicationModule);
-    assertEventually(tabletStateChangeListener, hasMessageWithState(Tablet.State.Open));
-
-    tabletService.getTablet("hbase:meta");
-    final Fiber startUserTableFiber1 = poolFiberFactory.create();
-
-    SettableFuture<Long> longSettableFuture = SettableFuture.create();
-    context.checking(new Expectations() {
-      {
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(startUserTableFiber1));
-
-        oneOf(replicationModule).createReplicator(with(any(String.class)), with(any(List.class)));
-        will(returnValue(replicatorSettableFuture));
-
-        oneOf(replicator).getStateChannel();
-        will(returnValue(stateChannel));
-
-        oneOf(replicator).getEventChannel();
-        will(returnValue(eventChannel));
-
-        oneOf(replicator).start();
-
-        allowing(replicator).getQuorumId();
-        will(returnValue("hbase:tabletName,\\x00,1.33578e495f8173aac4be480afe41410a."));
-
-        allowing(replicator).logData(with(any(List.class)));
-        will(returnValue(longSettableFuture));
-      }
-    });
-    ByteString tableName = ByteString.copyFromUtf8("tabletName");
-    long nodeId = 1l;
-    AsyncChannelAsserts.ChannelListener<TabletStateChange> listener = listenTo(tabletService.getTabletStateChanges());
-
-    tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName, nodeId));
-    replicatorSettableFuture.set(replicator);
-    assertEventually(listener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
-
+    NonBlockingHashMap<String, ConcurrentSkipListMap<byte[], Tablet>> tabletRegistryTables
+        = tabletService.tabletRegistry.getTables();
+    ConcurrentSkipListMap<byte[], Tablet> metaTablet = new ConcurrentSkipListMap<>(new C5Compare());
+    metaTablet.put(new byte[]{0x00}, tablet);
+    tabletRegistryTables.put("hbase:meta", metaTablet);
+    tabletService.acceptCommand(TestHelpers.getCreateTabletSubCommand(tableName,
+        new byte[][]{},
+        Arrays.asList(c5Server)));
+    sync.waitUntil(searching.is("done"));
   }
 }
-
