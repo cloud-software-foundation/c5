@@ -51,6 +51,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import sun.misc.BASE64Encoder;
@@ -152,6 +153,7 @@ public class TabletServiceCommandCheckTest {
     return C5ServerConstants.CREATE_TABLE + ":" + hTableDesc + "," + hRegionInfo + "," + peerString;
   }
 
+  @Ignore
   @Test
   public void testCreateTable() throws Throwable {
     context.checking(new Expectations() {
@@ -264,6 +266,8 @@ public class TabletServiceCommandCheckTest {
     return C5ServerConstants.START_META + ":1,2,3";
   }
 
+
+  @Ignore
   @Test
   public void shouldSetMetaLeader() throws Throwable {
     context.checking(new Expectations() {
