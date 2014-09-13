@@ -20,14 +20,19 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * Helper functionality to make various value type/objects.
  */
 public class SystemTableNames {
+
+  public static byte[] sep = Bytes.toBytes(",");
+
   public static HTableDescriptor rootTableDescriptor() {
     return HTableDescriptor.ROOT_TABLEDESC;
   }
+
   public static HTableDescriptor metaTableDescriptor() {
     return HTableDescriptor.META_TABLEDESC;
   }
@@ -35,6 +40,7 @@ public class SystemTableNames {
   public static TableName metaTableName() {
     return TableName.valueOf(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR, "meta");
   }
+
   public static TableName rootTableName() {
     return HTableDescriptor.ROOT_TABLE_NAME;
   }
@@ -52,12 +58,13 @@ public class SystemTableNames {
   private static int rootRegionId() {
     return 1;
   }
+
   private static int metaRegionId() {
     return 2;
   }
 
   private static byte[] startKeyZero() {
-    return new byte[]{0};
+    return new byte[]{};
   }
 
   private static byte[] endKeyEmpty() {

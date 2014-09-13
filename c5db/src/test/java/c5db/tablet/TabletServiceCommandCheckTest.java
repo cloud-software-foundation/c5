@@ -226,7 +226,7 @@ public class TabletServiceCommandCheckTest {
 
       }
     });
-    tabletService.tabletRegistry.getTablets().put("hbase:meta,fake", metaTablet);
+    tabletService.tabletRegistry.getTablets("hbase:meta").put(Bytes.toBytes("hbase:meta,fake"), metaTablet);
     context.checking(new Expectations() {
       {
         oneOf(metaRegion).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
@@ -334,7 +334,7 @@ public class TabletServiceCommandCheckTest {
 
     Tablet tablet = context.mock(Tablet.class);
     Region region = context.mock(Region.class);
-    tabletService.tabletRegistry.getTablets().put("hbase:root,fake", tablet);
+    tabletService.tabletRegistry.getTablets("hbase:root").put(Bytes.toBytes("hbase:root,fake"), tablet);
 
 
     // We have to use allowing because we have no way of waiting for the meta to update currently

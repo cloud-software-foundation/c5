@@ -42,6 +42,7 @@ import org.hamcrest.core.IsNull;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -295,6 +296,7 @@ public class HRegionBridgeTest {
     assertThat(actions.getResultOrExceptionList().size(), is(3));
   }
 
+  @Ignore
   @Test
   public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutatePut() throws Exception {
     context.checking(new Expectations() {
@@ -315,10 +317,11 @@ public class HRegionBridgeTest {
         new Action(1, mutation, null),
         new Action(2, badMutation, null));
     RegionActionResult actions = hRegionBridge.processRegionAction(new RegionAction(regionSpecifier,
-        true,regionActions));
+        true, regionActions));
     assertThat(actions.getResultOrExceptionList().size(), is(regionActions.size()));
   }
 
+  @Ignore
   @Test
   public void shouldReturnExceptionAndNotAttemptMutationWhenWeAttemptAtomicMultiRowMutateDelete() throws Exception {
     context.checking(new Expectations() {
