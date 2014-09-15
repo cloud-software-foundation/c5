@@ -20,8 +20,6 @@ package c5db.log;
 import c5db.generated.RegionWalEntry;
 import c5db.interfaces.replication.GeneralizedReplicator;
 import c5db.interfaces.replication.ReplicateSubmissionInfo;
-import c5db.interfaces.replication.Replicator;
-import c5db.replication.C5GeneralizedReplicator;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.LinkBuffer;
@@ -35,7 +33,6 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
-import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,12 +67,9 @@ public class OLogShim implements Syncable, HLog {
   private final BlockingQueue<ListenableFuture<ReplicateSubmissionInfo>> appendFutures =
       new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
 
-  /**
-   * The caller of this constructor must take responsibility for starting and disposing of
-   * the Replicator, and starting and disposing of the fiber.
-   */
-  public OLogShim(Replicator replicatorInstance, Fiber fiber) {
-    this.replicator = new C5GeneralizedReplicator(replicatorInstance, fiber);
+
+  public OLogShim(GeneralizedReplicator replicator) {
+    this.replicator = replicator;
   }
 
   //TODO fix so we don't always insert a huge amount of data
