@@ -456,6 +456,7 @@ public class TabletService extends AbstractService implements TabletModule {
     TableName tableName = new TableName(hbaseNameSpace, hbaseTableName);
 
     if (tablet.getLeader() != server.getNodeId()) {
+      System.out.println("Crashing!");
       System.exit(1);
     }
     Put put = new Put(TabletNameHelpers.toBytes(tableName));
@@ -480,6 +481,7 @@ public class TabletService extends AbstractService implements TabletModule {
     byte[] metaRowKey = Bytes.add(tableNameAndRow, SystemTableNames.sep, Bytes.toBytes(hRegionInfo.getRegionId()));
     Tablet tablet = this.tabletRegistry.getTablet("hbase:meta", metaRowKey);
     if (tablet.getLeader() != server.getNodeId()) {
+      System.out.println("Crashing!");
       System.exit(1);
     }
     Put put = new Put(hRegionInfo.getRegionName());
