@@ -285,7 +285,7 @@ public class C5DB extends AbstractService implements C5Server {
     serverFiber.dispose();
     beaconServiceFiber.dispose();
     fiberPool.dispose();
-
+    executor.shutdownNow();
     notifyStopped();
   }
 
