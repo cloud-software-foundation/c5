@@ -80,6 +80,9 @@ public class OLogShimTest {
 
       allowing(replicator).getCommitNoticeChannel();
       will(returnValue(commitNoticeChannel));
+
+      allowing(replicator).getEventChannel();
+      will(returnValue(new MemoryChannel<>()));
     }});
 
     oLogShimFiber.start();
