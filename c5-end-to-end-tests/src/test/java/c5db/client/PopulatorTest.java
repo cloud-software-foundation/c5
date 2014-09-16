@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-@Ignore public class PopulatorTest extends MiniClusterBase {
-  private static ByteString tableName = ByteString.bytesDefaultValue("testTable");
-
-  public PopulatorTest() {}
-
+@Ignore
+public class PopulatorTest extends MiniClusterBase {
+  private static ByteString tableName = ByteString.bytesDefaultValue("c5:testPopulator");
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
@@ -100,12 +98,10 @@ import java.util.concurrent.TimeoutException;
     }
   }
 
-  @Ignore
   @Test
   public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
     PopulatorTest populator = new PopulatorTest();
     tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-
     main(new String[]{String.valueOf(getRegionServerPort())});
   }
 }
