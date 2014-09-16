@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
-@Ignore public class ManyClustersBaseTest extends ManyClusterBase {
+public class ManyClustersBaseTest extends ManyClusterBase {
 
   @Test
   public void metaTableShouldContainUserTableEntries()

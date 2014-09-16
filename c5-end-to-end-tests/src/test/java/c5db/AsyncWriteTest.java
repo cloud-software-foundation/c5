@@ -49,7 +49,7 @@ public class AsyncWriteTest extends MiniClusterBase {
   @Test
   public void testPopulator() throws ExecutionException, InterruptedException, TimeoutException {
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        ByteBuffer.wrap(Bytes.toBytes("test")));
+        ByteBuffer.wrap(Bytes.toBytes("c5:testPopulator")));
     ByteBuffer cq = ByteBuffer.wrap(Bytes.toBytes("cq"));
     ByteBuffer cf = ByteBuffer.wrap(Bytes.toBytes("cf"));
     ByteBuffer value = ByteBuffer.wrap(new byte[512]);
@@ -102,13 +102,8 @@ public class AsyncWriteTest extends MiniClusterBase {
 
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
     AsyncWriteTest asyncWriteTest = new AsyncWriteTest();
-    try {
-      asyncWriteTest.testPopulator();
-    } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      e.printStackTrace();
-    }
-    System.exit(1);
+    asyncWriteTest.testPopulator();
   }
 }

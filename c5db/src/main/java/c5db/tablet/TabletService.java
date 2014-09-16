@@ -21,28 +21,33 @@ import c5db.C5ServerConstants;
 import c5db.client.ProtobufUtil;
 import c5db.client.generated.Condition;
 import c5db.client.generated.MutationProto;
+import c5db.client.generated.RegionSpecifier;
+import c5db.client.generated.TableName;
 import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
+import c5db.interfaces.ControlModule;
 import c5db.interfaces.DiscoveryModule;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.discovery.NodeInfo;
+import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
+import c5db.messages.generated.CommandReply;
+import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
+import c5db.regionserver.RegionNotFoundException;
 import c5db.tablet.hregionbridge.HRegionBridge;
 import c5db.tablet.hregionbridge.HRegionServicesBridge;
-import c5db.regionserver.RegionNotFoundException;
 import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
+import c5db.util.TabletNameHelpers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -51,24 +56,29 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
-
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
+import org.jetlang.channels.Request;
+import org.jetlang.channels.Session;
 import org.jetlang.core.Disposable;
 import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 
@@ -83,7 +93,6 @@ public class TabletService extends AbstractService implements TabletModule {
   private final C5FiberFactory fiberFactory;
   private final Fiber fiber;
   private final C5Server server;
-  // TODO bring this into this class, and not have an external class.
 
   private final Configuration conf;
   private final Channel<TabletStateChange> tabletStateChangeChannel = new MemoryChannel<>();
@@ -92,52 +101,26 @@ public class TabletService extends AbstractService implements TabletModule {
   private boolean rootStarted = false;
   protected TabletRegistry tabletRegistry;
   private Disposable newNodeWatcher = null;
+  private ControlModule controlModule;
 
   public TabletService(C5Server server) {
     this.fiberFactory = server.getFiberFactory(this::notifyFailed);
     this.fiber = fiberFactory.create();
     this.server = server;
     this.conf = HBaseConfiguration.create();
-
-  }
-
-  @Override
-  public Tablet getTablet(String tabletName) throws RegionNotFoundException {
-    Tablet tablet = getRegionWithJustTableName(tabletName);
-    if (tablet != null) {
-      return tablet;
-    } else {
-      throw new RegionNotFoundException("Unable to find specified tablet:" + tabletName);
-    }
-  }
-
-  // TODO remove
-  private Tablet getRegionWithJustTableName(String tableName) {
-    // Always return the first region which matches
-    if (tabletRegistry == null) {
-      return null;
-    }
-    Optional<String> maybeFoundRegion = tabletRegistry
-        .getTablets()
-        .keySet()
-        .stream()
-        .filter(s -> s.startsWith(tableName))
-        .findFirst();
-    if (maybeFoundRegion.isPresent()) {
-      return tabletRegistry.getTablets().get(maybeFoundRegion.get());
-    } else {
-      LOG.error("Region not found: " + tableName);
-      return null;
-    }
   }
 
   @Override
   protected void doStart() {
+
     fiber.start();
     fiber.execute(() -> {
       ListenableFuture<C5Module> discoveryService = server.getModule(ModuleType.Discovery);
+      ListenableFuture<C5Module> controlService = server.getModule(ModuleType.ControlRpc);
+
       try {
         discoveryModule = (DiscoveryModule) discoveryService.get();
+        controlModule = (ControlModule) controlService.get();
       } catch (InterruptedException | ExecutionException e) {
         notifyFailed(e);
         return;
@@ -146,7 +129,7 @@ public class TabletService extends AbstractService implements TabletModule {
       ListenableFuture<C5Module> replicatorService = server.getModule(ModuleType.Replication);
       Futures.addCallback(replicatorService, new FutureCallback<C5Module>() {
         @Override
-        public void onSuccess(C5Module result) {
+        public void onSuccess(@NotNull C5Module result) {
           replicationModule = (ReplicationModule) result;
           fiber.execute(() -> {
             tabletRegistry = new TabletRegistry(server,
@@ -157,16 +140,9 @@ public class TabletService extends AbstractService implements TabletModule {
                 replicationModule,
                 ReplicatedTablet::new,
                 (basePath, regionInfo, tableDescriptor, log, conf) -> {
-                  HRegion hregion = null;
                   HRegionServicesBridge hRegionBridge = new HRegionServicesBridge(conf);
-                    hregion = HRegion.openHRegion(new org.apache.hadoop.fs.Path(basePath.toString()),
-                        regionInfo,
-                        tableDescriptor,
-                        log,
-                        conf,
-                        hRegionBridge,
-                        null);
-                  return new HRegionBridge(hregion);
+                  return new HRegionBridge(HRegion.openHRegion(new org.apache.hadoop.fs.Path(basePath.toString()),
+                      regionInfo, tableDescriptor, log, conf, hRegionBridge, null));
                 }
             );
             try {
@@ -180,7 +156,7 @@ public class TabletService extends AbstractService implements TabletModule {
         }
 
         @Override
-        public void onFailure(Throwable t) {
+        public void onFailure(@NotNull Throwable t) {
           notifyFailed(t);
         }
       }, fiber);
@@ -190,22 +166,24 @@ public class TabletService extends AbstractService implements TabletModule {
 
   @FiberOnly
   private void startBootstrap() {
-    LOG.info("Waiting to find at least " + getMinQuorumSize() + " nodes to bootstrap with");
-
     final FutureCallback<ImmutableMap<Long, NodeInfo>> callback =
         new FutureCallback<ImmutableMap<Long, NodeInfo>>() {
+          final Map<Long, NodeInfo> peers = new HashMap<>();
+
           @Override
           @FiberOnly
-          public void onSuccess(ImmutableMap<Long, NodeInfo> result) {
+          public void onSuccess(@NotNull ImmutableMap<Long, NodeInfo> result) {
+            peers.putAll(result);
             try {
-              maybeStartBootstrap(result);
+              maybeStartBootstrap(peers);
             } catch (IOException e) {
               e.printStackTrace();
+              System.exit(1);
             }
           }
 
           @Override
-          public void onFailure(Throwable t) {
+          public void onFailure(@NotNull Throwable t) {
             LOG.warn("failed to get discovery state", t);
           }
         };
@@ -214,14 +192,11 @@ public class TabletService extends AbstractService implements TabletModule {
       ListenableFuture<ImmutableMap<Long, NodeInfo>> f = discoveryModule.getState();
       Futures.addCallback(f, callback, fiber);
     });
-
-    ListenableFuture<ImmutableMap<Long, NodeInfo>> f = discoveryModule.getState();
-    Futures.addCallback(f, callback, fiber);
   }
 
   @FiberOnly
-  private void maybeStartBootstrap(ImmutableMap<Long, NodeInfo> nodes) throws IOException {
-    List<Long> peers = new ArrayList<>(nodes.keySet());
+  private void maybeStartBootstrap(Map<Long, NodeInfo> nodes) throws IOException {
+    ImmutableList<Long> peers = ImmutableList.copyOf(new ArrayList<>(nodes.keySet()));
 
     LOG.debug("Found a bunch of peers: {}", peers);
     if (peers.size() < getMinQuorumSize()) {
@@ -242,13 +217,11 @@ public class TabletService extends AbstractService implements TabletModule {
 
   // to bootstrap root we need to find the list of peers we should be connected to, and then do that.
   // how to bootstrap?
-  private void bootstrapRoot(final List<Long> peers) throws IOException {
-    HTableDescriptor rootDesc = HTableDescriptor.ROOT_TABLEDESC;
-    HRegionInfo rootRegion = new HRegionInfo(
-        rootDesc.getTableName(), new byte[]{0}, new byte[]{}, false, 1);
+  private void bootstrapRoot(final ImmutableList<Long> peers) throws IOException {
+    HTableDescriptor rootDesc = SystemTableNames.rootTableDescriptor();
+    HRegionInfo rootRegion = SystemTableNames.rootRegionInfo();
 
     // ok we have enough to start a region up now:
-
     tabletRegistry.startTablet(rootRegion, rootDesc, peers);
   }
 
@@ -260,28 +233,24 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public void startTablet(List<Long> peers, String tabletName) {
-    LOG.error("unimplemented");
-    System.exit(1);
-  }
-
-  @Override
   public Channel<TabletStateChange> getTabletStateChanges() {
     return tabletStateChangeChannel;
   }
 
+  @org.jetbrains.annotations.NotNull
   @Override
-  public Collection<Tablet> getTablets() throws ExecutionException, InterruptedException {
-    SettableFuture<Collection<Tablet>> future = SettableFuture.create();
-    fiber.execute(() -> {
-      Map<String, Tablet> tablets = tabletRegistry.getTablets();
-      // make defensive copy:
-      future.set(
-          Lists.newArrayList(tablets.values())
-      );
-    });
+  public Tablet getTablet(String tableName, ByteBuffer row) throws RegionNotFoundException {
+    return tabletRegistry.getTablet(tableName, row);
+  }
 
-    return future.get();
+  @Override
+  public Tablet getTablet(RegionSpecifier regionSpecifier) throws RegionNotFoundException {
+    throw new RegionNotFoundException("Not supported");
+  }
+
+  @Override
+  public Collection<Tablet> getTablets() {
+    return this.tabletRegistry.dumpTablets();
   }
 
   @Override
@@ -300,22 +269,49 @@ public class TabletService extends AbstractService implements TabletModule {
   }
 
   @Override
-  public String acceptCommand(String commandString) throws InterruptedException {
+  public String acceptCommand(String commandString) {
     try {
       if (commandString.startsWith(C5ServerConstants.START_META)) {
-        return startMeta(commandString);
+        return startMetaHere(commandString);
       } else if (commandString.startsWith(C5ServerConstants.CREATE_TABLE)) {
         return createUserTable(commandString);
+      } else if (commandString.startsWith(C5ServerConstants.LAUNCH_TABLET)) {
+        return launchTablet(commandString);
       } else if (commandString.startsWith(C5ServerConstants.SET_META_LEADER)) {
         return setMetaLeader(commandString);
-      } else {
-        throw new IOException("Unknown command:" + commandString);
+      } else if (commandString.startsWith(C5ServerConstants.SET_USER_LEADER)) {
+        return setUserLeader(commandString);
       }
     } catch (IOException | RegionNotFoundException | DeserializationException e) {
+      LOG.error(e.getMessage());
       e.printStackTrace();
     }
 
+    LOG.error("Unable to accept command:" + commandString);
     return "NOTOK";
+  }
+
+  @Override
+  public void startTabletHere(HTableDescriptor hTableDescriptor,
+                              HRegionInfo hRegionInfo,
+                              ImmutableList<Long> peers) throws IOException {
+    this.tabletRegistry.startTablet(hRegionInfo, hTableDescriptor, peers);
+  }
+
+  private String launchTablet(String commandString) throws IOException, DeserializationException {
+    BASE64Decoder decoder = new BASE64Decoder();
+    String createString = commandString.substring(commandString.indexOf(":") + 1);
+    String[] tableCreationStrings = createString.split(",");
+    HTableDescriptor hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
+    HRegionInfo hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
+    List<Long> peers = new ArrayList<>();
+    for (String s : Arrays.copyOfRange(tableCreationStrings, 2, tableCreationStrings.length)) {
+      s = StringUtils.strip(s);
+      peers.add(new Long(s));
+    }
+
+    startTabletHere(hTableDescriptor, hRegionInfo, ImmutableList.copyOf(peers));
+    return "OK";
   }
 
   private String setMetaLeader(String commandString) throws IOException, RegionNotFoundException {
@@ -325,6 +321,16 @@ public class TabletService extends AbstractService implements TabletModule {
     return "OK";
   }
 
+  private String setUserLeader(String commandString)
+      throws IOException, RegionNotFoundException, DeserializationException {
+    BASE64Decoder decoder = new BASE64Decoder();
+    String createString = commandString.substring(commandString.indexOf(":") + 1);
+    String[] splits = createString.split(",");
+    addLeaderEntryToMeta(Long.parseLong(splits[0]), HRegionInfo.parseFrom(decoder.decodeBuffer(splits[1])));
+    return "OK";
+  }
+
+
   private String createUserTable(String commandString)
       throws IOException, DeserializationException, RegionNotFoundException {
     BASE64Decoder decoder = new BASE64Decoder();
@@ -332,19 +338,55 @@ public class TabletService extends AbstractService implements TabletModule {
     String[] tableCreationStrings = createString.split(",");
 
     HTableDescriptor hTableDescriptor;
-    HRegionInfo hRegionInfo;
+    ArrayList<HRegionInfo> hRegionInfos = new ArrayList<>();
     List<Long> peers = new ArrayList<>();
 
-    for (String s : Arrays.copyOfRange(tableCreationStrings, 2, tableCreationStrings.length)) {
+    hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
+    hRegionInfos.add(HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1])));
+
+    String[] extraHRegionStrings = Arrays.copyOfRange(tableCreationStrings, 2, tableCreationStrings.length - 1);
+    for (String s : extraHRegionStrings) {
+      try {
+        byte[] potentialHRegion = decoder.decodeBuffer(s);
+        HRegionInfo hRegion = HRegionInfo.parseFrom(potentialHRegion);
+        hRegionInfos.add(hRegion);
+      } catch (DeserializationException e) {
+        // WE have gotten to the peer list
+        break;
+      }
+    }
+
+    for (String s : Arrays.copyOfRange(tableCreationStrings, hRegionInfos.size() + 1, tableCreationStrings.length)) {
       s = StringUtils.strip(s);
       peers.add(new Long(s));
     }
-    hTableDescriptor = HTableDescriptor.parseFrom(decoder.decodeBuffer(tableCreationStrings[0]));
-    hRegionInfo = HRegionInfo.parseFrom(decoder.decodeBuffer(tableCreationStrings[1]));
-    return createUserTableHelper(peers, hTableDescriptor, hRegionInfo);
+
+    for (HRegionInfo hRegionInfo : hRegionInfos) {
+      notifyCohortsForTabletCreation(peers, hTableDescriptor, hRegionInfo, 3);
+    }
+    for (HRegionInfo hRegionInfo : hRegionInfos) {
+      addEntryToMeta(hRegionInfo, hTableDescriptor);
+    }
+    return "OK";
   }
 
-  private String startMeta(String commandString) throws IOException {
+  private void notifyCohortsForTabletCreation(final List<Long> peers,
+                                              final HTableDescriptor hTableDescriptor,
+                                              final HRegionInfo hRegionInfo,
+                                              final int maximumNumberOfCohorts) {
+    int numberOfCohorts = peers.size() < 3 ? peers.size() : maximumNumberOfCohorts;
+    ArrayList<Long> shuffledPeers = new ArrayList<>(peers);
+    Collections.shuffle(shuffledPeers);
+    List<Long> subList = shuffledPeers.subList(0, numberOfCohorts);
+    for (long peer : subList) {
+      ModuleSubCommand moduleSubCommand
+          = prepareTabletModuleSubCommand(prepareLaunchTabletString(hTableDescriptor, hRegionInfo, subList));
+      relayRequest(prepareRequest(peer, moduleSubCommand));
+    }
+  }
+
+  private String startMetaHere(String commandString)
+      throws IOException {
     HTableDescriptor metaDesc = HTableDescriptor.META_TABLEDESC;
     HRegionInfo metaRegion = SystemTableNames.metaRegionInfo();
     // ok we have enough to start a region up now:
@@ -353,45 +395,115 @@ public class TabletService extends AbstractService implements TabletModule {
     for (String s : peerString.split(",")) {
       peers.add(new Long(s));
     }
-    tabletRegistry.startTablet(metaRegion, metaDesc, peers);
+
+    this.startTabletHere(metaDesc, metaRegion, ImmutableList.copyOf(peers));
     return "OK";
   }
 
-  private String createUserTableHelper(List<Long> peers,
-                                       HTableDescriptor hTableDescriptor,
-                                       HRegionInfo hRegionInfo) throws IOException, RegionNotFoundException {
-    addEntryToMeta(hRegionInfo, hTableDescriptor);
-    tabletRegistry.startTablet(hRegionInfo, hTableDescriptor, peers);
-    return "OK";
+  private ModuleSubCommand prepareTabletModuleSubCommand(String command) {
+    return new ModuleSubCommand(ModuleType.Tablet, command);
+  }
+
+  private Request<CommandRpcRequest<?>, CommandReply>
+  prepareRequest(long peer, ModuleSubCommand moduleSubCommand) {
+    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
+    return new Request<CommandRpcRequest<?>, CommandReply>() {
+
+      @Override
+      public Session getSession() {
+        return null;
+      }
+
+      @Override
+      public CommandRpcRequest<?> getRequest() {
+        return commandRpcRequest;
+      }
+
+      @Override
+      public void reply(CommandReply i) {
+      }
+    };
+  }
+
+  private void relayRequest(Request<CommandRpcRequest<?>, CommandReply> request) {
+    controlModule.doMessage(request);
+  }
+
+  private static String prepareLaunchTabletString(HTableDescriptor hTableDescriptor,
+                                                  HRegionInfo hRegionInfo,
+                                                  List<Long> peers) {
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append(C5ServerConstants.LAUNCH_TABLET);
+    stringBuilder.append(":");
+    BASE64Encoder encoder = new BASE64Encoder();
+    stringBuilder.append(encoder.encode(hTableDescriptor.toByteArray()));
+    stringBuilder.append(",");
+    stringBuilder.append(encoder.encode(hRegionInfo.toByteArray()));
+
+    for (Long peer : peers) {
+      stringBuilder.append(",");
+      stringBuilder.append(peer);
+    }
+
+    return stringBuilder.toString();
+  }
+
+  private void addMetaLeaderEntryToRoot(long leader) throws IOException, RegionNotFoundException {
+    Tablet tablet = this.tabletRegistry.getTablet("hbase:root", new byte[]{0x00});
+    org.apache.hadoop.hbase.TableName hbaseDatabaseName = SystemTableNames.metaTableName();
+    ByteBuffer hbaseNameSpace = ByteBuffer.wrap(hbaseDatabaseName.getNamespace());
+    ByteBuffer hbaseTableName = ByteBuffer.wrap(hbaseDatabaseName.getQualifier());
+    TableName tableName = new TableName(hbaseNameSpace, hbaseTableName);
+
+    if (tablet.getLeader() != server.getNodeId()) {
+      throw new IOException(" I am not leader but I am trying to put into root");
+    }
+    Put put = new Put(TabletNameHelpers.toBytes(tableName));
+    put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put);
+    boolean processed = tablet.getRegion().mutate(mutation, new Condition());
+    if (!processed) {
+      throw new IOException("Unable to process root change");
+    }
   }
 
   private void addEntryToMeta(HRegionInfo hRegionInfo, HTableDescriptor hTableDescriptor)
       throws IOException, RegionNotFoundException {
-    Region region = this.getTablet("hbase:meta").getRegion();
+    byte[] tableName = hRegionInfo.getTable().getName();
+    byte[] tableNameAndRow;
+    if (hRegionInfo.getEndKey() == null || hRegionInfo.getEndKey().length == 0) {
+      tableNameAndRow = Bytes.add(tableName, SystemTableNames.sep, new byte[0]);
+    } else {
+      tableNameAndRow = Bytes.add(tableName, SystemTableNames.sep, hRegionInfo.getEndKey());
+    }
 
-    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
+    byte[] metaRowKey = Bytes.add(tableNameAndRow, SystemTableNames.sep, Bytes.toBytes(hRegionInfo.getRegionId()));
+    Tablet tablet = this.tabletRegistry.getTablet("hbase:meta", metaRowKey);
+    if (tablet.getLeader() != server.getNodeId()) {
+     throw new IOException(" I am not leader but I am trying to put into meta");
+    }
+    Put put = new Put(hRegionInfo.getRegionName());
     put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());
     put.add(HConstants.CATALOG_FAMILY, HTABLE_DESCRIPTOR_QUALIFIER, hTableDescriptor.toByteArray());
+    MutationProto mutation = ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put);
+    boolean processed = tablet.getRegion().mutate(mutation, new Condition());
+    if (!processed) {
+      throw new IOException("Unable to process root change");
+    }
 
-
-    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
   }
 
-  private void addMetaLeaderEntryToRoot(long leader) throws IOException, RegionNotFoundException {
-    Region region = this.getTablet("hbase:root").getRegion();
-    HRegionInfo hRegionInfo = SystemTableNames.rootRegionInfo();
-    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
-    put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
-    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
-  }
 
-  private void addLeaderEntryToMeta(long leader) throws IOException, RegionNotFoundException {
-    Region region = this.getTablet("hbase:meta").getRegion();
-    HRegionInfo hRegionInfo = SystemTableNames.metaRegionInfo();
-    Put put = new Put(hRegionInfo.getEncodedNameAsBytes());
+  private void addLeaderEntryToMeta(long leader, HRegionInfo hRegionInfo) throws IOException, RegionNotFoundException {
+    Tablet tablet = this.tabletRegistry.getTablet("hbase:meta", new byte[]{0x00});
+    if (tablet.getLeader() == server.getNodeId()) {
+      Put put = new Put(hRegionInfo.getRegionName());
 
-    put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
-    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
+      put.add(HConstants.CATALOG_FAMILY, C5ServerConstants.LEADER_QUALIFIER, Bytes.toBytes(leader));
+      tablet.getRegion().mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
+    } else {
+      throw new IOException("We are not meta, but we got the command to start it ");
+    }
   }
 
   int getMinQuorumSize() {

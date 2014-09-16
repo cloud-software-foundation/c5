@@ -16,7 +16,7 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.MiniClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class TestScannerTest extends MiniClusterBase {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
+public class TestScannerTest extends MiniClusterPopulated {
 
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
@@ -35,17 +38,12 @@ public class TestScannerTest extends MiniClusterBase {
 
     ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {
-      i++;
-      if (i % 1024 == 0) {
-        System.out.print("#");
-        System.out.flush();
-      }
-      if (i % (1024 * 80) == 0) {
-        System.out.println("");
-      }
       result = scanner.next();
+      if (result != null) {
+        i++;
+      }
     } while (result != null);
     scanner.close();
-
+    assertThat(i, is(this.NUMBER_OF_ROWS));
   }
 }

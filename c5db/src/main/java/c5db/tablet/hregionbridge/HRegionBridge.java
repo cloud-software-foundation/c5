@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.regionserver.HRegionInterface;
@@ -40,7 +41,6 @@ import org.apache.hadoop.hbase.regionserver.OperationStatus;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.StringUtils;
-import org.jetlang.channels.MemoryChannel;
 import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.slf4j.Logger;
@@ -72,7 +72,6 @@ public class HRegionBridge implements Region {
   int processors = Runtime.getRuntime().availableProcessors();
   PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(processors * 2));
   Fiber batcher = poolFiberFactory.create();
-  MemoryChannel<Map.Entry<SettableFuture<Boolean>, MutationProto>> memoryChannel = new MemoryChannel<>();
 
   public HRegionBridge(final HRegionInterface theRegion) {
     this.theRegion = theRegion;
@@ -87,12 +86,10 @@ public class HRegionBridge implements Region {
       batchMutateHelper(arrayList);
       long time = System.currentTimeMillis() - begin;
       if (time > 100) {
-        LOG.error("batchMutate took longer than 100ms:" + time + " ms");
+        LOG.error("batchMutate took longer than 100ms: {} ms for {} entries", time, arrayList.size());
       }
     }, 0l, 1l, TimeUnit.MILLISECONDS);
-
   }
-
 
   private void batchMutateHelper(List<Map.Entry<SettableFuture<Boolean>, MutationProto>> message) {
 
@@ -143,7 +140,6 @@ public class HRegionBridge implements Region {
     batchExecutor.put(new TreeMap.SimpleEntry<>(future, mutateProto));
     return future;
   }
-
 
   @Override
   public boolean mutate(MutationProto mutateProto, Condition condition) throws IOException {
@@ -239,8 +235,9 @@ public class HRegionBridge implements Region {
   }
 
   @Override
-  public RegionScanner getScanner(c5db.client.generated.Scan scan) throws IOException {
-    return theRegion.getScanner(ReverseProtobufUtil.toScan(scan));
+  public RegionScanner getScanner(c5db.client.generated.Scan scanIn) throws IOException {
+    Scan scan = ReverseProtobufUtil.toScan(scanIn);
+    return theRegion.getScanner(scan);
   }
 
   @Override
@@ -288,6 +285,7 @@ public class HRegionBridge implements Region {
             return new RegionActionResult(new ArrayList<>(), buildException(new IOException("Increment not supported")));
           case PUT:
             try {
+
               rowsToLock.add(action.getMutation().getRow().array());
               mutations.add(ReverseProtobufUtil.toPut(action.getMutation()));
               resultOrExceptions.add(new ResultOrException(action.getIndex(), new Result(), null));
@@ -385,11 +383,14 @@ public class HRegionBridge implements Region {
    * @param t The exception to stringify.
    * @return NameValuePair of the exception name to stringified version os exception.
    */
-
-  //private ResultOrException processAction(Action action)
   private NameBytesPair buildException(final Throwable t) {
     return new NameBytesPair(
         t.getClass().getName(),
         ByteBuffer.wrap(Bytes.toBytes(StringUtils.stringifyException(t))));
+  }
+
+  @Override
+  public boolean rowInRange(byte[] row) {
+    return true;
   }
 }

@@ -176,7 +176,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     String stringifiedRegion = Bytes.toString(regionSpecifierBuffer.array());
     LOG.debug("get online region:" + stringifiedRegion);
 
-    Tablet tablet = tabletModule.getTablet(stringifiedRegion);
+    Tablet tablet = tabletModule.getTablet(stringifiedRegion, ByteBuffer.wrap(new byte[]{0x00}));
     if (tablet == null) {
       throw new RegionNotFoundException("Unable to find specified tablet:" + stringifiedRegion);
     }
