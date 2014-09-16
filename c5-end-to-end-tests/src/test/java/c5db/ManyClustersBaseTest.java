@@ -33,11 +33,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
-
-public class ManyClustersBaseTest extends ManyClusterBase {
+@Ignore public class ManyClustersBaseTest extends ManyClusterBase {
 
   @Test
-  @Ignore
   public void metaTableShouldContainUserTableEntries()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
     ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));

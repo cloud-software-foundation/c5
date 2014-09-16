@@ -21,6 +21,7 @@ import c5db.MiniClusterBase;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,14 +29,10 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class PopulatorTest extends MiniClusterBase {
-
-
+@Ignore public class PopulatorTest extends MiniClusterBase {
   private static ByteString tableName = ByteString.bytesDefaultValue("testTable");
 
-  public PopulatorTest() {
-
-  }
+  public PopulatorTest() {}
 
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, IOException {
@@ -103,6 +100,7 @@ public class PopulatorTest extends MiniClusterBase {
     }
   }
 
+  @Ignore
   @Test
   public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
     PopulatorTest populator = new PopulatorTest();

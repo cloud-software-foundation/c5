@@ -19,8 +19,7 @@ package c5db.log;
 
 import c5db.generated.RegionWalEntry;
 import c5db.interfaces.replication.GeneralizedReplicator;
-import c5db.interfaces.replication.Replicator;
-import c5db.replication.C5GeneralizedReplicator;
+import c5db.interfaces.replication.ReplicateSubmissionInfo;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.protostuff.LinkBuffer;
@@ -34,7 +33,6 @@ import org.apache.hadoop.hbase.regionserver.wal.HLog;
 import org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
 import org.apache.hadoop.hbase.regionserver.wal.WALCoprocessorHost;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
-import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,14 +64,12 @@ public class OLogShim implements Syncable, HLog {
   // for all those saved futures. To prevent this queue from growing without bound, the client
   // of this class must sync regularly. That's something the client would need to do anyway in
   // order to determine whether its writes are succeeding.
-  private final BlockingQueue<ListenableFuture<Long>> appendFutures = new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
+  private final BlockingQueue<ListenableFuture<ReplicateSubmissionInfo>> appendFutures =
+      new ArrayBlockingQueue<>(MAX_APPENDS_OUTSTANDING);
 
-  /**
-   * The caller of this constructor must take responsibility for starting and disposing of
-   * the Replicator, and starting and disposing of the fiber.
-   */
-  public OLogShim(Replicator replicatorInstance, Fiber fiber) {
-    this.replicator = new C5GeneralizedReplicator(replicatorInstance, fiber);
+
+  public OLogShim(GeneralizedReplicator replicator) {
+    this.replicator = replicator;
   }
 
   //TODO fix so we don't always insert a huge amount of data
@@ -161,12 +157,14 @@ public class OLogShim implements Syncable, HLog {
   public void sync() throws IOException {
     // TODO how should this handle a case where some writes succeed and others fail?
     // TODO currently it throws an exception, but that can lead to the appearance that a successful write failed
-    List<ListenableFuture<Long>> appendFutureList = new ArrayList<>();
+    List<ListenableFuture<ReplicateSubmissionInfo>> appendFutureList = new ArrayList<>();
     appendFutures.drainTo(appendFutureList);
 
     try {
-      for (ListenableFuture<Long> appendFuture : appendFutureList) {
-        appendFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+      for (ListenableFuture<ReplicateSubmissionInfo> appendFuture : appendFutureList) {
+        appendFuture
+            .get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .completedFuture.get(WAL_SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS);
       }
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new IOException("Error encountered while waiting within OLogShim#sync", e);
@@ -223,7 +221,7 @@ public class OLogShim implements Syncable, HLog {
       List<ByteBuffer> entryBytes = serializeWalEdit(info.getRegionNameAsString(), edit);
 
       // our replicator knows what quorumId/tabletId we are.
-      ListenableFuture<Long> appendFuture = replicator.replicate(entryBytes);
+      ListenableFuture<ReplicateSubmissionInfo> appendFuture = replicator.replicate(entryBytes);
       appendFutures.add(appendFuture);
 
     } catch (GeneralizedReplicator.InvalidReplicatorStateException | InterruptedException e) {
