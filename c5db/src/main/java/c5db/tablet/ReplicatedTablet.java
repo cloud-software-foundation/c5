@@ -137,7 +137,6 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     replicatorStateChannel.subscribe(tabletFiber, this::tabletStateCallback);
     Subscriber<ReplicatorInstanceEvent> replicatorEventChannel = replicator.getEventChannel();
     replicatorEventChannel.subscribe(tabletFiber, this::tabletStateChangeCallback);
-    replicator.start();
 
     // TODO this ThreadFiber is a workaround until issue 252 is fixed; at which point shim can use tabletFiber.
     OLogShim shim = new OLogShim(new C5GeneralizedReplicator(replicator, shimFiber));

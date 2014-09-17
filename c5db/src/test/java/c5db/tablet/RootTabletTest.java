@@ -153,9 +153,6 @@ public class RootTabletTest {
         will(returnValue(future));
         then(state.is("opening"));
 
-        oneOf(replicator).start();
-        when(state.is("opening"));
-
         oneOf(regionCreator).getHRegion(
             with(any(Path.class)),
             with(equal(regionInfo)),
