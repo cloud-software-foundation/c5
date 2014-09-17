@@ -71,7 +71,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
   public WebAdminService(C5Server server, int port) {
     this.server = server;
     this.port = port;
-    this.fiber = server.getFiberSupplier().getFiber(this::handleThrowable);
+    this.fiber = server.getFiberSupplier().getNewFiber(this::handleThrowable);
   }
 
   private void handleThrowable(Throwable fiberError) {

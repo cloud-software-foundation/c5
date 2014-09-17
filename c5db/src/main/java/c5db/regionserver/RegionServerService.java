@@ -78,7 +78,7 @@ public class RegionServerService extends AbstractService implements RegionServer
     this.workerGroup = workerGroup;
     this.port = port;
     this.server = server;
-    this.fiber = server.getFiberSupplier().getFiber(this::notifyFailed);
+    this.fiber = server.getFiberSupplier().getNewFiber(this::notifyFailed);
     bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
   }
 

@@ -114,7 +114,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
     this.conf = conf;
     this.basePath = basePath;
 
-    this.tabletFiber = server.getFiberSupplier().getFiber(this::handleFail);
+    this.tabletFiber = server.getFiberSupplier().getNewFiber(this::handleFail);
     this.replicationModule = replicationModule;
     this.regionCreator = regionCreator;
 

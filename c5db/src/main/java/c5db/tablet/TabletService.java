@@ -105,7 +105,7 @@ public class TabletService extends AbstractService implements TabletModule {
 
   public TabletService(C5Server server) {
     this.fiberSupplier = server.getFiberSupplier();
-    this.fiber = fiberSupplier.getFiber(this::notifyFailed);
+    this.fiber = fiberSupplier.getNewFiber(this::notifyFailed);
     this.server = server;
     this.conf = HBaseConfiguration.create();
   }
