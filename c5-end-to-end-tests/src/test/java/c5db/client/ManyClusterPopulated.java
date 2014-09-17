@@ -14,17 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package c5db.client;
 
-package c5db;
+import c5db.ManyClusterBase;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Before;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
 
-public class LogConstants {
-  public static final Path LOG_ROOT_DIRECTORY_RELATIVE_PATH = Paths.get("logs");
-  public static final Path LOG_FILE_SUBDIRECTORY_RELATIVE_PATH = Paths.get("files");
-  public static final int LOG_THREAD_POOL_SIZE = 1;
-  public static final int LOG_CLOSE_TIMEOUT_SECONDS = 15;
-  public static final int LOG_NAVIGATOR_DEFAULT_MAX_ENTRY_SEEK = 256;
-  public static final boolean LOG_USE_FILE_CHANNEL_FORCE = true;
+public class ManyClusterPopulated extends ManyClusterBase {
+
+  public int NUMBER_OF_ROWS = 1024 * 100 ;
+
+  @Before
+  public void initTable() throws IOException, InterruptedException {
+    for (int i = 0; i != NUMBER_OF_ROWS; i++) {
+      Put put = new Put(Bytes.toBytes(i));
+      put.add(Bytes.toBytes("cf"), Bytes.toBytes("cq"), new byte[2]);
+      this.table.put(put);
+      if (i % 1024 == 0){
+        System.out.print("#");
+      }
+    }
+  }
 }

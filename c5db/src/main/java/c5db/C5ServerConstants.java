@@ -20,7 +20,6 @@ package c5db;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class C5ServerConstants {
-
   public static final int MAX_CALL_SIZE = Integer.MAX_VALUE;
   public static final long MAX_CONTENT_LENGTH_HTTP_AGG = 8192;
 
@@ -36,7 +35,9 @@ public class C5ServerConstants {
   // Commands we pass to the command server
   public static final String START_META = "Start Meta";
   public static final String CREATE_TABLE = "Create Table";
+  public static final String LAUNCH_TABLET = "Launch Tablet";
   public static final String SET_META_LEADER = "Set me as Meta Leader";
+  public static final String SET_USER_LEADER = "Set me as User Leader";
 
   public static final String LOOPBACK_ADDRESS = "127.0.0.1";
   public static final String BROADCAST_ADDRESS = "255.255.255.255";
@@ -54,8 +55,4 @@ public class C5ServerConstants {
   public static final String WEB_SERVER_PORT_PROPERTY_NAME = "webServerPort";
   public static final String REGION_SERVER_PORT_PROPERTY_NAME = "regionServerPort";
   public static final String CONTROL_SERVER_PORT_PROPERTY_NAME = "controlServerPort";
-
-  public static final byte[] META_ROW = {1, 2, 3, 4, 5};
-  public static final byte[] META_START_KEY = {0x00};
-  public static final byte[] META_END_KEY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 }

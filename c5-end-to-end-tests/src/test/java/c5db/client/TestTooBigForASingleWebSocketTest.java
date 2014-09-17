@@ -16,6 +16,7 @@
  */
 package c5db.client;
 
+import c5db.ManyClusterBase;
 import c5db.MiniClusterBase;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -68,11 +69,9 @@ public class TestTooBigForASingleWebSocketTest extends MiniClusterBase {
     assertThat(DataHelper.valueReadFromDB(table, row), is(equalTo(valuePutIntoDatabase)));
   }
 
-  private void putRowAndValueIntoDatabase(byte[] row,
-                                          byte[] valuePutIntoDatabase) throws IOException {
+  private void putRowAndValueIntoDatabase(byte[] row, byte[] valuePutIntoDatabase) throws IOException {
     Put put = new Put(row);
     put.add(cf, cq, valuePutIntoDatabase);
     table.put(put);
   }
-
 }

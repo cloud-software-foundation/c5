@@ -22,9 +22,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-/**
- * Created by posix4e on 5/18/14.
- */
 public class CommandMatchers {
 
   public static Matcher<CommandRpcRequest<ModuleSubCommand>> hasMessageWithRPC(String s) {

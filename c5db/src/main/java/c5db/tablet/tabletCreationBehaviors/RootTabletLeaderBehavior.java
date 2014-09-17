@@ -21,6 +21,7 @@ import c5db.client.ProtobufUtil;
 import c5db.client.generated.Condition;
 import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionInfo;
+import c5db.client.generated.Scan;
 import c5db.client.generated.TableName;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.server.CommandRpcRequest;
@@ -30,39 +31,37 @@ import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
 import c5db.tablet.SystemTableNames;
 import c5db.util.FiberOnly;
+import c5db.util.TabletNameHelpers;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Put;
-import org.jetlang.channels.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hadoop.hbase.regionserver.RegionScanner;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
-
-  private static final Logger LOG = LoggerFactory.getLogger(RootTabletLeaderBehavior.class);
   private final long numberOfMetaPeers;
   private final Tablet tablet;
-  Channel<CommandRpcRequest<?>> commandRpcRequestChannel;
+  private final C5Server server;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
                                   final C5Server server,
                                   final long numberOfMetaPeers) {
     this.numberOfMetaPeers = numberOfMetaPeers;
-    commandRpcRequestChannel = server.getCommandChannel();
+    this.server = server;
     this.tablet = tablet;
-
   }
 
-  public void start() throws IOException {
-
+  public void start() throws IOException, ExecutionException, InterruptedException {
     Region region = tablet.getRegion();
     if (!metaExists(region)) {
       List<Long> pickedPeers = shuffleListAndReturnMetaRegionPeers(tablet.getPeers());
@@ -73,14 +72,12 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
     }
   }
 
-  boolean metaExists(Region region) {
+  boolean metaExists(Region region) throws IOException {
     // TODO We should make sure the meta is well formed
-    org.apache.hadoop.hbase.client.Get get = new org.apache.hadoop.hbase.client.Get(C5ServerConstants.META_ROW);
-    try {
-      return region.exists(ProtobufUtil.toGet(get, true));
-    } catch (IOException e) {
-      return false;
-    }
+    RegionScanner scanner = region.getScanner(new Scan());
+    ArrayList<Cell> results = new ArrayList<>();
+    scanner.next(results, 1);
+    return results.size() > 0;
   }
 
   private List<Long> shuffleListAndReturnMetaRegionPeers(final List<Long> peers) {
@@ -89,37 +86,42 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   }
 
   @FiberOnly
-  private void requestMetaCommandCreated(List<Long> peers) {
+  private void requestMetaCommandCreated(List<Long> peers) throws ExecutionException, InterruptedException {
     String pickedPeersString = StringUtils.join(peers, ',');
     ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet,
         C5ServerConstants.START_META + ":" + pickedPeersString);
 
-    CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peers.get(0), moduleSubCommand);
-    commandRpcRequestChannel.publish(commandRpcRequest);
-
+    for (long peer : peers) {
+      CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
+      TabletLeaderBehaviorHelper.sendRequest(commandRpcRequest, server);
+    }
   }
+
   private void createLeaderLessMetaEntryInRoot(Region region, List<Long> pickedPeers) throws IOException {
-    Put put = new Put(C5ServerConstants.META_ROW);
     org.apache.hadoop.hbase.TableName hbaseDatabaseName = SystemTableNames.metaTableName();
     ByteBuffer hbaseNameSpace = ByteBuffer.wrap(hbaseDatabaseName.getNamespace());
-    ByteBuffer hbaseTableName = ByteBuffer.wrap(hbaseDatabaseName.getName());
+    ByteBuffer hbaseTableName = ByteBuffer.wrap(hbaseDatabaseName.getQualifier());
     TableName tableName = new TableName(hbaseNameSpace, hbaseTableName);
 
-    ByteBuffer startKey = ByteBuffer.wrap(C5ServerConstants.META_START_KEY);
-    ByteBuffer endKey = ByteBuffer.wrap(C5ServerConstants.META_END_KEY);
+    byte[] initialMetaRockeyInRoot = Bytes.add(TabletNameHelpers.toBytes(tableName), SystemTableNames.sep, new byte[0]);
+    Put put = new Put(initialMetaRockeyInRoot);
 
     RegionInfo regionInfo = new RegionInfo(1,
         tableName,
         pickedPeers,
         0l, // This signifies that we haven't picked the leader
-        startKey,
-        endKey,
+        ByteBuffer.wrap(new byte[0]),
+        ByteBuffer.wrap(new byte[0]),
         true,
         false);
 
     put.add(HConstants.CATALOG_FAMILY,
         HConstants.REGIONINFO_QUALIFIER,
         ProtobufIOUtil.toByteArray(regionInfo, RegionInfo.getSchema(), LinkedBuffer.allocate(512)));
-    region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
+
+    boolean processed = region.mutate(ProtobufUtil.toMutation(MutationProto.MutationType.PUT, put), new Condition());
+    if (!processed) {
+      throw new IOException("Unable to mutate root and thus we can't properly run root tablet leader behavior");
+    }
   }
 }
