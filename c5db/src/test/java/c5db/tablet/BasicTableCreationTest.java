@@ -163,8 +163,6 @@ public class BasicTableCreationTest {
 
       allowing(replicator).getId();
 
-      oneOf(replicator).start();
-
       allowing(replicator).getQuorumId();
       will(returnValue("hbase:root,\\x00,1.33578e495f8173aac4be480afe41410a."));
     }});
@@ -200,7 +198,6 @@ public class BasicTableCreationTest {
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
 
-        oneOf(replicator).start();
 
         allowing(replicator).getQuorumId();
         will(returnValue("hbase:meta,\\x00,1.33578e495f8173aac4be480afe41410a."));
@@ -232,8 +229,6 @@ public class BasicTableCreationTest {
 
         oneOf(replicator).getStateChannel();
         will(returnValue(stateChannel));
-
-        oneOf(replicator).start();
 
         allowing(replicator).getQuorumId();
         will(returnValue("hbase:tabletName,\\x00,1.33578e495f8173aac4be480afe41410a."));
