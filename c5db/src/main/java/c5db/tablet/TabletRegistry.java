@@ -24,7 +24,6 @@ import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.regionserver.RegionNotFoundException;
-import c5db.util.C5FiberFactory;
 import c5db.util.TabletNameHelpers;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -34,7 +33,6 @@ import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.jetlang.channels.Channel;
-import org.jetlang.fibers.Fiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +47,11 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Handles the logic of starting quorums, restoring them from disk, etc.
- * <p/>
+ * <p>
  * Totally NOT thread safe!
  */
 public class TabletRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(TabletRegistry.class);
-  private final C5FiberFactory fiberFactory;
   private final TabletFactory tabletFactory;
   private final Region.Creator regionCreator;
 
@@ -70,7 +67,6 @@ public class TabletRegistry {
   public TabletRegistry(C5Server c5server,
                         ConfigDirectory configDirectory,
                         Configuration legacyConf,
-                        C5FiberFactory fiberFactory,
                         Channel<TabletStateChange> commonStateChangeChannel,
                         ReplicationModule replicationModule,
                         TabletFactory tabletFactory,
@@ -78,7 +74,6 @@ public class TabletRegistry {
     this.c5server = c5server;
     this.configDirectory = configDirectory;
     this.legacyConf = legacyConf;
-    this.fiberFactory = fiberFactory;
     this.commonStateChangeChannel = commonStateChangeChannel;
     this.replicationModule = replicationModule;
     this.tabletFactory = tabletFactory;
@@ -99,7 +94,6 @@ public class TabletRegistry {
         HTableDescriptor tableDescriptor = HTableDescriptor.parseFrom(tableDescriptorBytes);
 
         Path basePath = configDirectory.getBaseConfigPath();
-        Fiber fiber = fiberFactory.create();
         Tablet tablet = tabletFactory.create(
             c5server,
             regionInfo,
@@ -107,7 +101,6 @@ public class TabletRegistry {
             peers,
             basePath,
             legacyConf,
-            fiber,
             replicationModule,
             regionCreator);
         tablet.start();
@@ -150,7 +143,6 @@ public class TabletRegistry {
         tableDescriptor.toByteArray());
     configDirectory.writePeersToFile(quorumName, peerList);
 
-    Fiber tabletFiber = fiberFactory.create();
     Tablet tablet = tabletFactory.create(
         c5server,
         regionInfo,
@@ -158,7 +150,6 @@ public class TabletRegistry {
         peerList,
         basePath,
         legacyConf,
-        tabletFiber,
         replicationModule,
         regionCreator);
     tablet.setStateChangeChannel(commonStateChangeChannel);

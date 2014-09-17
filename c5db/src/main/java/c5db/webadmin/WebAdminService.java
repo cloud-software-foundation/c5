@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.webadmin;
 
 import c5db.discovery.generated.Availability;
@@ -25,7 +26,6 @@ import c5db.interfaces.WebAdminModule;
 import c5db.interfaces.discovery.NewNodeVisible;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleType;
-import c5db.util.C5FiberFactory;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import c5db.webadmin.generated.TabletStateNotification;
@@ -71,9 +71,7 @@ public class WebAdminService extends AbstractService implements WebAdminModule {
   public WebAdminService(C5Server server, int port) {
     this.server = server;
     this.port = port;
-
-    C5FiberFactory fiberFactory = server.getFiberFactory(this::handleThrowable);
-    fiber = fiberFactory.create();
+    this.fiber = server.getFiberSupplier().getFiber(this::handleThrowable);
   }
 
   private void handleThrowable(Throwable fiberError) {

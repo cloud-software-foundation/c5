@@ -39,8 +39,8 @@ import c5db.messages.generated.ModuleType;
 import c5db.regionserver.RegionNotFoundException;
 import c5db.tablet.hregionbridge.HRegionBridge;
 import c5db.tablet.hregionbridge.HRegionServicesBridge;
-import c5db.util.C5FiberFactory;
 import c5db.util.FiberOnly;
+import c5db.util.FiberSupplier;
 import c5db.util.TabletNameHelpers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -90,7 +90,7 @@ public class TabletService extends AbstractService implements TabletModule {
   private static final Logger LOG = LoggerFactory.getLogger(TabletService.class);
   private static final byte[] HTABLE_DESCRIPTOR_QUALIFIER = Bytes.toBytes("HTABLE_QUAL");
 
-  private final C5FiberFactory fiberFactory;
+  private final FiberSupplier fiberSupplier;
   private final Fiber fiber;
   private final C5Server server;
 
@@ -104,8 +104,8 @@ public class TabletService extends AbstractService implements TabletModule {
   private ControlModule controlModule;
 
   public TabletService(C5Server server) {
-    this.fiberFactory = server.getFiberFactory(this::notifyFailed);
-    this.fiber = fiberFactory.create();
+    this.fiberSupplier = server.getFiberSupplier();
+    this.fiber = fiberSupplier.getFiber(this::notifyFailed);
     this.server = server;
     this.conf = HBaseConfiguration.create();
   }
@@ -135,7 +135,6 @@ public class TabletService extends AbstractService implements TabletModule {
             tabletRegistry = new TabletRegistry(server,
                 server.getConfigDirectory(),
                 conf,
-                fiberFactory,
                 getTabletStateChanges(),
                 replicationModule,
                 ReplicatedTablet::new,

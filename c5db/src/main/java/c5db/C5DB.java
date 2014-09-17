@@ -35,10 +35,9 @@ import c5db.regionserver.RegionServerService;
 import c5db.replication.ConfigDirectoryQuorumFileReaderWriter;
 import c5db.replication.ReplicatorService;
 import c5db.tablet.TabletService;
-import c5db.util.C5FiberFactory;
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberOnly;
-import c5db.util.PoolFiberFactoryWithExecutor;
+import c5db.util.FiberSupplier;
 import c5db.webadmin.WebAdminService;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractService;
@@ -73,7 +72,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 /**
  * Holds information about all other modules, can start/stop other modules, etc.
@@ -224,13 +222,9 @@ public class C5DB extends AbstractService implements C5Server {
   }
 
   @Override
-  public C5FiberFactory getFiberFactory(Consumer<Throwable> throwableConsumer) {
-    return new PoolFiberFactoryWithExecutor(fiberPool,
-        new ExceptionHandlingBatchExecutor(throwableConsumer));
-  }
-
-  private Fiber getFiber(Consumer<Throwable> throwableConsumer) {
-    return getFiberFactory(throwableConsumer).create();
+  public FiberSupplier getFiberSupplier() {
+    return (throwableConsumer) ->
+        fiberPool.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
   }
 
   @Override
@@ -255,9 +249,9 @@ public class C5DB extends AbstractService implements C5Server {
       bossGroup = new NioEventLoopGroup(processors / 3);
       workerGroup = new NioEventLoopGroup(processors / 3);
 
-      beaconServiceFiber = getFiber((t) -> {
-        LOG.error("Error from beaconServiceFiber:", t);
-      });
+      beaconServiceFiber = getFiberSupplier()
+          .getFiber((t) ->
+              LOG.error("Error from beaconServiceFiber:", t));
 
       commandChannel.subscribe(serverFiber, message -> {
         try {
@@ -422,18 +416,18 @@ public class C5DB extends AbstractService implements C5Server {
 
     switch (moduleType) {
       case Discovery: {
-        C5Module module = new BeaconService(this.nodeId, modulePort, workerGroup, this, this::getFiber);
+        C5Module module = new BeaconService(this.nodeId, modulePort, workerGroup, this, getFiberSupplier());
         startServiceModule(module);
         break;
       }
       case Replication: {
         C5Module module = new ReplicatorService(bossGroup, workerGroup, nodeId, modulePort, this,
-            this::getFiber, new ConfigDirectoryQuorumFileReaderWriter(configDirectory));
+            getFiberSupplier(), new ConfigDirectoryQuorumFileReaderWriter(configDirectory));
         startServiceModule(module);
         break;
       }
       case Log: {
-        C5Module module = new LogService(configDirectory.getBaseConfigPath(), this::getFiber);
+        C5Module module = new LogService(configDirectory.getBaseConfigPath(), getFiberSupplier());
         startServiceModule(module);
         break;
       }
