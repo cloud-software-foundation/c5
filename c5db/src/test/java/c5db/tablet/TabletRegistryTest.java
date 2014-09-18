@@ -22,6 +22,7 @@ import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
+import c5db.tablet.tabletCreationBehaviors.StartableTabletBehavior;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configuration;
@@ -85,7 +86,8 @@ public class TabletRegistryTest {
           with.is(anything()), /* base path */
           with.is(anything()), /* legacy conf */
           with(same(replicationModule)),
-          with(same(regionCreator)));
+          with(same(regionCreator)),
+          with(any(StartableTabletBehavior.class)));
       will(returnValue(rootTablet));
 
       oneOf(rootTablet).setStateChangeChannel(DO_NOT_CARE_STATE_CHANGE_CHANNEL);

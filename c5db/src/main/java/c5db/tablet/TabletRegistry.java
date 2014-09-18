@@ -24,6 +24,7 @@ import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.regionserver.RegionNotFoundException;
+import c5db.tablet.tabletCreationBehaviors.UserTabletLeaderBehavior;
 import c5db.util.TabletNameHelpers;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
@@ -102,7 +103,8 @@ public class TabletRegistry {
             basePath,
             legacyConf,
             replicationModule,
-            regionCreator);
+            regionCreator,
+            new UserTabletLeaderBehavior(c5server, regionInfo));
         tablet.start();
         tablet.setStateChangeChannel(commonStateChangeChannel);
 
@@ -151,7 +153,8 @@ public class TabletRegistry {
         basePath,
         legacyConf,
         replicationModule,
-        regionCreator);
+        regionCreator,
+        new UserTabletLeaderBehavior(c5server, regionInfo));
     tablet.setStateChangeChannel(commonStateChangeChannel);
     tablet.start();
     ConcurrentSkipListMap<byte[], Tablet> tablets;

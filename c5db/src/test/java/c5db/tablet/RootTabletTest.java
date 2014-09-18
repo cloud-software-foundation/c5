@@ -28,6 +28,7 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
+import c5db.tablet.tabletCreationBehaviors.UserTabletLeaderBehavior;
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberSupplier;
 import c5db.util.JUnitRuleFiberExceptions;
@@ -120,7 +121,8 @@ public class RootTabletTest {
         path,
         conf,
         replicationModule,
-        regionCreator);
+        regionCreator,
+        new UserTabletLeaderBehavior(server, regionInfo));
     future.set(replicator);
     stateChangeChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
     stateMemoryChannel = new MemoryChannel<>();

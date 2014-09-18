@@ -23,6 +23,7 @@ import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.replication.ReplicatorInstanceEvent;
 import c5db.interfaces.tablet.TabletStateChange;
+import c5db.tablet.tabletCreationBehaviors.StartableTabletBehavior;
 import c5db.util.ExceptionHandlingBatchExecutor;
 import c5db.util.FiberSupplier;
 import c5db.util.JUnitRuleFiberExceptions;
@@ -81,6 +82,8 @@ public class ReplicatedTabletTest {
   final HRegionInfo regionInfo = new HRegionInfo(TableName.valueOf("tablename"));
   final String regionName = regionInfo.getRegionNameAsString();
   final HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf("tablename"));
+  private final StartableTabletBehavior userTabletLeaderBehavior = context.mock(StartableTabletBehavior.class);
+
 
   final Path path = Paths.get("/");
   final Configuration conf = new Configuration();
@@ -109,7 +112,8 @@ public class ReplicatedTabletTest {
         path,
         conf,
         replicationModule,
-        regionCreator);
+        regionCreator,
+        userTabletLeaderBehavior);
     tabletStateChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
 
     future.set(replicator);
@@ -137,7 +141,7 @@ public class ReplicatedTabletTest {
         will(returnValue(region));
         then(state.is("opened"));
         stateChannel = new MemoryChannel<>();
-        replicatorEventChannel = new MemoryChannel<ReplicatorInstanceEvent>();
+        replicatorEventChannel = new MemoryChannel<>();
       }
     });
 
@@ -167,11 +171,17 @@ public class ReplicatedTabletTest {
   }
 
   @Test
-  public void shouldRunCallCallbackWhenTabletBecomesTheLeader() throws Throwable {
+  public void shouldPublishATabletStateChangeToLeaderWhenTheReplicatorBecomesTheLeader() throws Throwable {
+    context.checking(new Expectations() {{
+      // This behavior may or may not run before the test ends, and whether or not it runs is
+      // not being tested here.
+      allowing(userTabletLeaderBehavior).start();
+    }});
+
     replicatedTablet.start();
     assertEventually(tabletStateChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Open));
+
     stateChannel.publish(Replicator.State.LEADER);
     assertEventually(tabletStateChannelListener, hasMessageWithState(c5db.interfaces.tablet.Tablet.State.Leader));
-
   }
 }

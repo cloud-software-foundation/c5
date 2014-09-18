@@ -19,6 +19,7 @@ package c5db.tablet;
 
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
+import c5db.tablet.tabletCreationBehaviors.StartableTabletBehavior;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -41,5 +42,6 @@ public interface TabletFactory {
       Path basePath,
       Configuration legacyConf,
       ReplicationModule replicationModule,
-      Region.Creator regionCreator);
+      Region.Creator regionCreator,
+      StartableTabletBehavior userTabletLeaderBehavior);
 }

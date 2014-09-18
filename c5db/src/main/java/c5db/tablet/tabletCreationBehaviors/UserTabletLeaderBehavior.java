@@ -37,16 +37,17 @@ import sun.misc.BASE64Encoder;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class UserTabletLeaderBehavior {
+public class UserTabletLeaderBehavior implements StartableTabletBehavior {
   private static final Logger LOG = LoggerFactory.getLogger(UserTabletLeaderBehavior.class);
   private final C5Server server;
-  private final Tablet tablet;
+  private final HRegionInfo hRegionInfo;
 
-  public UserTabletLeaderBehavior(C5Server server, Tablet tablet) {
+  public UserTabletLeaderBehavior(C5Server server, HRegionInfo hRegionInfo) {
     this.server = server;
-    this.tablet = tablet;
+    this.hRegionInfo = hRegionInfo;
   }
 
   private static String generateCommandString(long nodeId, HRegionInfo hRegionInfo) {
@@ -55,19 +56,26 @@ public class UserTabletLeaderBehavior {
     return C5ServerConstants.SET_USER_LEADER + ":" + nodeId + "," + hRegionInfoStr;
   }
 
-  public void start() throws ExecutionException, InterruptedException, RegionNotFoundException, IOException {
-    TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
-    Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
-    Region rootRegion = rootTablet.getRegion();
+  @Override
+  public void start() throws InterruptedException, IOException {
+    try {
+      TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
+      Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
+      Region rootRegion = rootTablet.getRegion();
 
-    RegionScanner scanner = rootRegion.getScanner(ProtobufUtil.toScan(new Scan()));
-    ArrayList<Cell> results = new ArrayList<>();
-    scanner.nextRaw(results);
+      RegionScanner scanner = rootRegion.getScanner(ProtobufUtil.toScan(new Scan()));
+      List<Cell> results = new ArrayList<>();
+      scanner.nextRaw(results);
 
-    long leader = TabletLeaderBehaviorHelper.getLeaderFromResults(results);
-    String commandString = generateCommandString(leader, this.tablet.getRegionInfo());
-    ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, commandString);
-    CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
-    TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, server);
+      long leader = TabletLeaderBehaviorHelper.getLeaderFromResults(results);
+      String commandString = generateCommandString(leader, hRegionInfo);
+      ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, commandString);
+      CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
+      TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, server);
+    } catch (ExecutionException e) {
+      throw new IOException(e.getCause());
+    } catch (RegionNotFoundException e) {
+      throw new IOException(e);
+    }
   }
 }
