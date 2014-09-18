@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package c5db.util;
+package c5db.tablet.tabletCreationBehaviors;
 
-import org.jetlang.fibers.Fiber;
+import java.io.IOException;
 
 /**
- * Interface describing a service that creates fibers.
+ * A behavior that can be started, that may block or perform IO.
  */
-public interface C5FiberFactory {
-  public Fiber create();
+public interface StartableTabletBehavior {
+  void start() throws InterruptedException, IOException;
 }

@@ -20,6 +20,7 @@ import c5db.MiniClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import static org.hamcrest.core.Is.is;
 
 public class TestScannerTest extends MiniClusterPopulated {
 
+  @Ignore // Pending resolution of issue #304
   @Test
   public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     int i = 0;

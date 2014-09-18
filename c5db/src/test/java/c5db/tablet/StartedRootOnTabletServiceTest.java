@@ -30,7 +30,6 @@ import c5db.messages.generated.ModuleType;
 import com.google.common.collect.ImmutableMap;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,6 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
   Replicator replicator = context.mock(Replicator.class);
   Channel<Replicator.State> stateChannel = new MemoryChannel<>();
   Channel<Tablet.State> stateChangeChannel = new MemoryChannel<>();
-  Fiber fiber = poolFiberFactory.create();
 
   @Before
   public void startRoot() throws Throwable {
@@ -82,9 +80,6 @@ public class StartedRootOnTabletServiceTest extends TabletServiceTest {
 
         allowing(configDirectory).writeBinaryData(with(any(String.class)), with(any(String.class)), with(any(byte[].class)));
         allowing(configDirectory).writePeersToFile(with(any(String.class)), with(any(List.class)));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(fiber));
 
         oneOf(replicator).getQuorumId();
         will(returnValue("hbase:root,,1.9e44d7942d3598d55c758b7b83373c71."));

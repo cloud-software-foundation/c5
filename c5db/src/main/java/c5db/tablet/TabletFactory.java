@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.tablet;
 
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ReplicationModule;
+import c5db.tablet.tabletCreationBehaviors.StartableTabletBehavior;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.jetlang.fibers.Fiber;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
 /**
  * Essentially the constructor parameters for a tablet, as an interface. This exists primarily
  * to provide testability for those who manage the lifecycle of Tablets.
- * <p/>
+ * <p>
  * In production code, one can just type Tablet::new !!
  */
 public interface TabletFactory {
@@ -40,7 +41,7 @@ public interface TabletFactory {
       List<Long> peers,
       Path basePath,
       Configuration legacyConf,
-      Fiber tabletFiber,
       ReplicationModule replicationModule,
-      Region.Creator regionCreator);
+      Region.Creator regionCreator,
+      StartableTabletBehavior userTabletLeaderBehavior);
 }

@@ -24,12 +24,11 @@ import c5db.interfaces.ReplicationModule;
 import c5db.interfaces.discovery.NewNodeVisible;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
-import c5db.util.C5FiberFactory;
+import c5db.util.ExceptionHandlingBatchExecutor;
+import c5db.util.FiberSupplier;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
-import org.jmock.api.ThreadingPolicy;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.Before;
@@ -38,7 +37,6 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import static c5db.FutureActions.returnFutureWithValue;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -59,19 +57,18 @@ public class TabletServiceTest {
   ConfigDirectory configDirectory = context.mock(ConfigDirectory.class);
 
   C5Server c5Server = context.mock(C5Server.class);
-  C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
   MemoryChannel<NewNodeVisible> nodeNotifications = new MemoryChannel<>();
   TabletService tabletService;
+
+  private final FiberSupplier fiberSupplier = (throwableConsumer) ->
+      poolFiberFactory.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
 
   @Before
   public void before() throws Throwable {
     context.checking(new Expectations() {
       {
-        oneOf(c5Server).getFiberFactory(with(any(Consumer.class)));
-        will(returnValue(c5FiberFactory));
-
-        oneOf(c5FiberFactory).create();
-        will(returnValue(poolFiberFactory.create()));
+        allowing(c5Server).getFiberSupplier();
+        will(returnValue(fiberSupplier));
 
         oneOf(c5Server).getModule(ModuleType.Discovery);
         will(returnFutureWithValue(discoveryModule));

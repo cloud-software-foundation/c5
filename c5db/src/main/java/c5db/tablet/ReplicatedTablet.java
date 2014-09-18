@@ -28,7 +28,7 @@ import c5db.log.OLogShim;
 import c5db.replication.C5GeneralizedReplicator;
 import c5db.tablet.tabletCreationBehaviors.MetaTabletLeaderBehavior;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
-import c5db.tablet.tabletCreationBehaviors.UserTabletLeaderBehavior;
+import c5db.tablet.tabletCreationBehaviors.StartableTabletBehavior;
 import c5db.util.C5Futures;
 import c5db.util.FiberOnly;
 import com.google.common.collect.ImmutableList;
@@ -74,6 +74,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
   // Config type info:
   private final HRegionInfo regionInfo;
   private final HTableDescriptor tableDescriptor;
+  private final StartableTabletBehavior userTabletLeaderBehavior;
   private final ImmutableList<Long> peers;
   private final Configuration conf;
   private final Path basePath;
@@ -105,17 +106,18 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
                           List<Long> peers,
                           Path basePath,
                           Configuration conf,
-                          Fiber tabletFiber,
                           ReplicationModule replicationModule,
-                          Region.Creator regionCreator) {
+                          Region.Creator regionCreator,
+                          StartableTabletBehavior userTabletLeaderBehavior) {
     this.server = server;
     this.regionInfo = regionInfo;
     this.tableDescriptor = tableDescriptor;
+    this.userTabletLeaderBehavior = userTabletLeaderBehavior;
     this.peers = ImmutableList.copyOf(peers);
     this.conf = conf;
     this.basePath = basePath;
 
-    this.tabletFiber = tabletFiber;
+    this.tabletFiber = server.getFiberSupplier().getNewFiber(this::handleFail);
     this.replicationModule = replicationModule;
     this.regionCreator = regionCreator;
 
@@ -208,8 +210,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             metaTabletLeaderBehavior.start();
 
           } else {
-            UserTabletLeaderBehavior userTabletLeaderBeauvoir = new UserTabletLeaderBehavior(server, this);
-            userTabletLeaderBeauvoir.start();
+            userTabletLeaderBehavior.start();
           }
         } catch (Exception e) {
           LOG.error("Error setting tablet state to leader", e);
@@ -229,6 +230,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
 
   private void handleFail(Throwable t) {
     tabletFiber.dispose();
+    shimFiber.dispose();
     setTabletStateFailed(t);
   }
 
