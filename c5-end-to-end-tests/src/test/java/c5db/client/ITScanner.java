@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db;
+package c5db.client;
 
-import org.apache.hadoop.hbase.HConstants;
+import c5db.ClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,24 +30,23 @@ import java.util.concurrent.TimeoutException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class MiniClustersBaseTest extends MiniClusterPopulated {
+@Ignore
+public class ITScanner extends ClusterPopulated {
 
+  @Ignore // Pending resolution of issue #304
   @Test
-  public void metaTableShouldContainUserTableEntries()
-      throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Scan scan = new Scan();
-    scan.addFamily(HConstants.CATALOG_FAMILY);
-    ResultScanner scanner = metaTable.getScanner(scan);
+  public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    int i = 0;
     Result result;
-    int counter = 0;
+
+    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {
       result = scanner.next();
-      counter++;
-      if (result == null) {
-        break;
+      if (result != null) {
+        i++;
       }
-      assertThat(result, ScanMatchers.isWellFormedUserTable(name));
-    } while (true);
-    assertThat(counter, is(this.splitkeys.length + 2));
+    } while (result != null);
+    scanner.close();
+    assertThat(i, is(this.NUMBER_OF_ROWS));
   }
 }

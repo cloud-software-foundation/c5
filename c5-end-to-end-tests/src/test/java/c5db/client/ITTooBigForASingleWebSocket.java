@@ -16,8 +16,7 @@
  */
 package c5db.client;
 
-import c5db.ManyClusterBase;
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
@@ -31,7 +30,7 @@ import static c5db.testing.BytesMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TestTooBigForASingleWebSocketTest extends MiniClusterBase {
+public class ITTooBigForASingleWebSocket extends ClusterOrPseudoCluster {
   private static final byte[] randomBytes = new byte[65535 * 4];
   private static final Random random = new Random();
 

@@ -16,7 +16,7 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -83,7 +83,7 @@ class DataHelper {
 
   static void putRowInDB(FakeHTable hTable, byte[] row) throws IOException {
     Put put = new Put(row);
-    put.add(cf, cq, MiniClusterBase.value);
+    put.add(cf, cq, ClusterOrPseudoCluster.value);
     hTable.put(put);
   }
 
