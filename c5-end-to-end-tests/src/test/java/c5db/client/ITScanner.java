@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Ohm Data
+ * Copyright (C) 2014  Ohm Data
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,47 +16,35 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterPopulated;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.Scan;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static c5db.client.DataHelper.putRowInDB;
-import static junit.framework.TestCase.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
-public class TestInOrderScanTest extends MiniClusterBase {
-
-  private final byte[] cf = Bytes.toBytes("cf");
+@Ignore
+public class ITScanner extends ClusterPopulated {
 
   @Test
-  public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    Result result = null;
-    ResultScanner scanner;
-    putRowInDB(table, row);
-    row = Bytes.add(row, row);
-    putRowInDB(table, row);
-    row = Bytes.add(row, row);
-    putRowInDB(table, row);
-    row = Bytes.add(row, row);
-    putRowInDB(table, row);
-    row = Bytes.add(row, row);
-    putRowInDB(table, row);
-    row = Bytes.add(row, row);
-    putRowInDB(table, row);
+  public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    int i = 0;
+    Result result;
 
-    scanner = table.getScanner(cf);
-    byte[] previousRow = {};
+    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
     do {
-      if (result != null) {
-        previousRow = result.getRow();
-      }
       result = scanner.next();
-      if (result != null) assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
+      if (result != null) {
+        i++;
+      }
     } while (result != null);
+    scanner.close();
+    assertThat(i, is(this.NUMBER_OF_ROWS));
   }
 }

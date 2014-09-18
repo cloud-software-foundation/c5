@@ -1,5 +1,5 @@
 base: cloudius/osv-openjdk8
-cmdline: /java.so -cp c5db-0.1-SNAPSHOT-jar-with-dependencies.jar c5db.Main 
+cmdline: /java.so -cp c5db-${project.version}-jar-with-dependencies.jar c5db.Main
 build: mvn compile assembly:single
 files:
-  /c5db-0.1-SNAPSHOT-jar-with-dependencies.jar: target/c5db-0.1-SNAPSHOT-jar-with-dependencies.jar
+  /c5db-${project.version}-jar-with-dependencies.jar: target/c5db-${project.version}-jar-with-dependencies.jar

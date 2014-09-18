@@ -17,7 +17,7 @@
 package c5db.client;
 
 import c5db.C5TestServerConstants;
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -29,39 +29,19 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-@Ignore
-public class PopulatorTest extends MiniClusterBase {
-  private static ByteString tableName = ByteString.bytesDefaultValue("c5:testPopulator");
+public class ITPopulator extends ClusterOrPseudoCluster {
+  private static ByteString tableName = ByteString.bytesDefaultValue("c5:writeOutAsynchronously");
 
-  public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException, IOException {
-
-    int port;
-    if (args.length < 1) {
-      port = 31337;
-    } else {
-      port = Integer.parseInt(args[0]);
-    }
-    try (FakeHTable table = new FakeHTable(C5TestServerConstants.LOCALHOST, port, tableName)) {
-      long start = System.currentTimeMillis();
-
+  @Test
+  public void testPopulator() throws IOException {
       int numberOfBatches = 100;
       int batchSize = 10;
-      if (args.length == 2) {
-        numberOfBatches = Integer.parseInt(args[0]);
-        batchSize = Integer.parseInt(args[1]);
-
-      }
       compareToHBasePut(table,
           Bytes.toBytes("cf"),
           Bytes.toBytes("cq"),
           Bytes.toBytes("value"),
           numberOfBatches,
           batchSize);
-      long end = System.currentTimeMillis();
-      System.out.println("time:" + (end - start));
-
-
-    }
   }
 
   private static void compareToHBasePut(final FakeHTable table,
@@ -98,10 +78,4 @@ public class PopulatorTest extends MiniClusterBase {
     }
   }
 
-  @Test
-  public void testPopulator() throws IOException, InterruptedException, ExecutionException, MutationFailedException, TimeoutException {
-    PopulatorTest populator = new PopulatorTest();
-    tableName = ByteString.copyFrom(Bytes.toBytes(name.getMethodName()));
-    main(new String[]{String.valueOf(getRegionServerPort())});
-  }
-}
+ }

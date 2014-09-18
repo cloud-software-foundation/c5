@@ -37,19 +37,18 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class AsyncWriteTest extends MiniClusterBase {
+public class ITAsyncWrite extends ClusterOrPseudoCluster {
 
   private static final int TO_SEND = 100000;
   CountDownLatch countDownLatch = new CountDownLatch(TO_SEND);
 
   @Test
-  public void testPopulator() throws ExecutionException, InterruptedException, TimeoutException {
+  public void writeOutAsynchronously() throws ExecutionException, InterruptedException, TimeoutException {
     RegionSpecifier regionSpecifier = new RegionSpecifier(RegionSpecifier.RegionSpecifierType.REGION_NAME,
-        ByteBuffer.wrap(Bytes.toBytes("c5:testPopulator")));
+        ByteBuffer.wrap(Bytes.toBytes("c5:writeOutAsynchronously")));
     ByteBuffer cq = ByteBuffer.wrap(Bytes.toBytes("cq"));
     ByteBuffer cf = ByteBuffer.wrap(Bytes.toBytes("cf"));
     ByteBuffer value = ByteBuffer.wrap(new byte[512]);
@@ -103,7 +102,7 @@ public class AsyncWriteTest extends MiniClusterBase {
   }
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
-    AsyncWriteTest asyncWriteTest = new AsyncWriteTest();
-    asyncWriteTest.testPopulator();
+    ITAsyncWrite asyncWrite = new ITAsyncWrite();
+    asyncWrite.writeOutAsynchronously();
   }
 }

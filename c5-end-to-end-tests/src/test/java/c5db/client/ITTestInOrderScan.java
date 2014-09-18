@@ -16,34 +16,49 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterPopulated;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static c5db.client.DataHelper.putRowInDB;
+import static junit.framework.TestCase.assertFalse;
 
-public class TestScannerTest extends MiniClusterPopulated {
+@Ignore
+public class ITTestInOrderScan extends ClusterOrPseudoCluster {
+
+  private final byte[] cf = Bytes.toBytes("cf");
 
   @Test
-  public void scan() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    int i = 0;
-    Result result;
+  public void testInOrderScan() throws IOException, InterruptedException, TimeoutException, ExecutionException {
+    Result result = null;
+    ResultScanner scanner;
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
+    row = Bytes.add(row, row);
+    putRowInDB(table, row);
 
-    ResultScanner scanner = table.getScanner(new Scan().setStartRow(new byte[]{0x00}));
+    scanner = table.getScanner(cf);
+    byte[] previousRow = {};
     do {
-      result = scanner.next();
       if (result != null) {
-        i++;
+        previousRow = result.getRow();
       }
+      result = scanner.next();
+      if (result != null) assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
     } while (result != null);
-    scanner.close();
-    assertThat(i, is(this.NUMBER_OF_ROWS));
   }
 }
