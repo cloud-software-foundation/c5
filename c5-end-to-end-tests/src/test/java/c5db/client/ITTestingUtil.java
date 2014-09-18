@@ -23,6 +23,7 @@ import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -104,6 +105,7 @@ public class ITTestingUtil extends ClusterOrPseudoCluster {
   }
 
 
+  @Ignore
   @Test(timeout = 1000)
   public void testScan() throws IOException {
     byte[] row0 = new byte[]{0x00};
@@ -132,6 +134,7 @@ public class ITTestingUtil extends ClusterOrPseudoCluster {
     assertEquals(resultScanner.next(), null);
   }
 
+  @Ignore
   @Test(timeout =  1000)
   public void testScanWith0Row() throws IOException {
     byte[] row0 = new byte[]{0x00};
@@ -161,7 +164,7 @@ public class ITTestingUtil extends ClusterOrPseudoCluster {
     assertEquals(resultScanner.next(), null);
   }
 
-
+  @Ignore
   @Test
   public void testScanWithNoStart() throws IOException {
     byte[] row0 = new byte[]{0x00};
