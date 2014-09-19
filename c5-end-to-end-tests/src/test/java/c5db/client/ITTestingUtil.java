@@ -19,10 +19,11 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 
-public class TestingUtilTest extends MiniClusterBase {
+public class ITTestingUtil extends ClusterOrPseudoCluster {
 
   @Test
   public void testSimplePutGet() throws IOException {
@@ -103,7 +104,9 @@ public class TestingUtilTest extends MiniClusterBase {
     assertFalse(values[1]);
   }
 
-  @Test
+
+  @Ignore
+  @Test(timeout = 1000)
   public void testScan() throws IOException {
     byte[] row0 = new byte[]{0x00};
     byte[] row1 = new byte[]{0x01};
@@ -131,7 +134,8 @@ public class TestingUtilTest extends MiniClusterBase {
     assertEquals(resultScanner.next(), null);
   }
 
-  @Test
+  @Ignore
+  @Test(timeout =  1000)
   public void testScanWith0Row() throws IOException {
     byte[] row0 = new byte[]{0x00};
     byte[] row1 = new byte[]{0x01};
@@ -160,7 +164,7 @@ public class TestingUtilTest extends MiniClusterBase {
     assertEquals(resultScanner.next(), null);
   }
 
-
+  @Ignore
   @Test
   public void testScanWithNoStart() throws IOException {
     byte[] row0 = new byte[]{0x00};

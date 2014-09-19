@@ -17,7 +17,7 @@
 package c5db.client;
 
 import c5db.C5TestServerConstants;
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import io.protostuff.ByteString;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class CompareToHBase extends MiniClusterBase {
+public class CompareToH extends ClusterOrPseudoCluster {
   private static HTable hTable;
   private static ByteString tableName =
       ByteString.copyFrom(Bytes.toBytes("tableName"));
@@ -38,12 +38,12 @@ public class CompareToHBase extends MiniClusterBase {
 
   private final byte[] cf = Bytes.toBytes("cf");
 
-  private CompareToHBase() {
+  private CompareToH() {
     conf = HBaseConfiguration.create();
   }
 
   public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, ExecutionException {
-    CompareToHBase testingUtil = new CompareToHBase();
+    CompareToH testingUtil = new CompareToH();
     hTable = new HTable(conf, tableName.toByteArray());
     testingUtil.compareToHBaseScan();
     hTable.close();

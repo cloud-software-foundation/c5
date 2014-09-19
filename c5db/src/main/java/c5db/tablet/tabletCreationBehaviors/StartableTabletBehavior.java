@@ -14,17 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package c5db.client;
 
-import c5db.MiniClusterBase;
-import org.junit.Test;
+package c5db.tablet.tabletCreationBehaviors;
 
 import java.io.IOException;
 
-public class BigRowTest extends MiniClusterBase {
-  @Test
-  public void shouldBeAbleToCreateABigRow() throws IOException {
-    DataHelper.putBigRowInDatabase(table, row);
-  }
-
+/**
+ * A behavior that can be started, that may block or perform IO.
+ */
+public interface StartableTabletBehavior {
+  void start() throws InterruptedException, IOException;
 }

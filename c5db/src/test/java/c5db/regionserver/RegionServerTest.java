@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package c5db.regionserver;
 
 import c5db.client.FakeHTable;
@@ -39,7 +40,8 @@ import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
 import c5db.tablet.Region;
-import c5db.util.C5FiberFactory;
+import c5db.util.ExceptionHandlingBatchExecutor;
+import c5db.util.FiberSupplier;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.SettableFuture;
@@ -65,7 +67,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class RegionServerTest {
   @Rule
@@ -78,7 +79,6 @@ public class RegionServerTest {
 
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
-  private final C5FiberFactory c5FiberFactory = context.mock(C5FiberFactory.class);
   private final ChannelHandlerContext ctx = context.mock(ChannelHandlerContext.class);
   private final TabletModule tabletModule = context.mock(TabletModule.class);
   private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(2));
@@ -86,17 +86,17 @@ public class RegionServerTest {
   private final Random random = new Random();
   private final int port = 10000 + random.nextInt(100);
 
+  private final FiberSupplier fiberSupplier = (throwableConsumer) ->
+      fiberFactory.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
+
   private RegionServerHandler regionServerHandler;
   private RegionServerService regionServerService;
 
   @Before
   public void before() throws ExecutionException, InterruptedException {
     context.checking(new Expectations() {{
-      oneOf(server).getFiberFactory(with(any(Consumer.class)));
-      will(returnValue(c5FiberFactory));
-
-      oneOf(c5FiberFactory).create();
-      will(returnValue(fiberFactory.create()));
+      allowing(server).getFiberSupplier();
+      will(returnValue(fiberSupplier));
     }});
     regionServerService = new RegionServerService(acceptConnectionGroup,
         ioWorkerGroup,

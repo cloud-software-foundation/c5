@@ -92,14 +92,14 @@ public class UserTabletLeaderBehaviorTest {
       oneOf(rootRegion).getScanner(with(any(Scan.class)));
       will(returnValue(rootRegionScanner));
 
-      oneOf(tablet).getRegionInfo();
+      allowing(tablet).getRegionInfo();
       will(returnValue(userRegionInfo));
 
       oneOf(rootRegionScanner).nextRaw(with(any(List.class)));
       will(addElements(rootKV));
     }});
 
-    UserTabletLeaderBehavior userTabletLeaderBehavior = new UserTabletLeaderBehavior(c5Server, tablet);
+    UserTabletLeaderBehavior userTabletLeaderBehavior = new UserTabletLeaderBehavior(c5Server, userRegionInfo);
     userTabletLeaderBehavior.start();
     synchronizer.waitUntil(searching.is("done"));
   }
