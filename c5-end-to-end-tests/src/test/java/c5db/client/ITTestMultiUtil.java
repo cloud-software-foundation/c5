@@ -22,6 +22,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.hamcrest.core.IsNull;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class ITTestMultiUtil extends ClusterOrPseudoCluster {
     assertThat(DataHelper.valueReadFromDB(table, row2), is(equalTo(value)));
   }
 
+  @Ignore
   @Test
   public void testScan() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);

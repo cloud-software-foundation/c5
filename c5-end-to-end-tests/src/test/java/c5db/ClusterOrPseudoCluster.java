@@ -100,35 +100,35 @@ public class ClusterOrPseudoCluster {
       System.setProperty(C5ServerConstants.C5_CFG_PATH, ClusterOrPseudoCluster.testFolder.getRoot().getAbsolutePath());
       System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
-    server = Main.startC5Server(new String[]{});
-    metaOnNode = server.getNodeId();
-    TabletModule tabletServer = (TabletModule) server.getModule(ModuleType.Tablet).get();
-    RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
-    stateChanges = tabletServer.getTabletStateChanges();
+      server = Main.startC5Server(new String[]{});
+      metaOnNode = server.getNodeId();
+      TabletModule tabletServer = (TabletModule) server.getModule(ModuleType.Tablet).get();
+      RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
+      stateChanges = tabletServer.getTabletStateChanges();
 
-    Fiber receiver = new ThreadFiber();
-    receiver.start();
+      Fiber receiver = new ThreadFiber();
+      receiver.start();
 
-    // create java.util.concurrent.CountDownLatch to notify when message arrives
-    final CountDownLatch latch = new CountDownLatch(1);
-    int processors = Runtime.getRuntime().availableProcessors();
-    PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
-    Fiber fiber = fiberPool.create();
-    fiber.start();
-    tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
-      if (tabletStateChange.state.equals(Tablet.State.Leader)) {
-        if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServer.port();
-          metaOnNode = server.getNodeId();
+      // create java.util.concurrent.CountDownLatch to notify when message arrives
+      final CountDownLatch latch = new CountDownLatch(1);
+      int processors = Runtime.getRuntime().availableProcessors();
+      PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
+      Fiber fiber = fiberPool.create();
+      fiber.start();
+      tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
+        if (tabletStateChange.state.equals(Tablet.State.Leader)) {
+          if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
+            metaOnPort = regionServer.port();
+            metaOnNode = server.getNodeId();
 
-          latch.countDown();
-          fiber.dispose();
+            latch.countDown();
+            fiber.dispose();
+          }
         }
-      }
-    });
+      });
 
-    latch.await();
-    receiver.dispose();
+      latch.await();
+      receiver.dispose();
     }
     dirty = false;
   }
@@ -142,32 +142,32 @@ public class ClusterOrPseudoCluster {
 
   @Before
   public void before() throws InterruptedException, ExecutionException, TimeoutException {
-      Fiber receiver = new ThreadFiber();
-      receiver.start();
+    Fiber receiver = new ThreadFiber();
+    receiver.start();
 
-      final CountDownLatch latch = new CountDownLatch(1);
-      Callback<TabletStateChange> onMsg = message -> {
-        if (message.state.equals(Tablet.State.Leader)) {
-          latch.countDown();
-        }
-      };
-      stateChanges.subscribe(receiver, onMsg);
+    final CountDownLatch latch = new CountDownLatch(1);
+    Callback<TabletStateChange> onMsg = message -> {
+      if (message.state.equals(Tablet.State.Leader)) {
+        latch.countDown();
+      }
+    };
+    stateChanges.subscribe(receiver, onMsg);
 
-      TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
-      org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
-      Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
+    TableName clientTableName = TabletNameHelpers.getClientTableName("c5", name.getMethodName());
+    org.apache.hadoop.hbase.TableName tableName = TabletNameHelpers.getHBaseTableName(clientTableName);
+    Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
 
-      ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-          TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));
-      CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
-          createTableSubCommand);
+    ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
+        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));
+    CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
+        createTableSubCommand);
 
-      commandChannel.publish(createTableCommand);
-      latch.await();
+    commandChannel.publish(createTableCommand);
+    latch.await();
 
-      table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
-          TabletNameHelpers.toByteString(clientTableName));
-      row = Bytes.toBytes(name.getMethodName());
-      receiver.dispose();
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
+        TabletNameHelpers.toByteString(clientTableName));
+    row = Bytes.toBytes(name.getMethodName());
+    receiver.dispose();
   }
 }
