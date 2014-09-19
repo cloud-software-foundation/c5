@@ -28,6 +28,10 @@ import c5db.interfaces.replication.Replicator;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.TabletStateChange;
 import c5db.messages.generated.ModuleSubCommand;
+import c5db.tablet.tabletCreationBehaviors.UserTabletLeaderBehavior;
+import c5db.util.ExceptionHandlingBatchExecutor;
+import c5db.util.FiberSupplier;
+import c5db.util.JUnitRuleFiberExceptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
 import io.protostuff.Message;
@@ -41,7 +45,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
-import org.jetlang.fibers.Fiber;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.States;
@@ -70,6 +74,9 @@ public class RootTabletTest {
     setThreadingPolicy(new Synchroniser());
   }};
 
+  @Rule
+  public final JUnitRuleFiberExceptions fiberExceptionRule = new JUnitRuleFiberExceptions();
+
   private Channel<Message<?>> commandMemoryChannel;
 
   private MemoryChannel<Replicator.State> stateMemoryChannel;
@@ -90,31 +97,32 @@ public class RootTabletTest {
   private final Path path = Paths.get("/");
   private final Configuration conf = new Configuration();
 
-  private final Fiber tabletFiber = new ThreadFiber();
-  private ReplicatedTablet replicatedTablet = new ReplicatedTablet(server,
-      regionInfo,
-      tableDescriptor,
-      peerList,
-      path,
-      conf,
-      tabletFiber,
-      replicationModule,
-      regionCreator);
+  private final FiberSupplier fiberSupplier = (ignore) ->
+      new ThreadFiber(
+          new RunnableExecutorImpl(new ExceptionHandlingBatchExecutor(fiberExceptionRule)),
+          null,
+          false);
+
+  private ReplicatedTablet replicatedTablet;
 
   private AsyncChannelAsserts.ChannelListener<TabletStateChange> stateChangeChannelListener;
 
   @Before
   public void setup() throws Exception {
-    Fiber tabletFiber = new ThreadFiber();
+    context.checking(new Expectations() {{
+      allowing(server).getFiberSupplier();
+      will(returnValue(fiberSupplier));
+    }});
+
     this.replicatedTablet = new ReplicatedTablet(server,
         regionInfo,
         tableDescriptor,
         peerList,
         path,
         conf,
-        tabletFiber,
         replicationModule,
-        regionCreator);
+        regionCreator,
+        new UserTabletLeaderBehavior(server, regionInfo));
     future.set(replicator);
     stateChangeChannelListener = listenTo(replicatedTablet.getStateChangeChannel());
     stateMemoryChannel = new MemoryChannel<>();
@@ -140,8 +148,8 @@ public class RootTabletTest {
 
   @After
   public void after() {
-    tabletFiber.dispose();
     stateChangeChannelListener.dispose();
+    replicatedTablet.dispose();
   }
 
   @Test

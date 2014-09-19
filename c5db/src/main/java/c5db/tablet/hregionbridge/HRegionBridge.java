@@ -85,6 +85,13 @@ public class HRegionBridge implements Region {
       batchExecutor.drainTo(arrayList, 10000);
       batchMutateHelper(arrayList);
       long time = System.currentTimeMillis() - begin;
+      if (begin % 1024 == 0){
+        try {
+          theRegion.flushcache();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
       if (time > 100) {
         LOG.error("batchMutate took longer than 100ms: {} ms for {} entries", time, arrayList.size());
       }

@@ -16,7 +16,7 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TestCheckAndTest extends MiniClusterBase {
+public class ITCheckAndSet extends ClusterOrPseudoCluster {
 
   @Test
   public void shouldFailCheckAndPutNullRow() throws IOException {

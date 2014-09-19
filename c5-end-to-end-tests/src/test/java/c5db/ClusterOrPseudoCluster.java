@@ -29,7 +29,6 @@ import c5db.messages.generated.ModuleSubCommand;
 import c5db.messages.generated.ModuleType;
 import c5db.util.TabletNameHelpers;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
@@ -53,7 +52,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class MiniClusterBase {
+public class ClusterOrPseudoCluster {
   public static final byte[] value = Bytes.toBytes("value");
   protected static final byte[] notEqualToValue = Bytes.toBytes("notEqualToValue");
 
@@ -61,9 +60,11 @@ public class MiniClusterBase {
   public static TemporaryFolder testFolder = new TemporaryFolder();
   private static Channel<TabletStateChange> stateChanges;
   private static C5Server server;
-  private static int metaOnPort;
+  static int metaOnPort;
   private static long metaOnNode;
-  static FakeHTable metaTable;
+
+  private static boolean dirty = true;
+
   @Rule
   public TestName name = new TestName();
   protected FakeHTable table;
@@ -75,68 +76,72 @@ public class MiniClusterBase {
   }
 
   @AfterClass
-  public static void afterClass() throws InterruptedException, ExecutionException, TimeoutException {
-    for (C5Module module : server.getModules().values()) {
-      try {
-        module.stop().get(1, TimeUnit.SECONDS);
-      } catch (UncheckedExecutionException e) {
-        e.printStackTrace();
+  public static void afterClass() throws Exception {
+    if (dirty) {
+      for (C5Module module : server.getModules().values()) {
+        try {
+          module.stop().get(1, TimeUnit.SECONDS);
+        } catch (UncheckedExecutionException e) {
+          e.printStackTrace();
+        }
       }
+      server.stop().get(1, TimeUnit.SECONDS);
+      Log.warn("We left it dirty");
     }
-    server.stop().get(1, TimeUnit.SECONDS);
-    Log.warn("-----------------------------------------------------------------------------------------------------------");
+  }
+
+  public static void makeDirty() {
+    dirty = true;
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    Log.warn("-----------------------------------------------------------------------------------------------------------");
+    if (dirty) {
+      System.setProperty(C5ServerConstants.C5_CFG_PATH, ClusterOrPseudoCluster.testFolder.getRoot().getAbsolutePath());
+      System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
 
-    System.setProperty(C5ServerConstants.C5_CFG_PATH, MiniClusterBase.testFolder.getRoot().getAbsolutePath());
-    System.setProperty("clusterName", C5ServerConstants.LOCALHOST);
+      server = Main.startC5Server(new String[]{});
+      metaOnNode = server.getNodeId();
+      TabletModule tabletServer = (TabletModule) server.getModule(ModuleType.Tablet).get();
+      RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
+      stateChanges = tabletServer.getTabletStateChanges();
 
-    server = Main.startC5Server(new String[]{});
-    metaOnNode = server.getNodeId();
-    TabletModule tabletServer = (TabletModule) server.getModule(ModuleType.Tablet).get();
-    RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
-    stateChanges = tabletServer.getTabletStateChanges();
+      Fiber receiver = new ThreadFiber();
+      receiver.start();
 
-    Fiber receiver = new ThreadFiber();
-    receiver.start();
+      // create java.util.concurrent.CountDownLatch to notify when message arrives
+      final CountDownLatch latch = new CountDownLatch(1);
+      int processors = Runtime.getRuntime().availableProcessors();
+      PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
+      Fiber fiber = fiberPool.create();
+      fiber.start();
+      tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
+        if (tabletStateChange.state.equals(Tablet.State.Leader)) {
+          if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
+            metaOnPort = regionServer.port();
+            metaOnNode = server.getNodeId();
 
-    // create java.util.concurrent.CountDownLatch to notify when message arrives
-    final CountDownLatch latch = new CountDownLatch(1);
-    int processors = Runtime.getRuntime().availableProcessors();
-    PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
-    Fiber fiber = fiberPool.create();
-    fiber.start();
-    tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
-      if (tabletStateChange.state.equals(Tablet.State.Leader)) {
-        if (tabletStateChange.tablet.getRegionInfo().getRegionNameAsString().startsWith("hbase:meta")) {
-          metaOnPort = regionServer.port();
-          metaOnNode = server.getNodeId();
-          try {
-            metaTable = new FakeHTable("localhost", metaOnPort, ByteString.copyFromUtf8("hbase:meta"));
-          } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            e.printStackTrace();
+            latch.countDown();
+            fiber.dispose();
           }
-
-          latch.countDown();
-          fiber.dispose();
         }
-      }
-    });
+      });
 
-    latch.await();
-    receiver.dispose();
+      latch.await();
+      receiver.dispose();
+    }
+    dirty = false;
   }
 
   @After
   public void after() throws InterruptedException {
-    table.close();
+    if (dirty) {
+      table.close();
+    }
   }
 
   @Before
-  public void before() throws InterruptedException {
+  public void before() throws InterruptedException, ExecutionException, TimeoutException {
     Fiber receiver = new ThreadFiber();
     receiver.start();
 
@@ -153,19 +158,15 @@ public class MiniClusterBase {
     Channel<CommandRpcRequest<?>> commandChannel = server.getCommandChannel();
 
     ModuleSubCommand createTableSubCommand = new ModuleSubCommand(ModuleType.Tablet,
-        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server) ));
+        TestHelpers.getCreateTabletSubCommand(tableName, splitkeys, Arrays.asList(server)));
     CommandRpcRequest<ModuleSubCommand> createTableCommand = new CommandRpcRequest<>(server.getNodeId(),
         createTableSubCommand);
 
     commandChannel.publish(createTableCommand);
     latch.await();
 
-    try {
-      table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
-          TabletNameHelpers.toByteString(clientTableName));
-    } catch (TimeoutException | ExecutionException e) {
-      e.printStackTrace();
-    }
+    table = new FakeHTable(C5TestServerConstants.LOCALHOST, getRegionServerPort(),
+        TabletNameHelpers.toByteString(clientTableName));
     row = Bytes.toBytes(name.getMethodName());
     receiver.dispose();
   }

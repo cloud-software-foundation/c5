@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package c5db;
 
 import c5db.client.FakeHTable;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.Scan;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -30,21 +30,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
-public class ManyClustersBaseTest extends ManyClusterBase {
+public class ITClusters extends ClusterPopulated {
 
-  @Test
+  @Ignore
+  @Test(timeout = 1000)
   public void metaTableShouldContainUserTableEntries()
       throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    ByteString tableName = ByteString.copyFrom(Bytes.toBytes("hbase:meta"));
-    FakeHTable c5AsyncDatabase = new FakeHTable(C5TestServerConstants.LOCALHOST, metaOnPort, tableName);
-    ResultScanner scanner = c5AsyncDatabase.getScanner(HConstants.CATALOG_FAMILY);
+    Scan scan = new Scan();
+    scan.addFamily(HConstants.CATALOG_FAMILY);
+    FakeHTable metaTable = new FakeHTable("localhost", metaOnPort, ByteString.copyFromUtf8("hbase:meta"));
+    ResultScanner scanner = metaTable.getScanner(scan);
 
-    assertThat(scanner.next(), ScanMatchers.isWellFormedUserTable(name));
-    assertThat(scanner.next(), is(nullValue()));
-
+    Result result;
+    int counter = 0;
+    do {
+      result = scanner.next();
+      counter++;
+      if (result == null) {
+        break;
+      }
+      assertThat(result, ScanMatchers.isWellFormedUserTable(name));
+    } while (true);
+    assertThat(counter, is(this.splitkeys.length + 2));
+    scanner.close();
   }
-
 }

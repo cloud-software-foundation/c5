@@ -16,10 +16,11 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,7 +30,8 @@ import java.util.concurrent.TimeoutException;
 import static c5db.client.DataHelper.putRowInDB;
 import static junit.framework.TestCase.assertFalse;
 
-public class TestInOrderScanTest extends MiniClusterBase {
+@Ignore
+public class ITTestInOrderScan extends ClusterOrPseudoCluster {
 
   private final byte[] cf = Bytes.toBytes("cf");
 

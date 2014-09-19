@@ -16,12 +16,13 @@
  */
 package c5db.client;
 
-import c5db.MiniClusterBase;
+import c5db.ClusterOrPseudoCluster;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.hamcrest.core.IsNull;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class TestMultiUtilTest extends MiniClusterBase {
+public class ITTestMultiUtil extends ClusterOrPseudoCluster {
   private final byte[] row1 = Bytes.toBytes("row1");
   private final byte[] row2 = Bytes.toBytes("row2");
 
@@ -43,6 +44,7 @@ public class TestMultiUtilTest extends MiniClusterBase {
     assertThat(DataHelper.valueReadFromDB(table, row2), is(equalTo(value)));
   }
 
+  @Ignore
   @Test
   public void testScan() throws IOException {
     DataHelper.putsRowInDB(table, new byte[][]{row1, row2}, value);
