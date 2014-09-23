@@ -36,8 +36,9 @@ import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.jetlang.channels.MemoryRequestChannel;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
+import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -50,8 +51,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.waitForReply;
@@ -68,9 +67,8 @@ public class RootTabletLeaderBehaviorTest {
   private C5Server c5Server = context.mock(C5Server.class, "mockC5Server");
   private DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
   int processors = Runtime.getRuntime().availableProcessors();
-  ExecutorService executors = Executors.newFixedThreadPool(processors);
-  PoolFiberFactory fiberPool = new PoolFiberFactory(executors);
-  Fiber serviceFiber = fiberPool.create();
+  private final Fiber serviceFiber =
+      new ThreadFiber(new RunnableExecutorImpl(), "root-leader-behavior-test-fiber", false);
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
 

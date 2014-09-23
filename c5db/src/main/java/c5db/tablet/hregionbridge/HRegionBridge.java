@@ -40,8 +40,9 @@ import org.apache.hadoop.hbase.regionserver.OperationStatus;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.StringUtils;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
+import org.jetlang.fibers.ThreadFiber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -66,11 +66,10 @@ import java.util.stream.Collectors;
  */
 public class HRegionBridge implements Region {
   private static final Logger LOG = LoggerFactory.getLogger(HRegionBridge.class);
-  LinkedTransferQueue<Map.Entry<SettableFuture<Boolean>, MutationProto>> batchExecutor = new LinkedTransferQueue<>();
-  private HRegionInterface theRegion;
-  int processors = Runtime.getRuntime().availableProcessors();
-  PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(processors * 2));
-  Fiber batcher = poolFiberFactory.create();
+  private final LinkedTransferQueue<Map.Entry<SettableFuture<Boolean>, MutationProto>> batchExecutor =
+      new LinkedTransferQueue<>();
+  private final HRegionInterface theRegion;
+  private final Fiber batcher = new ThreadFiber(new RunnableExecutorImpl(), "HRegionBridge-batcher", false);
 
   public HRegionBridge(final HRegionInterface theRegion) {
     this.theRegion = theRegion;
@@ -80,7 +79,7 @@ public class HRegionBridge implements Region {
       if (batchExecutor.size() == 0) {
         return;
       }
-      ArrayList<Map.Entry<SettableFuture<Boolean>, MutationProto>> arrayList = new ArrayList<>(10000);
+      List<Map.Entry<SettableFuture<Boolean>, MutationProto>> arrayList = new ArrayList<>(10000);
       batchExecutor.drainTo(arrayList, 10000);
       batchMutateHelper(arrayList);
       long time = System.currentTimeMillis() - begin;

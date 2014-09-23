@@ -30,11 +30,13 @@ import org.jetlang.fibers.PoolFiberFactory;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static c5db.FutureActions.returnFutureWithValue;
@@ -48,7 +50,8 @@ public class TabletServiceTest {
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(sync);
   }};
-  PoolFiberFactory poolFiberFactory = new PoolFiberFactory(Executors.newSingleThreadExecutor());
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+  PoolFiberFactory poolFiberFactory = new PoolFiberFactory(executorService);
 
   DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
   ControlModule controlModule = context.mock(ControlModule.class);
@@ -88,6 +91,12 @@ public class TabletServiceTest {
     });
     tabletService = new TabletService(c5Server);
     tabletService.start().get();
+  }
+
+  @After
+  public void shutdownExecutorService() {
+    poolFiberFactory.dispose();
+    executorService.shutdownNow();
   }
 
   @Test

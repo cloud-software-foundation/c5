@@ -61,6 +61,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static c5db.AsyncChannelAsserts.assertEventually;
@@ -80,7 +81,6 @@ public class TabletServiceCommandCheckTest {
   private final SettableFuture<Replicator> replicationFuture = SettableFuture.create();
   private final SettableFuture<DiscoveryModule> discoveryServiceFuture = SettableFuture.create();
   private final SettableFuture<ReplicationModule> replicationServiceFuture = SettableFuture.create();
-  private final FiberSupplier fiberSupplier = getFiberSupplier();
   private C5Server c5Server;
   private TabletService tabletService;
   private DiscoveryModule discoveryModule;
@@ -88,18 +88,17 @@ public class TabletServiceCommandCheckTest {
   private ConfigDirectory config;
   private Path configDirectory;
   private Replicator replicator;
-  private PoolFiberFactory fiberPool;
 
-  private FiberSupplier getFiberSupplier() {
-    fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-    return
-        (throwableConsumer) ->
-            fiberPool.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
-  }
+  private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  private final PoolFiberFactory fiberPool = new PoolFiberFactory(executorService);
+  private final FiberSupplier fiberSupplier = (throwableConsumer) ->
+      fiberPool.create(new ExceptionHandlingBatchExecutor(throwableConsumer));
+
 
   @After
   public void tearDown() {
     fiberPool.dispose();
+    executorService.shutdownNow();
   }
 
   @Before
