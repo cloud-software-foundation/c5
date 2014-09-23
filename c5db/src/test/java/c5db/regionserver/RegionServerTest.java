@@ -65,6 +65,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class RegionServerTest {
@@ -80,7 +81,8 @@ public class RegionServerTest {
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
   private final ChannelHandlerContext ctx = context.mock(ChannelHandlerContext.class);
   private final TabletModule tabletModule = context.mock(TabletModule.class);
-  private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(2));
+  private final ExecutorService fiberFactoryExecutor = Executors.newFixedThreadPool(2);
+  private final PoolFiberFactory fiberFactory = new PoolFiberFactory(fiberFactoryExecutor);
   private final C5Server server = context.mock(C5Server.class);
   private final Random random = new Random();
   private final int port = 10000 + random.nextInt(100);
@@ -117,6 +119,8 @@ public class RegionServerTest {
   @After
   public void after() throws ExecutionException, InterruptedException {
     regionServerService.stop();
+    fiberFactory.dispose();
+    fiberFactoryExecutor.shutdownNow();
   }
 
   @Test(expected = RegionNotFoundException.class)

@@ -29,8 +29,8 @@ import org.jetlang.channels.MemoryRequestChannel;
 import org.jetlang.channels.Request;
 import org.jetlang.channels.RequestChannel;
 import org.jetlang.channels.Session;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.jetlang.fibers.ThreadFiber;
 import org.jmock.Expectations;
 import org.jmock.api.Action;
@@ -46,7 +46,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 import static c5db.FutureActions.returnFutureWithException;
 import static c5db.FutureActions.returnFutureWithValue;
@@ -71,7 +70,6 @@ public class ControlServiceTest {
 
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
-  private final PoolFiberFactory fiberFactory = new PoolFiberFactory(Executors.newFixedThreadPool(2));
   private final C5Server server = context.mock(C5Server.class);
   private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
 
@@ -81,7 +79,7 @@ public class ControlServiceTest {
   private int modulePortUnderTest;
 
   private final RequestChannel<CommandRpcRequest<?>, CommandReply> serverRequests = new MemoryRequestChannel<>();
-  private final Fiber ourFiber = new ThreadFiber();
+  private final Fiber ourFiber = new ThreadFiber(new RunnableExecutorImpl(), "control-service-test-fiber", false);
 
   @Before
   public void before() {
@@ -104,7 +102,7 @@ public class ControlServiceTest {
 
     controlService = new ControlService(
         server,
-        fiberFactory.create(),
+        new ThreadFiber(new RunnableExecutorImpl(), "control-service-fiber", false),
         acceptConnectionGroup,
         ioWorkerGroup,
         modulePortUnderTest

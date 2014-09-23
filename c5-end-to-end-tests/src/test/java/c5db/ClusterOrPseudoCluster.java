@@ -31,8 +31,8 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jetlang.channels.Channel;
 import org.jetlang.core.Callback;
+import org.jetlang.core.RunnableExecutorImpl;
 import org.jetlang.fibers.Fiber;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.jetlang.fibers.ThreadFiber;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -47,7 +47,6 @@ import org.mortbay.log.Log;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -105,14 +104,12 @@ public class ClusterOrPseudoCluster {
       RegionServerModule regionServer = (RegionServerModule) server.getModule(ModuleType.RegionServer).get();
       stateChanges = tabletServer.getTabletStateChanges();
 
-      Fiber receiver = new ThreadFiber();
+      Fiber receiver = new ThreadFiber(new RunnableExecutorImpl(), "cluster-receiver-static-fiber", false);
       receiver.start();
 
       // create java.util.concurrent.CountDownLatch to notify when message arrives
       final CountDownLatch latch = new CountDownLatch(1);
-      int processors = Runtime.getRuntime().availableProcessors();
-      PoolFiberFactory fiberPool = new PoolFiberFactory(Executors.newFixedThreadPool(processors));
-      Fiber fiber = fiberPool.create();
+      Fiber fiber = new ThreadFiber(new RunnableExecutorImpl(), "cluster-tablet-state-change-fiber", false);
       fiber.start();
       tabletServer.getTabletStateChanges().subscribe(fiber, tabletStateChange -> {
         if (tabletStateChange.state.equals(Tablet.State.Leader)) {
@@ -141,7 +138,7 @@ public class ClusterOrPseudoCluster {
 
   @Before
   public void before() throws InterruptedException, ExecutionException, TimeoutException {
-    Fiber receiver = new ThreadFiber();
+    Fiber receiver = new ThreadFiber(new RunnableExecutorImpl(), "cluster-receiver-fiber", false);
     receiver.start();
 
     final CountDownLatch latch = new CountDownLatch(1);
