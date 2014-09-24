@@ -205,7 +205,7 @@ public class ReplicatedTablet implements c5db.interfaces.tablet.Tablet {
             // Have the meta leader update the root region with it being marked as the leader
 
             //TODO SEND TO ROOT
-            MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(server);
+            MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(server.getNodeId(), server);
             metaTabletLeaderBehavior.start();
 
           } else {

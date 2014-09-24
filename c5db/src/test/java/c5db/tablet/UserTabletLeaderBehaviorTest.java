@@ -13,12 +13,13 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.tablet;
 
 import c5db.C5ServerConstants;
 import c5db.client.generated.Scan;
-import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
@@ -44,42 +45,36 @@ import static c5db.FutureActions.returnFutureWithValue;
 import static c5db.regionserver.AddElementsActionReturnTrue.addElements;
 
 public class UserTabletLeaderBehaviorTest {
-  org.apache.hadoop.hbase.TableName tableName =
+  private final org.apache.hadoop.hbase.TableName tableName =
       TabletNameHelpers.getHBaseTableName(TabletNameHelpers.getClientTableName("c5", "userTable"));
   private final HRegionInfo userRegionInfo = new HRegionInfo(tableName, new byte[0], new byte[0]);
-  Synchroniser synchronizer = new Synchroniser();
+  private final Synchroniser synchroniser = new Synchroniser();
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
-    setThreadingPolicy(synchronizer);
+    setThreadingPolicy(synchroniser);
   }};
 
-  private C5Server c5Server = context.mock(C5Server.class);
-  private ControlModule controlRpcModule = context.mock(ControlModule.class);
-  private TabletModule tabletModule = context.mock(TabletModule.class);
-  private Tablet rootTablet = context.mock(Tablet.class, "rootTablet");
-  private Region rootRegion = context.mock(Region.class, "rootRegion ");
-  private RegionScanner rootRegionScanner = context.mock(RegionScanner.class, "rrs");
-  final States searching = context.states("running");
-  private Tablet tablet = context.mock(Tablet.class, "userTablet");
+  private final ModuleInformationProvider moduleInformationProvider = context.mock(ModuleInformationProvider.class);
+  private final ControlModule controlRpcModule = context.mock(ControlModule.class);
+  private final TabletModule tabletModule = context.mock(TabletModule.class);
+  private final Tablet rootTablet = context.mock(Tablet.class, "rootTablet");
+  private final Region rootRegion = context.mock(Region.class, "rootRegion ");
+  private final RegionScanner rootRegionScanner = context.mock(RegionScanner.class, "rrs");
+  private final States searching = context.states("running");
+  private final Tablet tablet = context.mock(Tablet.class, "userTablet");
 
 
   @Test
   public void shouldAddMyselfAsLeaderOfMetaToRoot() throws Throwable {
-    byte[] rootRow = Bytes.toBytes("row");
-    byte[] rootCf = HConstants.CATALOG_FAMILY;
-    byte[] rootCq = C5ServerConstants.LEADER_QUALIFIER;
-    byte[] rootValue = Bytes.toBytes(1l);
-    KeyValue rootKV = new KeyValue(rootRow, rootCf, rootCq, rootValue);
-
     context.checking(new Expectations() {{
-      oneOf(c5Server).getModule(ModuleType.ControlRpc);
+      oneOf(moduleInformationProvider).getModule(ModuleType.ControlRpc);
       will(returnFutureWithValue(controlRpcModule));
 
       oneOf(controlRpcModule).doMessage(with(any(Request.class)));
       then(searching.is("done"));//TODO make sure the message is correct
 
       // Prepare to get the root region
-      oneOf(c5Server).getModule(ModuleType.Tablet);
+      oneOf(moduleInformationProvider).getModule(ModuleType.Tablet);
       will(returnFutureWithValue(tabletModule));
 
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
@@ -95,11 +90,20 @@ public class UserTabletLeaderBehaviorTest {
       will(returnValue(userRegionInfo));
 
       oneOf(rootRegionScanner).nextRaw(with(any(List.class)));
-      will(addElements(rootKV));
+      will(addElements(aKeyValue()));
     }});
 
-    UserTabletLeaderBehavior userTabletLeaderBehavior = new UserTabletLeaderBehavior(c5Server, userRegionInfo);
+    UserTabletLeaderBehavior userTabletLeaderBehavior =
+        new UserTabletLeaderBehavior(moduleInformationProvider, userRegionInfo);
     userTabletLeaderBehavior.start();
-    synchronizer.waitUntil(searching.is("done"));
+    synchroniser.waitUntil(searching.is("done"));
+  }
+
+  private KeyValue aKeyValue() {
+    byte[] rootRow = Bytes.toBytes("row");
+    byte[] rootCf = HConstants.CATALOG_FAMILY;
+    byte[] rootCq = C5ServerConstants.LEADER_QUALIFIER;
+    byte[] rootValue = Bytes.toBytes(1l);
+    return new KeyValue(rootRow, rootCf, rootCq, rootValue);
   }
 }
