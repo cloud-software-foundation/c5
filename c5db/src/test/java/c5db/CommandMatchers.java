@@ -40,11 +40,11 @@ import org.hamcrest.TypeSafeMatcher;
 
 public class CommandMatchers {
 
-  public static Matcher<CommandRpcRequest<ModuleSubCommand>> hasMessageWithRPC(String s) {
+  public static Matcher<CommandRpcRequest<?>> hasMessageWithRPC(String s) {
     return new MessageMatcher(s);
   }
 
-  private static class MessageMatcher extends TypeSafeMatcher<CommandRpcRequest<ModuleSubCommand>> {
+  private static class MessageMatcher extends TypeSafeMatcher<CommandRpcRequest<?>> {
     private final String s;
 
     public MessageMatcher(String s) {
@@ -57,11 +57,16 @@ public class CommandMatchers {
     }
 
     @Override
-    protected boolean matchesSafely(CommandRpcRequest<ModuleSubCommand> moduleSubCommandCommandRpcRequest) {
-      return moduleSubCommandCommandRpcRequest.message.getModule().equals(ModuleType.Tablet) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().startsWith(C5ServerConstants.START_META) &&
-          moduleSubCommandCommandRpcRequest.message.getSubCommand().contains(s);
+    protected boolean matchesSafely(CommandRpcRequest<?> commandRpcRequest) {
+      if (commandRpcRequest.message instanceof ModuleSubCommand) {
+        ModuleSubCommand moduleSubCommand = (ModuleSubCommand) commandRpcRequest.message;
 
+        return moduleSubCommand.getModule().equals(ModuleType.Tablet) &&
+            moduleSubCommand.getSubCommand().startsWith(C5ServerConstants.START_META) &&
+            moduleSubCommand.getSubCommand().contains(s);
+      } else {
+        return false;
+      }
     }
   }
 }
