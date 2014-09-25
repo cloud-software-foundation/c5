@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.tablet;
 
 import c5db.C5Compare;
@@ -235,6 +236,6 @@ public class TabletRegistry {
   }
 
   public ConcurrentSkipListMap<byte[], Tablet> getTablets(String tableName) {
-        return this.tables.get(tableName);
+    return this.tables.get(tableName);
   }
 }

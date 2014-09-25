@@ -34,7 +34,7 @@ import java.nio.file.Path;
 
 /**
  * Our interface to a region.
- * <p/>
+ * <p>
  * Provides our abstraction to HRegion.
  */
 public interface Region {
@@ -44,7 +44,7 @@ public interface Region {
   /**
    * Creates instances of Region.  This exists to make mocking and testing
    * easier.
-   * <p/>
+   * <p>
    * Mock out the creator interface - then create/return mock region interfaces.
    */
 

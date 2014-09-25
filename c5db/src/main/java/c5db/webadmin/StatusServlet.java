@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.webadmin;
 
 import c5db.interfaces.C5Module;
@@ -107,12 +108,18 @@ public class StatusServlet extends HttpServlet {
       this.nodes = nodes;
       this.tablets = tablets;
     }
+
     public Collection<Map.Entry<ModuleType, C5Module>> getModules() {
-      if (modules == null) return null;
+      if (modules == null) {
+        return null;
+      }
       return modules.entrySet();
     }
+
     public Collection<NodeInfo> getNodes() {
-      if (nodes == null) return null;
+      if (nodes == null) {
+        return null;
+      }
       return nodes.values();
     }
   }

@@ -13,11 +13,12 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.interfaces.tablet;
 
 /**
-* Notification about a tablet changing state.
-*/
+ * Notification about a tablet changing state.
+ */
 public class TabletStateChange {
   public final Tablet tablet;
   public final Tablet.State state;

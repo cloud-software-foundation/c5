@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.client;
 
 import io.netty.channel.Channel;
@@ -20,9 +21,6 @@ import io.netty.channel.Channel;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by posix4e on 5/15/14.
- */
 public interface C5ConnectionManager {
   Channel getOrCreateChannel(byte tableName, byte row);
 

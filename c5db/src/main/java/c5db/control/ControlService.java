@@ -13,9 +13,11 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.control;
 
 import c5db.C5ServerConstants;
+import c5db.interfaces.C5Module;
 import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
 import c5db.interfaces.DiscoveryModule;
@@ -99,9 +101,9 @@ public class ControlService extends AbstractService implements ControlModule {
 
           C5Futures.addCallback(controlClient.sendRequest(request.getRequest(), socketAddress),
               request::reply, exception -> {
-                CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
-                request.reply(reply);
-              }, serviceFiber
+            CommandReply reply = new CommandReply(false, "", "Transport error: " + exception);
+            request.reply(reply);
+          }, serviceFiber
           );
         } catch (UnknownHostException e) {
           LOG.error("Bad address", e);
@@ -170,7 +172,7 @@ public class ControlService extends AbstractService implements ControlModule {
     serviceFiber.start();
 
     serviceFiber.execute(() -> C5Futures.addCallback(server.getModule(ModuleType.Discovery),
-        module -> {
+        (C5Module module) -> {
           discoveryModule = (DiscoveryModule) module;
           startHttpRpc();
         }, this::notifyFailed, serviceFiber

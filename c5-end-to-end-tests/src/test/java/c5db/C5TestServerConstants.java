@@ -13,11 +13,9 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db;
 
-/**
- * Created by posix4e on 5/15/14.
- */
 public class C5TestServerConstants {
   public static final String LOCALHOST = "localhost";
 }

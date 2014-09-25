@@ -7,12 +7,12 @@
     <parent>
         <groupId>c5db</groupId>
         <artifactId>parent</artifactId>
-      <version>0.1-SNAPSHOT</version>
+        <version>0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>c5db</artifactId>
 
-  <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>io.protostuff</groupId>
@@ -149,60 +149,60 @@
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5-proto</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5-api</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-client</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-protostuff-codec</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-util</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-util</artifactId>
-          <version>${project.version}</version>
-          <classifier>tests</classifier>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-replicator</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-replicator</artifactId>
-          <version>${project.version}</version>
-          <classifier>tests</classifier>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-olog</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5db-olog</artifactId>
-          <version>${project.version}</version>
-          <classifier>tests</classifier>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>c5db</groupId>
             <artifactId>c5-hbase-shim</artifactId>
-          <version>${project.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

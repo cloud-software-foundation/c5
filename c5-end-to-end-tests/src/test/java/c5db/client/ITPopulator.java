@@ -13,34 +13,31 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.client;
 
-import c5db.C5TestServerConstants;
 import c5db.ClusterOrPseudoCluster;
 import io.protostuff.ByteString;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 public class ITPopulator extends ClusterOrPseudoCluster {
   private static ByteString tableName = ByteString.bytesDefaultValue("c5:writeOutAsynchronously");
 
   @Test
   public void testPopulator() throws IOException {
-      int numberOfBatches = 100;
-      int batchSize = 10;
-      compareToHBasePut(table,
-          Bytes.toBytes("cf"),
-          Bytes.toBytes("cq"),
-          Bytes.toBytes("value"),
-          numberOfBatches,
-          batchSize);
+    int numberOfBatches = 100;
+    int batchSize = 10;
+    compareToHBasePut(table,
+        Bytes.toBytes("cf"),
+        Bytes.toBytes("cq"),
+        Bytes.toBytes("value"),
+        numberOfBatches,
+        batchSize);
   }
 
   private static void compareToHBasePut(final FakeHTable table,
@@ -77,4 +74,4 @@ public class ITPopulator extends ClusterOrPseudoCluster {
     }
   }
 
- }
+}
