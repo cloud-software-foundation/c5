@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.client;
 
 import c5db.ClusterOrPseudoCluster;
@@ -33,7 +34,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * language to help verify data from the database.
- * <p/>
+ * <p>
  * Add additional static verbs as necessary!
  */
 class DataHelper {

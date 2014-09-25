@@ -20,7 +20,7 @@ import c5db.messages.generated.ModuleType;
 
 /**
  * Provides remote network services for RPC clients (via http/s) to interact with the database.
- * <p/>
+ * <p>
  * The regionserver module may also be responsible for the forwarding client (To be
  * implemented).
  */

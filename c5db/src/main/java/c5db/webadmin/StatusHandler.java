@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.webadmin;
 
 import c5db.interfaces.C5Module;
@@ -98,9 +99,11 @@ public class StatusHandler extends AbstractHandler {
       this.nodes = nodes;
       this.tablets = tablets;
     }
+
     public Collection<Map.Entry<ModuleType, C5Module>> getModules() {
       return modules.entrySet();
     }
+
     public Collection<NodeInfo> getNodes() {
       return nodes.values();
     }

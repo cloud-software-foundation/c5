@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.client;
 
 import c5db.ClusterOrPseudoCluster;
@@ -131,7 +132,7 @@ public class ITTestingUtil extends ClusterOrPseudoCluster {
   }
 
   @Ignore
-  @Test(timeout =  1000)
+  @Test(timeout = 1000)
   public void testScanWith0Row() throws IOException {
     byte[] row0 = new byte[]{0x00};
     byte[] row1 = new byte[]{0x01};

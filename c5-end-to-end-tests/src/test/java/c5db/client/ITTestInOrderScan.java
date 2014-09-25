@@ -13,6 +13,7 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.client;
 
 import c5db.ClusterOrPseudoCluster;
@@ -57,7 +58,9 @@ public class ITTestInOrderScan extends ClusterOrPseudoCluster {
         previousRow = result.getRow();
       }
       result = scanner.next();
-      if (result != null) assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
+      if (result != null) {
+        assertFalse(Bytes.compareTo(result.getRow(), previousRow) < 1);
+      }
     } while (result != null);
   }
 }

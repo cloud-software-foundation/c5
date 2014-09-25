@@ -478,7 +478,7 @@ public class TabletService extends AbstractService implements TabletModule {
     byte[] metaRowKey = Bytes.add(tableNameAndRow, SystemTableNames.sep, Bytes.toBytes(hRegionInfo.getRegionId()));
     Tablet tablet = this.tabletRegistry.getTablet("hbase:meta", metaRowKey);
     if (tablet.getLeader() != server.getNodeId()) {
-     throw new IOException(" I am not leader but I am trying to put into meta");
+      throw new IOException(" I am not leader but I am trying to put into meta");
     }
     Put put = new Put(hRegionInfo.getRegionName());
     put.add(HConstants.CATALOG_FAMILY, HConstants.REGIONINFO_QUALIFIER, hRegionInfo.toByteArray());

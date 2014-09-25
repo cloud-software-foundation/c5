@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 
 /**
  * Bridge between the (complex) HRegion and the rest of c5.
- * <p/>
+ * <p>
  * Provides an abstraction and test point, and lessons in how to abstract
  * and extract HRegion functionality.
  */
@@ -83,7 +83,7 @@ public class HRegionBridge implements Region {
       batchExecutor.drainTo(arrayList, 10000);
       batchMutateHelper(arrayList);
       long time = System.currentTimeMillis() - begin;
-      if (begin % 1024 == 0){
+      if (begin % 1024 == 0) {
         try {
           theRegion.flushcache();
         } catch (IOException e) {

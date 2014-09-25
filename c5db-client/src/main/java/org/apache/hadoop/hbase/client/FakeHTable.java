@@ -17,6 +17,7 @@
  *  This file incorporates work covered by the following copyright and
  *  permission notice:
  */
+
 package org.apache.hadoop.hbase.client;
 
 import com.google.protobuf.Service;

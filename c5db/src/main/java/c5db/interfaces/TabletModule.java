@@ -35,7 +35,7 @@ import java.util.Collection;
  * Manages the lifecycle of tablets - the individual chunks of tables.  Each tablet is
  * an ordered portion of the key space, and has a distinct lifecycle.  This module handles
  * coordination with other modules.
- * <p/>
+ * <p>
  * Roughly, to bring a tablet online, first a replicator instance must be created for it. Then it
  * must be bound to the write-ahead-log.  Finally the local tablet files must be located,
  * verified and loaded.
