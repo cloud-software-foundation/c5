@@ -22,7 +22,7 @@ import c5db.client.generated.MutationProto;
 import c5db.client.generated.RegionInfo;
 import c5db.client.generated.Scan;
 import c5db.client.generated.TableName;
-import c5db.interfaces.C5Server;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleSubCommand;
@@ -50,13 +50,13 @@ import java.util.concurrent.ExecutionException;
 public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
   private final long numberOfMetaPeers;
   private final Tablet tablet;
-  private final C5Server server;
+  private final ModuleInformationProvider moduleInformationProvider;
 
   public RootTabletLeaderBehavior(final Tablet tablet,
-                                  final C5Server server,
+                                  final ModuleInformationProvider moduleInformationProvider,
                                   final long numberOfMetaPeers) {
     this.numberOfMetaPeers = numberOfMetaPeers;
-    this.server = server;
+    this.moduleInformationProvider = moduleInformationProvider;
     this.tablet = tablet;
   }
 
@@ -67,14 +67,14 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
       createLeaderLessMetaEntryInRoot(region, pickedPeers);
       requestMetaCommandCreated(pickedPeers);
     } else {
-      // Check to see if you can take root
+      // TODO Check to see if you can take root
     }
   }
 
   boolean metaExists(Region region) throws IOException {
     // TODO We should make sure the meta is well formed
     RegionScanner scanner = region.getScanner(new Scan());
-    ArrayList<Cell> results = new ArrayList<>();
+    List<Cell> results = new ArrayList<>();
     scanner.next(results, 1);
     return results.size() > 0;
   }
@@ -92,7 +92,7 @@ public class RootTabletLeaderBehavior implements TabletLeaderBehavior {
 
     for (long peer : peers) {
       CommandRpcRequest<ModuleSubCommand> commandRpcRequest = new CommandRpcRequest<>(peer, moduleSubCommand);
-      TabletLeaderBehaviorHelper.sendRequest(commandRpcRequest, server);
+      TabletLeaderBehaviorHelper.sendRequest(commandRpcRequest, moduleInformationProvider);
     }
   }
 

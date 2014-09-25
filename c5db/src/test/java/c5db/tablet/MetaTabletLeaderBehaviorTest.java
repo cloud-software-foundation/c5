@@ -13,10 +13,11 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.tablet;
 
-import c5db.interfaces.C5Server;
 import c5db.interfaces.ControlModule;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.tablet.Tablet;
 import c5db.messages.generated.ModuleType;
@@ -26,11 +27,9 @@ import org.jmock.Expectations;
 import org.jmock.States;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static c5db.FutureActions.returnFutureWithValue;
@@ -42,42 +41,37 @@ public class MetaTabletLeaderBehaviorTest {
     setThreadingPolicy(sync);
   }};
 
-  private Tablet rootTablet;
-  private C5Server c5Server;
-  private ControlModule controlRpcModule;
-  private TabletModule tabletModule;
+  private final Tablet rootTablet = context.mock(Tablet.class, "rootTablet");
+  private final ModuleInformationProvider moduleInformationProvider = context.mock(ModuleInformationProvider.class);
+  private final ControlModule controlRpcModule = context.mock(ControlModule.class);
+  private final TabletModule tabletModule = context.mock(TabletModule.class);
 
-  @Before
-  public void before() throws IOException {
-    rootTablet = context.mock(Tablet.class, "rootTablet");
-    c5Server = context.mock(C5Server.class, "mockC5Server");
-    controlRpcModule = context.mock(ControlModule.class);
-    tabletModule = context.mock(TabletModule.class);
-  }
+  private static final long NODE_ID = 1;
+
 
   @Test
   public void shouldAddMyselfAsLeaderOfMetaToRoot() throws Throwable {
     final States state = context.states("request-message").startsAs("not-run");
+
     context.checking(new Expectations() {{
-      oneOf(c5Server).getModule(ModuleType.ControlRpc);
+      oneOf(moduleInformationProvider).getModule(ModuleType.ControlRpc);
       will(returnFutureWithValue(controlRpcModule));
 
-      oneOf(c5Server).getModule(ModuleType.Tablet);
+      oneOf(moduleInformationProvider).getModule(ModuleType.Tablet);
       will(returnFutureWithValue(tabletModule));
 
       oneOf(tabletModule).getTablet(with(any(String.class)), with(any(ByteBuffer.class)));
       will(returnValue(rootTablet));
 
       oneOf(rootTablet).getLeader();
-      will(returnValue(1l));
-
-      oneOf(c5Server).getNodeId();
-      will(returnValue(1l));
+      will(returnValue(NODE_ID));
 
       oneOf(controlRpcModule).doMessage(with(any(Request.class)));
       then(state.is("done"));
     }});
-    MetaTabletLeaderBehavior metaTabletLeaderBehavior = new MetaTabletLeaderBehavior(c5Server);
+
+    MetaTabletLeaderBehavior metaTabletLeaderBehavior =
+        new MetaTabletLeaderBehavior(NODE_ID, moduleInformationProvider);
     metaTabletLeaderBehavior.start();
     sync.waitUntil(state.is("done"));
   }

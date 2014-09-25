@@ -13,9 +13,9 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.tablet;
 
-import c5db.AsyncChannelAsserts;
 import c5db.C5ServerConstants;
 import c5db.CommandMatchers;
 import c5db.client.generated.Cell;
@@ -33,6 +33,7 @@ import c5db.messages.generated.CommandReply;
 import c5db.messages.generated.ModuleType;
 import c5db.regionserver.AddElementsActionReturnTrue;
 import c5db.tablet.tabletCreationBehaviors.RootTabletLeaderBehavior;
+import com.google.common.collect.Lists;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.jetlang.channels.MemoryRequestChannel;
@@ -46,12 +47,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 
+import static c5db.AsyncChannelAsserts.ChannelListener;
 import static c5db.AsyncChannelAsserts.assertEventually;
 import static c5db.AsyncChannelAsserts.waitForReply;
 import static c5db.FutureActions.returnFutureWithValue;
@@ -62,149 +62,94 @@ public class RootTabletLeaderBehaviorTest {
   public final JUnitRuleMockery context = new JUnitRuleMockery() {{
     setThreadingPolicy(new Synchroniser());
   }};
-  private c5db.interfaces.tablet.Tablet hRegionTablet = context.mock(Tablet.class, "mockHRegionTablet");
-  private Region region = context.mock(Region.class, "mockRegion");
-  private C5Server c5Server = context.mock(C5Server.class, "mockC5Server");
-  private DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
-  int processors = Runtime.getRuntime().availableProcessors();
+
+  private final c5db.interfaces.tablet.Tablet hRegionTablet = context.mock(Tablet.class, "mockHRegionTablet");
+  private final Region region = context.mock(Region.class, "mockRegion");
+  private final C5Server c5Server = context.mock(C5Server.class, "mockC5Server");
+  private final DiscoveryModule discoveryModule = context.mock(DiscoveryModule.class);
+  private final RegionScanner regionScanner = context.mock(RegionScanner.class);
   private final Fiber serviceFiber =
       new ThreadFiber(new RunnableExecutorImpl(), "root-leader-behavior-test-fiber", false);
   private final NioEventLoopGroup acceptConnectionGroup = new NioEventLoopGroup(1);
   private final NioEventLoopGroup ioWorkerGroup = new NioEventLoopGroup();
+  private final MemoryRequestChannel<CommandRpcRequest<?>, CommandReply> commandRequestChannel =
+      new MemoryRequestChannel<>();
+  private final ChannelListener<CommandRpcRequest<?>> commandRequestListener = waitForReply(commandRequestChannel);
+  private final Random random = new Random();
 
-  Random random = new Random();
   private static int CONTROL_PORT = 9999;
 
   {
     CONTROL_PORT += random.nextInt(1024);
   }
 
-  private ControlModule controlModule = new ControlService(c5Server,
+  private final ControlModule controlModule = new ControlService(c5Server,
       serviceFiber,
       acceptConnectionGroup,
       ioWorkerGroup,
       CONTROL_PORT);
-  private AsyncChannelAsserts.ChannelListener commandListener;
 
   @Before
-  public void before() throws InterruptedException, ExecutionException {
-    context.checking(new Expectations() {
-      {
-        oneOf(c5Server).getModule(ModuleType.Discovery);
-        will(returnFutureWithValue(discoveryModule));
-      }
-    });
+  public void setupCommonExpectationsAndStartControlModule() throws Exception {
+    List<String> addresses = Lists.newArrayList("127.0.0.1");
+    long nodeId = 1;
+    List<Long> fakePeers = Arrays.asList(nodeId);
+
+    context.checking(new Expectations() {{
+      allowing(hRegionTablet).getRegion();
+      will(returnValue(region));
+
+      allowing(hRegionTablet).getPeers();
+      will(returnValue(fakePeers));
+
+      allowing(c5Server).getModule(ModuleType.Discovery);
+      will(returnFutureWithValue(discoveryModule));
+
+      allowing(c5Server).getModule(ModuleType.ControlRpc);
+      will(returnFutureWithValue(controlModule));
+
+      allowing(c5Server).getNodeId();
+      will(returnValue(nodeId));
+
+      allowing(c5Server).getCommandRequests();
+      will(returnValue(commandRequestChannel));
+
+      allowing(region).getScanner(with(any(Scan.class)));
+      will(returnValue(regionScanner));
+
+      allowing(discoveryModule).getNodeInfo(with(any(long.class)), with(any(ModuleType.class)));
+      will(returnFutureWithValue(new NodeInfoReply(true, addresses, CONTROL_PORT)));
+    }});
+
     controlModule.start().get();
   }
 
   @Test
   public void shouldBootStrapMetaOnlyWhenRootIsBlank() throws Throwable {
-    List<Long> fakePeers = Arrays.asList(1l);
-    MemoryRequestChannel<CommandRpcRequest<?>, CommandReply> memoryChannel = new MemoryRequestChannel<>();
-    RegionScanner regionScanner = context.mock(RegionScanner.class);
-
-    List<String> addresses = new ArrayList<>();
-    addresses.add("127.0.0.1");
+    long numberOfMetaPeers = 1;
 
     context.checking(new Expectations() {{
-      oneOf(hRegionTablet).getRegion();
-      will(returnValue(region));
-
-      oneOf(region).getScanner(with(any(Scan.class)));
-      will(returnValue(regionScanner));
-
       oneOf(regionScanner).next(with(any(List.class)), with(any(int.class)));
-
-      oneOf(hRegionTablet).getPeers();
-      will(returnValue(fakePeers));
+      will(returnValue(true));
 
       oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
       will(returnValue(true));
-
-      oneOf(c5Server).getModule(ModuleType.ControlRpc);
-      will(returnFutureWithValue(controlModule));
-
-      oneOf(c5Server).getNodeId();
-      will(returnValue(1l));
-
-      oneOf(discoveryModule).getNodeInfo(with(any(long.class)), with(any(ModuleType.class)));
-      will(returnFutureWithValue(new NodeInfoReply(true, addresses, CONTROL_PORT)));
-
-      oneOf(c5Server).getCommandRequests();
-      will(returnValue(memoryChannel));
     }});
 
-    commandListener = waitForReply(memoryChannel);
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,
-        c5Server, 1);
+    RootTabletLeaderBehavior rootTabletLeaderBehavior =
+        new RootTabletLeaderBehavior(hRegionTablet, c5Server, numberOfMetaPeers);
     rootTabletLeaderBehavior.start();
-    assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
-  }
 
-  @Test
-  public void shouldSendStartMetaPacketsToTheRightNumberOfPeers() throws Throwable {
-    MemoryRequestChannel<CommandRpcRequest<?>, CommandReply> memoryChannel = new MemoryRequestChannel<>();
-
-    List<String> addresses = new ArrayList<>();
-    addresses.add("127.0.0.1");
-    RegionScanner regionScanner = context.mock(RegionScanner.class);
-
-    List<Long> fakePeers = Arrays.asList(1l);
-    context.checking(new Expectations() {{
-      oneOf(hRegionTablet).getRegion();
-      will(returnValue(region));
-
-      oneOf(region).getScanner(with(any(Scan.class)));
-      will(returnValue(regionScanner));
-
-      oneOf(regionScanner).next(with(any(List.class)), with(any(int.class)));
-
-      oneOf(hRegionTablet).getPeers();
-      will(returnValue(fakePeers));
-
-      oneOf(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
-      will(returnValue(true));
-
-      oneOf(c5Server).getModule(ModuleType.ControlRpc);
-      will(returnFutureWithValue(controlModule));
-
-      oneOf(c5Server).getNodeId();
-      will(returnValue(1l));
-
-      oneOf(discoveryModule).getNodeInfo(with(any(long.class)), with(any(ModuleType.class)));
-      will(returnFutureWithValue(new NodeInfoReply(true, addresses, CONTROL_PORT)));
-
-      oneOf(c5Server).getCommandRequests();
-      will(returnValue(memoryChannel));
-
-    }});
-    commandListener = waitForReply(memoryChannel);
-    RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet, c5Server, 1);
-
-    rootTabletLeaderBehavior.start();
-    assertEventually(commandListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
+    assertEventually(commandRequestListener, CommandMatchers.hasMessageWithRPC(C5ServerConstants.START_META));
   }
 
   @Test
   public void shouldSkipBootStrapMetaOnlyWhenRootIsNotBlank() throws Throwable {
-
-    RegionScanner regionScanner = context.mock(RegionScanner.class);
     context.checking(new Expectations() {{
-      oneOf(hRegionTablet).getRegion();
-      will(returnValue(region));
-
-      oneOf(region).getScanner(with(any(Scan.class)));
-      will(returnValue(regionScanner));
-
       oneOf(regionScanner).next(with(any(List.class)), with(any(int.class)));
       will(AddElementsActionReturnTrue.addElements(new Cell()));
 
-
-      never(hRegionTablet).getPeers();
-      never(c5Server).isSingleNodeMode();
-
       never(region).mutate(with(any(MutationProto.class)), with(any(Condition.class)));
-      will(returnValue(true));
     }});
 
     RootTabletLeaderBehavior rootTabletLeaderBehavior = new RootTabletLeaderBehavior(hRegionTablet,

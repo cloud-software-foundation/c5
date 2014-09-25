@@ -13,11 +13,12 @@
  *  License for the specific language governing permissions and limitations
  *  under the License.
  */
+
 package c5db.tablet.tabletCreationBehaviors;
 
 import c5db.C5ServerConstants;
 import c5db.client.ProtobufUtil;
-import c5db.interfaces.C5Server;
+import c5db.interfaces.ModuleInformationProvider;
 import c5db.interfaces.TabletModule;
 import c5db.interfaces.server.CommandRpcRequest;
 import c5db.interfaces.tablet.Tablet;
@@ -29,8 +30,6 @@ import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
@@ -40,12 +39,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class UserTabletLeaderBehavior implements StartableTabletBehavior {
-  private static final Logger LOG = LoggerFactory.getLogger(UserTabletLeaderBehavior.class);
-  private final C5Server server;
+  private final ModuleInformationProvider moduleInformationProvider;
   private final HRegionInfo hRegionInfo;
 
-  public UserTabletLeaderBehavior(C5Server server, HRegionInfo hRegionInfo) {
-    this.server = server;
+  public UserTabletLeaderBehavior(ModuleInformationProvider moduleInformationProvider, HRegionInfo hRegionInfo) {
+    this.moduleInformationProvider = moduleInformationProvider;
     this.hRegionInfo = hRegionInfo;
   }
 
@@ -58,7 +56,7 @@ public class UserTabletLeaderBehavior implements StartableTabletBehavior {
   @Override
   public void start() throws InterruptedException, IOException {
     try {
-      TabletModule tabletModule = (TabletModule) server.getModule(ModuleType.Tablet).get();
+      TabletModule tabletModule = (TabletModule) moduleInformationProvider.getModule(ModuleType.Tablet).get();
       Tablet rootTablet = tabletModule.getTablet("hbase:root", ByteBuffer.wrap(new byte[0]));
       Region rootRegion = rootTablet.getRegion();
 
@@ -70,7 +68,7 @@ public class UserTabletLeaderBehavior implements StartableTabletBehavior {
       String commandString = generateCommandString(leader, hRegionInfo);
       ModuleSubCommand moduleSubCommand = new ModuleSubCommand(ModuleType.Tablet, commandString);
       CommandRpcRequest<ModuleSubCommand> commandCommandRpcRequest = new CommandRpcRequest<>(leader, moduleSubCommand);
-      TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, server);
+      TabletLeaderBehaviorHelper.sendRequest(commandCommandRpcRequest, moduleInformationProvider);
     } catch (ExecutionException e) {
       throw new IOException(e.getCause());
     } catch (RegionNotFoundException e) {
