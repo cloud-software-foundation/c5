@@ -114,7 +114,7 @@
     <repositories>
         <repository>
             <id>c5-replicator-mvn-repo</id>
-            <url>https://raw.github.com/OhmData/c5-replicator/mvn-repo/</url>
+            <url>https://raw.github.com/cloud-software-foundation/c5-replicator/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -836,7 +836,7 @@
     <distributionManagement>
         <site>
             <id>github</id>
-            <url>https://github.com/OhmData/c5.git</url>
+            <url>https://github.com/cloud-software-foundation/c5.git</url>
         </site>
     </distributionManagement>
 
