@@ -51,6 +51,8 @@ On Mac OSX:
 
 More documentation
 ------------------
+Bug us on irc. We hang on freenode on #c5db
+
 For more information about C5's code and package structure, please see the package-info.java files in project module __c5db__,
 located in each package within that module.
 
