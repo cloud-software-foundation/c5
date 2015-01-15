@@ -1,5 +1,7 @@
 C5
 ====================
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cloud-software-foundation/c5?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build status](https://travis-ci.org/cloud-software-foundation/c5.svg)](https://travis-ci.org/cloud-software-foundation/c5) [![HuBoard badge](http://img.shields.io/badge/Hu-Board-7965cc.svg)](https://huboard.com/cloud-software-foundation/c5)
 
 C5 is a simple, scalable, open source distributed database that is compatible with the HBase client API. Your code
