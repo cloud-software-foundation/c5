@@ -66,6 +66,26 @@
             <groupId>c5db</groupId>
             <artifactId>c5-replicator</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.protostuff</groupId>
+                    <artifactId>protostuff-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.protostuff</groupId>
+                    <artifactId>protostuff-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-api</artifactId>
+            <version>${protostuff.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
